@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lingshu/recall.schema.json",
+  "title": "LINGSHU memory/recall result (budgeted)",
+  "version": "recall-1.0",
+  "description": "召回结果契约。核心承诺：预算装不下时如实标记，不静默返回空；截短不丢 ID；保序装填。",
+  "type": "object",
+  "required": [
+    "matched_count",
+    "returned",
+    "excluded_by_budget",
+    "tokens_used",
+    "token_budget",
+    "truncated",
+    "degraded"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "query_digest": {
+      "type": "string",
+      "description": "线索的哈希，不存原文（docs/14 §2.3 隐私约束）。"
+    },
+    "matched_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "命中数。**限定于请求范围（用户/项目/层），不是全库计数。**"
+    },
+    "returned": {
+      "type": "array",
+      "maxItems": 3,
+      "description": "按排名降序。保序装填：绝不因为预算而用更短的低排名条目替换高排名条目。",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "layer",
+          "path",
+          "potency_band"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "截短也保留 ID，可被 expand 还原。"
+          },
+          "layer": {
+            "enum": [
+              "hot",
+              "warm",
+              "cold"
+            ]
+          },
+          "path": {
+            "enum": [
+              "direct",
+              "diffused",
+              "cold"
+            ]
+          },
+          "potency_band": {
+            "enum": [
+              "high",
+              "mid",
+              "low"
+            ]
+          },
+          "content_preview": {
+            "type": "string"
+          },
+          "content_truncated": {
+            "type": "boolean",
+            "default": false,
+            "description": "true 表示这是缩短预览，完整内容在库中不变，可用 expand 取回。"
+          },
+          "citation": {
+            "type": "object",
+            "properties": {
+              "source_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "status": {
+                "enum": [
+                  "active",
+                  "superseded",
+                  "stale"
+                ]
+              },
+              "evidence_quote": {
+                "type": "string"
+              }
+            }
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "条目置信度；热身期按 ≥0.7 过滤（docs/11）"
+          }
+        }
+      }
+    },
+    "excluded_by_budget": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "命中但因预算未返回的条数。>0 时元认知必须降档（见 x-invariants）。"
+    },
+    "excluded_results": {
+      "type": "array",
+      "maxItems": 10,
+      "description": "恢复引用：让调用方知道'还有这些'，可以按 ID 展开。",
+      "items": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "short_title": {
+            "type": "string",
+            "maxLength": 40
+          }
+        }
+      }
+    },
+    "excluded_results_truncated": {
+      "type": "boolean",
+      "default": false,
+      "description": "true 表示还有更多省略项未列入（超过 10 条上限）。"
+    },
+    "minimum_budget": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "连排名第一的最小身份预览都装不下时，返回所需的最小预算；否则 null。"
+    },
+    "tokens_used": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "启发式估算：返回结果序列化长度 / 3，向上取整。不是精确 token 数。"
+    },
+    "token_budget": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "truncated": {
+      "type": "boolean",
+      "description": "内容被截短或结果被省略，任一成立即为 true。"
+    },
+    "degraded": {
+      "type": "boolean",
+      "description": "检索超时/失败时为 true。此时 returned 必须为空，且不注入'无匹配'分支。"
+    },
+    "layer_filter": {
+      "type": "object",
+      "description": "层过滤必须在候选截断与扩散之前执行。",
+      "properties": {
+        "requested": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "hot",
+              "warm",
+              "cold"
+            ]
+          }
+        },
+        "applied_before_truncation": {
+          "const": true
+        }
+      }
+    }
+  },
+  "x-invariants": {
+    "V1_never_empty_silently": "degraded=false 且 matched_count>0 时，returned 不得为空——若装不下，必须给 minimum_budget。",
+    "V2_truncation_keeps_id": "content_truncated=true 的结果必须保留 id，且可用 expand 还原。",
+    "V3_stable_rank": "装填不得改变排名顺序；不得用更短的低排名条目替换高排名条目。",
+    "V4_scoped_count": "matched_count 只统计本次请求范围内的命中。",
+    "V5_layer_first": "layer_filter 在候选截断与扩散之前执行，Cold 命中不得挤占 Warm 的 topK 名额。",
+    "V6_metacog_downgrade": "excluded_by_budget>0 时，元认知 confidence_level 上限为 mid，expression 至少 hedge，措辞需说明'还有几条没带出来'——'没注入' ≠ '没有记录'。",
+    "V7_no_hit_vs_excluded": "matched_count=0 → 走'无匹配'分支；matched_count>0 且 returned 为空 → 走'有但装不下'分支。两者语义严格区分。"
+  },
+  "x-example": {
+    "query_digest": "sha256:9f2c…",
+    "matched_count": 5,
+    "returned": [
+      {
+        "id": "mem_101",
+        "layer": "warm",
+        "path": "direct",
+        "potency_band": "high",
+        "content_preview": "项目代号在 v2 改为 LINGSHU-v2",
+        "content_truncated": true,
+        "citation": {
+          "source_at": "2026-10-25T15:04:00+08:00",
+          "status": "active"
+        }
+      }
+    ],
+    "excluded_by_budget": 4,
+    "excluded_results": [
+      {
+        "id": "mem_102",
+        "session_id": "s_002",
+        "short_title": "代号变更的讨论"
+      },
+      {
+        "id": "mem_103",
+        "session_id": "s_003",
+        "short_title": "命名理由"
+      }
+    ],
+    "excluded_results_truncated": false,
+    "minimum_budget": null,
+    "tokens_used": 412,
+    "token_budget": 900,
+    "truncated": true,
+    "degraded": false,
+    "layer_filter": {
+      "requested": [
+        "warm",
+        "cold"
+      ],
+      "applied_before_truncation": true
+    }
+  }
+}

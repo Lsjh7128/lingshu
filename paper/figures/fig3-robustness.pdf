@@ -1,0 +1,169 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 504 316] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> /ProcSet [/PDF /Text] >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 5067 >>
+stream
+0 g
+BT /F2 9.5 Tf 1 0 0 1 135.34 300.58 Tm (Control-plane state transitions under injected faults) Tj ET
+0.985 0.985 0.985 rg
+0 G
+1.1 w
+155 290 m 349 290 l 350.657 290 352 288.657 352 287 c 352 239 l 352 237.343 350.657 236 349 236 c 155 236 l 153.343 236 152 237.343 152 239 c 152 287 l 152 288.657 153.343 290 155 290 c h
+B
+0 g
+BT /F2 8 Tf 1 0 0 1 211.556 270.04 Tm (Normal \(full function\)) Tj ET
+BT /F1 8 Tf 1 0 0 1 166.4 260.12 Tm (constitution + fact + organization + style + recall;) Tj ET
+BT /F1 8 Tf 1 0 0 1 226.548 250.2 Tm (verdict = allow) Tj ET
+1 w
+252 236 m 252 186 l S
+66 186 m 438 186 l S
+66 186 m 66 153.5 l S
+66 149 m 63.8 153.5 l 68.2 153.5 l h
+f
+190 186 m 190 153.5 l S
+190 149 m 187.8 153.5 l 192.2 153.5 l h
+f
+314 186 m 314 153.5 l S
+314 149 m 311.8 153.5 l 316.2 153.5 l h
+f
+438 186 m 438 153.5 l S
+438 149 m 435.8 153.5 l 440.2 153.5 l h
+f
+0.7 w
+[2.5 2] 0 d
+66 168 m 438 168 l S
+66 149 m 66 168 l S
+190 149 m 190 168 l S
+314 149 m 314 168 l S
+438 149 m 438 168 l S
+252 168 m 252 230.5 l S
+252 235 m 254.2 230.5 l 249.8 230.5 l h
+f
+BT /F1 8 Tf 1 0 0 1 201.752 217.12 Tm (degradation) Tj ET
+BT /F1 8 Tf 1 0 0 1 213.328 155.12 Tm (recovery) Tj ET
+1 1 1 rg
+0.9 w
+[] 0 d
+11 148 m 121 148 l 122.657 148 124 146.657 124 145 c 124 47 l 124 45.343 122.657 44 121 44 c 11 44 l 9.343 44 8 45.343 8 47 c 8 145 l 8 146.657 9.343 148 11 148 c h
+B
+0 g
+BT /F2 8 Tf 1 0 0 1 35.104 124.96 Tm (Feature-isolated) Tj ET
+BT /F1 8 Tf 1 0 0 1 16.212 115.04 Tm (cause: memory write throws) Tj ET
+BT /F1 8 Tf 1 0 0 1 58.444 105.12 Tm (\(B1\)) Tj ET
+BT /F1 8 Tf 1 0 0 1 11.532 95.2 Tm (recall empty; metacog hedges;) Tj ET
+BT /F1 8 Tf 1 0 0 1 15.756 85.28 Tm (emotion / phase still injected) Tj ET
+1 1 1 rg
+0.122 0.306 0.612 RG
+0.7 w
+15.5 68 m 116.5 68 l 117.328 68 118 67.328 118 66.5 c 118 51.5 l 118 50.672 117.328 50 116.5 50 c 15.5 50 l 14.672 50 14 50.672 14 51.5 c 14 66.5 l 14 67.328 14.672 68 15.5 68 c h
+B
+0.122 0.306 0.612 rg
+BT /F1 8 Tf 1 0 0 1 42.1 56.12 Tm (hook_error=1) Tj ET
+1 1 1 rg
+0 G
+0.9 w
+135 148 m 245 148 l 246.657 148 248 146.657 248 145 c 248 47 l 248 45.343 246.657 44 245 44 c 135 44 l 133.343 44 132 45.343 132 47 c 132 145 l 132 146.657 133.343 148 135 148 c h
+B
+0 g
+BT /F2 8 Tf 1 0 0 1 166.884 129.92 Tm (Neutral-safe) Tj ET
+BT /F1 8 Tf 1 0 0 1 146.872 120 Tm (cause: unresolved recall) Tj ET
+BT /F1 8 Tf 1 0 0 1 168.884 110.08 Tm (conflict \(B2\)) Tj ET
+BT /F1 8 Tf 1 0 0 1 140.864 100.16 Tm (style dropped; facts neutral;) Tj ET
+BT /F1 8 Tf 1 0 0 1 138.652 90.24 Tm (conflict-to-clarify; constitution) Tj ET
+BT /F1 8 Tf 1 0 0 1 182.44 80.32 Tm (kept) Tj ET
+1 1 1 rg
+0.122 0.306 0.612 RG
+0.7 w
+139.5 68 m 240.5 68 l 241.328 68 242 67.328 242 66.5 c 242 51.5 l 242 50.672 241.328 50 240.5 50 c 139.5 50 l 138.672 50 138 50.672 138 51.5 c 138 66.5 l 138 67.328 138.672 68 139.5 68 c h
+B
+0.122 0.306 0.612 rg
+BT /F1 8 Tf 1 0 0 1 164.988 56.12 Tm (fallback = true) Tj ET
+1 1 1 rg
+0 G
+0.9 w
+259 148 m 369 148 l 370.657 148 372 146.657 372 145 c 372 47 l 372 45.343 370.657 44 369 44 c 259 44 l 257.343 44 256 45.343 256 47 c 256 145 l 256 146.657 257.343 148 259 148 c h
+B
+0 g
+BT /F2 8 Tf 1 0 0 1 288.444 124.96 Tm (Safety cut-off) Tj ET
+BT /F1 8 Tf 1 0 0 1 265.088 115.04 Tm (cause: constitution violation) Tj ET
+BT /F1 8 Tf 1 0 0 1 265.864 105.12 Tm (injection stopped: prompt =) Tj ET
+BT /F1 8 Tf 1 0 0 1 303.328 95.2 Tm (None;) Tj ET
+BT /F1 8 Tf 1 0 0 1 269.868 85.28 Tm (constitution-only + notice) Tj ET
+1 1 1 rg
+0.122 0.306 0.612 RG
+0.7 w
+263.5 68 m 364.5 68 l 365.328 68 366 67.328 366 66.5 c 366 51.5 l 366 50.672 365.328 50 364.5 50 c 263.5 50 l 262.672 50 262 50.672 262 51.5 c 262 66.5 l 262 67.328 262.672 68 263.5 68 c h
+B
+0.122 0.306 0.612 rg
+BT /F1 8 Tf 1 0 0 1 287.328 56.12 Tm (fail-closed \(S3\)) Tj ET
+1 1 1 rg
+0 G
+0.9 w
+[2 2] 0 d
+383 148 m 493 148 l 494.657 148 496 146.657 496 145 c 496 47 l 496 45.343 494.657 44 493 44 c 383 44 l 381.343 44 380 45.343 380 47 c 380 145 l 380 146.657 381.343 148 383 148 c h
+B
+0 g
+BT /F2 8 Tf 1 0 0 1 400.888 124.96 Tm (Host transport fault) Tj ET
+BT /F1 8 Tf 1 0 0 1 390.424 115.04 Tm (cause: HTTP 500 / empty /) Tj ET
+BT /F1 8 Tf 1 0 0 1 422.66 105.12 Tm (hang \(A\)) Tj ET
+BT /F1 8 Tf 1 0 0 1 394.872 95.2 Tm (host retries with backoff;) Tj ET
+BT /F1 8 Tf 1 0 0 1 386.416 85.28 Tm (no fabricated content emitted) Tj ET
+1 1 1 rg
+0.122 0.306 0.612 RG
+0.7 w
+[] 0 d
+387.5 68 m 488.5 68 l 489.328 68 490 67.328 490 66.5 c 490 51.5 l 490 50.672 489.328 50 488.5 50 c 387.5 50 l 386.672 50 386 50.672 386 51.5 c 386 66.5 l 386 67.328 386.672 68 387.5 68 c h
+B
+0.122 0.306 0.612 rg
+BT /F1 8 Tf 1 0 0 1 413.988 56.12 Tm (7 tries; 18.0 s) Tj ET
+0 G
+1 w
+16 26 m 44 26 l S
+0 g
+BT /F1 8 Tf 1 0 0 1 48 23.12 Tm (fault -> degradation) Tj ET
+0.7 w
+[2.5 2] 0 d
+150 26 m 178 26 l S
+BT /F1 8 Tf 1 0 0 1 182 23.12 Tm (recovery) Tj ET
+1 g
+[2 2] 0 d
+232 21 10 10 re
+S
+0 g
+BT /F1 8 Tf 1 0 0 1 246 23.12 Tm (outside the control plane) Tj ET
+BT /F1 6 Tf 1 0 0 1 95.514 5.84 Tm (source: fault-injection runs 2026-10-27 \(A transport, B memory, C context\); plugin unmodified; n = 1 per injected point.) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+7 0 obj
+<< /Producer (LINGSHU paper figure generator: pdfcanvas.py) /Title (Fig.3 control-plane state transitions under injected faults) /Subject (Fault injection A/B/C, 2026-10-27; plugin unmodified; n=1 per point) >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000279 00000 n 
+0000005397 00000 n 
+0000005494 00000 n 
+0000005596 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R /Info 7 0 R >>
+startxref
+5822
+%%EOF

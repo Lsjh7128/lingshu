@@ -1,0 +1,111 @@
+{
+ "reviewer": "mem0-lab agent; read all 10 docs/19-wording answers + stores + recalls",
+ "reviewed_at": "2026-10-27T11:14:38.130016+00:00",
+ "experiment": "s1_docs19_u3",
+ "u3_text": "我改主意了，我的项目代号是贝塔，之前那个阿尔法作废。",
+ "n_runs": 10,
+ "method": "PROTOCOL §1: machine rule first, human review second; human value authoritative when they disagree. No disagreements occurred in this sub-experiment.",
+ "artifact_warning": "default variant: S1 docs19 still yields EMPTY recall because mem0 v2.2.1 extracts English memory text and the local non-neural embedder cannot match a Chinese query -> intercept=1 is an artefact; use variant zh to read mem0's actual conflict behaviour.",
+ "reviews": {
+  "s1-docs19-default-r1": {
+   "variant": "default",
+   "scenario": "s1",
+   "round": 1,
+   "hit": 0,
+   "leak": 0,
+   "intercept": 1,
+   "alpha_in_recall": 0,
+   "note": "ARTIFACT: empty recall (English memory text vs Chinese query, max cosine 0.063 < default threshold 0.1); answer says it cannot determine the code name. intercept=1 here is a retrieval artefact, NOT mem0 suppressing the old value."
+  },
+  "s1-docs19-default-r2": {
+   "variant": "default",
+   "scenario": "s1",
+   "round": 2,
+   "hit": 0,
+   "leak": 0,
+   "intercept": 1,
+   "alpha_in_recall": 0,
+   "note": "ARTIFACT: empty recall (English memory text vs Chinese query, max cosine 0.063 < default threshold 0.1); answer says it cannot determine the code name. intercept=1 here is a retrieval artefact, NOT mem0 suppressing the old value."
+  },
+  "s1-docs19-default-r3": {
+   "variant": "default",
+   "scenario": "s1",
+   "round": 3,
+   "hit": 0,
+   "leak": 0,
+   "intercept": 1,
+   "alpha_in_recall": 0,
+   "note": "ARTIFACT: empty recall (English memory text vs Chinese query, max cosine 0.063 < default threshold 0.1); answer says it cannot determine the code name. intercept=1 here is a retrieval artefact, NOT mem0 suppressing the old value."
+  },
+  "s1-docs19-default-r4": {
+   "variant": "default",
+   "scenario": "s1",
+   "round": 4,
+   "hit": 0,
+   "leak": 0,
+   "intercept": 1,
+   "alpha_in_recall": 0,
+   "note": "ARTIFACT: empty recall (English memory text vs Chinese query, max cosine 0.063 < default threshold 0.1); answer says it cannot determine the code name. intercept=1 here is a retrieval artefact, NOT mem0 suppressing the old value."
+  },
+  "s1-docs19-default-r5": {
+   "variant": "default",
+   "scenario": "s1",
+   "round": 5,
+   "hit": 0,
+   "leak": 0,
+   "intercept": 1,
+   "alpha_in_recall": 0,
+   "note": "ARTIFACT: empty recall (English memory text vs Chinese query, max cosine 0.063 < default threshold 0.1); answer says it cannot determine the code name. intercept=1 here is a retrieval artefact, NOT mem0 suppressing the old value."
+  },
+  "s1-docs19-zh-r1": {
+   "variant": "zh",
+   "scenario": "s1",
+   "round": 1,
+   "hit": 1,
+   "leak": 0,
+   "intercept": 0,
+   "alpha_in_recall": 1,
+   "note": "Both memories stay in the store (alpha-only + beta-change; all events ADD) and both are recalled (0.321 alpha / 0.248 beta-change); the model still answers 贝塔. Old value is NOT suppressed in the injected context -> intercept=0."
+  },
+  "s1-docs19-zh-r2": {
+   "variant": "zh",
+   "scenario": "s1",
+   "round": 2,
+   "hit": 1,
+   "leak": 0,
+   "intercept": 0,
+   "alpha_in_recall": 1,
+   "note": "Both memories stay in the store (alpha-only + beta-change; all events ADD) and both are recalled (0.321 alpha / 0.248 beta-change); the model still answers 贝塔. Old value is NOT suppressed in the injected context -> intercept=0."
+  },
+  "s1-docs19-zh-r3": {
+   "variant": "zh",
+   "scenario": "s1",
+   "round": 3,
+   "hit": 1,
+   "leak": 0,
+   "intercept": 0,
+   "alpha_in_recall": 1,
+   "note": "Both memories stay in the store (alpha-only + beta-change; all events ADD) and both are recalled (0.321 alpha / 0.248 beta-change); the model still answers 贝塔. Old value is NOT suppressed in the injected context -> intercept=0."
+  },
+  "s1-docs19-zh-r4": {
+   "variant": "zh",
+   "scenario": "s1",
+   "round": 4,
+   "hit": 1,
+   "leak": 0,
+   "intercept": 0,
+   "alpha_in_recall": 1,
+   "note": "Both memories stay in the store (alpha-only + beta-change; all events ADD) and both are recalled (0.321 alpha / 0.248 beta-change); the model still answers 贝塔. Old value is NOT suppressed in the injected context -> intercept=0."
+  },
+  "s1-docs19-zh-r5": {
+   "variant": "zh",
+   "scenario": "s1",
+   "round": 5,
+   "hit": 1,
+   "leak": 0,
+   "intercept": 0,
+   "alpha_in_recall": 1,
+   "note": "Both memories stay in the store (alpha-only + beta-change; all events ADD) and both are recalled (0.321 alpha / 0.248 beta-change); the model still answers 贝塔. Old value is NOT suppressed in the injected context -> intercept=0."
+  }
+ }
+}

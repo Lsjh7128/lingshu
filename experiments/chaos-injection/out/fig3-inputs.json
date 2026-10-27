@@ -1,0 +1,50 @@
+{
+  "generated_from": {
+    "A": "out/A-*/case_*.json + out/A-model-failure/summary.json",
+    "B": "out/B-memory-corruption/case_B*.json",
+    "C": "out/C-context-flood/summary.json"
+  },
+  "A": {
+    "http_attempts": 7,
+    "wall_s": 17.99,
+    "blocked_by_mode": {
+      "500": false,
+      "empty": false,
+      "fabricated": false,
+      "hang": false,
+      "ok": false
+    },
+    "empty_passthrough": true,
+    "fabricated_passthrough": true,
+    "retry_gaps_s": [
+      0.0,
+      0.55,
+      0.96,
+      1.92,
+      4.25,
+      7.51
+    ]
+  },
+  "B": {
+    "b0_style_injected": true,
+    "b0_no_fallback": true,
+    "b1_hook_errors": 1,
+    "b1_blocked": false,
+    "b1_answer_still_returned": true,
+    "b1_state_writes": 0,
+    "b1_claimed_persisted": true,
+    "b2_variety_fallback": true,
+    "b2_style_dropped": true,
+    "b2_conflict_hint": true,
+    "b2_constitution": true
+  },
+  "C": {
+    "ratio70": 0.7006,
+    "phase70": "shift",
+    "ratio85": 0.8507,
+    "phase85": "critical",
+    "anchor85": true,
+    "constitution_all": true,
+    "truncation_all_zero": true
+  }
+}

@@ -1,0 +1,672 @@
+{
+ "experiment": "s1_docs19_u3",
+ "generated_at": "2026-10-27T11:14:39.603926+00:00",
+ "mem0_version": "2.2.1",
+ "embedder": "local_hashed_bigram (local hashed char-bigram, 256-d, NOT neural)",
+ "llm": "DeepSeek deepseek-chat @ https://api.deepseek.com/v1",
+ "u3_text": "我改主意了，我的项目代号是贝塔，之前那个阿尔法作废。",
+ "u1_u2_u4": "PROTOCOL §2.1 verbatim",
+ "n_per_cell": 5,
+ "raw_dir": "raw/s1-docs19/",
+ "calls_jsonl": "raw/s1-docs19/calls.jsonl",
+ "protocol_note": "Lead 2026-10-27 round-4 instruction: all three objects use the plugin-docs docs/19 §7.2 supported U3 wording for the main S1 table; U1/U2/U4 stay verbatim from PROTOCOL §2.1. This block REPLACES NOTHING: the original PROTOCOL-phrasing S1 evidence stays in raw/memory-*.json and variants.<v>.s1.",
+ "variants": {
+  "default": {
+   "custom_instructions": null,
+   "s1_docs19": {
+    "n_planned": 5,
+    "n_valid": 5,
+    "not_run": 0,
+    "metric_rules": "hit = 回答含 贝塔 ｜ leak = 回答含 阿尔法 ｜ intercept = 召回集不含 阿尔法",
+    "rounds": [
+     {
+      "round": 1,
+      "run": "s1-docs19-default-r1",
+      "status": "ok",
+      "error": null,
+      "primary": {
+       "hit": 0,
+       "leak": 0,
+       "intercept": 1,
+       "alpha_in_recall": 0,
+       "canary_in_recall": null,
+       "recall_texts": [],
+       "recall_scores": [],
+       "answer_raw": "根据当前检索到的内容，我无法确定你的项目代号。"
+      },
+      "recall0": {
+       "hit": 0,
+       "leak": 1,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "canary_in_recall": null,
+       "recall_texts": [
+        "User usually drinks Americano coffee (美式咖啡)",
+        "User's project code name is Alpha (阿尔法)"
+       ],
+       "answer_raw": "阿尔法",
+       "reused_from_primary": false
+      },
+      "store_texts": [
+       "User usually drinks Americano coffee (美式咖啡)",
+       "User changed their project code name from Alpha (阿尔法) to Beta (贝塔) around October 27, 2026, and declared the previous Alpha code name void",
+       "User's project code name is Alpha (阿尔法)"
+      ],
+      "add_events": [
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ]
+      ],
+      "human": {
+       "variant": "default",
+       "scenario": "s1",
+       "round": 1,
+       "hit": 0,
+       "leak": 0,
+       "intercept": 1,
+       "alpha_in_recall": 0,
+       "note": "ARTIFACT: empty recall (English memory text vs Chinese query, max cosine 0.063 < default threshold 0.1); answer says it cannot determine the code name. intercept=1 here is a retrieval artefact, NOT mem0 suppressing the old value."
+      }
+     },
+     {
+      "round": 2,
+      "run": "s1-docs19-default-r2",
+      "status": "ok",
+      "error": null,
+      "primary": {
+       "hit": 0,
+       "leak": 0,
+       "intercept": 1,
+       "alpha_in_recall": 0,
+       "canary_in_recall": null,
+       "recall_texts": [],
+       "recall_scores": [],
+       "answer_raw": "根据当前检索到的内容，我无法确定你的项目代号。"
+      },
+      "recall0": {
+       "hit": 0,
+       "leak": 1,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "canary_in_recall": null,
+       "recall_texts": [
+        "User usually drinks Americano coffee (美式咖啡)",
+        "User's project code name is Alpha (阿尔法)"
+       ],
+       "answer_raw": "阿尔法",
+       "reused_from_primary": false
+      },
+      "store_texts": [
+       "User usually drinks Americano coffee (美式咖啡)",
+       "User changed their project code name from Alpha (阿尔法) to Beta (贝塔) around October 27, 2026, and declared the previous Alpha code name void",
+       "User's project code name is Alpha (阿尔法)"
+      ],
+      "add_events": [
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ]
+      ],
+      "human": {
+       "variant": "default",
+       "scenario": "s1",
+       "round": 2,
+       "hit": 0,
+       "leak": 0,
+       "intercept": 1,
+       "alpha_in_recall": 0,
+       "note": "ARTIFACT: empty recall (English memory text vs Chinese query, max cosine 0.063 < default threshold 0.1); answer says it cannot determine the code name. intercept=1 here is a retrieval artefact, NOT mem0 suppressing the old value."
+      }
+     },
+     {
+      "round": 3,
+      "run": "s1-docs19-default-r3",
+      "status": "ok",
+      "error": null,
+      "primary": {
+       "hit": 0,
+       "leak": 0,
+       "intercept": 1,
+       "alpha_in_recall": 0,
+       "canary_in_recall": null,
+       "recall_texts": [],
+       "recall_scores": [],
+       "answer_raw": "我没有找到任何关于你项目代号的信息，无法回答。"
+      },
+      "recall0": {
+       "hit": 0,
+       "leak": 1,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "canary_in_recall": null,
+       "recall_texts": [
+        "User usually drinks Americano coffee (美式咖啡)",
+        "User's project code name is Alpha (阿尔法)"
+       ],
+       "answer_raw": "阿尔法",
+       "reused_from_primary": false
+      },
+      "store_texts": [
+       "User changed their project code name from Alpha (阿尔法) to Beta (贝塔) around October 27, 2026, and declared the previous Alpha code name void",
+       "User usually drinks Americano coffee (美式咖啡)",
+       "User's project code name is Alpha (阿尔法)"
+      ],
+      "add_events": [
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ]
+      ],
+      "human": {
+       "variant": "default",
+       "scenario": "s1",
+       "round": 3,
+       "hit": 0,
+       "leak": 0,
+       "intercept": 1,
+       "alpha_in_recall": 0,
+       "note": "ARTIFACT: empty recall (English memory text vs Chinese query, max cosine 0.063 < default threshold 0.1); answer says it cannot determine the code name. intercept=1 here is a retrieval artefact, NOT mem0 suppressing the old value."
+      }
+     },
+     {
+      "round": 4,
+      "run": "s1-docs19-default-r4",
+      "status": "ok",
+      "error": null,
+      "primary": {
+       "hit": 0,
+       "leak": 0,
+       "intercept": 1,
+       "alpha_in_recall": 0,
+       "canary_in_recall": null,
+       "recall_texts": [],
+       "recall_scores": [],
+       "answer_raw": "根据目前检索到的内容，我无法确定你的项目代号。"
+      },
+      "recall0": {
+       "hit": 0,
+       "leak": 1,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "canary_in_recall": null,
+       "recall_texts": [
+        "User usually drinks Americano coffee (美式咖啡)",
+        "User's project code name is Alpha (阿尔法)"
+       ],
+       "answer_raw": "阿尔法",
+       "reused_from_primary": false
+      },
+      "store_texts": [
+       "User usually drinks Americano coffee (美式咖啡)",
+       "User's project code name is Alpha (阿尔法)",
+       "User changed their project code name from Alpha (阿尔法) to Beta (贝塔) around October 27, 2026, and declared the previous Alpha code name void"
+      ],
+      "add_events": [
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ]
+      ],
+      "human": {
+       "variant": "default",
+       "scenario": "s1",
+       "round": 4,
+       "hit": 0,
+       "leak": 0,
+       "intercept": 1,
+       "alpha_in_recall": 0,
+       "note": "ARTIFACT: empty recall (English memory text vs Chinese query, max cosine 0.063 < default threshold 0.1); answer says it cannot determine the code name. intercept=1 here is a retrieval artefact, NOT mem0 suppressing the old value."
+      }
+     },
+     {
+      "round": 5,
+      "run": "s1-docs19-default-r5",
+      "status": "ok",
+      "error": null,
+      "primary": {
+       "hit": 0,
+       "leak": 0,
+       "intercept": 1,
+       "alpha_in_recall": 0,
+       "canary_in_recall": null,
+       "recall_texts": [],
+       "recall_scores": [],
+       "answer_raw": "根据当前检索到的内容，我无法确定你的项目代号。"
+      },
+      "recall0": {
+       "hit": 0,
+       "leak": 1,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "canary_in_recall": null,
+       "recall_texts": [
+        "User usually drinks Americano coffee (美式咖啡)",
+        "User's project code name is Alpha (阿尔法)"
+       ],
+       "answer_raw": "阿尔法",
+       "reused_from_primary": false
+      },
+      "store_texts": [
+       "User changed their project code name from Alpha (阿尔法) to Beta (贝塔) around October 27, 2026, and declared the previous Alpha code name void",
+       "User usually drinks Americano coffee (美式咖啡)",
+       "User's project code name is Alpha (阿尔法)"
+      ],
+      "add_events": [
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ]
+      ],
+      "human": {
+       "variant": "default",
+       "scenario": "s1",
+       "round": 5,
+       "hit": 0,
+       "leak": 0,
+       "intercept": 1,
+       "alpha_in_recall": 0,
+       "note": "ARTIFACT: empty recall (English memory text vs Chinese query, max cosine 0.063 < default threshold 0.1); answer says it cannot determine the code name. intercept=1 here is a retrieval artefact, NOT mem0 suppressing the old value."
+      }
+     }
+    ],
+    "primary": {
+     "hit_mean": 0.0,
+     "leak_mean": 0.0,
+     "intercept_mean": 1.0,
+     "alpha_in_recall_mean": 0.0
+    },
+    "primary_human": {
+     "hit_mean": 0.0,
+     "leak_mean": 0.0,
+     "intercept_mean": 1.0
+    },
+    "recall0": {
+     "hit_mean": 0.0,
+     "leak_mean": 1.0,
+     "intercept_mean": 0.0,
+     "alpha_in_recall_mean": 1.0
+    },
+    "recall0_human": {
+     "hit_mean": 0.0,
+     "leak_mean": 0.0,
+     "intercept_mean": 1.0
+    }
+   }
+  },
+  "zh": {
+   "custom_instructions": "请用简体中文记录抽取出的记忆文本，不要翻译成英文。",
+   "s1_docs19": {
+    "n_planned": 5,
+    "n_valid": 5,
+    "not_run": 0,
+    "metric_rules": "hit = 回答含 贝塔 ｜ leak = 回答含 阿尔法 ｜ intercept = 召回集不含 阿尔法",
+    "rounds": [
+     {
+      "round": 1,
+      "run": "s1-docs19-zh-r1",
+      "status": "ok",
+      "error": null,
+      "primary": {
+       "hit": 1,
+       "leak": 0,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "canary_in_recall": null,
+       "recall_texts": [
+        "用户的项目代号是阿尔法。",
+        "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。"
+       ],
+       "recall_scores": [
+        0.3208739883248263,
+        0.24841093506284917
+       ],
+       "answer_raw": "贝塔"
+      },
+      "recall0": {
+       "hit": 1,
+       "leak": 0,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "canary_in_recall": null,
+       "recall_texts": [
+        "用户的项目代号是阿尔法。",
+        "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。",
+        "用户平时喝美式咖啡。"
+       ],
+       "answer_raw": "贝塔",
+       "reused_from_primary": false
+      },
+      "store_texts": [
+       "用户平时喝美式咖啡。",
+       "用户的项目代号是阿尔法。",
+       "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。"
+      ],
+      "add_events": [
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ]
+      ],
+      "human": {
+       "variant": "zh",
+       "scenario": "s1",
+       "round": 1,
+       "hit": 1,
+       "leak": 0,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "note": "Both memories stay in the store (alpha-only + beta-change; all events ADD) and both are recalled (0.321 alpha / 0.248 beta-change); the model still answers 贝塔. Old value is NOT suppressed in the injected context -> intercept=0."
+      }
+     },
+     {
+      "round": 2,
+      "run": "s1-docs19-zh-r2",
+      "status": "ok",
+      "error": null,
+      "primary": {
+       "hit": 1,
+       "leak": 0,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "canary_in_recall": null,
+       "recall_texts": [
+        "用户的项目代号是阿尔法。",
+        "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。"
+       ],
+       "recall_scores": [
+        0.3208739883248263,
+        0.24841093506284917
+       ],
+       "answer_raw": "贝塔"
+      },
+      "recall0": {
+       "hit": 1,
+       "leak": 0,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "canary_in_recall": null,
+       "recall_texts": [
+        "用户的项目代号是阿尔法。",
+        "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。",
+        "用户平时喝美式咖啡。"
+       ],
+       "answer_raw": "贝塔",
+       "reused_from_primary": false
+      },
+      "store_texts": [
+       "用户的项目代号是阿尔法。",
+       "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。",
+       "用户平时喝美式咖啡。"
+      ],
+      "add_events": [
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ]
+      ],
+      "human": {
+       "variant": "zh",
+       "scenario": "s1",
+       "round": 2,
+       "hit": 1,
+       "leak": 0,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "note": "Both memories stay in the store (alpha-only + beta-change; all events ADD) and both are recalled (0.321 alpha / 0.248 beta-change); the model still answers 贝塔. Old value is NOT suppressed in the injected context -> intercept=0."
+      }
+     },
+     {
+      "round": 3,
+      "run": "s1-docs19-zh-r3",
+      "status": "ok",
+      "error": null,
+      "primary": {
+       "hit": 1,
+       "leak": 0,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "canary_in_recall": null,
+       "recall_texts": [
+        "用户的项目代号是阿尔法。",
+        "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。"
+       ],
+       "recall_scores": [
+        0.3208739883248263,
+        0.24841093506284917
+       ],
+       "answer_raw": "贝塔"
+      },
+      "recall0": {
+       "hit": 1,
+       "leak": 0,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "canary_in_recall": null,
+       "recall_texts": [
+        "用户的项目代号是阿尔法。",
+        "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。",
+        "用户平时喝美式咖啡。"
+       ],
+       "answer_raw": "贝塔",
+       "reused_from_primary": false
+      },
+      "store_texts": [
+       "用户的项目代号是阿尔法。",
+       "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。",
+       "用户平时喝美式咖啡。"
+      ],
+      "add_events": [
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ]
+      ],
+      "human": {
+       "variant": "zh",
+       "scenario": "s1",
+       "round": 3,
+       "hit": 1,
+       "leak": 0,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "note": "Both memories stay in the store (alpha-only + beta-change; all events ADD) and both are recalled (0.321 alpha / 0.248 beta-change); the model still answers 贝塔. Old value is NOT suppressed in the injected context -> intercept=0."
+      }
+     },
+     {
+      "round": 4,
+      "run": "s1-docs19-zh-r4",
+      "status": "ok",
+      "error": null,
+      "primary": {
+       "hit": 1,
+       "leak": 0,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "canary_in_recall": null,
+       "recall_texts": [
+        "用户的项目代号是阿尔法。",
+        "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。"
+       ],
+       "recall_scores": [
+        0.3208739883248263,
+        0.24841093506284917
+       ],
+       "answer_raw": "贝塔"
+      },
+      "recall0": {
+       "hit": 1,
+       "leak": 0,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "canary_in_recall": null,
+       "recall_texts": [
+        "用户的项目代号是阿尔法。",
+        "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。",
+        "用户平时喝美式咖啡。"
+       ],
+       "answer_raw": "贝塔",
+       "reused_from_primary": false
+      },
+      "store_texts": [
+       "用户平时喝美式咖啡。",
+       "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。",
+       "用户的项目代号是阿尔法。"
+      ],
+      "add_events": [
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ]
+      ],
+      "human": {
+       "variant": "zh",
+       "scenario": "s1",
+       "round": 4,
+       "hit": 1,
+       "leak": 0,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "note": "Both memories stay in the store (alpha-only + beta-change; all events ADD) and both are recalled (0.321 alpha / 0.248 beta-change); the model still answers 贝塔. Old value is NOT suppressed in the injected context -> intercept=0."
+      }
+     },
+     {
+      "round": 5,
+      "run": "s1-docs19-zh-r5",
+      "status": "ok",
+      "error": null,
+      "primary": {
+       "hit": 1,
+       "leak": 0,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "canary_in_recall": null,
+       "recall_texts": [
+        "用户的项目代号是阿尔法。",
+        "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。"
+       ],
+       "recall_scores": [
+        0.3208739883248263,
+        0.24841093506284917
+       ],
+       "answer_raw": "贝塔"
+      },
+      "recall0": {
+       "hit": 1,
+       "leak": 0,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "canary_in_recall": null,
+       "recall_texts": [
+        "用户的项目代号是阿尔法。",
+        "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。",
+        "用户平时喝美式咖啡。"
+       ],
+       "answer_raw": "贝塔",
+       "reused_from_primary": false
+      },
+      "store_texts": [
+       "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。",
+       "用户的项目代号是阿尔法。",
+       "用户平时喝美式咖啡。"
+      ],
+      "add_events": [
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ],
+       [
+        "ADD"
+       ]
+      ],
+      "human": {
+       "variant": "zh",
+       "scenario": "s1",
+       "round": 5,
+       "hit": 1,
+       "leak": 0,
+       "intercept": 0,
+       "alpha_in_recall": 1,
+       "note": "Both memories stay in the store (alpha-only + beta-change; all events ADD) and both are recalled (0.321 alpha / 0.248 beta-change); the model still answers 贝塔. Old value is NOT suppressed in the injected context -> intercept=0."
+      }
+     }
+    ],
+    "primary": {
+     "hit_mean": 1.0,
+     "leak_mean": 0.0,
+     "intercept_mean": 0.0,
+     "alpha_in_recall_mean": 1.0
+    },
+    "primary_human": {
+     "hit_mean": 1.0,
+     "leak_mean": 0.0,
+     "intercept_mean": 0.0
+    },
+    "recall0": {
+     "hit_mean": 1.0,
+     "leak_mean": 0.0,
+     "intercept_mean": 0.0,
+     "alpha_in_recall_mean": 1.0
+    },
+    "recall0_human": {
+     "hit_mean": 1.0,
+     "leak_mean": 0.0,
+     "intercept_mean": 0.0
+    }
+   }
+  }
+ },
+ "notes": [
+  "Same mem0 v2.2.1 / DeepSeek / local hashed-bigram embedder / fresh in-memory qdrant store per round as the main matrix.",
+  "Metrics: same machine rules as PROTOCOL §2.3 (hit=回答含贝塔, leak=回答含阿尔法, intercept=召回集不含阿尔法), plus human review in raw/s1-docs19/human-review.json.",
+  "default variant is the registered S1 row; zh is the language-normalised diagnostic (the non-neural embedder cannot match English memory text to Chinese queries)."
+ ],
+ "file": "results/summary-s1-docs19.json"
+}

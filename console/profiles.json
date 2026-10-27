@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "default_profile": "desktop",
+  "refresh_hint_ms": 1500,
+  "privacy": {
+    "policy": "allowlist-v1",
+    "raw_text": false
+  },
+  "profiles": [
+    {
+      "id": "desktop",
+      "label": "日常 desktop（静默监控）",
+      "kind": "runtime",
+      "mode": "observe",
+      "color": "#38bdf8",
+      "stale_after_sec": 180,
+      "source": {
+        "type": "jsonl",
+        "dirs": ["${DSH_HOME}/plugins/dsh-lingshu/profiles/desktop"]
+      }
+    },
+    {
+      "id": "lingshu-lab",
+      "label": "实验环境 lingshu-lab",
+      "kind": "lab",
+      "mode": "active",
+      "color": "#a78bfa",
+      "stale_after_sec": 900,
+      "source": {
+        "type": "jsonl",
+        "dirs": [
+          "${DSH_HOME}/plugins/dsh-lingshu/profiles/lingshu-lab",
+          "${DSH_HOME}/plugins/dsh-lingshu"
+        ]
+      }
+    },
+    {
+      "id": "desktop-demo",
+      "label": "演示 · desktop 模拟流量（合成）",
+      "kind": "demo",
+      "mode": "observe",
+      "color": "#f59e0b",
+      "stale_after_sec": 600,
+      "source": {
+        "type": "jsonl",
+        "dirs": ["${REPO}/.console-data/desktop-demo"]
+      }
+    },
+    {
+      "id": "lab-demo",
+      "label": "演示 · lab 模拟流量（合成）",
+      "kind": "demo",
+      "mode": "active",
+      "color": "#f472b6",
+      "stale_after_sec": 600,
+      "source": {
+        "type": "jsonl",
+        "dirs": ["${REPO}/.console-data/lab-demo"]
+      }
+    }
+  ]
+}

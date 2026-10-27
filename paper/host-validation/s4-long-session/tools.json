@@ -1,0 +1,6 @@
+{
+ "node": "<NODE>",
+ "bin": "<DSH_BIN>",
+ "py": "<PYTHON>",
+ "creds": "<DSH_HOME>\\.credentials.yaml"
+}

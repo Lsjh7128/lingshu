@@ -1,0 +1,145 @@
+% ============================================================================
+% 10-appendix.tex - Appendix: UCA table, parameter/provenance table, reproduction
+% This file starts with \appendix, so it is safe whether or not main.tex
+% already calls \appendix; it must be \input last.
+% Requires: booktabs (tables are tabular-only, no multirow dependency).
+% ============================================================================
+
+\appendix
+
+\section{Safety control actions (UCA-01--08)}\label{sec:app:uca}
+
+Table~\ref{tab:uca} reproduces the eight unsafe control actions of the
+gate as defined in the implementation (the source strings are Chinese and are
+translated here). The table, the two trigger word lists and the verdict logic are
+hardcoded at
+\texttt{engine/control.py:175--188} and \texttt{engine/control.py:191--232};
+checks are evaluated in code order, and any hit among UCA-01--07 sets the
+verdict to \texttt{block}. UCA-08 is downgrade-only: it is recorded in the
+\texttt{downgrades} field and never changes the verdict.
+
+\begin{table}[t]
+\centering\small
+\caption{Unsafe control actions and their responses. ``Marker'' is a fixed
+five-character anchor sentinel beginning with U+3016; ``fact block'' is the
+rendered fact block \texttt{f}.}\label{tab:uca}
+\begin{tabular}{@{}p{0.08\textwidth}p{0.42\textwidth}p{0.34\textwidth}p{0.09\textwidth}@{}}
+\toprule
+ID & Definition (translated from the code table) & Detection condition & Response \\
+\midrule
+UCA-01 & Injected content overrides constitutional constraints & any override phrase in $p$ (\texttt{:207--208}) & block \\
+UCA-02 & Constitution verification failed but injection continues & $\neg\mathrm{frozen\_ok}$ (\texttt{:209--210}) & block \\
+UCA-03 & Style/emotion injected in a refusal scene & $\mathrm{refuse} \land \mathrm{style\_injected}$ (\texttt{:211--212}) & block \\
+UCA-04 & Memory content asserted as current fact (unsourced) & any unsourced phrase in $f$ (\texttt{:213--214}) & block \\
+UCA-05 & Budget truncation evicts the constitution & $\neg\mathrm{constitution\_injected}$ (\texttt{:215--216}) & block \\
+UCA-06 & Unresolved conflict not reduced & unresolved $\land \neg$fallback (\texttt{:217--218}) & block \\
+UCA-07 & Persona anchor missing during a phase shift & prefeed $\land$ marker $\not\subseteq p$ (\texttt{:219--220}) & block \\
+UCA-08 & Integration continues after saturation & $\exists k: s_k$ (\texttt{:221--223}) & downgrade only \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Parameters and provenance}\label{sec:app:params}
+
+Table~\ref{tab:params} lists every numeric parameter touched by the mechanisms
+in Section~\ref{sec:method}. The authoritative source is
+\texttt{rules/decay-params.yaml}; \texttt{engine/config.py} is a zero-dependency
+shadow copy, cross-checked key by key by \texttt{tools/check\_config\_sync.py}
+(66 keys, 0 failures). \textbf{All entries are \texttt{provenance: guess}}; the
+number of measured parameters is zero
+(\texttt{acceptance/provenance-candidates.json} reports
+\texttt{upgrade\_eligible: false} for every entry).
+
+\begin{table}[t]
+\centering\footnotesize
+\caption{Numeric parameters, authoritative rule-file line, value, provenance and
+code shadow. ``guess'' is a design default, not a calibrated value.}\label{tab:params}
+\begin{tabular}{@{}p{0.25\textwidth}p{0.42\textwidth}p{0.18\textwidth}p{0.11\textwidth}@{}}
+\toprule
+Parameter key & Value & Provenance & Shadow \\
+\midrule
+\texttt{actr.d}, \texttt{actr.ref}, \texttt{actr.lo}, \texttt{actr.hi} & 0.5, 0.001 d, $-3.0$, $1.0$ (\texttt{:217--221}) & guess & \texttt{config.py:90--95} \\
+\texttt{memory.actrWeight} & 0.6 (\texttt{:18}) & guess\textsuperscript{a} & \texttt{config.py:21} \\
+\texttt{memory.decay.tau.*} & 7, 30, 90 d (\texttt{:39--48}) & guess & \texttt{config.py:15--19} \\
+\texttt{control.integralKi} / \texttt{Cap} / \texttt{Leak} / \texttt{Deadband} & 0.15 / 0.4 / 0.05 / 0.02 (\texttt{:224--233}) & guess & \texttt{config.py:97--100} \\
+\texttt{control.phaseShiftRatio} / \texttt{HardRatio} & 0.70 / 0.85 (\texttt{:228--233}) & guess & \texttt{config.py:101--102} \\
+\texttt{control.trendThreshold} / \texttt{ratioMax} / \texttt{historyCapacity} & 0.02 / 1.5 / 64 (\texttt{:230--233}) & guess & \texttt{config.py:104--106} \\
+\texttt{compose.weights.fact} / \texttt{organization} / \texttt{style} / \texttt{retrieval} & 0.70 / 0.50 / 0.40 / 0.45 (\texttt{:239--247}) & guess & \texttt{config.py:50--53} \\
+\texttt{compose.weights.boost*} & 0.50 / 0.35 / 0.40 (\texttt{:243--247}) & guess & \texttt{config.py:54--56} \\
+\texttt{compose.weights.styleBoostThreshold} & 0.6 (\texttt{:246}) & guess & \texttt{config.py:58} \\
+\texttt{memory.retrieval.topK} & 3 (\texttt{:20}) & guess & \texttt{config.py:22} \\
+\texttt{memory.recallBudget.tokenBudgetDefault} / \texttt{maxReturned} & 900 / 3 (\texttt{:70--71}) & guess\textsuperscript{a} & \texttt{config.py:25} \\
+\texttt{memory.potency.archiveThreshold} & 0.15 (\texttt{:50}) & guess\textsuperscript{a} & \texttt{config.py:20} \\
+\texttt{compose.injectionTokenRatioMax} & 0.15 (\texttt{:236}) & none\textsuperscript{b} & \texttt{config.py:45} (\texttt{tokenRatioMax}) \\
+\texttt{metacog.emotionCapIntensity} & 0.6 & no rule key\textsuperscript{c} & \texttt{config.py:30} \\
+\texttt{ASSUMED\_CONTEXT\_TOKENS} & 8000 & no rule key\textsuperscript{c} & \texttt{compose.py:36} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textsuperscript{a}~The block carries no inline provenance key; the
+file header states that all values are guesses (\texttt{:4}), and the enclosing
+section repeats \texttt{provenance: guess}.
+\textsuperscript{b}~The rule key exists but is not compared by the
+consistency tool (key-name mismatch against the shadow).
+\textsuperscript{c}~Hardcoded in code; documented as a single-source exception.
+These three exceptions are the only places where a numeric value does not flow
+from a checked rule-file key.
+
+\section{Reproduction commands and assertion inventory}\label{sec:app:repro}
+
+All Python commands below were executed on the reference implementation while
+preparing this paper. The environment variable is required on Windows because
+one assertion name contains U+2212, which the default console code page cannot
+encode; without it the run aborts on printing, not on an assertion failure.
+
+\begin{verbatim}
+$env:PYTHONIOENCODING = "utf-8"
+python tests/test_control.py                  # 161 passed, 0 failed
+python tests/test_pipeline_integration.py     #  65 passed, 0 failed
+python tests/test_constitution.py             #  26 passed, 0 failed
+python tools/check_config_sync.py             #  66 ok, 0 fail, 0 skipped
+python tools/gen_impl_status.py --check       #  OK (status matrix current)
+python tools/run_learning.py --json           #  recall_at_3 = 1.0
+node plugin/dsh-lingshu/host-sim.mjs --assert #  documented 188 assertions
+node plugin/dsh-lingshu/control-sim.mjs --assert # documented 148 assertions
+node plugin/dsh-lingshu/stress.mjs --assert   #  documented 45 assertions
+\end{verbatim}
+
+Table~\ref{tab:assertions} attributes the executed Python assertions to the
+mechanisms of Section~\ref{sec:method}. Counts are executions, not call sites:
+one call site inside a loop runs once per iteration (e.g.\ the top-$k$ slot
+check). Plugin assertion counts are those recorded by the project and were not
+re-executed for this paper.
+
+\begin{table}[t]
+\centering\footnotesize
+\caption{Assertion inventory. ``Run'' is the number of assertion executions
+observed; ``site'' is the test-file line where the test function starts.}\label{tab:assertions}
+\begin{tabular}{@{}p{0.36\textwidth}p{0.34\textwidth}p{0.10\textwidth}p{0.12\textwidth}@{}}
+\toprule
+Mechanism & Test function (file) & Run & Site \\
+\midrule
+ACT-R base level & \texttt{test\_actr\_activation} (\texttt{test\_control.py}) & 15 & \texttt{:58} \\
+ACT-R dual channel & \texttt{test\_actr\_dual\_channel} (\texttt{test\_control.py}) & 7 & \texttt{:103} \\
+Top-$k$ slot contract & \texttt{test\_topk\_slot\_contract} (\texttt{test\_control.py}) & 9 & \texttt{:143} \\
+Integral feedback & \texttt{test\_integral\_baseline} (\texttt{test\_control.py}) & 18 & \texttt{:177} \\
+Phase-shift monitor & \texttt{test\_phase\_shift\_monitor} (\texttt{test\_control.py}) & 22 & \texttt{:258} \\
+Requisite-variety guard & \texttt{test\_requisite\_variety\_guard} (\texttt{test\_control.py}) & 11 & \texttt{:342} \\
+Pre-flight gate & \texttt{test\_preflight\_audit} (\texttt{test\_control.py}) & 33 & \texttt{:387} \\
+Dynamic weights & \texttt{test\_compose\_weights} (\texttt{test\_control.py}) & 29 & \texttt{:484} \\
+Single-source parameters & \texttt{test\_params\_single\_source} (\texttt{test\_control.py}) & 8 & \texttt{:623} \\
+Impasse & \texttt{test\_impasse} (\texttt{test\_control.py}) & 7 & \texttt{:668} \\
+Pipeline integration & nine functions & 65 & \texttt{test\_pipeline\_integration.py:46--284} \\
+Constitution audit & five functions & 26 & \texttt{test\_constitution.py} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The gate-level measurements quoted in the text were produced with the same
+token-free call used by the chaos executor
+(\texttt{tools/run\_chaos.py:443--446}): the sample text is passed as the
+\texttt{prompt} argument with \texttt{frozen\_ok=True} and
+\texttt{constitution\_injected=True}, which isolates UCA-01. This is a unit-level
+coverage check on the gate's scan surface, not an end-to-end interception
+measurement.

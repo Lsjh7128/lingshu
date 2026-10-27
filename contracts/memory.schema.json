@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lingshu/memory.schema.json",
+  "title": "LINGSHU memory entry",
+  "version": "memory-3.0",
+  "type": "object",
+  "required": ["id", "type", "importance", "subject", "relation", "object",
+               "content", "source_quote", "source_trust", "confidence", "status",
+               "forgetting_policy"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "type": { "enum": ["episodic", "semantic", "procedural"] },
+    "importance": { "type": "number", "minimum": 0, "maximum": 1 },
+
+    "subject": { "type": "string", "minLength": 1 },
+    "relation": { "type": "string", "minLength": 1 },
+    "object": { "type": "string", "minLength": 1 },
+    "content": {
+      "type": "string",
+      "description": "一句自包含陈述。不得含祈使句（MEM-2.1）。"
+    },
+
+    "keywords": { "type": "array", "items": { "type": "string" }, "maxItems": 12 },
+    "seed_tokens": { "type": "array", "items": { "type": "string" }, "maxItems": 12 },
+
+    "source_quote": {
+      "type": "string",
+      "minLength": 1,
+      "description": "原文逐字证据。必须逐字存在，否则该条目被丢弃（MEM-0.2）。"
+    },
+    "source_trust": {
+      "enum": ["user_explicit", "user_implicit", "tool_output", "external"]
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+
+    "supersedes": {
+      "type": ["string", "null"],
+      "description": "取代判定的唯一键是 (subject, relation)；禁止用语义相似度判矛盾。"
+    },
+    "depends_on": {
+      "type": "array",
+      "items": { "type": "string" },
+      "maxItems": 8,
+      "description": "字段级依赖，不是边。级联失效沿此字段递归（深度 ≤3）。"
+    },
+
+    "status": {
+      "enum": ["active", "superseded", "dormant", "suppressed", "stale"]
+    },
+    "forgetting_policy": {
+      "enum": ["passive_decay", "active_delete", "safety_trigger", "adaptive_reinforce"],
+      "default": "passive_decay"
+    },
+    "entry_weight": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "仅 Cold 层使用；由 recency/frequency/relevance 合成。"
+    },
+
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["to", "type", "weight", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "to": { "type": "string" },
+          "type": {
+            "enum": ["supersedes", "same_entity", "same_source", "temporal_next",
+                     "same_topic", "caused_by", "part_of", "contradicts"]
+          },
+          "weight": { "type": "number", "minimum": 0, "maximum": 1 },
+          "origin": { "enum": ["rule", "encoder"] },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      },
+      "maxItems": 12
+    },
+
+    "revisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["at", "field", "from", "to"],
+        "properties": {
+          "at": { "type": "string", "format": "date-time" },
+          "field": { "type": "string" },
+          "from": {},
+          "to": {},
+          "by": { "enum": ["user", "encoder", "consolidator", "tool"] }
+        }
+      }
+    },
+
+    "param_version": { "type": "string" },
+    "prompt_version": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "last_access": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "const": "semantic" } } },
+      "then": { "properties": { "content": { "maxLength": 120 } } }
+    }
+  ],
+  "x-invariants": {
+    "I1": "记忆是参考，不替代用户当前陈述",
+    "no_semantic_similarity_for_supersede": true,
+    "cold_has_no_verbatim_content": true,
+    "depends_on_is_not_an_edge": true
+  }
+}

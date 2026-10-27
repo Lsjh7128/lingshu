@@ -1,0 +1,74 @@
+{
+ "S4-V1-001": {
+  "cell_id": "baseline-v1-t10",
+  "variant": "v1",
+  "arm": "baseline",
+  "turn": 10
+ },
+ "S4-V1-002": {
+  "cell_id": "full-v1-t30",
+  "variant": "v1",
+  "arm": "full",
+  "turn": 30
+ },
+ "S4-V1-003": {
+  "cell_id": "baseline-v1-t20",
+  "variant": "v1",
+  "arm": "baseline",
+  "turn": 20
+ },
+ "S4-V1-004": {
+  "cell_id": "baseline-v1-t30",
+  "variant": "v1",
+  "arm": "baseline",
+  "turn": 30
+ },
+ "S4-V1-005": {
+  "cell_id": "full-v1-t10",
+  "variant": "v1",
+  "arm": "full",
+  "turn": 10
+ },
+ "S4-V1-006": {
+  "cell_id": "full-v1-t20",
+  "variant": "v1",
+  "arm": "full",
+  "turn": 20
+ },
+ "S4-V2-001": {
+  "cell_id": "full-v2-t20",
+  "variant": "v2",
+  "arm": "full",
+  "turn": 20
+ },
+ "S4-V2-002": {
+  "cell_id": "baseline-v2-t10",
+  "variant": "v2",
+  "arm": "baseline",
+  "turn": 10
+ },
+ "S4-V2-003": {
+  "cell_id": "full-v2-t30",
+  "variant": "v2",
+  "arm": "full",
+  "turn": 30
+ },
+ "S4-V2-004": {
+  "cell_id": "full-v2-t10",
+  "variant": "v2",
+  "arm": "full",
+  "turn": 10
+ },
+ "S4-V2-005": {
+  "cell_id": "baseline-v2-t30",
+  "variant": "v2",
+  "arm": "baseline",
+  "turn": 30
+ },
+ "S4-V2-006": {
+  "cell_id": "baseline-v2-t20",
+  "variant": "v2",
+  "arm": "baseline",
+  "turn": 20
+ }
+}

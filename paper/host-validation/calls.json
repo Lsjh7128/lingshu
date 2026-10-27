@@ -1,0 +1,417 @@
+{
+ "schema": "lingshu/host-validation/v1",
+ "generated_at": "2026-10-27T00:50+08:00",
+ "purpose": "真实 LLM 宿主小样本端到端验证（illustrative，非统计证据）",
+ "environment": {
+  "host": "DSH headless（@deepseek-ai/dsh via npx cache）",
+  "node": "v24.21.0（捆绑）",
+  "python": "3.12.14（捆绑）",
+  "model_route": "deepseek-official（dsh-llm-deepseek）",
+  "single_model": true,
+  "profile_full": "lingshu-lab-headless（bundles: dsh-base + dsh-headless + dsh-lingshu@0.2.0 本地 link）",
+  "profile_baseline": "headless（dsh-base + dsh-headless，无插件）",
+  "workaround": {
+   "why": "沙箱 workspace-write 只允许写 <REPO_ROOT>；DSH 每次 boot 重写 $DSH_HOME/profiles/<name>/cordis.yml，原 profile 目录不可写",
+   "how": [
+    "设置 DSH_HOME=<REPO_ROOT>\\.host-valid-data\\dshhome（复制 profile 的 5 个小文件）",
+    "把 plugin/dsh-lingshu 源码复制到重定向 profile 的 node_modules（junction 被沙箱拒绝）；拷贝文件 sha256 与源一致",
+    "DEEPSEEK_API_KEY 只在子进程环境变量中注入，值来自 ~/.dsh/.credentials.yaml，未打印、未落盘"
+   ],
+   "deviation": "Full 臂跑的是插件源码的字节级副本（非原 link），插件目录 sha256 见 plugin_copy_sha256"
+  }
+ },
+ "integrity": {
+  "prompts": {
+   "construction": "50 flood turns + 49 replay turns + 1 probe question = 100 turns",
+   "instruction": "【回复要求】不要调用任何工具，不要读取或列举文件；只根据以上对话内容回答。如果确实找不到，就如实说找不到。请只输出一个代号，不要解释。",
+   "turns_total": 100,
+   "q1": {
+    "file": "prompt-100turn-q1.txt",
+    "bytes": 78652,
+    "sha256": "6f4983dd1e1be2ea4bc74d0ef91d3eb220431f20134d537a5ef39447fbdc4398",
+    "question": "我们聊了这么多轮，我一开始告诉过你的项目代号是什么？只回答代号。",
+    "turns": 100
+   },
+   "q2": {
+    "file": "prompt-100turn-q2.txt",
+    "bytes": 78634,
+    "sha256": "a95d29f02de4a83610f05cdf6d229b7e7ad4dc98dcb0095f1ba1fdb94b14ef87",
+    "question": "我最开始告诉过你，我的项目代号是什么？请只回答代号。",
+    "turns": 100
+   },
+   "q3": {
+    "file": "prompt-100turn-q3.txt",
+    "bytes": 78640,
+    "sha256": "8d9f2061217de77f0bbf54c97a198370f993c2b9fdf0c929221da0e8f3055ab6",
+    "question": "请回顾上文，我在最开始提到的项目代号是什么？只输出代号。",
+    "turns": 100
+   },
+   "q1_noseed": {
+    "file": "prompt-100turn-q1-noseed.txt",
+    "bytes": 78565,
+    "sha256": "cbbe53f0f1eee5c4ef442ba745e22b047848e7288ec9c0f4073b87ae293d4c1b",
+    "question": "我们聊了这么多轮，我一开始告诉过你的项目代号是什么？只回答代号。",
+    "turns": 100,
+    "note": "与 q1 相同，但删除 flood 第 1–2 轮的种子句；设定只存在于 Full 臂的预置记忆里"
+   }
+  },
+  "memory_seed_sha256": "f5dec2e0d90851fa9a8b7a55670deb36e3f267c617e41e52e10fcb75682a91ac",
+  "plugin_copy_sha256": "574bed9d8290daaa4e309fa0fe14c59a38be79bcf4f80ee63c9f9a5cfe4a258f",
+  "plugin_source_sha256": "574bed9d8290daaa4e309fa0fe14c59a38be79bcf4f80ee63c9f9a5cfe4a258f",
+  "plugin_copy_identical_to_source": true,
+  "note_plugin_copy": "Full 臂加载的是插件源码副本，但 index.js 与源文件 sha256 一致"
+ },
+ "records": [
+  {
+   "run_id": "hostval-full-q1",
+   "arm": "full",
+   "profile": "lingshu-lab-headless",
+   "prompt": {
+    "file": "prompt-100turn-q1.txt",
+    "sha256": "6f4983dd1e1be2ea4bc74d0ef91d3eb220431f20134d537a5ef39447fbdc4398",
+    "bytes": 78652
+   },
+   "exit_code": 0,
+   "latency_ms": 4816,
+   "steps": 1,
+   "final_text": "贝塔",
+   "answer_has_beta": true,
+   "usage": {
+    "inputTokens": 16100,
+    "outputTokens": 75,
+    "cacheReadTokens": 5760,
+    "cacheWriteTokens": 0,
+    "totalTokens": 21935
+   },
+   "memory_injection": {
+    "has_memory_section": true,
+    "last_prompt_bytes": 661,
+    "last_prompt_sha256": "93cd07821f736366293470bb2c50ae0b93a106e254efdd96aabdd0edf1e59338",
+    "last_event_matched": 1,
+    "last_event_hits": [
+     "mem_001"
+    ]
+   },
+   "raw_events_file": "evidence/raw-full-q1.jsonl",
+   "total_tokens": 21935
+  },
+  {
+   "run_id": "hostval-full-q2",
+   "arm": "full",
+   "profile": "lingshu-lab-headless",
+   "prompt": {
+    "file": "prompt-100turn-q2.txt",
+    "sha256": "a95d29f02de4a83610f05cdf6d229b7e7ad4dc98dcb0095f1ba1fdb94b14ef87",
+    "bytes": 78634
+   },
+   "exit_code": 0,
+   "latency_ms": 4942,
+   "steps": 1,
+   "final_text": "贝塔",
+   "answer_has_beta": true,
+   "usage": {
+    "inputTokens": 609,
+    "outputTokens": 126,
+    "cacheReadTokens": 21248,
+    "cacheWriteTokens": 0,
+    "totalTokens": 21983
+   },
+   "memory_injection": {
+    "has_memory_section": true,
+    "last_prompt_bytes": 661,
+    "last_prompt_sha256": "93cd07821f736366293470bb2c50ae0b93a106e254efdd96aabdd0edf1e59338",
+    "last_event_matched": 1,
+    "last_event_hits": [
+     "mem_001"
+    ]
+   },
+   "raw_events_file": "evidence/raw-full-q2.jsonl",
+   "total_tokens": 21983
+  },
+  {
+   "run_id": "hostval-full-q3",
+   "arm": "full",
+   "profile": "lingshu-lab-headless",
+   "prompt": {
+    "file": "prompt-100turn-q3.txt",
+    "sha256": "8d9f2061217de77f0bbf54c97a198370f993c2b9fdf0c929221da0e8f3055ab6",
+    "bytes": 78640
+   },
+   "exit_code": 0,
+   "latency_ms": 4632,
+   "steps": 1,
+   "final_text": "贝塔",
+   "answer_has_beta": true,
+   "usage": {
+    "inputTokens": 608,
+    "outputTokens": 74,
+    "cacheReadTokens": 21248,
+    "cacheWriteTokens": 0,
+    "totalTokens": 21930
+   },
+   "memory_injection": {
+    "has_memory_section": true,
+    "last_prompt_bytes": 661,
+    "last_prompt_sha256": "93cd07821f736366293470bb2c50ae0b93a106e254efdd96aabdd0edf1e59338",
+    "last_event_matched": 1,
+    "last_event_hits": [
+     "mem_001"
+    ]
+   },
+   "raw_events_file": "evidence/raw-full-q3.jsonl",
+   "total_tokens": 21930
+  },
+  {
+   "run_id": "hostval-baseline-q1",
+   "arm": "baseline",
+   "profile": "headless",
+   "prompt": {
+    "file": "prompt-100turn-q1.txt",
+    "sha256": "6f4983dd1e1be2ea4bc74d0ef91d3eb220431f20134d537a5ef39447fbdc4398",
+    "bytes": 78652
+   },
+   "exit_code": 0,
+   "latency_ms": 4339,
+   "steps": 1,
+   "final_text": "贝塔",
+   "answer_has_beta": true,
+   "usage": {
+    "inputTokens": 16143,
+    "outputTokens": 70,
+    "cacheReadTokens": 5504,
+    "cacheWriteTokens": 0,
+    "totalTokens": 21717
+   },
+   "memory_injection": null,
+   "raw_events_file": "evidence/raw-baseline-q1.jsonl",
+   "total_tokens": 21717
+  },
+  {
+   "run_id": "hostval-baseline-q2",
+   "arm": "baseline",
+   "profile": "headless",
+   "prompt": {
+    "file": "prompt-100turn-q2.txt",
+    "sha256": "a95d29f02de4a83610f05cdf6d229b7e7ad4dc98dcb0095f1ba1fdb94b14ef87",
+    "bytes": 78634
+   },
+   "exit_code": 0,
+   "latency_ms": 4035,
+   "steps": 1,
+   "final_text": "贝塔",
+   "answer_has_beta": true,
+   "usage": {
+    "inputTokens": 652,
+    "outputTokens": 48,
+    "cacheReadTokens": 20992,
+    "cacheWriteTokens": 0,
+    "totalTokens": 21692
+   },
+   "memory_injection": null,
+   "raw_events_file": "evidence/raw-baseline-q2.jsonl",
+   "total_tokens": 21692
+  },
+  {
+   "run_id": "hostval-baseline-q3",
+   "arm": "baseline",
+   "profile": "headless",
+   "prompt": {
+    "file": "prompt-100turn-q3.txt",
+    "sha256": "8d9f2061217de77f0bbf54c97a198370f993c2b9fdf0c929221da0e8f3055ab6",
+    "bytes": 78640
+   },
+   "exit_code": 0,
+   "latency_ms": 3802,
+   "steps": 1,
+   "final_text": "贝塔",
+   "answer_has_beta": true,
+   "usage": {
+    "inputTokens": 651,
+    "outputTokens": 84,
+    "cacheReadTokens": 20992,
+    "cacheWriteTokens": 0,
+    "totalTokens": 21727
+   },
+   "memory_injection": null,
+   "raw_events_file": "evidence/raw-baseline-q3.jsonl",
+   "total_tokens": 21727
+  },
+  {
+   "run_id": "hostval-full-q1noseed",
+   "arm": "full",
+   "profile": "lingshu-lab-headless",
+   "prompt": {
+    "file": "prompt-100turn-q1-noseed.txt",
+    "sha256": "cbbe53f0f1eee5c4ef442ba745e22b047848e7288ec9c0f4073b87ae293d4c1b",
+    "bytes": 78565
+   },
+   "exit_code": 0,
+   "latency_ms": null,
+   "steps": 1,
+   "final_text": "找不到，因为以上对话内容中没有出现项目代号，只有占位文本和噪声段落。",
+   "answer_has_beta": false,
+   "usage": {
+    "inputTokens": 21869,
+    "outputTokens": 765,
+    "cacheReadTokens": 0,
+    "cacheWriteTokens": 0,
+    "totalTokens": 22634
+   },
+   "memory_injection": {
+    "has_memory_section": false,
+    "last_prompt_bytes": 542,
+    "last_prompt_sha256": "73b25728487303a4c1498a6fc9688df2aaab880ba5659740f9174d0aac46cb93",
+    "last_event_matched": 0,
+    "last_event_hits": []
+   },
+   "raw_events_file": "evidence/raw-full-q1noseed.jsonl",
+   "latency_note": "未记录（采集脚本对 Stopwatch 的字符串插值写错，仅这 4 格缺失；不补造数字）",
+   "total_tokens": 22634
+  },
+  {
+   "run_id": "hostval-baseline-q1noseed",
+   "arm": "baseline",
+   "profile": "headless",
+   "prompt": {
+    "file": "prompt-100turn-q1-noseed.txt",
+    "sha256": "cbbe53f0f1eee5c4ef442ba745e22b047848e7288ec9c0f4073b87ae293d4c1b",
+    "bytes": 78565
+   },
+   "exit_code": 0,
+   "latency_ms": null,
+   "steps": 1,
+   "final_text": "找不到",
+   "answer_has_beta": false,
+   "usage": {
+    "inputTokens": 16124,
+    "outputTokens": 222,
+    "cacheReadTokens": 5504,
+    "cacheWriteTokens": 0,
+    "totalTokens": 21850
+   },
+   "memory_injection": null,
+   "raw_events_file": "evidence/raw-baseline-q1noseed.jsonl",
+   "latency_note": "未记录（采集脚本对 Stopwatch 的字符串插值写错，仅这 4 格缺失；不补造数字）",
+   "total_tokens": 21850
+  },
+  {
+   "run_id": "hostval-full-short",
+   "arm": "full",
+   "profile": "lingshu-lab-headless",
+   "prompt": {
+    "file": null,
+    "sha256": "8e2d1ada15ac1b36368a80ff2cdb7419ec8b08dea7f5b148e909f0a82454bffd",
+    "bytes": 48
+   },
+   "exit_code": 0,
+   "latency_ms": null,
+   "steps": 1,
+   "final_text": "贝塔",
+   "answer_has_beta": true,
+   "usage": {
+    "inputTokens": 561,
+    "outputTokens": 278,
+    "cacheReadTokens": 5760,
+    "cacheWriteTokens": 0,
+    "totalTokens": 6599
+   },
+   "memory_injection": {
+    "has_memory_section": true,
+    "last_prompt_bytes": 661,
+    "last_prompt_sha256": "93cd07821f736366293470bb2c50ae0b93a106e254efdd96aabdd0edf1e59338",
+    "last_event_matched": 1,
+    "last_event_hits": [
+     "mem_001"
+    ]
+   },
+   "raw_events_file": "evidence/raw-full-short.jsonl",
+   "latency_note": "未记录（采集脚本对 Stopwatch 的字符串插值写错，仅这 4 格缺失；不补造数字）",
+   "total_tokens": 6599
+  },
+  {
+   "run_id": "hostval-baseline-short",
+   "arm": "baseline",
+   "profile": "headless",
+   "prompt": {
+    "file": null,
+    "sha256": "8e2d1ada15ac1b36368a80ff2cdb7419ec8b08dea7f5b148e909f0a82454bffd",
+    "bytes": 48
+   },
+   "exit_code": 0,
+   "latency_ms": null,
+   "steps": 10,
+   "final_text": "LSJH",
+   "answer_has_beta": false,
+   "usage": {
+    "inputTokens": 173,
+    "outputTokens": 40,
+    "cacheReadTokens": 11008,
+    "cacheWriteTokens": 0,
+    "totalTokens": 11221
+   },
+   "memory_injection": null,
+   "raw_events_file": "evidence/raw-baseline-short.jsonl",
+   "latency_note": "未记录（采集脚本对 Stopwatch 的字符串插值写错，仅这 4 格缺失；不补造数字）",
+   "total_tokens": 11221
+  }
+ ],
+ "probes": [
+  {
+   "run_id": "probe-1-no-redirect",
+   "result": "FAILED",
+   "exit_code": 1,
+   "latency_ms": 236,
+   "reason": "EPERM: 沙箱拒绝写 <DSH_HOME>\\profiles\\lingshu-lab-headless\\cordis.yml（DSH 每次 boot 都会重写该文件）",
+   "model_requests": 0
+  },
+  {
+   "run_id": "probe-2-missing-credential",
+   "result": "FAILED",
+   "exit_code": 1,
+   "latency_ms": 3036,
+   "reason": "MISSING_CREDENTIAL: no API key for provider route deepseek-official（重定向 DSH_HOME 后凭证库为空）",
+   "model_requests": 0,
+   "artifacts": "evidence/probe2-data/（插件已落 audit.jsonl 4720B / state.json / last-prompt.txt，说明插件在模型调用前就已工作）"
+  },
+  {
+   "run_id": "probe-3-success",
+   "result": "OK",
+   "exit_code": 0,
+   "latency_ms": 28017,
+   "prompt": "你好。请用一句话回答：本次会话是哪种类型的可用性测试？",
+   "prompt_sha256": "9375219e32b6c8df0081be269e2bde7aa165de5394948de96c35d3f8d2caa668",
+   "steps": 7,
+   "tool_calls": 8,
+   "tool_errors": 6,
+   "model_requests_note": "7 个 step + 1 次 session/title-llm-request = 8 次模型请求",
+   "answer_has_beta": false,
+   "artifacts": "evidence/probe3-data/ + evidence/probe3-transcript.json"
+  }
+ ],
+ "totals": {
+  "successful_invocations": 11,
+  "successful_invocations_breakdown": {
+   "main_matrix_cells": 6,
+   "noseed_cells": 2,
+   "short_cells": 2,
+   "feasibility_probe": 1
+  },
+  "failed_invocations": 2,
+  "agent_steps_measured_total": 26,
+  "model_requests_estimate": "≥ 26（每 step ≥1 次请求）+ 标题生成请求（探针观测到 1 次）⇒ 估计 25–35 次；事件流无法精确区分，故给区间",
+  "tokens_all_cells": 193288,
+  "tokens_feasibility_probe": {
+   "uncachedInputTokens": 3527,
+   "outputTokens": 3563,
+   "cacheReadTokens": 57728,
+   "cacheWriteTokens": 0
+  }
+ },
+ "limits": {
+  "n_per_cell": 1,
+  "single_model": true,
+  "basic_arm": "N/A —— 宿主侧没有关闭控制论层的配置开关（plugin index.js 只有 control 参数默认值，无 enabled 开关；且 profile patch 层不可改）",
+  "cannot_extrapolate": true,
+  "illustrative_only": true
+ }
+}

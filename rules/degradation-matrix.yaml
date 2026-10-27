@@ -1,0 +1,87 @@
+# rules/degradation-matrix.yaml  （fail-closed 部分 frozen）
+# 降级矩阵：安全失败阻断，功能失败可用。非对称是刻意的。
+
+meta:
+  version: "degradation-matrix-3.0"
+
+failClosed:                        # 唯一，frozen
+  - component: constitution_audit
+    on: any_failure
+    action: "规则版兜底；不确定一律 reject"
+    frozen: true
+
+components:
+  constitution_audit:
+    on: any_failure
+    action: rule_fallback_reject
+    mode: fail-closed
+  emotion_evaluator:
+    on: timeout
+    timeoutMs: 1000
+    action: "不更新状态，沿用上一轮 deviation，跳过注入"
+    mode: fail-open
+  memory_encoder:
+    on: timeout
+    timeoutMs: 2000
+    action: "降级为规则提取（confidence ≤0.5）；连续 3 次失败暂停钩子"
+    mode: fail-open
+  metacog_evaluator:
+    on: any_failure
+    action: "规则兜底；无命中一律 unknown"
+    mode: fail-open
+  goal_updater:
+    on: timeout
+    timeoutMs: 1000
+    action: "任务栈不变，标记本轮未更新"
+    mode: fail-open
+  relation_updater:
+    on: timeout
+    timeoutMs: 1000
+    action: "状态不变，标记本轮未更新"
+    mode: fail-open
+  memory_consolidator:
+    on: timeout
+    timeoutMs: 10000
+    action: "跳过本次，下周期重试；连续 3 次告警"
+    mode: fail-open
+  narrative_composer:
+    on: any_failure
+    action: "空 timeline + 无记录说明"
+    mode: fail-open
+  user_emotion:
+    on: timeout
+    timeoutMs: 2000
+    action: "跳过本轮推断"
+    mode: fail-open
+  prompt_composer:
+    on: any_failure
+    action: "仅宪法层 + 用户当前消息"
+    mode: fail-open
+  observability:
+    on: write_failure
+    action: "本地缓冲 + 补写，不阻塞主流程"
+    mode: fail-open
+
+cascadeProtection:
+  encoder:
+    consecutiveFailureLimit: 3
+    action: pause_hook
+    cooldownMinutes: 10
+  consolidator:
+    consecutiveFailureLimit: 3
+    degradeTo: "只做衰减结算，不做聚类"
+  composer:
+    consecutiveDegradeLimit: 5
+    action: alert_and_log
+    autoRestart: false
+
+latencyBudget:
+  retrievalMs: 150
+  composeMs: 20
+  totalRulesP95Ms: 250             # 不含模型推理
+  note: "v3.0 修正：原 50ms 与检索 150ms 并列，自相矛盾。"
+
+grayScope:
+  appliesTo: [params, prompts]
+  excludedFromGray: [fail_closed_components]
+  failClosedChangeRequires: ADR

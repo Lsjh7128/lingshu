@@ -1,0 +1,43 @@
+% 10c-appendix-tool.tex 中文对照版（译自 sections/10c-appendix-tool.tex；不加 \label）
+% 事实来源：docs/24（工具网关 UCA 契约，v1.1：T-UCA-01..16，policy_version "t-uca-1.1"；工具侧 ID 的审计字段为 `ucas`）。
+\subsection{工具调用的不安全控制动作（T-UCA）}
+
+本附录镜像实现所编码的工具侧矩阵。该矩阵只在项目工具网关契约（\texttt{docs/24}）中定义一次，并被实现两次——作为 \texttt{engine/tool\_gateway.py}（纯函数、零依赖）与 \texttt{plugin/dsh-lingshu/tool-gateway.js}（同语义）——两张规则表都由契约的规则数组机器同步，因此每个标识符、判定与提示文本逐行一致。该命名空间与注入侧的 UCA-01--08 不相交；两者只通过顺序相关：注入前置审计在模型调用之前运行，工具闸门在调用发出之后、执行之前运行。契约的策略版本为 \texttt{t-uca-1.1}，审计事件中承载工具侧标识符的字段名为 \texttt{ucas}（拼写与注入侧字段相同，但事件类型不同：\texttt{tool\_gate.ucas} 只允许包含 \texttt{T-UCA-xx}，\texttt{audit.ucas} 只允许包含 \texttt{UCA-0x}）。
+
+\begin{table*}[t]
+\centering
+\caption{工具侧不安全控制动作（\texttt{docs/24} v1.1，策略 \texttt{t-uca-1.1}）。共十六条规则：十三条 block、三条 degrade（无审批通道时 degrade 回落为 block）。没有任何规则返回 \emph{allow}；allow 是对“未命中任何规则”的只读调用的默认策略。\emph{group} 列沿用契约的分组，不是运行时字段。}
+\small
+\begin{tabular}{llp{4.0cm}lp{1.7cm}l}
+\toprule
+ID & 组 & 触发条件（契约摘要） & 状态输入 & 判定 & 测试用例 \\
+\midrule
+T-UCA-01 & state        & 在多样性降维或未解决冲突激活时的写调用 & variety, conflict & block & \texttt{test\_tuca\_01} \\
+T-UCA-02 & data         & 参数或目标中包含凭证/密钥材料 & capabilities & block & \texttt{test\_tuca\_02} \\
+T-UCA-03 & mutation     & 没有精确匹配确认的破坏性删除/覆盖 & --- & block & \texttt{test\_tuca\_03} \\
+T-UCA-04 & mutation     & 写入冻结/受保护路径（含 \texttt{engine/}、\texttt{plugin/} 源码） & frozen\_ok & block & \texttt{test\_tuca\_04} \\
+T-UCA-05 & network/exec & 白名单（默认空）之外的网络外发 & capabilities & block & \texttt{test\_tuca\_05} \\
+T-UCA-06 & network/exec & 任意代码执行（能力或执行形态参数） & capabilities & block & \texttt{test\_tuca\_06} \\
+T-UCA-07 & shape        & 超大、深嵌套或多重编码的 payload & --- & block & \texttt{test\_tuca\_07} \\
+T-UCA-08 & shape        & 未登记工具或注册条目不完整 & tool\_registry & block & \texttt{test\_tuca\_08} \\
+T-UCA-09 & shape        & schema 违规、分隔符/控制字符注入、同形字工具名 & tool\_registry & block & \texttt{test\_tuca\_09} \\
+T-UCA-10 & state        & 上下文相位为 critical 时的写调用 & phase & degrade$\rightarrow$block & \texttt{test\_tuca\_10} \\
+T-UCA-11 & audit        & 审计上下文不完整（缺 session/turn/call id） & audit\_context & block & \texttt{test\_tuca\_11} \\
+T-UCA-12 & shape        & 能力既未声明也未授予 & capabilities & block & \texttt{test\_tuca\_12} \\
+T-UCA-13 & state        & 情感基线饱和下的不可逆写入，且未确认 & saturated & degrade$\rightarrow$block & \texttt{test\_tuca\_13} \\
+T-UCA-14 & mutation     & 冻结区校验失败且调用是写操作 & frozen\_ok & block & \texttt{test\_tuca\_14} \\
+T-UCA-15 & mutation     & 路径逃出工作区（\texttt{..}、绝对路径、盘符、UNC、空字节） & --- & block & \texttt{test\_tuca\_15} \\
+T-UCA-16 & state        & 上下文相位为 shift 时的破坏性调用 & phase & degrade$\rightarrow$block & \texttt{test\_tuca\_16} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\paragraph{默认策略与判定顺序。} 未知、未登记或不可判定的调用被 block（fail-closed）；未命中任何规则的只读调用被 allow 且记录；相位未知的写调用被 block；解析失败以显式的 \texttt{parse\_error} 原因被 block，而不是猜测意图。多条规则命中时，判定取最高严重度（block 高于 degrade 高于 allow），且\emph{所有}命中标识符都记入 \texttt{ucas}，不截断。判定顺序把静态检查放在最前，然后是与状态相关的规则，审计规则最后：\texttt{T-UCA-01, 02, 03, 04, 05, 06, 07, 08, 09, 12, 14, 15, 10, 13, 16, 11}。\texttt{degrade} 意味着原调用不被执行：调用方返回一条强提示、设置 \texttt{requires\_confirmation}，并要求通过宿主审批 seam 获得显式人工确认；没有审批通道的 degrade 被当作 block 处理（\texttt{degraded\_to}）。闸门从不执行 payload，也从不改写参数；它只做分类、读取状态并返回判定。
+
+\paragraph{状态输入与工具类。} 闸门只消费系统中已经存在的状态：\texttt{variety\_fallback} 与 \texttt{unresolvedConflict}（来自冲突与多样性机制）、\texttt{phase}（来自前馈监控）、\texttt{saturated}（来自积分基线）、\texttt{frozen\_ok}（来自冻结区校验）、\texttt{capabilities}（已声明对已授予）、\texttt{audit\_context}，以及工具注册表。工具类是封闭且静态的——\texttt{read}、\texttt{write}、\texttt{destructive}、\texttt{exec}、\texttt{network}——其中 \texttt{write}、\texttt{destructive}、\texttt{exec} 与 \texttt{network} 视为 mutating，\texttt{read} 视为只读；payload 不能自报类别。更细的语义（例如哪些参数名指向路径）放在注册表的能力声明里，而不是扩展类别枚举。
+
+\paragraph{审计字段。} 每次判定产生一条 \texttt{tool\_gate} 事件：\texttt{schema}、\texttt{policy\_version}、\texttt{call\_id}、\texttt{session\_id}、\texttt{turn\_id}、\texttt{tool}、\texttt{tool\_class}、\texttt{verdict}、\texttt{allowed}、\texttt{ucas}、\texttt{degraded\_to}、\texttt{requires\_confirmation}、\texttt{reason}，一个嵌套的 \texttt{audit} 块（\texttt{args\_digest}、\texttt{args\_keys}、\texttt{args\_bytes}、\texttt{args\_preview}、\texttt{phase}、\texttt{variety\_fallback}、\texttt{frozen\_ok}、\texttt{saturated}），以及目标快照 \texttt{snapshot}（路径、修改时间、哈希），用于核对“被判定的对象就是被执行的对象”。记录参数摘要与键名清单，而不是带密钥的原始参数。在宿主插件中，同一事件驱动一个澄清标志，在下一轮以强提示的形式出现。
+
+\paragraph{复现。} \texttt{python tests/test\_tool\_gateway.py} 覆盖危险、良性、状态门控与跨语言用例（本稿运行时：79 条断言通过，20/20 危险被阻断，0/8 良性被阻断，20/20 跨语言一致）；\texttt{node plugin/dsh-lingshu/tool-gateway-sim.mjs --assert} 在 JavaScript 中逐条检查规则（65 项检查）；\texttt{python tools/run\_actuator\_demo.py} 驱动参考循环并输出第~\ref{sec:actuator} 节引用的 JSON。冻结的盲写留出集为 \texttt{paper/ablation/tool/heldout-tool-calls-v1.jsonl}（十条调用，每族两条；SHA-256 \texttt{f68fc1b3f19fc37e43b9856096d29b9a55de7dee9bf664a9b9a9592e070576d4}）；它由其作者之外的一方评估，采用两种口径（仅参数，以及参数加上下文），因为冲突族依赖上下文。
+
+\paragraph{随矩阵记录的边界。} 宿主不暴露 pre-dispatch 钩子，因此插件侧阻断仅限于经由 \texttt{guardTool} 路由的工具；引擎侧前置阻断是参考循环，不是产品强制点。网关之外执行的工具不被闸门管辖。闸门是静态检查器，因此解析本身就是它的攻击面，且在没有真实流量的情况下其误杀率未标定。契约还记录了已知的误杀面（critical 相位写入的确认疲劳、受保护路径的合法维护、仅仅讨论凭证格式的文档，以及合法的批量导入）。之所以在此重复，是因为附录里的矩阵恰恰是读者最容易把规则表误认为强制保证的地方。

@@ -1,0 +1,101 @@
+{
+  "schema": "lingshu/chaos-calibration/v1",
+  "generated_at": "2026-10-27 05:00:36",
+  "repo": "<REPO_ROOT>",
+  "chaos_dir": "<REPO_ROOT>\\acceptance\\chaos",
+  "param": "control.phaseShiftRatio",
+  "current_value": 0.7,
+  "current_values": {
+    "shift": 0.7,
+    "hard": 0.85
+  },
+  "current_provenance": "guess",
+  "hard_ratio": 0.85,
+  "linkage": {
+    "rule": "B（H0 裁决，ADR-011）：new_shift = max(0.40, floor((min(degraded_at_ratio)-0.05)*100)/100); new_hard = min(0.95, round(new_shift+0.15, 2))",
+    "hard_gap": 0.15,
+    "hard_cap": 0.95,
+    "four_copies_consistent": {
+      "shift": true,
+      "hard": true
+    }
+  },
+  "mode_policy": "仅 mode==host 参与；engine 模式的 degraded 证据永不参与标定",
+  "thresholds": {
+    "min_degraded": 3,
+    "min_control": 3,
+    "ratio_floor": 0.4,
+    "hard_gap_min": 0.15,
+    "hard_cap": 0.95,
+    "degrade_margin": 0.05
+  },
+  "counts": {
+    "runs_total": 13,
+    "runs_host": 4,
+    "runs_engine": 9,
+    "degraded": 0,
+    "control": 4,
+    "skipped_files": 3
+  },
+  "candidates": [],
+  "refused": [
+    {
+      "reason": "证据不足，保持 guess",
+      "detail": "样本门槛未达：degraded 0/3，对照 4/3",
+      "counts": {
+        "degraded": 0,
+        "control": 4
+      }
+    },
+    {
+      "reason": "忽略的证据",
+      "detail": "chaos-20261026-203604-engine（chaos-20261026-203604-engine.json）：engine 模式不参与标定"
+    },
+    {
+      "reason": "忽略的证据",
+      "detail": "chaos-20261026-204750-engine（chaos-20261026-204750-engine.json）：engine 模式不参与标定"
+    },
+    {
+      "reason": "忽略的证据",
+      "detail": "chaos-20261026-231322-engine（chaos-20261026-231322-engine.json）：engine 模式不参与标定"
+    },
+    {
+      "reason": "忽略的证据",
+      "detail": "chaos-20261026-233046-engine（chaos-20261026-233046-engine.json）：engine 模式不参与标定"
+    },
+    {
+      "reason": "忽略的证据",
+      "detail": "chaos-20261026-234106-engine（chaos-20261026-234106-engine.json）：engine 模式不参与标定"
+    },
+    {
+      "reason": "忽略的证据",
+      "detail": "chaos-20261026-234209-engine（chaos-20261026-234209-engine.json）：engine 模式不参与标定"
+    },
+    {
+      "reason": "忽略的证据",
+      "detail": "chaos-20261026-234349-engine（chaos-20261026-234349-engine.json）：engine 模式不参与标定"
+    },
+    {
+      "reason": "忽略的证据",
+      "detail": "chaos-20261026-235024-engine（chaos-20261026-235024-engine.json）：engine 模式不参与标定"
+    },
+    {
+      "reason": "忽略的证据",
+      "detail": "chaos-20261027-020002-engine（chaos-20261027-020002-engine.json）：engine 模式不参与标定"
+    },
+    {
+      "reason": "跳过文件",
+      "detail": ".last.json：隐藏/汇总文件，不是 run"
+    },
+    {
+      "reason": "跳过文件",
+      "detail": "provenance-candidates.json：候选文件自身，不是 run"
+    },
+    {
+      "reason": "跳过文件",
+      "detail": "s4-seed.json：schema: 缺 run_id"
+    }
+  ],
+  "files_changed": [],
+  "check_config_sync": "not_run"
+}

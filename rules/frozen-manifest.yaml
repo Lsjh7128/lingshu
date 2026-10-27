@@ -1,0 +1,56 @@
+# rules/frozen-manifest.yaml
+# `_frozen/` 的哈希清单。宿主启动时校验；不匹配则拒绝启动（fail-closed）。
+# 这是"不可修改"唯一的工程落地方式 —— 若宿主不支持，本文件降级为声明式约束。
+#
+# 用法：
+#   1. 把下列文件挂载为只读；
+#   2. 计算 sha256，与本文件比对；
+#   3. 任一不匹配 → 拒绝启动，并在日志写明不匹配的路径。
+
+meta:
+  version: "frozen-manifest-3.0"
+  algorithm: sha256
+  enforcement: startup_check
+  degradeIfUnsupported: "declarative_only"   # 必须同步写入 README §三 与 assumptions/未验证.md
+
+frozen:
+  # 宪法层
+  - path: "docs/01-宪法层.md"
+    reason: "原则表、裁决 C1-C6、审计器 A1-A10、黑名单"
+  # 规则表
+  - path: "rules/compose-matrix.yaml"
+    reason: "域分类、域内排序、互斥表、拼装顺序"
+  - path: "rules/degradation-matrix.yaml"
+    reason: "fail-closed 环节"
+  # 学习机制的"考卷"
+  - path: "rules/learning-params.yaml#objective"
+    reason: "目标函数"
+  - path: "rules/learning-params.yaml#constraints"
+    reason: "约束条件"
+  - path: "rules/learning-params.yaml#gray"
+    reason: "灰度与回滚策略"
+  - path: "rules/learning-params.yaml#guardrails"
+    reason: "护栏阈值与跌破动作"
+  - path: "replay-set/"
+    reason: "回放集（防系统自己塞简单样本）"
+    hashMode: tree
+  # 边界清单
+  - path: "docs/15-验收清单.md#§12"
+    reason: "明确不做的事"
+
+# 允许变更但需 ADR 的（不在此清单，但改动要留记录）
+adrRequired:
+  - "docs/00-架构总览.md#§4"
+  - "docs/13-学习机制.md#§1"
+  - "docs/13-学习机制.md#§6"
+  - "docs/14-工程与可观测性.md#§4"
+
+# 明确可自由调整的（学习系统 L1 可搜）
+freeWithin:
+  - "rules/decay-params.yaml#memory.decay.tau"
+  - "rules/decay-params.yaml#memory.retrieval.topK"
+  - "rules/decay-params.yaml#memory.edge.minWeight"
+  - "rules/decay-params.yaml#memory.edge.diffusionDiscount"
+  - "rules/decay-params.yaml#memory.potency.archiveThreshold"
+
+hashes: {}    # 首次冻结时由 `lingshu freeze` 命令填充；此前为空 = 未启用校验

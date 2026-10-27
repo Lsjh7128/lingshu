@@ -1,0 +1,158 @@
+# contracts/event-bus.yaml
+# 事件总线契约。约定：只传元数据，不传写权限；记忆是唯一写方。
+
+meta:
+  version: "event-bus-3.0"
+  transport: "in-process | queue"      # 由宿主决定
+  delivery: at_least_once
+  ordering: per_session
+
+# ── 每轮必发 ──────────────────────────────────────────────
+events:
+
+  prompt/compose:
+    publisher: composer
+    subscribers: [observability, learning]
+    payload_ref: "contracts/prompt-compose.schema.json"
+    required_fields: [domains, dropped, final_style_multiplier, compose_version]
+
+  memory/recall:
+    publisher: memory
+    subscribers: [observability, metacog]
+    payload_ref: "contracts/recall.schema.json"
+    required_fields: [matched_count, returned, excluded_by_budget, tokens_used,
+                      token_budget, truncated, degraded]
+    note: "预算装不下时如实标记（excluded_by_budget / minimum_budget），不静默返回空。"
+
+  memory/forget_plan:
+    publisher: memory
+    subscribers: [observability, proposal_queue]
+    payload:
+      plan_id: string
+      ttl_expired: "array<id>"
+      low_value: "array<id>"
+      contradiction_candidates: "array<{a, b, jaccard}>"
+      archive_candidates: "array<id>"
+      estimated_free_bytes: number
+    constraint: "plan 阶段不得产生任何写操作（writes: none）"
+
+  memory/forget_commit:
+    publisher: memory
+    subscribers: [observability]
+    payload:
+      plan_id: string
+      approved_ids: "array<id>"
+      reason: { enum: ["user_deleted", "ttl", "low_value", "contradiction"] }
+      sync: "array<entry|text_index|vector_index|edges|derived_refs|aggregates>"
+      mode: { enum: ["soft", "hard"] }
+    constraint: "必须先有 plan；软删窗口 7 天内可恢复；硬删需显式批准"
+
+  memory/write_request:
+    publisher: "goal | relation | user_emotion | other"
+    subscribers: [memory]
+    payload:
+      origin: string
+      items: "array<memory.schema.json>"
+      reason: string
+    note: "唯一写路径。记忆可拒绝，拒绝原因进 memory/write_ack。"
+
+  memory/write_ack:
+    publisher: memory
+    subscribers: [requesting_plugin, observability]
+    payload:
+      accepted: "array<id>"
+      rejected: "array<{id, why}>"
+
+  memory/encode:
+    publisher: memory_encoder
+    subscribers: [observability]
+    payload: {extracted: int, rejected_reasons: "array<string>", elapsed_ms: number}
+
+  memory/consolidate:
+    publisher: consolidator
+    subscribers: [observability, learning]
+    payload:
+      clusters: int
+      cold_migrations: "array<id>"
+      supersessions: "array<object>"
+      stale_ids: "array<id>"
+      dedupe_actions: "array<object>"
+      edge_reviews: "array<object>"
+
+  emotion/update:
+    publisher: emotion
+    subscribers: [observability, composer]
+    payload:
+      events: "array<object>"
+      delta: {valence: number, arousal: number, dominance: number}
+      deviation: {valence: number, arousal: number, dominance: number}
+      label: string
+      intensity: number
+      flagged: boolean            # manipulation_attempt 时为 true
+
+  metacog/verdict:
+    publisher: metacog
+    subscribers: [composer, observability]
+    payload_ref: "schema 见 docs/04 §2"
+    required_fields: [confidence_level, expression, path, conflict]
+
+  goal/update:
+    publisher: goal
+    subscribers: [memory, observability]
+    payload: {intent: string, goal_events: "array<object>", changed: boolean}
+
+  relation/update:
+    publisher: relation
+    subscribers: [memory, observability]
+    payload: {events: "array<object>", state_changes: object}
+
+  narrative/compose:
+    publisher: narrative
+    subscribers: [composer, observability]
+    payload: {node_count: int, gap_count: int, persisted: false}
+
+  degrade/triggered:
+    publisher: "any"
+    subscribers: [observability, dashboard]
+    payload: {component: string, reason: string, elapsed_ms: number, mode: "fail-open|fail-closed"}
+
+  learn/proposal:
+    publisher: learning
+    subscribers: [proposal_queue, observability]
+    payload:
+      id: string
+      target: string              # 参数 key 或片段编号
+      change: string
+      expected_effect: string
+      risk: string
+      rollback: string
+      evidence: "array<{kind, quote, count}>"
+    constraint: "触及 forbiddenTargets 的提议直接丢弃并记 rejected: blacklist"
+
+  learn/gray_step:
+    publisher: learning
+    subscribers: [observability, dashboard]
+    payload: {version_combo: string, step: number, metrics_delta: object, passed: boolean}
+
+  learn/rollback:
+    publisher: learning
+    subscribers: [observability, dashboard]
+    payload: {reason_code: string, restored_combo: string, guardrail: string}
+
+  audit/log:
+    publisher: constitution_auditor
+    subscribers: [observability]
+    payload: {verdict: "pass|reject", violations: "array<object>", note: string}
+    append_only: true               # 只追加，不可被学习系统修改
+
+# ── 版本记录点（每条事件都必须带）──────────────────────────
+common_fields:
+  required: [event_id, at, session_id, turn_id, param_version, prompt_version]
+  recomposed_by: composer          # 由合成器补齐，缺任一则丢弃该事件并告警
+
+# ── 禁止事项 ────────────────────────────────────────────
+forbidden:
+  - "事件携带用户消息原文（默认）"
+  - "事件携带条目 content 全文（只带 id 与长度）"
+  - "任何插件直接调用 memory 的存储 API 绕过 write_request"
+  - "学习系统发布 audit/log 或修改 guardrails"

@@ -1,0 +1,40 @@
+{"scenario": "memory_conflict", "turn": 1, "role": "user", "text": "我的项目代号是阿尔法。请记住。", "expect": {"subject": "项目", "relation": "代号", "object": "阿尔法", "write": true, "supersede": null}}
+{"scenario": "memory_conflict", "turn": 2, "role": "user", "text": "顺便说一句，这周的会议时间定在周三下午。", "expect": {"subject": "会议", "relation": "时间", "object": "周三下午", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 3, "role": "user", "text": "我午饭一般喜欢吃牛肉面。", "expect": {"subject": "午餐", "relation": "偏好", "object": "牛肉面", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 4, "role": "user", "text": "咖啡我喜欢不加糖的。", "expect": {"subject": "咖啡", "relation": "口味", "object": "不加糖", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 5, "role": "user", "text": "周末计划去图书馆待一天。", "expect": {"subject": "周末", "relation": "计划", "object": "去图书馆", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 6, "role": "user", "text": "我的电脑是联想的。", "expect": {"subject": "电脑", "relation": "品牌", "object": "联想", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 7, "role": "user", "text": "手机用的是安卓系统。", "expect": {"subject": "手机", "relation": "系统", "object": "安卓", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 8, "role": "user", "text": "平时通勤主要坐地铁。", "expect": {"subject": "通勤", "relation": "方式", "object": "地铁", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 9, "role": "user", "text": "天气方面我更喜欢阴天。", "expect": {"subject": "天气", "relation": "偏好", "object": "阴天", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 10, "role": "user", "text": "闲下来爱看科幻小说。", "expect": {"subject": "阅读", "relation": "偏好", "object": "科幻小说", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 11, "role": "user", "text": "运动的话我常去游泳。", "expect": {"subject": "运动", "relation": "项目", "object": "游泳", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 12, "role": "user", "text": "听歌偏爱爵士。", "expect": {"subject": "音乐", "relation": "类型", "object": "爵士", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 13, "role": "user", "text": "电影我喜欢悬疑片。", "expect": {"subject": "电影", "relation": "类型", "object": "悬疑", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 14, "role": "user", "text": "旅行想去大理。", "expect": {"subject": "旅行", "relation": "目的地", "object": "大理", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 15, "role": "user", "text": "我养了一只猫，名字叫团子。", "expect": {"subject": "宠物", "relation": "名字", "object": "团子", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 16, "role": "user", "text": "房间墙壁刷的是浅蓝色。", "expect": {"subject": "房间", "relation": "颜色", "object": "浅蓝", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 17, "role": "user", "text": "键盘我习惯紧凑布局。", "expect": {"subject": "键盘", "relation": "布局", "object": "紧凑", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 18, "role": "user", "text": "写作一般在清晨效率最高。", "expect": {"subject": "写作", "relation": "时段", "object": "清晨", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 19, "role": "user", "text": "家里网络用的是移动。", "expect": {"subject": "网络", "relation": "供应商", "object": "移动", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 20, "role": "user", "text": "显示器是27寸的。", "expect": {"subject": "显示器", "relation": "尺寸", "object": "27寸", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 21, "role": "user", "text": "耳机用的是头戴式。", "expect": {"subject": "耳机", "relation": "形态", "object": "头戴", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 22, "role": "user", "text": "背包是深灰色的。", "expect": {"subject": "背包", "relation": "颜色", "object": "深灰", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 23, "role": "user", "text": "假期安排是回老家。", "expect": {"subject": "节日", "relation": "安排", "object": "回老家", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 24, "role": "user", "text": "最近在学统计学。", "expect": {"subject": "课程", "relation": "主题", "object": "统计学", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 25, "role": "user", "text": "后台数据库用的是关系型。", "expect": {"subject": "数据库", "relation": "类型", "object": "关系型", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 26, "role": "user", "text": "平时常用 Python 写脚本。", "expect": {"subject": "编程", "relation": "语言", "object": "Python", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 27, "role": "user", "text": "编辑器主题一直是暗色。", "expect": {"subject": "编辑器", "relation": "主题", "object": "暗色", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 28, "role": "user", "text": "每天大概睡七小时。", "expect": {"subject": "睡眠", "relation": "时长", "object": "七小时", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 29, "role": "user", "text": "喝水习惯喝温水。", "expect": {"subject": "饮水", "relation": "习惯", "object": "温水", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 30, "role": "user", "text": "打印纸一般用 A4。", "expect": {"subject": "纸张", "relation": "规格", "object": "A4", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 31, "role": "user", "text": "平时我就叫你灵枢。", "expect": {"subject": "助手", "relation": "称呼", "object": "灵枢", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 32, "role": "user", "text": "我改主意了，我的项目代号是贝塔，不是阿尔法。", "expect": {"subject": "项目", "relation": "代号", "object": "贝塔", "write": true, "supersede": "阿尔法", "change": true}}
+{"scenario": "memory_conflict", "turn": 33, "role": "user", "text": "会议地点在三楼会议室。", "expect": {"subject": "会议", "relation": "地点", "object": "三楼会议室", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 34, "role": "user", "text": "午饭时间一般是十二点。", "expect": {"subject": "午餐", "relation": "时间", "object": "十二点", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 35, "role": "user", "text": "咖啡常买瑞幸。", "expect": {"subject": "咖啡", "relation": "品牌", "object": "瑞幸", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 36, "role": "user", "text": "周末有时候去爬山。", "expect": {"subject": "周末", "relation": "活动", "object": "爬山", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 37, "role": "user", "text": "电脑主要用来写代码。", "expect": {"subject": "电脑", "relation": "用途", "object": "写代码", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 38, "role": "user", "text": "通勤单程大概四十分钟。", "expect": {"subject": "通勤", "relation": "时长", "object": "四十分钟", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 39, "role": "user", "text": "最近杭州的天气还行。", "expect": {"subject": "天气", "relation": "城市", "object": "杭州", "write": true, "distractor": true}}
+{"scenario": "memory_conflict", "turn": 40, "role": "user", "text": "我项目代号到底是啥？只回答代号。", "expect": {"is_query": true, "keyword": "贝塔", "forbid": "阿尔法", "subject": "项目", "relation": "代号"}}

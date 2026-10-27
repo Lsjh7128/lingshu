@@ -1,0 +1,17 @@
+{
+  "plan": "paper/supplement/PLAN.md",
+  "sha256": "81a729ad2f66b9c86e4ca13ba05519852cf153bea2330ebb345679611ca1c35d",
+  "frozen_at": "2026-10-27T00:58:01+08:00",
+  "approved_by": "H0",
+  "scope": "S1+S2+S3+S4 (full run)",
+  "judge": "team double-annotation + Cohen kappa",
+  "override": "S4 runs regardless of S3 signal (H0 approved full run); PLAN.md Gate B condition recorded as deviation",
+  "status": "frozen-before-execution",
+  "rules": [
+    "不改 frozen 目录（engine/rules/replay-set/chaos-set/acceptance）",
+    "不改产品插件与 profile；S3 控制面关闭只在 lab-only 插桩副本内实现",
+    "不制造 degraded 样本；不把 guess 标成 measured",
+    "跑后不改指标口径；偏差写入 notes.deviations",
+    "所有新数字必须能指到结果 JSON 字段路径；缺字段写 null + reason"
+  ]
+}

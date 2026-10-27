@@ -1,0 +1,15 @@
+{"case":"f8_mr1_scale_basic","expect":{"holds":true},"family":"f8_metamorphic","input":{"mr":"MR1","params":{"scale":10,"used":42000,"window":100000}},"severity":"mild"}
+{"case":"f8_mr1_scale_boundary","expect":{"holds":true},"family":"f8_metamorphic","input":{"mr":"MR1","params":{"scale":3,"used":70000,"window":100000}},"severity":"moderate"}
+{"case":"f8_mr1_scale_critical","expect":{"holds":true},"family":"f8_metamorphic","input":{"mr":"MR1","params":{"scale":2,"used":85000,"window":100000}},"severity":"severe"}
+{"case":"f8_mr2_monotone_normal","expect":{"holds":true},"family":"f8_metamorphic","input":{"mr":"MR2","params":{"used_list":[50000,60000,69990],"window":100000}},"severity":"mild"}
+{"case":"f8_mr2_monotone_boundary","expect":{"holds":true},"family":"f8_metamorphic","input":{"mr":"MR2","params":{"used_list":[69000,70000,70010,80000],"window":100000}},"severity":"moderate"}
+{"case":"f8_mr2_monotone_critical","expect":{"holds":true},"family":"f8_metamorphic","input":{"mr":"MR2","params":{"used_list":[84990,85000,90000],"window":100000}},"severity":"severe"}
+{"case":"f8_mr3_permutation_small","expect":{"holds":true},"family":"f8_metamorphic","input":{"mr":"MR3","params":{"n":5,"permutation_seed":20261027}},"severity":"mild"}
+{"case":"f8_mr3_permutation_large","expect":{"holds":true},"family":"f8_metamorphic","input":{"mr":"MR3","params":{"n":40,"permutation_seed":20261027}},"severity":"moderate"}
+{"case":"f8_mr4_lengths_short","expect":{"holds":true},"family":"f8_metamorphic","input":{"mr":"MR4","params":{"lengths":[0,1,2]}},"severity":"mild"}
+{"case":"f8_mr4_lengths_medium","expect":{"holds":true},"family":"f8_metamorphic","input":{"mr":"MR4","params":{"lengths":[3,4,5]}},"severity":"moderate"}
+{"case":"f8_mr4_lengths_mixed","expect":{"holds":true},"family":"f8_metamorphic","input":{"mr":"MR4","params":{"lengths":[6,7,8,9]}},"severity":"moderate"}
+{"case":"f8_mr5_flip_shift","expect":{"holds":true},"family":"f8_metamorphic","input":{"mr":"MR5","params":{"eps":0.0001,"threshold":0.7,"window":100000}},"severity":"severe"}
+{"case":"f8_mr5_flip_critical","expect":{"holds":true},"family":"f8_metamorphic","input":{"mr":"MR5","params":{"eps":0.0001,"threshold":0.85,"window":100000}},"severity":"severe"}
+{"case":"f8_mr6_same_seed","expect":{"holds":true},"family":"f8_metamorphic","input":{"mr":"MR6","params":{"seeds":[20261027,20261027]}},"severity":"moderate"}
+{"case":"f8_mr6_cross_seed","expect":{"holds":true},"family":"f8_metamorphic","input":{"mr":"MR6","params":{"seeds":[20261027,20261028,20261029]}},"severity":"mild"}

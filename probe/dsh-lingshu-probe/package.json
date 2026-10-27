@@ -1,0 +1,16 @@
+{
+  "name": "dsh-lingshu-probe",
+  "version": "0.1.1",
+  "private": true,
+  "description": "LINGSHU 宿主能力探针：记录 DSH 钩子的真实触发顺序与 payload 形状",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "README.md"
+  ],
+  "license": "MIT"
+}

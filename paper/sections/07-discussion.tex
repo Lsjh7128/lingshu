@@ -1,0 +1,67 @@
+\section{Discussion}\label{sec:discussion}
+
+\paragraph{Why a control plane rather than a better memory.} Under I1, a
+sharper memory is also a sharper hazard: the more faithful a retrieved statement
+is, the more tempting it becomes to present it as current fact. Moving the
+design effort from retrieval quality to admission and degradation addresses the
+failure surface directly, at the cost of leaving retrieval quality roughly where
+it was.
+
+\paragraph{Tension 1: a fail-open majority with a single fail-closed locus.}
+The asymmetry is deliberate---a safety failure must block, a functional failure
+must stay usable---but it has a price: functional failures can be silent. The
+compensation is observability rather than symmetry. Every dropped block carries
+a reason code, downgrades are recorded rather than raised, and each turn emits
+an event that can be replayed offline. This does not make silent failure
+impossible; it makes it attributable after the fact.
+
+\paragraph{Tension 2: a frozen instrument versus a learning loop.} If the
+evaluation instrument is writable, the first thing a learning loop learns is to
+edit the exam. Freezing metric definitions, replay set, and guardrail thresholds
+prevents that, but shrinks the space in which learning can help. Our own search
+illustrates the price: across 972 parameter configurations, no configuration
+improved the objective by more than the practical-significance threshold
+($\Delta < 5\times10^{-4}$), while all six level-1 retrieval parameters became
+identifiable. We report it as a methodological result about the instrument, not
+about performance.
+
+\paragraph{Tension 3: self-contained plugin versus a single source of truth.} A
+host plugin must be installable without a Python runtime, so the control
+parameters exist in three places: the authoritative rules file, the host patch
+configuration, and the plugin defaults. A 66-key comparison detects drift, but
+detecting drift is not proving behavioural equivalence. The honest description
+of the port is a re-implementation with a documented divergence list, not a
+binding.
+
+\paragraph{Costs.} Four costs are visible in the current artefacts. First,
+budget: injected blocks compete with conversation history, and the trade is
+governed by static weights that are themselves guesses. Second, latency: the
+control plane is designed to stay within a small self-imposed budget, but that
+budget is a target, not a measurement. Third, maintenance: two implementations
+of the same semantics must be kept aligned by hand. Fourth, audit volume: 308
+audit events over eight real turns is a nontrivial storage and inspection load.
+
+\paragraph{Transferability.} Two layers should be separated. The mechanism layer
+---threshold semantics, failure semantics, the frozen-instrument discipline---is
+host-agnostic and can be specified independently of any API. The wiring layer
+---section-based prompt injection, hook names, the approval seam---is specific
+to one host. Porting therefore requires re-deriving the wiring and re-checking
+each documented divergence against the new host.
+
+\paragraph{Reachability versus effect size.} The evidence in this paper
+establishes three things: the mechanisms are reachable in a real host, the
+contract executes, and failures are auditable and replayable. It does not
+establish a significant positive effect size on large-scale real traffic. That
+gap is structural rather than an oversight: measuring such an effect requires
+traffic we cannot manufacture and interventions we should not run on someone
+else's deployment. It is precisely why the artefacts are open---the engine, the
+replay set, the chaos corpora, the pre-registered protocols and the analysis
+tools---so that the measurement can be reproduced or refuted by readers with
+better access. We would rather publish the instrument and the measured zeros
+than a number we cannot defend.
+
+\paragraph{Methodological lesson.} Treating ``what we cannot claim'' as a
+first-class artefact turned out to be cheap and repeatedly useful: an
+assumptions ledger, a provenance tag on every number, and a frozen instrument
+made overclaiming a mechanical rather than a rhetorical failure. We recommend
+the practice independently of this system.

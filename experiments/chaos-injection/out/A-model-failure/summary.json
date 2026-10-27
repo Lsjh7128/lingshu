@@ -1,0 +1,34 @@
+{
+  "scenario": "A-model-failure",
+  "generated_at": "2026-10-27T18:34:29+0800",
+  "timeout_s": 150.0,
+  "cases": [
+    {
+      "mode": "hang",
+      "exit_code": null,
+      "wall_s": 150.029,
+      "timed_out": true,
+      "final_text_len": 0,
+      "final_text_head": "",
+      "got_final": false,
+      "mock_hit": true,
+      "empty_reply_passed_through": false,
+      "fabricated_reply_passed_through": false,
+      "plugin_blocked": false,
+      "hook_error_count": 0,
+      "injection_events": {
+        "pre_step": 1
+      },
+      "model_call_events": {
+        "request/header": 1,
+        "request/context": 1,
+        "session/title-llm-request": 1
+      }
+    }
+  ],
+  "notes": [
+    "注入点：DEEPSEEK_BASE_URL → 本机 mock（宿主侧外部注入，插件代码零改动）",
+    "hang 模式由外层 subprocess timeout 或宿主客户端超时终止；两者都在 wall_s 里体现",
+    "LINGSHU 只控制注入侧；模型输出不经过它校验（见报告 §A.4 诚实边界）"
+  ]
+}

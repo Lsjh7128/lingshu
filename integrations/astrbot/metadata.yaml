@@ -1,0 +1,6 @@
+name: astrbot_plugin_lingshu
+display_name: LINGSHU 灵枢
+desc: 给对话加上可追溯的记忆、情感与边界（记忆/元认知/目标/关系，全部可审计）
+version: 0.1.0
+author: lingshu
+repo: ""

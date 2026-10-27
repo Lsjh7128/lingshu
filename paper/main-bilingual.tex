@@ -1,0 +1,93 @@
+% =====================================================================
+% main-bilingual.tex -- LINGSHU 中英对照版（XeLaTeX）
+% 结构：每个 section 先英文、后中文；中文文件在 sections-zh/，不含 \label。
+% 构建：xelatex main-bilingual && bibtex main-bilingual && xelatex ×2
+% source of truth 仍是 main.tex（英文）；本文件只做对照阅读，不改内容。
+% =====================================================================
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=0.9in]{geometry}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setmainfont{Times New Roman}
+\setCJKmainfont[Path=C:/Windows/Fonts/, Extension=.ttf]{simhei}
+\setCJKmonofont[Path=C:/Windows/Fonts/, Extension=.ttf]{simhei}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+
+\setlength{\parskip}{2pt}
+\frenchspacing
+
+\newcommand{\system}{\textsc{LingShu}}
+\newcommand{\host}{\textsc{Dsh}}
+\newcommand{\eg}{e.g.,\ }
+\newcommand{\ie}{i.e.,\ }
+\newcommand{\wrt}{w.r.t.\ }
+
+% 每节：英文在前，中文在后；中文缺失时降级为提示，不中断编译。
+\newcommand{\pair}[2]{%
+  \input{#1}%
+  \IfFileExists{#2}{\input{#2}}{%
+    \par\medskip\noindent\textit{（本节中文对照待补：该节由并行工作流新增。）}\par}}
+\newcommand{\zhlang}[1]{\par\medskip\noindent{\large\bfseries #1}\par\nopagebreak}
+
+\title{\system: A Cybernetic Control Plane for Auditable\\
+Cognition Plugins in Agent Hosts\\[6pt]
+\large 灵枢：面向 Agent 宿主可审计认知插件的控制论控制面\\[2pt]
+\normalsize\itshape 中英对照版（Bilingual draft）}
+\author{\system{} Project Team}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Reading note.} Each section appears in English first and in
+Chinese immediately after. Numbers, qualifiers, negations and boundary
+statements are translated one-for-one; the English source
+(\texttt{main.tex}) remains authoritative if the two ever diverge. Sections
+added after the first translation pass are marked when their Chinese text is not
+yet available.
+
+\zhlang{阅读说明}
+每节先英文后中文。数字、限定词、否定句与边界声明逐条对应；若中英出现歧义，以英文源文件（\texttt{main.tex}）为准。首次翻译之后新增的章节若暂无中文，会在原位置标注。
+
+% ---------------- Abstract ----------------
+\input{sections/01-abstract}
+\begingroup
+\renewcommand{\abstractname}{摘要}
+\IfFileExists{sections-zh/01-abstract.tex}{\input{sections-zh/01-abstract}}{}
+\endgroup
+
+% ---------------- 1 Introduction ... 8 Conclusion ----------------
+\pair{sections/02-intro}{sections-zh/02-intro}
+\pair{sections/03-related}{sections-zh/03-related}
+\pair{sections/04-problem}{sections-zh/04-problem}
+\pair{sections/05-method}{sections-zh/05-method}
+\pair{sections/06-experiments}{sections-zh/06-experiments}
+\pair{sections/06b-supplement}{sections-zh/06b-supplement}
+\pair{sections/06c-host}{sections-zh/06c-host}
+\pair{sections/06d-engineering}{sections-zh/06d-engineering}
+\pair{sections/06e-actuator}{sections-zh/06e-actuator}
+\pair{sections/06f-baselines}{sections-zh/06f-baselines}
+\pair{sections/06g-case-study}{sections-zh/06g-case-study}
+\pair{sections/07-discussion}{sections-zh/07-discussion}
+\pair{sections/08-limitations}{sections-zh/08-limitations}
+\pair{sections/09-conclusion}{sections-zh/09-conclusion}
+
+% ---------------- Appendix ----------------
+\appendix
+\pair{sections/10-appendix}{sections-zh/10-appendix}
+\pair{sections/10b-appendix-audit}{sections-zh/10b-appendix-audit}
+\pair{sections/10c-appendix-tool}{sections-zh/10c-appendix-tool}
+\pair{sections/10d-appendix-hostpilot}{sections-zh/10d-appendix-hostpilot}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}

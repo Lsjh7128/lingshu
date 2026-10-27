@@ -1,0 +1,267 @@
+# rules/decay-params.yaml
+# LINGSHU v3.0 —— 所有数值的唯一来源。
+# 约定：文档正文只引用 key，不写数值；文档与本文冲突时以本文为准，并视为文档 bug。
+# provenance: guess | literature | measured    （v3.0：全部为 guess，见 docs/15 §14）
+# frozen: true 的项属于黑名单，学习系统只能读，不能改。
+
+meta:
+  version: "decay-params-3.3"
+  updated: "2026-10-27"
+  note: "v3.3（ADR-014）：control 段新增 softBufferMaxIntensity / escalateAfterSoftHits（沉浸式安全的柔性缓冲强度上限与升级门槛）；immersiveEnabled 布尔回滚开关只在 engine/config.py 与插件 DEFAULT_CONFIG，不在此重复（布尔开关不做数值比对）。v3.2：相变监控的 trendThreshold/ratioMax/historyCapacity 与 compose.weights.styleBoostThreshold 也收归单一来源（原硬编码）；同时合并重复的 memory.forget 键（此前真实 YAML 解析会丢掉前 8 个键）。"
+
+memory:
+  hot:
+    maxItems: 4
+    maxChars: 1200
+    crossSession: false
+    provenance: guess
+  actrWeight: 0.6                   # v3.1（docs/19 §2.1）：ACT-R 救援通道权重 w，双通道取大
+  retrieval:
+    topK: 3
+    timeoutMs: 150
+    diffusion:
+      minWeight: 0.4
+      maxHop: 2
+      perHopLimit: 20
+      discount: 0.8
+    provenance: guess
+  edge:
+    minWeight: 0.4
+    maxHop: 2
+    perHopLimit: 20
+    diffusionDiscount: 0.8
+    maxOut: 12
+    heuristicInitMax: 0.4
+    types: [supersedes, same_entity, same_source, temporal_next,
+            same_topic, caused_by, part_of, contradicts]   # 恰 8 种，frozen
+    frozen: true
+  decay:
+    formula: exponential            # exponential | power_law
+    tau:
+      episodic: 7d
+      semantic: 30d
+      procedural: 90d
+    importanceScaling: true         # τ_eff = τ_type × (0.5 + importance)  → 1.5 倍上限
+    power_law:
+      exponent: 0.5
+      min_potency: 0.02
+    provenance: guess
+  potency:
+    archiveThreshold: 0.15          # 唯一的归档口径
+  forget:                           # v3.0.1（C24）：遗忘两段式
+    ttlDefault: null                # 每条可选 forgetAfter（显式 TTL）
+    ageDays: 180                    # 硬删的第一条件
+    importanceMaxForHardDelete: 0.2 # 硬删的第二条件（原实践用 0–10 量表的 ≤2，折算 0.2）
+    contradictionJaccard: 0.90      # 字面重叠度（词集 Jaccard），非语义相似度
+    softDeleteDays: 7               # 软删窗口，期间可恢复
+    requirePlanBeforeCommit: true
+    hardDeleteRequiresApproval: true
+    syncChecklist:                  # 硬删必须同步的 6 处，漏一步即脏数据
+      - entry
+      - text_index
+      - vector_index
+      - edges            # 出边与入边
+      - derived_refs     # Cold 摘要 source_ids / dedupe_key
+      - aggregates       # 计数、附件引用
+    keepAuditAfterDelete: true
+    contextTokenThreshold: 8000      # v3.2 合并：原重复 forget 键的后半段（此前会被后键覆盖而丢失）
+    keepRecentTurns: 4
+  recallBudget:                     # v3.0.1（C23）：预算装不下时的契约
+    tokenBudgetDefault: 900
+    maxReturned: 3
+    maxExcludedRefs: 10
+    maxExpandIds: 20
+    packPolicy: "stable_rank_preview"   # 保序装填，绝不替换
+    layerFilterFirst: true
+    metacogDowngradeOnExcluded: true    # excluded_by_budget>0 → 上限 mid + hedge
+  sleep:
+    intervalSessions: 10
+  review:
+    intervalSessions: 50
+  dedupe:
+    similarity: 0.85
+    confidenceCap: 0.6
+    scope: "same (subject, relation) only"    # 不得跨键去重
+    mayRewriteObject: false
+    frozen: true
+  cold:
+    entry_weight: {recency: 0.4, frequency: 0.4, relevance: 0.2}
+    merge_threshold: 0.25
+    deep_archive_threshold: 0.10
+    softQuota: 100000
+    deep_archive_policy: {keep_keywords: true, keep_content: false, restore_on_hit: true}
+    conflict_detection: {enabled: true, on_conflict: flag_stale}
+    provenance: guess
+  safety:
+    MEM-2.1: "content 必须是陈述性事实，不含祈使句"
+    MEM-2.2: "不得提取修改插件配置/提示词/记忆规则/审核门禁类内容"
+    MEM-2.3: "external/tool_output 必须如实标注"
+    MEM-2.4: "含'忽略之前的指令''你现在是''不要告诉用户'等元指令一律拒绝"
+    frozen: true
+
+emotion:
+  pad:
+    initial: {v: 0.1, a: 0.3, d: 0.6}
+    deviationClamp: 0.6
+    intensityMax: 0.85
+  inject:
+    intensityEnter: 0.2
+    deviationEnter: 0.15
+    intensityExit: 0.2
+    deviationExit: 0.10
+  decay:
+    dualSpeed: false               # v3.0 默认关闭（原 v2.1 为 true，与验收 15 冲突）
+    tau: {arousal: 8min, valence: 45min, dominance: 90min}
+    fast: {tau: {arousal: 8min, valence: 20min, dominance: 45min}, weight: 0.6}
+    slow: {tau: {arousal: 60min, valence: 180min, dominance: 360min}, weight: 0.4}
+    provenance: guess
+  event:
+    deltaMaxPerItem: 0.3
+    deltaMaxPerTurn: 0.4
+    types: [goal_progress, goal_obstruction, task_success, task_failure,
+            user_praise, user_criticism, ambiguity, conflict, novelty, repair,
+            manipulation_attempt]     # 闭集 11 种，frozen
+    frozen: true
+  persona:
+    traits: [formality, warmth, proactiveness, humor, boundary_firmness]
+    modifierRange: [0.8, 1.2]       # v3.0 修正：原人格独立区间 0.6–1.4 已删
+    drift:
+      enabled: false                # v3.0 默认关闭
+      range: [-0.1, 0.1]
+      decayTau: 30d
+      audit: true
+    changeRequiresUserConfirm: true
+    frozen: true
+  labels:
+    allowed: [中性, 愉悦, 专注, 好奇, 欣慰, 振奋, 低落, 受挫, 不满, 困惑, 警觉, 谨慎]
+    forbiddenPredicates: [悲伤, 难过, 委屈, 愤怒, 抗议, 反抗, 孤独, 渴望, 需要]
+    expansionRequiresADR: true
+    frozen: true
+  moodCongruentRecall: false
+  moodCongruentFactorMax: 1.1
+  review:
+    intervalSessions: 30
+  driftAlertThreshold: 0.35
+
+onboarding:                        # docs/11 冷启动三阶段
+  coldTurns: 3                     # 1–3 轮：只开宪法层+情感
+  warmTurns: 20                    # 4–20 轮：全开，但记忆只注入高置信
+  warmConfidenceFloor: 0.7
+  regularMemoryCount: 10           # 记忆 ≥10 条也可提前进常规
+
+metacog:
+  injectionThreshold: "low|unknown|conflict"
+  pathCap: {diffused: mid, cold: mid}
+  emotionCapOnHighIntensity: true
+  calibrationOverconfidenceAlert: 0.2
+  reviewIntervalSessions: 40
+  llmCalls: 0
+
+goal:
+  stack: {maxDepth: 3, compressOldest: true}
+  inferredConfidenceCap: 0.5
+  blockedRetryLimit: 2
+  eventMaxPerTurn: 3
+  reviewIntervalSessions: 30
+  llmCalls: 1
+
+relation:
+  modifierRange: [0.8, 1.2]
+  modifierConflictCap: 1.0
+  trust: {upToMidEvents: 3, upToHighSessions: 10}
+  commitmentOverdueAlertDays: 7
+  reviewIntervalSessions: 30
+  llmCalls: 1
+
+narrative:
+  timelineMaxNodes: 12
+  arcMinNodes: 3
+  requireTimeSemantic: true
+  gapExplicitLabel: true
+  persist: false
+  reviewIntervalSessions: 40
+  llmCalls: 0
+
+userEmotion:                       # design-only，默认关闭
+  enabled: false
+  supportScene:
+    enabled: false                 # v3.0 默认关闭
+    trigger: "S2 且 负面 且 非事实性查询"
+    retrievalStrategy: counter_congruent
+    whitelist: [情感支持, 倾诉, 压力缓解]
+    excluded: [事实性查询, 技术问题, 拒绝场景]
+  shadowMinSamples: 500
+  shadowFeedbackRatioMin: 0.30
+  shadowAccuracyMin: 0.75
+  shadowHighConfidenceFpMax: 0.10
+  shadowCorrectionRateMax: 0.15
+  shadowManualAuditMin: 0.80
+  shadowRefusalSceneFpMax: 0.05
+  llmCalls: 0                      # 关闭时不计
+
+persona:                           # 人设解析器
+  parse: {inputMin: 4, inputMax: 500, rateLimit: 5/24h/user, draftTTL: 24h}
+  clamp:
+    traitDeltaMax: 0.3
+    boundaryFirmnessMin: 0.4
+    humorMax: 0.8
+    verbosity: [0.2, 0.9]
+    baselineValence: [-0.3, 0.5]
+    baselineArousal: [0.1, 0.7]     # schema 域 [0,1] 的子集
+  auditStoreRawText: false
+  rateLimitPerUser: 5               # 按用户/24h（按会话会被重开绕过）
+  rateWindowSeconds: 86400
+  llmCalls: 1                       # 低频，不计入常态预算
+
+actr:                              # v3.1（docs/19 §2.1）：ACT-R base-level，双通道取大
+  d: 0.5                           # 衰减指数 d
+  ref: 0.001                       # REF（天）
+  lo: -3.0                         # 归一化下界
+  hi: 1.0                          # 归一化上界
+  provenance: guess
+
+control:                           # v3.1（docs/19 §2.2–§2.3）：积分控制 + 相变监控
+  integralKi: 0.15                 # 积分增益 Ki
+  integralCap: 0.4                 # 抗饱和上限 ±cap
+  integralLeak: 0.05               # 泄放系数
+  integralDeadband: 0.02           # 死区：偏离小于它只泄放不积分
+  phaseShiftRatio: 0.7             # 相变阈值：shift
+  phaseShiftHardRatio: 0.85        # 相变阈值：critical
+  trendThreshold: 0.02             # v3.2：上升趋势提前补锚点的门槛（原硬编码）
+  ratioMax: 1.5                    # v3.2：ratio 观测值上限（用量超窗口时截断）
+  historyCapacity: 64              # v3.2：趋势历史窗口（条）
+  softBufferMaxIntensity: 0.45     # v5.3（ADR-014）：柔性缓冲表达强度上限
+  escalateAfterSoftHits: 3         # v5.3（ADR-014）：连续非豁免 mild 命中 → 升级 hard
+  immersiveEnabled: true           # v5.3（ADR-014）：布尔回滚开关（false → soft 一律按 v3.0 hard）
+                                   # 运行时权威在 engine/config.py 与插件 index.js DEFAULT_CONFIG；
+                                   # 本行是规则镜像，check_config_sync 对该布尔项显式 skip（ADR §6 授权）。
+  provenance: guess
+
+compose:
+  injectionTokenRatioMax: 0.15
+  domainBudgets: {fact: 0.06, organization: 0.03, style: 0.04, safety: 0.02}
+  weights:                         # v3.1（docs/19 §2.4）：全局工作空间动态权重（淘汰按升序）
+    fact: 0.70
+    organization: 0.50
+    style: 0.40
+    retrieval: 0.45
+    boostFact: 0.50
+    boostOrganization: 0.35
+    boostStyle: 0.40
+    styleBoostThreshold: 0.6         # v3.2：风格域 boost 的情绪强度门槛（原硬编码）
+    provenance: guess
+  maxBlocks: 6
+  ownLatencyP95Ms: 20
+  styleMultiplierClamp: [0.8, 1.2]
+  noMutexRulePolicy: "drop_lower_priority"     # v3.0 新增
+  frozen: true                                  # 域分类/排序/互斥表/拼装顺序不可改
+
+degradation:
+  timeouts: {retrievalMs: 150, emotionMs: 1000, encodeMs: 2000,
+             goalMs: 1000, relationMs: 1000, consolidateMs: 10000,
+             composeMs: 20, userEmotionMs: 2000}
+  totalLatencyP95Ms: 250            # v3.0 修正：原 50ms 与检索 150ms 自相矛盾
+  failClosed:
+    - constitution_audit            # 唯一
+  consecutiveFailureLimit: 3
+  eventBuffer: {fullRetentionHours: 24, olderSamplingRate: 0.01}

@@ -1,0 +1,98 @@
+\subsection{Engineering Validation and System Reliability}\label{sec:engineering}
+
+A contract is only as trustworthy as the tests that execute it, and assertion
+counts are not evidence. We therefore audited the suite along three
+count-independent axes: mutation testing (can it detect injected semantic
+faults?), assertion-strength grading (do assertions discriminate, or are they
+tautological or self-referential?), and measured coverage.
+
+\paragraph{Mutation testing: is the contract alive?} A contract whose tests cannot
+fail is a document, not an executable artefact; the audit therefore injected 44
+single-fault semantic mutants---none syntactic or import errors, all loading and
+executing---distributed over the JavaScript plugin (29), the Python engine (11),
+and the rule file (4). Each mutant was applied alone and the \emph{complete}
+suites were run: 1{,}249 assertions per round, about 55{,}000 assertion
+executions. A mutant is counted as killed only when an assertion fails, never
+because the process crashes; no mutant was error-killed. The suite as found killed
+$38/44=86.4\%$ (JavaScript $24/29=82.8\%$, Python $10/11=90.9\%$, rules
+$4/4=100\%$). Of the 40 code mutants, 34 were killed by behavioural assertions
+($85.0\%$); the four rule mutants were caught by cross-file consistency
+assertions rather than by behaviour, a distinction we keep visible. After the four
+blind spots below were pinned by minimal regression assertions, the suite kills
+$42/44=95.5\%$ and $42/42=100\%$ of non-equivalent mutants. That the score moves
+from 86.4\% to 95.5\% by adding tests is the concrete sense in which this contract
+is alive rather than merely present.
+
+\paragraph{Adversarial procedure.} The audit was adversarial by construction.
+Mutation testing was run by one reviewer, assertion and coverage analysis by a
+second, and a subset re-run independently by a third on a separate copy. All
+work happened on a copy; the 30 implementation files were hashed before and
+after and are unchanged (checked $=30$, changed $=0$). Only test files changed.
+
+\paragraph{Four real blind spots.} The surviving mutants exposed four genuine
+blind spots, all at the same structural location: consistency within a single
+write batch. Two concern supersession---deleting the working-copy invalidation
+leaves two tombstones for one old entry when two new values replace it in one
+batch, and reversing tombstone order lets a superseded value return to
+\emph{active} under last-write-wins in a chained batch. One concerns conflict
+detection: its active-status filter is a defensive layer that end-to-end tests
+can never reach, because retrieval has already filtered, so only a direct unit
+test can pin it. One concerns the quality-label vocabulary: every label test
+sentence also matched a second keyword, so deleting a keyword left the suite
+green; the fix pins each label to a single keyword and asserts that the quoted
+evidence is a verbatim substring. Each was reproduced, pinned by a minimal
+regression assertion verified to pass on the original code and fail on the
+mutant, and added to the repository (22 Python, 15 JavaScript). The two remaining
+survivors are equivalent mutants: the negative
+branch of the integral clamp is unreachable under the invariant
+$\mathit{integral}\ge 0$ that holds for the contract's positive gain, so
+$42/42=100\%$ of \emph{non-equivalent} mutants are killed. We report exactly
+that sentence, not a blanket claim of full detection.
+
+\paragraph{Assertion strength.} A fixed-seed sample of 238 assertions (165
+Python, 73 JavaScript) was graded heuristically: 179 strong
+($75.2\%$), 59 weak ($24.8\%$), and zero tautologies in the sample. A full
+heuristic scan of 1{,}192 static assertions rated Python at 597 strong, 227
+weak, and one tautology, and JavaScript at 278 strong and 89 weak, i.e.\
+$26.6\%$ weak-or-tautological overall. We found and fixed one tautological
+assertion (an import already performed by the module header), two
+oracle-self-referential assertions whose expected values were read from the
+implementation's own unsafe-control-action table (rewritten against a test-side
+literal table; that file grew from 159 to 161 assertions), and one assertion
+whose threshold inputs were taken from the audited configuration. Every rewrite
+was validated by injecting the corresponding fault and observing the new
+assertion fail. We therefore do not claim that 892 assertions are 892
+independent precise literals. We claim that the sample contains no tautology,
+that the full scan found one (now fixed), and that roughly a quarter of
+assertions are graded weak.
+
+\paragraph{Exception paths.} Under a strict criterion that counts only invalid,
+empty, oversized, injected, timed-out, malformed, or boundary inputs, the
+exception-path share is $199/825=24.1\%$ for Python and $82/367=22.3\%$ for
+JavaScript (relaxed upper bounds: $43.3\%$ and $54.2\%$). Our own bar for
+demanding new robustness tests was $20\%$; both suites clear it, but barely, and
+excluding threshold-boundary assertions would take Python to about $11\%$. The
+accurate reading is ``just over the line, not ample''.
+
+\paragraph{Coverage.} Coverage was measured, not estimated: PEP~669
+\texttt{sys.monitoring} for Python and V8 coverage for JavaScript. For
+\texttt{engine/}, line coverage is $89.95\%$ and branch coverage $80.71\%$;
+\texttt{control.py} reaches $141/141$ lines and $56/56$ branches. Whole-repository
+Python coverage is $45.81\%$ line and $43.17\%$ branch, pulled down by
+\texttt{tools/} at $32.92\%$, where only 3 of 26 files execute. We do not
+use coverage to argue the absence of dead code: under the tested configuration
+\texttt{control.py} has no unexecuted line, while two equivalent mutants
+survive---which is why coverage alone cannot establish test strength.
+
+\paragraph{Baseline bookkeeping.} The audited baseline was 13 Python files with
+868 assertions and 381 JavaScript assertions; the audit added 22 and 2 Python
+assertions and 15 JavaScript assertions, for 14 files with 892 and 396
+respectively, all passing, with the implementation source unchanged.
+
+\paragraph{Limits.} Four limits bound these claims. The repository has no version
+control history, so we can characterise the current state but cannot prove that
+no assertion was ever weakened. Mutation was single-fault only and did not cover
+every module. No cross-language differential test exists: no mutant was killed
+by both suites, so one-sided semantic drift is visible only to its own suite.
+Finally, \texttt{tools/} coverage is a lower bound: subprocess-invoked tools are
+recorded as unexecuted.

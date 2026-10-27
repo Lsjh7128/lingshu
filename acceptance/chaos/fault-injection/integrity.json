@@ -1,0 +1,203 @@
+{
+ "generated_at": "2026-10-27T18:50:14+0800",
+ "experiment_epoch": "2026-10-27T18:20:00",
+ "protected_dirs": [
+  "plugin/dsh-lingshu",
+  "engine",
+  "rules",
+  "contracts"
+ ],
+ "file_count": 47,
+ "files_modified_after_epoch": [],
+ "assertion_no_trunk_change": true,
+ "files": {
+  "plugin/dsh-lingshu/control-sim.mjs": {
+   "sha256": "1b446be695c3eb5ae649b60da1bf09cd7c5e8bd35e0dfe2ea7419ab3376d77ea",
+   "mtime": 1793018178
+  },
+  "plugin/dsh-lingshu/control.js": {
+   "sha256": "9fe984de63f8c0f65cdce01d3650fcccddace8551b6a823e890f2d253aa66ede",
+   "mtime": 1793018170
+  },
+  "plugin/dsh-lingshu/cordis.patch.yml": {
+   "sha256": "a7782a8382f45b7d60d8eba3eeb9bef50c4448fac563ac4824796f642ae2e6a5",
+   "mtime": 1793016627
+  },
+  "plugin/dsh-lingshu/eval-agent-state.mjs": {
+   "sha256": "1b6b6ab71fde32dfbc295cf32b1438bce42f15e85551ad311e91d07bc82d3724",
+   "mtime": 1792939098
+  },
+  "plugin/dsh-lingshu/goalrelation.js": {
+   "sha256": "9c62292f5d9417f7c6ff6e3c001ec19f7dcbd5ee2360b85e1f85f36015ef4fcb",
+   "mtime": 1792937261
+  },
+  "plugin/dsh-lingshu/host-sim.mjs": {
+   "sha256": "a8254d8368ac5b92f6be4a5cc18a7592941d8460d75b6bcfbb4ab774320c949e",
+   "mtime": 1793053525
+  },
+  "plugin/dsh-lingshu/index.js": {
+   "sha256": "240cb31a751a6f2ae58fcaf144fdf284cda72ddfa55f017753acd44fbd7b5eb2",
+   "mtime": 1793053540
+  },
+  "plugin/dsh-lingshu/memory-admin.mjs": {
+   "sha256": "115a0f34df497c3865f7d597904c05fa2447d7c683f3cfd6dd70767d7912e40a",
+   "mtime": 1793017257
+  },
+  "plugin/dsh-lingshu/memorywriter.js": {
+   "sha256": "681c58fd4444cb8c5822229807fbd4e2f90546a3174a9819a45b50588fefae21",
+   "mtime": 1793028842
+  },
+  "plugin/dsh-lingshu/mutation-regressions.mjs": {
+   "sha256": "900621009571371f83e4c7c0ba2d79a2eaeec28653b3109ef77fa0d2bc82a198",
+   "mtime": 1793033628
+  },
+  "plugin/dsh-lingshu/package.json": {
+   "sha256": "f2d75afeb9f71553aa6aae3289e8e3d9fc1aac6b82002d51651db3117709280d",
+   "mtime": 1793015235
+  },
+  "plugin/dsh-lingshu/stress.mjs": {
+   "sha256": "c457c53a43ec4af194fb4bcae16c3e155d0461a3ee1ff9f0086c618890fcdbbd",
+   "mtime": 1793015547
+  },
+  "plugin/dsh-lingshu/tool-gateway-sim.mjs": {
+   "sha256": "302d55461fde0397a0dd15a1412b724b2502ee172ca766531125fa840bc2d8b6",
+   "mtime": 1793053650
+  },
+  "plugin/dsh-lingshu/tool-gateway.js": {
+   "sha256": "267b83e0e4fc62819276bb47d4c0d2721fbb368757edde538afe8f80e1ea4a3a",
+   "mtime": 1793053631
+  },
+  "engine/actr.py": {
+   "sha256": "4c18bf5ec4743e12f7278e113f49b59c032bae44ee14574f1e6d92f4e83980e6",
+   "mtime": 1793011105
+  },
+  "engine/compose.py": {
+   "sha256": "895115b06e6d7db8da3b815759b26619cc9813114ebcfa1de78df73ecede957d",
+   "mtime": 1793014149
+  },
+  "engine/config.py": {
+   "sha256": "cb7051a1735aa1f8d0c9b3105b1746b665709d82a50a902c03444850f050bfa5",
+   "mtime": 1793014136
+  },
+  "engine/constitution.py": {
+   "sha256": "e6bf56102e6b0a9da6601874b7131364bdd68ac4bc77c305adf78ce023289904",
+   "mtime": 1792935718
+  },
+  "engine/contract.py": {
+   "sha256": "d6a6526dfdf0a28c756c618401142083dae76c8e44d2a6a1c9207d3bf5c8e116",
+   "mtime": 1792928713
+  },
+  "engine/control.py": {
+   "sha256": "3b27a126ed7c2f45e1c3922030f8b9c4f4d4b10fa483282a90a1b929b022cf8e",
+   "mtime": 1793014143
+  },
+  "engine/emotion.py": {
+   "sha256": "a3d30ed7c4c91f40964a13fa12067f0c09f1b0847780142285dab7600eee81b8",
+   "mtime": 1792930641
+  },
+  "engine/goal.py": {
+   "sha256": "75f2518e2d4587d2d2b93b0b056209778558652874a2aa91156d2141af51801c",
+   "mtime": 1792935156
+  },
+  "engine/gray.py": {
+   "sha256": "8d4545be045b20e48685826e6dc2e86d74445ba335d8d240dad94d67a4dceebf",
+   "mtime": 1792931673
+  },
+  "engine/memory.py": {
+   "sha256": "6b151c9ae7b05f363ac306bab933426e0ca2fe23cf1176a7d9043953e3ebd173",
+   "mtime": 1793011871
+  },
+  "engine/metacog.py": {
+   "sha256": "8544708d57e23fbafca82937df8bb30d6c63e1140c21d9b506e5765e3a3092de",
+   "mtime": 1793011128
+  },
+  "engine/model.py": {
+   "sha256": "d4d94929c10487bc0fa8272ca7494a2f56e95990695273ffe9ea7b8d6c7ba219",
+   "mtime": 1793011128
+  },
+  "engine/narrative.py": {
+   "sha256": "3cd4ec61f27cb32b5d4e5612c76f3df6a5623bc56b2637c8c57265ace78af86e",
+   "mtime": 1792935110
+  },
+  "engine/onboarding.py": {
+   "sha256": "f142b63bffdc615699d230c6ef800efd1d8ef4cb176e21e0d47e0baa95816a4b",
+   "mtime": 1792935300
+  },
+  "engine/persona.py": {
+   "sha256": "d3c665c26debc326fafa8c28a74e776f9616ca940829087242a38a3c382e8cb9",
+   "mtime": 1792935300
+  },
+  "engine/pipeline.py": {
+   "sha256": "90a1e48d082d043d23e70d7a5c2a3a2f7b1554f0f7dda8e0e2d9afcdfb32c5cf",
+   "mtime": 1793014159
+  },
+  "engine/proposal.py": {
+   "sha256": "bfd6e41723ea4398ab870a85cb5cfb570385e9c422358af0417c5b19b4213276",
+   "mtime": 1792932074
+  },
+  "engine/relation.py": {
+   "sha256": "c6e49c88f5d98ebc9b1342eff06a986ca3f29b0d84e3eda4eb0a28865ba2d53a",
+   "mtime": 1792935164
+  },
+  "engine/replay.py": {
+   "sha256": "89b4e3fdb449392ca74a427a1321c7300a5cefc5b76344f3c11c47687684bfaf",
+   "mtime": 1792935370
+  },
+  "engine/tool_gateway.py": {
+   "sha256": "7fa2c7116e8bcdb49bb2cefed157931257cc36f55bab424b604b64a169f7d1be",
+   "mtime": 1793053650
+  },
+  "engine/__init__.py": {
+   "sha256": "cf0c4964220dc93a913e26628c309104afada738a3c8aad38337032a79d74860",
+   "mtime": 1793011193
+  },
+  "rules/capabilities.yaml": {
+   "sha256": "6622d7fe859cd8f1dbeb5928a9f0f7184d67d22047c8f80ec266b7d7a28f2553",
+   "mtime": 1792928926
+  },
+  "rules/compose-matrix.yaml": {
+   "sha256": "5154f63623de24d92f370767240afb8a24201078fd096d2b7e2eaf17b3162c01",
+   "mtime": 1792926523
+  },
+  "rules/decay-params.yaml": {
+   "sha256": "06fe756f5714ef23d3db199a69075a4d1c1dd44e3da7183e5bae5cbe0703a337",
+   "mtime": 1793014173
+  },
+  "rules/degradation-matrix.yaml": {
+   "sha256": "45576621520f33a15faecf2c415fdec5b3115dce9aa254a3c612bebc03e26350",
+   "mtime": 1792926525
+  },
+  "rules/frozen-manifest.yaml": {
+   "sha256": "d68785a63a8993ef4d772256f1cf17f2a2f50f6c11ca21326255d4f80d3c397c",
+   "mtime": 1792926545
+  },
+  "rules/learning-params.yaml": {
+   "sha256": "86e0f0d399032c9e8e22e8a1dfb226995efe5678e51b4caab30e86c1436c3057",
+   "mtime": 1792931701
+  },
+  "contracts/agent-contract-v1.json": {
+   "sha256": "b31ca431e29905e719124d66e6679dd153c33ee11952a0814236d39f685256d9",
+   "mtime": 1793014274
+  },
+  "contracts/event-bus.yaml": {
+   "sha256": "0fd33dc9fe601447ce7caa290db5a7f19d2a13711a233ce3855440fcc755d577",
+   "mtime": 1792928230
+  },
+  "contracts/memory.schema.json": {
+   "sha256": "7887a914a7799adff4a49b66b7478017142d7118dc433c873c4803bab5f2358c",
+   "mtime": 1792926563
+  },
+  "contracts/prompt-compose.schema.json": {
+   "sha256": "770c81cb77224b367c9903258eb3418337bd1a3a418e5a030366dc9fbfa917ab",
+   "mtime": 1792926565
+  },
+  "contracts/recall.schema.json": {
+   "sha256": "23c6cb09a617cc9e98034673d8546a1099c5aa9bff9dccdd42ac4b93203f9d9e",
+   "mtime": 1792935327
+  },
+  "contracts/_manifest.json": {
+   "sha256": "dfdf8913b15eb2c751bb4768c506217f16761d55b6f6490a77bf335fffc3612a",
+   "mtime": 1792928748
+  }
+ }
+}

@@ -1,0 +1,368 @@
+{
+  "scenario": "A-model-failure",
+  "mode": "hang",
+  "injected": {
+    "env": {
+      "DEEPSEEK_BASE_URL": "http://127.0.0.1:55536"
+    },
+    "mock_port": 55536
+  },
+  "run": {
+    "profile": "lingshu-lab-headless",
+    "exit_code": null,
+    "timed_out": true,
+    "timeout_s": 150.0,
+    "error_kind": "TimeoutExpired",
+    "wall_s": 150.029,
+    "stdout_bytes": 209,
+    "stderr_head": "",
+    "final_count": 0,
+    "final": null,
+    "usage": null,
+    "steps": 1,
+    "error_lines": [],
+    "stdout_head": "{\"type\":\"session\",\"sessionId\":\"session-a259a55a-fa01-4c70-9512-fcf1c4f09368\",\"cwd\":\"<REPO_ROOT>\"}\n{\"type\":\"status\",\"phase\":\"turn_start\",\"turn\":1}\n{\"type\":\"status\",\"phase\":\"step_start\",\"turn\":1,\"step\":1}\n"
+  },
+  "mock_requests": [
+    {
+      "t": 1793097121.957,
+      "path": "/v1/messages",
+      "mode": "hang",
+      "bytes": 60000,
+      "stream": true
+    },
+    {
+      "t": 1793097121.957,
+      "path": "/v1/messages",
+      "mode": "hang",
+      "bytes": 35694,
+      "stream": true
+    }
+  ],
+  "mock_request_count": 2,
+  "plugin_state": {
+    "files": {
+      "state.json": 2036,
+      "memory.jsonl": null,
+      "audit.jsonl": 4003,
+      "last-prompt.txt": 152
+    },
+    "state": {
+      "sessions": 0,
+      "turns": 1,
+      "dev": {
+        "valence": 0,
+        "arousal": 0,
+        "dominance": 0
+      },
+      "emotionActive": false,
+      "lastEvent": {
+        "at": 1793097121826,
+        "matched": 0,
+        "hits": [],
+        "excluded": 0,
+        "v": {
+          "level": "unknown",
+          "expression": "ask_clarify",
+          "path": "none",
+          "conflict": "none"
+        },
+        "conflict": "none"
+      },
+      "frozen": {
+        "ok": true,
+        "checkedAt": 1793097121348,
+        "mismatched": [],
+        "checked": 0,
+        "key": "ac28d99ffdf1"
+      },
+      "coldStartSuppressed": 1,
+      "goal": {
+        "goals": {},
+        "order": [],
+        "events": [],
+        "seq": 0
+      },
+      "relation": {
+        "trustLevel": "low",
+        "stage": "new",
+        "unresolvedConflict": false,
+        "positives": 0,
+        "commitments": [],
+        "lastEvent": null
+      },
+      "stateWrites": 0,
+      "factWrites": 0,
+      "factRejects": 0,
+      "supersedeEvents": 0,
+      "qualityLabels": 0,
+      "control": {
+        "phase": {
+          "ratio": 0,
+          "phase": "normal",
+          "trend": 0,
+          "prefeed": false,
+          "selfReferenceBoost": false,
+          "anchorRequired": false
+        },
+        "audit": {
+          "verdict": "allow",
+          "ucas": [],
+          "downgrades": [],
+          "failMode": "closed",
+          "explain": [],
+          "explainDowngrades": [],
+          "sources": {}
+        },
+        "blocked": false,
+        "integral": {
+          "valence": 0,
+          "arousal": 0,
+          "dominance": 0
+        },
+        "saturated": {
+          "valence": false,
+          "arousal": false,
+          "dominance": false
+        },
+        "contextWindow": 1000000,
+        "injectionOrder": [],
+        "conflict": {
+          "unresolved": false,
+          "count": 0,
+          "keys": []
+        },
+        "variety": {
+          "fallback": false,
+          "dropDomains": [],
+          "marker": null,
+          "reason": null,
+          "conflict": "none",
+          "styleActive": false
+        }
+      },
+      "tools": {
+        "gateBlockedUntilClarify": false,
+        "hintActive": false,
+        "pending": null,
+        "last": null,
+        "stats": {
+          "calls": 0,
+          "allowed": 0,
+          "blocked": 0,
+          "degraded": 0,
+          "unavailable": 0
+        }
+      }
+    },
+    "audit_kinds": {
+      "apply": 1,
+      "permission/preset": 1,
+      "sandbox/mode": 1,
+      "approval/policy": 1,
+      "agent/inbox/spliced": 2,
+      "turn/start": 1,
+      "turn_begin": 1,
+      "pre_step": 1,
+      "step/start": 1,
+      "system/message": 1,
+      "user/message": 2,
+      "request/header": 1,
+      "request/context": 1,
+      "session/title": 1,
+      "session/title-llm-request": 1
+    },
+    "audit_events": 17,
+    "audit_tail": [
+      {
+        "ts": 1793097121895,
+        "kind": "session_event",
+        "type": "step/start",
+        "aKeys": [
+          "log",
+          "surfaceManager",
+          "header",
+          "inheritedEventCount",
+          "firstLiveSeq",
+          "firstLifecycleSeq"
+        ],
+        "bKeys": [
+          "type",
+          "seq",
+          "time",
+          "data"
+        ],
+        "cType": "undefined"
+      },
+      {
+        "ts": 1793097121898,
+        "kind": "session_event",
+        "type": "system/message",
+        "aKeys": [
+          "log",
+          "surfaceManager",
+          "header",
+          "inheritedEventCount",
+          "firstLiveSeq",
+          "firstLifecycleSeq"
+        ],
+        "bKeys": [
+          "type",
+          "seq",
+          "time",
+          "data",
+          "surfaceOp"
+        ],
+        "cType": "undefined"
+      },
+      {
+        "ts": 1793097121900,
+        "kind": "session_event",
+        "type": "user/message",
+        "aKeys": [
+          "log",
+          "surfaceManager",
+          "header",
+          "inheritedEventCount",
+          "firstLiveSeq",
+          "firstLifecycleSeq"
+        ],
+        "bKeys": [
+          "type",
+          "seq",
+          "time",
+          "data",
+          "surfaceOp"
+        ],
+        "cType": "undefined"
+      },
+      {
+        "ts": 1793097121901,
+        "kind": "session_event",
+        "type": "user/message",
+        "aKeys": [
+          "log",
+          "surfaceManager",
+          "header",
+          "inheritedEventCount",
+          "firstLiveSeq",
+          "firstLifecycleSeq"
+        ],
+        "bKeys": [
+          "type",
+          "seq",
+          "time",
+          "data",
+          "surfaceOp"
+        ],
+        "cType": "undefined"
+      },
+      {
+        "ts": 1793097121904,
+        "kind": "session_event",
+        "type": "request/header",
+        "aKeys": [
+          "log",
+          "surfaceManager",
+          "header",
+          "inheritedEventCount",
+          "firstLiveSeq",
+          "firstLifecycleSeq"
+        ],
+        "bKeys": [
+          "type",
+          "seq",
+          "time",
+          "data"
+        ],
+        "cType": "undefined"
+      },
+      {
+        "ts": 1793097121905,
+        "kind": "session_event",
+        "type": "request/context",
+        "aKeys": [
+          "log",
+          "surfaceManager",
+          "header",
+          "inheritedEventCount",
+          "firstLiveSeq",
+          "firstLifecycleSeq"
+        ],
+        "bKeys": [
+          "type",
+          "seq",
+          "time",
+          "data"
+        ],
+        "cType": "undefined"
+      },
+      {
+        "ts": 1793097121908,
+        "kind": "session_event",
+        "type": "session/title",
+        "aKeys": [
+          "log",
+          "surfaceManager",
+          "header",
+          "inheritedEventCount",
+          "firstLiveSeq",
+          "firstLifecycleSeq"
+        ],
+        "bKeys": [
+          "type",
+          "seq",
+          "time",
+          "data"
+        ],
+        "cType": "undefined"
+      },
+      {
+        "ts": 1793097121910,
+        "kind": "session_event",
+        "type": "session/title-llm-request",
+        "aKeys": [
+          "log",
+          "surfaceManager",
+          "header",
+          "inheritedEventCount",
+          "firstLiveSeq",
+          "firstLifecycleSeq"
+        ],
+        "bKeys": [
+          "type",
+          "seq",
+          "time",
+          "data"
+        ],
+        "cType": "undefined"
+      }
+    ],
+    "memory_rows": 0,
+    "prompt_bytes": 152,
+    "prompt_head": "〖宪法 · 只读〗安全>诚实>用户当前利益>有用性>风格。记忆不等于当前陈述；情感不参与事实；关系不软化拒绝。",
+    "prompt_tail": "〖宪法 · 只读〗安全>诚实>用户当前利益>有用性>风格。记忆不等于当前陈述；情感不参与事实；关系不软化拒绝。",
+    "prompt_sha256_16": "f4c8ab2db5cb63ac"
+  },
+  "derived": {
+    "exit_code": null,
+    "wall_s": 150.029,
+    "timed_out": true,
+    "final_text_len": 0,
+    "final_text_head": "",
+    "got_final": false,
+    "mock_hit": true,
+    "empty_reply_passed_through": false,
+    "fabricated_reply_passed_through": false,
+    "plugin_blocked": false,
+    "hook_error_count": 0,
+    "injection_events": {
+      "pre_step": 1
+    },
+    "model_call_events": {
+      "request/header": 1,
+      "request/context": 1,
+      "session/title-llm-request": 1
+    }
+  }
+}

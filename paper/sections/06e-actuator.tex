@@ -1,0 +1,96 @@
+\subsection{Actuator Gating: {STPA} for Tool Calls}\label{sec:actuator}
+
+The gate of Section~4 governs what the model \emph{reads}. Tool calls are a
+different problem: they actuate. A softened refusal costs a turn; a deleted
+directory costs data. Tool side effects are irreversible, and the hazards are not
+injection-side---the model may emit a call while a conflict is unresolved, while
+context usage sits at a preemptive threshold, or after a social-engineering
+turn. We therefore extend the same causal-interposition idea to the interval
+between a tool request and its execution, with a separate unsafe-control-action
+namespace (\emph{T-UCA}) that neither modifies nor merges with the
+injection-side UCA-01--08. The two gates are parallel: injection pre-flight,
+then tool gate, then execution.
+
+\paragraph{Scope, stated as an override.} Current project policy freezes
+tool-loop work. This extension is an \emph{explicit override}, not an
+evidence-driven unfreeze: the pre-declared trigger---real logs showing at least
+ten tasks failed because external calls were unavailable, plus a demonstrated
+inability to roll back tool errors---is \emph{not} met. We report it because it
+is implemented and testable, but its existence is not evidence that the trigger
+was satisfied. Three items remain frozen: multi-step tool planning,
+transactional rollback or compensation, and writing tool outcomes into long-term
+memory.
+
+\paragraph{The T-UCA matrix.} Sixteen rules---contract version
+\texttt{t-uca-1.1}---in six groups. \emph{State coupling} (four): a mutating call
+under variety fallback or unresolved conflict, in the critical phase, an
+irreversible write with a saturated affective baseline, and a destructive call in
+the shift phase. \emph{Data protection} (one): credentials in clear text.
+\emph{Mutation safety} (four): destructive delete or overwrite without exact
+confirmation, writes to frozen or protected paths, a mutating call after a failed
+frozen-region check, and path escape. \emph{Network and execution} (two):
+non-allowlisted egress and arbitrary code execution. \emph{Shape and registry}
+(four): oversized or recursive payloads, schema or delimiter violations,
+unregistered tools, undeclared capabilities. \emph{Auditability} (one):
+incomplete audit context. Thirteen rules block, three degrade: a degrade is not
+executed but requires explicit human confirmation through the host approval
+seam, and falls back to block when no approval channel exists. No rule returns
+\emph{allow}; allow is the default only for read-only calls that match nothing,
+and unknown or undecidable calls default to block.
+
+\paragraph{Why state matters.} Unlike the injection gate, which reads only the
+prompt, the tool gate consumes host state: variety fallback, unresolved conflict,
+the phase of the preemptive monitor, integral saturation, frozen-layer
+verification, declared capabilities, and audit context. The same call is not the
+same act in every state: deleting a file while a conflict is unresolved differs
+from deleting it after clarification, and a write during the critical phase is
+where an irreversible mistake is hardest to attribute.
+
+\paragraph{Three attachment points.} We state which wirings are preventive.
+(i)~In the engine's reference loop the gate sits after parsing and before
+execution, so a blocked call is never executed. (ii)~In the host plugin,
+\texttt{guardTool(spec, stateProvider)} wraps registered tools so that a call
+routed through the wrapper is evaluated first: preventive, but only for tools
+that route through it. (iii)~The host exposes \texttt{tool/call} and
+\texttt{tool/result} session events but no pre-dispatch hook, so the plugin's
+default path is \emph{detective}: it evaluates the call, records a
+\texttt{tool\_gate} audit event (tool, argument digest, verdict, matched
+identifiers in \texttt{ucas}, policy version, state snapshot), and injects a
+strong clarification prompt on the next turn. Detection is not blocking, and we
+label it as such.
+
+\paragraph{Evidence.} The Python suite covers twenty constructed dangerous
+scenarios (all blocked), eight benign scenarios (none blocked), state-gated and
+fail-closed cases, and a twenty-case Python--JavaScript check in which verdict,
+matched identifiers and downgrade field all agree. The JavaScript simulation runs
+sixty-five checks; the Python suite reports 79 passing assertions. The reference
+demo emits the JSON cited here
+(\texttt{paper/ablation/results/actuator-demo-20261027.json}): twelve scripted
+calls, four allowed and executed, eight blocked and none executed, with nine
+distinct rules among the matched identifiers. It uses a mock executor with zero
+model calls and zero real writes, so these are scenario counts showing
+``judge before execute'', not an interception rate. The same run evaluates a
+ten-item held-out set written blind---its author did not read the rule table, the
+implementation, or the tests---frozen at
+\texttt{paper/ablation/tool/heldout-tool-calls-v1.jsonl} (SHA-256
+\texttt{f68fc1b3f19fc37e43b9856096d29b9a55de7dee9bf664a9b9a9592e070576d4}); ten
+of ten calls are blocked with arguments only and ten of ten with context, and its
+endpoints are placeholder domains, so a hit cannot be a domain coincidence. We
+report verdicts, not a correctness rate: whether each call \emph{should} be
+blocked awaits adjudication. The gateway is additive: injection-side rules are
+untouched, and three suite failures that predate this work are
+environment-related and unchanged.
+
+\paragraph{What the numbers are not.} We do not convert these counts into a
+defence rate: designers chose the constructed scenarios, and the held-out set is
+ten cases from one blind author. The gate never executes payloads, so its attack
+surface is parsing and its false-positive rate is uncalibrated; recovery is a
+strong hint plus human confirmation, not silent denial.
+
+\paragraph{Boundaries.} First, without a host pre-dispatch hook the plugin cannot
+stop an arbitrary host tool; true host-level pre-blocking is an upstream request,
+not a shipped capability. Second, if a tool executes outside the gateway---another
+plugin, or a host path that bypasses the wrapper---the gate is inert: it is a
+control point that can be adopted, not system-wide enforcement. Third, the
+excluded items above remain frozen, so the paper makes no claim about closed-loop
+tool behaviour.

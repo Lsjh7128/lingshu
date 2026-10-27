@@ -1,0 +1,10 @@
+# 保留字节原样：本仓库包含论文证据文件（其 sha256 被 calls*.jsonl / FREEZE / SHA256SUMS
+# 等清单引用），任何 EOL 归一化都会让摘要失效。因此对所有文件关闭 Git 的换行符转换。
+* -text
+
+# 明确标注二进制/大文件，避免 diff 噪音（不影响内容）
+*.pdf binary
+*.png binary
+*.jpg binary
+*.zstd binary
+*.pyc binary

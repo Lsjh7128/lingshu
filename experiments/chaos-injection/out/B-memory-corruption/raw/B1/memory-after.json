@@ -1,0 +1,14 @@
+{
+  "path": "experiments\\chaos-injection\\_runtime\\B-memory-corruption\\B1\\data\\memory.jsonl",
+  "path_kind": "directory",
+  "path_is_dir": true,
+  "dir_entries": [],
+  "raw_rows": 0,
+  "unparsable_rows": 0,
+  "unparsable_head": [],
+  "entries": [],
+  "last_wins": [],
+  "active_ids": [],
+  "superseded_ids": [],
+  "active_objects": {}
+}

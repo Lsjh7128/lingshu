@@ -1,0 +1,74 @@
+\section{Related Work}\label{sec:related}
+
+\paragraph{Long-term memory for agents.} Recent work treats agent memory as an
+architecture rather than a vector store. ZenBrain proposes a seven-layer,
+neuroscience-derived memory architecture with sleep-phase consolidation and
+explicit ablations of each mechanism~\cite{zenbrain2026}. FSFM argues that
+selective forgetting deserves first-class treatment and gives a taxonomy of
+passive decay, active deletion, safety-triggered forgetting, and adaptive
+reinforcement~\cite{fsfm2026}. A human-inspired architecture combines
+sleep-phase consolidation, interference-based forgetting, and multi-cue
+retrieval, reporting retention precision of 97.2\% at a 58\% store
+reduction~\cite{himemory2026}. PersMem internalizes personality into a
+dual-pathway memory pipeline so that memory processing becomes
+personality-dependent~\cite{persmem2026}. Mem0 extracts, consolidates and
+retrieves salient conversational facts at production scale, reporting large
+latency and token savings over full-context prompting~\cite{mem0_2025}. These
+systems optimize what is remembered and how well it is retrieved. Our concern is
+different and orthogonal: what is \emph{allowed} to enter the prompt, under which
+priority, and what happens when the budget cannot hold everything. We use Mem0 as
+an external memory baseline for that question
+(Section~\ref{sec:exp:baselines}).
+
+\paragraph{Activation and decay.} Ranking memories over long horizons is usually
+framed as a decay or activation problem. The ACT-R base-level activation folds
+frequency and recency into a single logarithmic quantity, motivated by the
+statistics of practice and need probability~\cite{anderson1991,anderson2007}.
+We treat it as one of two channels rather than as a replacement for decay,
+because an outright replacement degrades a frozen ranking baseline in our own
+setting, as reported in Section~4. This is a concrete example of a general
+point: borrowed mechanisms rarely transplant without a regression check against
+the instrument that existed before the borrowing.
+
+\paragraph{Affect and persona.} Sentipolis couples a continuous
+Pleasure--Arousal--Dominance representation with dual-speed emotion dynamics
+and emotion--memory coupling for social simulation~\cite{sentipolis2026}. Its
+own report is instructive: gains are model-dependent, and emotion-awareness can
+mildly reduce adherence to social norms. PAD itself dates back to environmental
+psychology~\cite{mehrabian1974}. We adopt PAD as a representation and, unlike
+simulation-oriented systems, confine affect to the style domain: an invariant
+forbids affect from entering factual judgement, and the composer enforces the
+separation structurally.
+
+\paragraph{Safety engineering.} STPA analyses unsafe control actions in
+safety-critical systems~\cite{leveson2011,leveson2018}. We adapt the notion of
+an unsafe control action from its original, offline analytical setting to a
+runtime gate: eight control actions are screened after composition and before
+the model call, with a single fail-closed locus. The transfer is deliberate but
+partial---STPA is a hazard-analysis method, whereas our gate is a predicate
+evaluated on every turn---and we do not claim that our gate is a substitute for
+a full STPA of the host.
+
+\paragraph{Cybernetics and requisite variety.} Ashby's law of requisite variety
+states that a regulator must command at least as much variety as the
+disturbances it faces~\cite{ashby1956}; Beer's Viable System Model is one
+influential reading of layered regulation~\cite{beer1972}. We borrow the
+engineering idea that when a controller cannot represent a conflict, it should
+shrink its own action space instead of acting anyway, and implement this as
+dimensionality reduction over composition domains. We use VSM only as an
+interpretive lens on an existing priority layering: it is borrowed, not
+implemented, has no code locus, parameter, or dependency in our implementation,
+and we do not claim System~1--5 machinery. Anti-windup for integral controllers
+is standard control practice~\cite{astrom2006} and is adopted directly.
+
+\paragraph{Evaluation and staged change.} Optimizing a single proxy invites
+Goodhart's law~\cite{goodhart1975}, so our learning loop pairs every primary
+metric with an adversarial counterpart, treats user corrections as the final
+judge, and freezes the evaluation instrument itself. Change management follows
+a conventional staged-rollout pattern (small share, guardrails, automatic
+rollback), with the additional constraint that data insufficient to verify a
+guardrail blocks release instead of skipping it.
+
+\paragraph{Scope.} The mechanisms discussed above are the whole of the paper's
+scope. Limits of that scope, including components that exist in the project but
+are deliberately not claimed here, are stated in Section~7.

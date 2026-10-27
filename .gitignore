@@ -1,0 +1,105 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# LINGSHU · 开源发布排除清单（UTF-8 无 BOM）
+# 原则：能由脚本重建的构建产物 / 运行现场 → 排除；论文汇总结果、图表、CSV → 保留。
+# 排除 ≠ 删除：文件仍在磁盘，只是不提交。口径见 docs/21 §B1 与 _release/SCOPE.md §3。
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Python 缓存 / 打包产物
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+# 虚拟环境 / 第三方依赖（不发布 npm 包，不需要 node_modules）
+**/.venv/
+.venv/
+**/node_modules/
+node_modules/
+
+# 环境文件与凭据（绝不入库；仅保留占位示例）
+.env
+.env.*
+!.env.example
+.credentials
+.credentials.yaml
+.credentials.*
+*.pem
+*.key
+
+# 运行时数据目录（含真实消息原文 / 本机路径 / 审计，禁止入库）
+.chaos-data*/
+.console-data/
+chaos-runs/
+.tmp/
+**/dshhome/
+paper/**/.runtime/
+experiments/**/_runtime/
+paper/_lead_tmp/
+acceptance/chaos/logs/
+# 宿主/引擎运行现场（-raw/ 下是 *-audit.jsonl / *-memory.jsonl / *-state.json /
+# *-last-prompt.txt 改名副本，属于 B1 真实运行数据）
+acceptance/*-raw/
+logs/
+
+# 真实运行数据文件（$DSH_HOME/plugins/dsh-lingshu 现场产物；docs/21 §B1）
+audit.jsonl
+memory.jsonl
+state.json
+last-prompt.txt
+.last.json
+.anonymous-user-id
+# 同上，但针对运行现场里的「改名副本」（turn2.state.json / turn1.audit.jsonl 等）
+**/*.state.json
+**/*.last-prompt.txt
+**/*.audit.jsonl
+**/*.memory.jsonl
+# 运行现场里的 dshhome 改名副本（turn1.dshhome/、turn2.dshhome/）
+**/*.dshhome/
+# 运行现场里的压缩归档副本（mem0 raw 原始证据不在 .runtime 外的改名副本范围内）
+**/*.zstd
+
+# comparison-lab 逐轮运行现场（每 turn 一个 DSH_HOME / stdout / stderr / cell-meta）。
+# 保留同目录下的 calls*.jsonl（论文原始证据）、smoke.json 与 results/**。
+paper/comparison-lab/raw/cells/
+paper/comparison-lab/raw/cells-archive/
+paper/comparison-lab/raw/warm-cells/
+paper/comparison-lab/raw/diag-cells/
+paper/comparison-lab/raw/cells-run2-baseline/
+
+# 探针临时文件（probe/ 是宿主探针源码，保留）
+.probe*
+.probemk*/
+probe-*/
+tests/probe-*/
+_probe_write_tool.txt
+paper/probe-write-new.txt
+
+# 构建中间产物（LaTeX build 可由 paper/build.ps1 重建）
+build/
+paper/.tmppip/
+paper/**/.tmppip/
+paper/_tmp/
+paper/**/_tmp/
+paper/.pylib/
+paper/.wheels/
+paper/figures/__pycache__/
+
+# 本地 research 检出（只发布 research/*.md）
+research/_trees/
+research/repos/
+tools-tex/
+
+# 标注流程临时/探针文件（正式输入是 annotator-a4/a5.jsonl；
+# labels/ 下有 *.sha256 冻结清单，故只排除下划线开头的 scratch，不排除正式件）
+paper/supplement/labels/_*
+
+# 控制台本地覆盖（现场 profile 映射；profiles.json 入库）
+console/profiles.local.json
+
+# 日志
+*.log
+
+# 系统垃圾文件
+.DS_Store
+Thumbs.db

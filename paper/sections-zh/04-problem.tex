@@ -1,0 +1,47 @@
+\section{问题形式化}
+
+\paragraph{设定。} 设 $H$ 为一个 Agent 宿主，轮次 $t$ 具有上下文窗口 $W_t$ 与注入预算 $B$。
+在模型调用之前，宿主用用户消息与一组注入块 $D_t$ 组装 prompt；这些块取自五个域：
+\emph{safety}（是否拒绝）、\emph{fact}（主张什么）、\emph{organization}（是否给选项或叙事）、
+\emph{style}（语气、详略、称呼）与 \emph{retrieval}（用哪种检索策略）。
+块具有冻结的组装顺序、每个域内冻结的优先级顺序，以及一张跨域的互斥表。
+动态权重只在预算被超出时决定牺牲哪个块；它们从不决定哪条不变量可以被覆盖。
+
+\paragraph{控制动作。} 控制面通过五个动作作用于组装结果：
+$U_t \in \{\text{\textsc{inject}}, \text{\textsc{reduce}},
+\text{\textsc{anchor}}, \text{\textsc{trip}}, \text{\textsc{log}}\}$：
+选块、收缩所表示的域、插入边界锚点、阻断本轮、记录轨迹。
+每个动作都是模型调用之前即可获得的系统状态的纯函数。
+
+\paragraph{失效谓词。} 第 1 节的失效被定义为组装结果上的谓词，而不是模型输出上的谓词。
+设 $\mathit{prefeed}_t$ 为前馈监控标志位，$\mathit{blocks}_t$ 为组装后的块列表，则
+\begin{align}
+F_1 &: \text{fact block asserts an unsourced memory statement},\\
+F_2 &: \mathit{refuse}_t \wedge \text{a style block is present},\\
+F_3 &: \mathit{prefeed}_t \wedge \text{no anchor marker in the prompt},\\
+F_4 &: \text{the constitutional block is absent or not first}.
+\end{align}
+每个谓词都从每轮的事件中求值，无需调用模型；并且每个谓词映射到闸门中的一个不安全控制动作
+（分别为 UCA-04、UCA-03、UCA-07、UCA-05）。把失效定义在注入侧而不是答案侧，
+正是使系统可被确定性审计的设计决定：同样的状态与预算两次运行，得到同样的裁决。
+
+\paragraph{评估工具。} 评估工具是一个三元组 $(\mathcal{M}, \mathcal{R}, \mathcal{G})$：
+指标定义 $\mathcal{M}$（对期望标识符的 recall@3、禁止标识符泄漏、被截断的轮次）、
+带显式合成数据占比上限的回放集 $\mathcal{R}$，以及护栏阈值 $\mathcal{G}$。
+三者对任何学习组件都是只读的，并且审计器会拒绝以它们为目标的提议。
+合成数据占比被显式限定，因为由被测系统自己生成的回放集，不能作为该系统适合真实流量的证据。
+
+\paragraph{Provenance 约束。} 每个数值参数 $\theta$ 携带一个标签
+$\pi(\theta) \in \{\mathit{guess}, \mathit{literature}, \mathit{measured}\}$。
+关于功效的声称只能消费标签为 $\mathit{measured}$ 的参数；设计描述可以使用任何标签，
+前提是标签被如实报告。当前所有参数都有 $\pi(\theta) = \mathit{guess}$，因此
+$|\{\theta : \pi(\theta) = \mathit{measured}\}| = 0$，本文在构造上就没有任何功效声称可用。
+
+\paragraph{假设。} A1：单一宿主（DSH）、单一用户、单一模型。A2：交互以中文为主，
+含拉丁字母标识符；token 数按「字符数除以一个常数」估算，而不是由 tokenizer 给出。
+A3：宿主提供模型调用前的钩子与基于 section 的 prompt API；若两者都不提供，
+这些机制就只是规范，而不是可执行工件。
+
+\paragraph{研究对象。} 研究对象是组装函数及其闸门，而不是模型。
+因此本文中的每一项主张都关于「注入了什么」与「阻止了什么」，
+而这恰恰是 Agent 行为中无需裁判模型即可检查的部分。

@@ -1,0 +1,96 @@
+% ============================================================================
+% 10d-appendix-hostpilot.tex -- Host-side pilot details (moved out of the main
+% experiments text under the "subtract and amplify" revision).
+% Sources: paper/host-validation/REPORT.md and calls.json (single-message pilot);
+%          paper/host-validation/s4-long-session/{calls.json, REPORT.md} (S4).
+% Table/numbers are unchanged from the main text version; only the location moved.
+% ============================================================================
+
+\subsection{Real-host pilot details}\label{app:hostpilotdata}
+
+This appendix holds the two host-side pilots whose headlines remain in
+Section~\ref{sec:exp:host} and Section~\ref{sec:exp:s4}. Nothing here is a new
+measurement: the numbers are transferred verbatim from the main text and the
+archived records, and the two pilots differ in shape (one concatenated request
+versus genuine per-turn calls).
+
+\paragraph{Host pilot (single concatenated request).} Ten cells ran on one host,
+one model route, one run each: \textsc{Full} (plugin) and \textsc{Baseline} (no
+plugin) against three probe phrasings, plus two controls. A cell is one headless
+CLI invocation over a 100-turn prompt of 78,565--78,652 bytes---the host-feasible
+single-message form (50 flood turns, 49 replay turns, one probe). All 11
+invocations, including the feasibility probe, exited zero, with at least 26 model
+requests (26--36 estimated, since one CLI invocation is an agent loop) and
+193,288 tokens.
+
+The main matrix is a ceiling: 6/6 answers contain the planted codename because
+the seed sentence is verbatim in the prompt. Removing that sentence is more
+informative: \textsc{Full} reports \texttt{matched=0}, injects no memory section,
+and both arms answer not-found---a methodological finding, since compressing a
+100-turn dialogue into one 78\,KB message dilutes the query until
+query-conditioned retrieval stops hitting. This also questions stress protocols
+that concatenate many turns into one prompt. A short-query control isolates the
+channel: \textsc{Full} injects the seeded entry and answers the codename, whereas
+\textsc{Baseline}, with no memory, takes ten tool steps and answers with the
+directory name. That is a mechanism demonstration at $n=1$, not a hallucination
+rate. \textsc{Basic} is not applicable on the host: the plugin exposes parameter
+defaults but no switch to disable the control layer. In all ten cells the gate
+returned \texttt{allow} with an empty UCA list, so the pilot says nothing about
+the control layer.
+
+\paragraph{Per-turn long-session pilot (S4).} The last experiment replaces the
+single concatenated message with genuine per-turn calls. Two arms---\textsc{Full}
+(plugin and control plane) and \textsc{Baseline} (no plugin; the harness prepends
+the last $W=3$ turns)---run two 30-turn variants. Settings are planted in turns
+1--2, a superseding statement appears at turn 3, and probes at turns 10, 20 and 30
+ask for the setting, the superseded value, the interface preference and an
+unmentioned cat. Primary delivery is the v1 subset: 60 cells, 60/60 exit zero,
+419{,}203 tokens. The full 120-cell run (873{,}198 tokens) is archived and is never
+pooled with the primary numbers; the extra variant is a cross-check only.
+
+\begin{table}[t]
+\centering\footnotesize
+\caption{Per-turn long-session pilot (S4), primary v1 subset: six probe outcomes
+(three probe turns $\times$ two arms), rule-assisted counts. Source:
+\texttt{calls.json}, fields \texttt{observations\_raw\_counts.full-v1},
+\texttt{.baseline-v1}, \texttt{aggregate.*}, \texttt{full\_arm\_memory\_evidence.v1},
+\texttt{totals\_v1\_subset\_60}; the same record is duplicated in
+\texttt{long-session-2026-10-27.json}.}
+\label{tab:s4}
+\begin{tabular}{@{}l ccccc@{}}
+\toprule
+Arm & Setting kept & Stale ALPHA & Unknown ack. & Preference kept & Memory injected \\
+\midrule
+\textsc{Full} & 0/3 & 0/3 & 3/3 & 1/3 & 3/3 \\
+\textsc{Baseline} & 3/3 & 0/3 & 1/3 & 3/3 & 0/3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:s4} shows the six probe outcomes. Read alone they invite the wrong
+conclusion, so two mechanism facts must be read with them. First, \textsc{Full}
+did inject memory in all three probe turns, but the content was wrong: the
+turn-3 supersession does not match any of the plugin's three supported extraction
+patterns (\texttt{plugin/dsh-lingshu/index.js:1004--1011}), so BETA was never
+written and the memory's last-wins view has
+\texttt{beta\_present=false} with the project code still ALPHA---a stale value.
+Second, the probe question itself was extracted as a fact: asking for the
+interface preference matches the pattern with object ``what'', and that junk
+entry superseded the correct preference (one supersede event, in the wrong
+direction). \textsc{Full}'s model therefore saw ``code = ALPHA'' and
+``preference = what'' and, following invariant~I1 (memory is a reference, never
+the current statement), answered that there was no record. That is the designed
+behaviour on corrupted input, not a capability ceiling.
+
+\textsc{Baseline}'s apparent retention has a different origin: the window carries
+the assistant's own earlier restatements, so BETA and the dark theme survive by
+self-repetition rather than through memory, and two answers fabricate turn
+references---citing filler turns 7--8 as prior user statements that were in fact
+the assistant's own restatements. The pre-registered P-S4a (Full at least as
+good as Baseline on setting retention) is therefore \emph{not supported} and is
+recorded as \texttt{null}. What this pilot shows is an input-construction defect
+interacting with the real boundary of a rule extractor; it cannot be read as
+``\textsc{Full} is less capable'' or ``\textsc{Baseline} is better''. With one
+chain per arm and variant, one model, one host and rule-assisted counting, we
+report counts, not rates. The archived v2 variant repeats the pattern
+(\textsc{Full} 0/3, \textsc{Baseline} 2/3) and is not pooled.

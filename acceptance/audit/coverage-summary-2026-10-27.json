@@ -1,0 +1,6752 @@
+{
+  "audit": "A5 断言强度/异常路径/真实覆盖率",
+  "date": "2026-10-27",
+  "seed": 20261027,
+  "environment": {
+    "python": "3.12.14 (dsh-primary-runtime dependencies)",
+    "node": "v24 (dsh-primary-runtime dependencies)",
+    "pytest": "unavailable",
+    "coverage": "custom sys.monitoring tracer",
+    "git": "no git history (no diff evidence possible)"
+  },
+  "baseline": {
+    "python": {
+      "files": 13,
+      "passed": 868,
+      "failed": 0
+    },
+    "js": {
+      "host-sim": 188,
+      "control-sim": 148,
+      "stress": 45,
+      "total": 381,
+      "failed": 0
+    }
+  },
+  "assertion_strength": {
+    "frame": {
+      "python_static_call_sites": 825,
+      "python_dynamic_baseline": 868,
+      "js_static_call_sites": 367,
+      "js_dynamic_baseline": 381,
+      "note": "static < dynamic means loop-repeated check call sites"
+    },
+    "sample": {
+      "python": 165,
+      "js": 73,
+      "python_tally": {
+        "STRONG": 125,
+        "WEAK": 40,
+        "TAUTOLOGY": 0,
+        "oracle_suspect": 0
+      },
+      "js_tally": {
+        "STRONG": 54,
+        "WEAK": 19,
+        "TAUTOLOGY": 0,
+        "oracle_suspect": 0
+      }
+    },
+    "full_heuristic": {
+      "python_tally": {
+        "STRONG": 597,
+        "WEAK": 227,
+        "TAUTOLOGY": 1,
+        "oracle_suspect": 0
+      },
+      "js_tally": {
+        "STRONG": 278,
+        "WEAK": 89,
+        "TAUTOLOGY": 0,
+        "oracle_suspect": 0
+      },
+      "weak_plus_tautology_pct": 26.59
+    },
+    "weak_sample_pct": 24.79,
+    "tautology_count": 1
+  },
+  "anomaly_paths": {
+    "strict": {
+      "python": {
+        "total": 825,
+        "abnormal": 199,
+        "pct": 24.1,
+        "by_cat": {
+          "非法输入": 9,
+          "空-null": 54,
+          "超长文本": 18,
+          "注入-越狱": 20,
+          "工具超时-报错": 13,
+          "坏JSON": 1,
+          "负值-边界": 109,
+          "并发": 0
+        },
+        "per_file": {
+          "test_agent_state.py": {
+            "total": 43,
+            "abnormal": 8,
+            "pct": 18.6
+          },
+          "test_astrbot_adapter.py": {
+            "total": 12,
+            "abnormal": 3,
+            "pct": 25.0
+          },
+          "test_chaos_calibrate.py": {
+            "total": 123,
+            "abnormal": 25,
+            "pct": 20.3
+          },
+          "test_constitution.py": {
+            "total": 17,
+            "abnormal": 4,
+            "pct": 23.5
+          },
+          "test_control.py": {
+            "total": 141,
+            "abnormal": 37,
+            "pct": 26.2
+          },
+          "test_gray.py": {
+            "total": 27,
+            "abnormal": 10,
+            "pct": 37.0
+          },
+          "test_learning.py": {
+            "total": 23,
+            "abnormal": 2,
+            "pct": 8.7
+          },
+          "test_onboarding_persona.py": {
+            "total": 50,
+            "abnormal": 12,
+            "pct": 24.0
+          },
+          "test_pipeline.py": {
+            "total": 32,
+            "abnormal": 5,
+            "pct": 15.6
+          },
+          "test_pipeline_integration.py": {
+            "total": 65,
+            "abnormal": 17,
+            "pct": 26.2
+          },
+          "test_proposal.py": {
+            "total": 19,
+            "abnormal": 2,
+            "pct": 10.5
+          },
+          "test_run_chaos.py": {
+            "total": 117,
+            "abnormal": 25,
+            "pct": 21.4
+          },
+          "test_shadow_analysis.py": {
+            "total": 156,
+            "abnormal": 49,
+            "pct": 31.4
+          }
+        }
+      },
+      "js": {
+        "total": 367,
+        "abnormal": 82,
+        "pct": 22.3,
+        "by_cat": {
+          "非法输入": 4,
+          "空-null": 10,
+          "超长文本": 4,
+          "注入-越狱": 23,
+          "工具超时-报错": 12,
+          "坏JSON": 0,
+          "负值-边界": 38,
+          "并发": 0
+        },
+        "per_file": {
+          "host-sim.mjs": {
+            "total": 188,
+            "abnormal": 33,
+            "pct": 17.6
+          },
+          "control-sim.mjs": {
+            "total": 134,
+            "abnormal": 41,
+            "pct": 30.6
+          },
+          "stress.mjs": {
+            "total": 45,
+            "abnormal": 8,
+            "pct": 17.8
+          }
+        }
+      }
+    },
+    "loose": {
+      "python": {
+        "total": 825,
+        "abnormal": 357,
+        "pct": 43.3,
+        "by_cat": {
+          "非法输入": 24,
+          "空-null": 73,
+          "超长文本": 13,
+          "注入-越狱": 30,
+          "工具超时-报错": 66,
+          "坏 JSON": 41,
+          "负值-边界": 111,
+          "并发": 42
+        }
+      },
+      "js": {
+        "total": 367,
+        "abnormal": 199,
+        "pct": 54.2,
+        "by_cat": {
+          "非法输入": 9,
+          "空-null": 31,
+          "超长文本": 3,
+          "注入-越狱": 29,
+          "工具超时-报错": 38,
+          "坏 JSON": 49,
+          "负值-边界": 51,
+          "并发": 20
+        }
+      }
+    },
+    "robustness_supplement_triggered": false,
+    "reason": "strict 24.1%(Python)/22.3%(JS) both >= 20%; happy path < 80%; supplement not triggered"
+  },
+  "coverage": {
+    "python": {
+      "method": "sys.monitoring(PEP 669) LINE+DISABLE / BRANCH; each of 13 tests in its own subprocess, aggregated; executable lines = code.co_lines(); branch = 2 destinations of 3.12 conditional jumps (taken precise via BRANCH, fallthrough approximated by destination-line coverage, same-line excluded)",
+      "scope_files": 47,
+      "total": {
+        "line_total": 10441,
+        "line_covered": 4783,
+        "line_pct": 45.81,
+        "branch_total": 2460,
+        "branch_covered": 1062,
+        "branch_pct": 43.17,
+        "files": 47
+      },
+      "groups": {
+        "engine/": {
+          "files": 20,
+          "files_touched": 20,
+          "line_total": 2319,
+          "line_covered": 2086,
+          "line_pct": 89.95,
+          "branch_total": 648,
+          "branch_covered": 523,
+          "branch_pct": 80.71
+        },
+        "tools/": {
+          "files": 26,
+          "files_touched": 3,
+          "line_total": 8023,
+          "line_covered": 2641,
+          "line_pct": 32.92,
+          "branch_total": 1794,
+          "branch_covered": 527,
+          "branch_pct": 29.38
+        },
+        "integrations/": {
+          "files": 1,
+          "files_touched": 1,
+          "line_total": 99,
+          "line_covered": 56,
+          "line_pct": 56.57,
+          "branch_total": 18,
+          "branch_covered": 12,
+          "branch_pct": 66.67
+        }
+      },
+      "per_file": {
+        "engine/__init__.py": {
+          "line_total": 3,
+          "line_covered": 3,
+          "line_pct": 100.0,
+          "branch_total": 0,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 0,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/actr.py": {
+          "line_total": 53,
+          "line_covered": 43,
+          "line_pct": 81.13,
+          "branch_total": 14,
+          "branch_covered": 12,
+          "branch_pct": 85.71,
+          "branch_same_line_excluded": 16,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              37,
+              37
+            ],
+            [
+              75,
+              75
+            ],
+            [
+              82,
+              89
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/compose.py": {
+          "line_total": 150,
+          "line_covered": 142,
+          "line_pct": 94.67,
+          "branch_total": 60,
+          "branch_covered": 53,
+          "branch_pct": 88.33,
+          "branch_same_line_excluded": 26,
+          "fallthrough_approx": 3,
+          "uncovered_lines": [
+            [
+              93,
+              94
+            ],
+            [
+              96,
+              97
+            ],
+            [
+              99,
+              100
+            ],
+            [
+              105,
+              106
+            ]
+          ],
+          "fallthrough_by_line_approx": 3,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/config.py": {
+          "line_total": 108,
+          "line_covered": 108,
+          "line_pct": 100.0,
+          "branch_total": 2,
+          "branch_covered": 2,
+          "branch_pct": 100.0,
+          "branch_same_line_excluded": 10,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/constitution.py": {
+          "line_total": 105,
+          "line_covered": 99,
+          "line_pct": 94.29,
+          "branch_total": 42,
+          "branch_covered": 35,
+          "branch_pct": 83.33,
+          "branch_same_line_excluded": 26,
+          "fallthrough_approx": 1,
+          "uncovered_lines": [
+            [
+              67,
+              70
+            ],
+            [
+              72,
+              72
+            ],
+            [
+              126,
+              126
+            ]
+          ],
+          "fallthrough_by_line_approx": 1,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/contract.py": {
+          "line_total": 67,
+          "line_covered": 19,
+          "line_pct": 28.36,
+          "branch_total": 8,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 10,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              32,
+              34
+            ],
+            [
+              38,
+              38
+            ],
+            [
+              43,
+              44
+            ],
+            [
+              46,
+              59
+            ],
+            [
+              61,
+              62
+            ],
+            [
+              64,
+              65
+            ],
+            [
+              69,
+              75
+            ],
+            [
+              79,
+              85
+            ],
+            [
+              90,
+              90
+            ],
+            [
+              95,
+              102
+            ],
+            [
+              104,
+              104
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/control.py": {
+          "line_total": 141,
+          "line_covered": 141,
+          "line_pct": 100.0,
+          "branch_total": 56,
+          "branch_covered": 56,
+          "branch_pct": 100.0,
+          "branch_same_line_excluded": 26,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/emotion.py": {
+          "line_total": 70,
+          "line_covered": 59,
+          "line_pct": 84.29,
+          "branch_total": 26,
+          "branch_covered": 20,
+          "branch_pct": 76.92,
+          "branch_same_line_excluded": 22,
+          "fallthrough_approx": 1,
+          "uncovered_lines": [
+            [
+              52,
+              54
+            ],
+            [
+              59,
+              61
+            ],
+            [
+              110,
+              110
+            ],
+            [
+              112,
+              112
+            ],
+            [
+              115,
+              117
+            ]
+          ],
+          "fallthrough_by_line_approx": 1,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/goal.py": {
+          "line_total": 128,
+          "line_covered": 108,
+          "line_pct": 84.38,
+          "branch_total": 48,
+          "branch_covered": 35,
+          "branch_pct": 72.92,
+          "branch_same_line_excluded": 6,
+          "fallthrough_approx": 1,
+          "uncovered_lines": [
+            [
+              52,
+              53
+            ],
+            [
+              56,
+              62
+            ],
+            [
+              64,
+              66
+            ],
+            [
+              94,
+              95
+            ],
+            [
+              109,
+              109
+            ],
+            [
+              113,
+              113
+            ],
+            [
+              119,
+              119
+            ],
+            [
+              133,
+              133
+            ],
+            [
+              170,
+              170
+            ],
+            [
+              175,
+              175
+            ]
+          ],
+          "fallthrough_by_line_approx": 1,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/gray.py": {
+          "line_total": 163,
+          "line_covered": 158,
+          "line_pct": 96.93,
+          "branch_total": 46,
+          "branch_covered": 37,
+          "branch_pct": 80.43,
+          "branch_same_line_excluded": 50,
+          "fallthrough_approx": 1,
+          "uncovered_lines": [
+            [
+              60,
+              60
+            ],
+            [
+              98,
+              98
+            ],
+            [
+              123,
+              123
+            ],
+            [
+              135,
+              135
+            ],
+            [
+              160,
+              160
+            ]
+          ],
+          "fallthrough_by_line_approx": 1,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/memory.py": {
+          "line_total": 285,
+          "line_covered": 240,
+          "line_pct": 84.21,
+          "branch_total": 82,
+          "branch_covered": 63,
+          "branch_pct": 76.83,
+          "branch_same_line_excluded": 126,
+          "fallthrough_approx": 3,
+          "uncovered_lines": [
+            [
+              69,
+              70
+            ],
+            [
+              105,
+              113
+            ],
+            [
+              141,
+              141
+            ],
+            [
+              184,
+              184
+            ],
+            [
+              187,
+              187
+            ],
+            [
+              191,
+              191
+            ],
+            [
+              256,
+              256
+            ],
+            [
+              291,
+              291
+            ],
+            [
+              298,
+              298
+            ],
+            [
+              307,
+              307
+            ],
+            [
+              316,
+              316
+            ],
+            [
+              322,
+              322
+            ],
+            [
+              336,
+              337
+            ],
+            [
+              339,
+              348
+            ],
+            [
+              350,
+              352
+            ],
+            [
+              366,
+              367
+            ],
+            [
+              385,
+              386
+            ],
+            [
+              402,
+              402
+            ],
+            [
+              404,
+              407
+            ]
+          ],
+          "fallthrough_by_line_approx": 3,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/metacog.py": {
+          "line_total": 68,
+          "line_covered": 62,
+          "line_pct": 91.18,
+          "branch_total": 26,
+          "branch_covered": 22,
+          "branch_pct": 84.62,
+          "branch_same_line_excluded": 20,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              50,
+              52
+            ],
+            [
+              76,
+              76
+            ],
+            [
+              79,
+              79
+            ],
+            [
+              85,
+              85
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/model.py": {
+          "line_total": 80,
+          "line_covered": 80,
+          "line_pct": 100.0,
+          "branch_total": 2,
+          "branch_covered": 2,
+          "branch_pct": 100.0,
+          "branch_same_line_excluded": 14,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/narrative.py": {
+          "line_total": 69,
+          "line_covered": 66,
+          "line_pct": 95.65,
+          "branch_total": 20,
+          "branch_covered": 18,
+          "branch_pct": 90.0,
+          "branch_same_line_excluded": 32,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              97,
+              97
+            ],
+            [
+              102,
+              103
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/onboarding.py": {
+          "line_total": 82,
+          "line_covered": 66,
+          "line_pct": 80.49,
+          "branch_total": 20,
+          "branch_covered": 16,
+          "branch_pct": 80.0,
+          "branch_same_line_excluded": 6,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              64,
+              64
+            ],
+            [
+              104,
+              110
+            ],
+            [
+              112,
+              113
+            ],
+            [
+              119,
+              124
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/persona.py": {
+          "line_total": 112,
+          "line_covered": 109,
+          "line_pct": 97.32,
+          "branch_total": 38,
+          "branch_covered": 36,
+          "branch_pct": 94.74,
+          "branch_same_line_excluded": 38,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              69,
+              71
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/pipeline.py": {
+          "line_total": 219,
+          "line_covered": 208,
+          "line_pct": 94.98,
+          "branch_total": 38,
+          "branch_covered": 31,
+          "branch_pct": 81.58,
+          "branch_same_line_excluded": 66,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              154,
+              154
+            ],
+            [
+              244,
+              251
+            ],
+            [
+              288,
+              289
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/proposal.py": {
+          "line_total": 151,
+          "line_covered": 131,
+          "line_pct": 86.75,
+          "branch_total": 38,
+          "branch_covered": 24,
+          "branch_pct": 63.16,
+          "branch_same_line_excluded": 68,
+          "fallthrough_approx": 1,
+          "uncovered_lines": [
+            [
+              55,
+              58
+            ],
+            [
+              69,
+              69
+            ],
+            [
+              72,
+              72
+            ],
+            [
+              119,
+              119
+            ],
+            [
+              141,
+              143
+            ],
+            [
+              155,
+              155
+            ],
+            [
+              164,
+              166
+            ],
+            [
+              203,
+              203
+            ],
+            [
+              215,
+              215
+            ],
+            [
+              221,
+              221
+            ],
+            [
+              223,
+              225
+            ]
+          ],
+          "fallthrough_by_line_approx": 1,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/relation.py": {
+          "line_total": 137,
+          "line_covered": 117,
+          "line_pct": 85.4,
+          "branch_total": 64,
+          "branch_covered": 44,
+          "branch_pct": 68.75,
+          "branch_same_line_excluded": 12,
+          "fallthrough_approx": 2,
+          "uncovered_lines": [
+            [
+              73,
+              74
+            ],
+            [
+              80,
+              80
+            ],
+            [
+              109,
+              109
+            ],
+            [
+              115,
+              119
+            ],
+            [
+              163,
+              163
+            ],
+            [
+              181,
+              190
+            ]
+          ],
+          "fallthrough_by_line_approx": 2,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "engine/replay.py": {
+          "line_total": 128,
+          "line_covered": 127,
+          "line_pct": 99.22,
+          "branch_total": 18,
+          "branch_covered": 17,
+          "branch_pct": 94.44,
+          "branch_same_line_excluded": 52,
+          "fallthrough_approx": 1,
+          "uncovered_lines": [
+            [
+              165,
+              165
+            ]
+          ],
+          "fallthrough_by_line_approx": 1,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "integrations/astrbot/main.py": {
+          "line_total": 99,
+          "line_covered": 56,
+          "line_pct": 56.57,
+          "branch_total": 18,
+          "branch_covered": 12,
+          "branch_pct": 66.67,
+          "branch_same_line_excluded": 24,
+          "fallthrough_approx": 1,
+          "uncovered_lines": [
+            [
+              25,
+              26
+            ],
+            [
+              30,
+              31
+            ],
+            [
+              40,
+              42
+            ],
+            [
+              70,
+              70
+            ],
+            [
+              103,
+              104
+            ],
+            [
+              109,
+              113
+            ],
+            [
+              115,
+              116
+            ],
+            [
+              118,
+              121
+            ],
+            [
+              123,
+              128
+            ],
+            [
+              130,
+              131
+            ],
+            [
+              133,
+              141
+            ],
+            [
+              143,
+              144
+            ],
+            [
+              146,
+              146
+            ],
+            [
+              148,
+              148
+            ],
+            [
+              150,
+              150
+            ]
+          ],
+          "fallthrough_by_line_approx": 1,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/_cyber1.py": {
+          "line_total": 50,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 4,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 0,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              3
+            ],
+            [
+              5,
+              9
+            ],
+            [
+              12,
+              13
+            ],
+            [
+              28,
+              29
+            ],
+            [
+              41,
+              41
+            ],
+            [
+              43,
+              43
+            ],
+            [
+              46,
+              47
+            ],
+            [
+              49,
+              49
+            ],
+            [
+              52,
+              53
+            ],
+            [
+              55,
+              56
+            ],
+            [
+              58,
+              58
+            ],
+            [
+              60,
+              60
+            ],
+            [
+              63,
+              69
+            ],
+            [
+              81,
+              81
+            ],
+            [
+              84,
+              86
+            ],
+            [
+              88,
+              88
+            ],
+            [
+              91,
+              93
+            ],
+            [
+              97,
+              98
+            ],
+            [
+              101,
+              102
+            ],
+            [
+              124,
+              124
+            ],
+            [
+              132,
+              132
+            ],
+            [
+              148,
+              148
+            ],
+            [
+              150,
+              150
+            ],
+            [
+              153,
+              154
+            ],
+            [
+              173,
+              173
+            ],
+            [
+              175,
+              175
+            ],
+            [
+              177,
+              177
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/_fixmem.py": {
+          "line_total": 18,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 2,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 0,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              3
+            ],
+            [
+              5,
+              7
+            ],
+            [
+              9,
+              9
+            ],
+            [
+              129,
+              132
+            ],
+            [
+              135,
+              142
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/_fixpot.py": {
+          "line_total": 21,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 2,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 0,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              7,
+              7
+            ],
+            [
+              11,
+              11
+            ],
+            [
+              38,
+              41
+            ],
+            [
+              44,
+              47
+            ],
+            [
+              49,
+              50
+            ],
+            [
+              53,
+              58
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/_scan_hooks.py": {
+          "line_total": 39,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 10,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 14,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              7
+            ],
+            [
+              9,
+              12
+            ],
+            [
+              14,
+              29
+            ],
+            [
+              31,
+              33
+            ],
+            [
+              35,
+              37
+            ],
+            [
+              39,
+              45
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/analyze_shadow.py": {
+          "line_total": 1220,
+          "line_covered": 1148,
+          "line_pct": 94.1,
+          "branch_total": 214,
+          "branch_covered": 182,
+          "branch_pct": 85.05,
+          "branch_same_line_excluded": 588,
+          "fallthrough_approx": 7,
+          "uncovered_lines": [
+            [
+              137,
+              138
+            ],
+            [
+              189,
+              190
+            ],
+            [
+              199,
+              200
+            ],
+            [
+              205,
+              210
+            ],
+            [
+              217,
+              217
+            ],
+            [
+              223,
+              224
+            ],
+            [
+              235,
+              237
+            ],
+            [
+              246,
+              247
+            ],
+            [
+              262,
+              263
+            ],
+            [
+              301,
+              301
+            ],
+            [
+              355,
+              355
+            ],
+            [
+              370,
+              370
+            ],
+            [
+              374,
+              375
+            ],
+            [
+              494,
+              494
+            ],
+            [
+              553,
+              553
+            ],
+            [
+              679,
+              679
+            ],
+            [
+              779,
+              779
+            ],
+            [
+              916,
+              916
+            ],
+            [
+              1110,
+              1111
+            ],
+            [
+              1122,
+              1127
+            ],
+            [
+              1303,
+              1303
+            ],
+            [
+              1400,
+              1400
+            ],
+            [
+              1456,
+              1457
+            ],
+            [
+              1463,
+              1464
+            ],
+            [
+              1496,
+              1498
+            ],
+            [
+              1505,
+              1507
+            ],
+            [
+              1509,
+              1509
+            ],
+            [
+              1517,
+              1519
+            ],
+            [
+              1522,
+              1536
+            ],
+            [
+              1541,
+              1541
+            ]
+          ],
+          "fallthrough_by_line_approx": 7,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/audit_console_data.py": {
+          "line_total": 197,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 86,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 94,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              14,
+              14
+            ],
+            [
+              16,
+              19
+            ],
+            [
+              21,
+              22
+            ],
+            [
+              25,
+              25
+            ],
+            [
+              28,
+              30
+            ],
+            [
+              32,
+              32
+            ],
+            [
+              35,
+              36
+            ],
+            [
+              39,
+              51
+            ],
+            [
+              54,
+              60
+            ],
+            [
+              63,
+              63
+            ],
+            [
+              65,
+              70
+            ],
+            [
+              73,
+              83
+            ],
+            [
+              86,
+              91
+            ],
+            [
+              93,
+              96
+            ],
+            [
+              99,
+              112
+            ],
+            [
+              115,
+              122
+            ],
+            [
+              125,
+              133
+            ],
+            [
+              136,
+              143
+            ],
+            [
+              146,
+              156
+            ],
+            [
+              159,
+              163
+            ],
+            [
+              166,
+              169
+            ],
+            [
+              171,
+              171
+            ],
+            [
+              174,
+              180
+            ],
+            [
+              182,
+              184
+            ],
+            [
+              187,
+              192
+            ],
+            [
+              195,
+              204
+            ],
+            [
+              207,
+              211
+            ],
+            [
+              215,
+              219
+            ],
+            [
+              221,
+              222
+            ],
+            [
+              224,
+              226
+            ],
+            [
+              229,
+              233
+            ],
+            [
+              235,
+              238
+            ],
+            [
+              240,
+              243
+            ],
+            [
+              245,
+              249
+            ],
+            [
+              251,
+              261
+            ],
+            [
+              263,
+              264
+            ],
+            [
+              267,
+              268
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/audit_console_trends.py": {
+          "line_total": 228,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 62,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 108,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              15,
+              15
+            ],
+            [
+              17,
+              22
+            ],
+            [
+              24,
+              25
+            ],
+            [
+              29,
+              29
+            ],
+            [
+              43,
+              52
+            ],
+            [
+              56,
+              56
+            ],
+            [
+              66,
+              66
+            ],
+            [
+              69,
+              70
+            ],
+            [
+              73,
+              85
+            ],
+            [
+              88,
+              94
+            ],
+            [
+              97,
+              100
+            ],
+            [
+              103,
+              103
+            ],
+            [
+              106,
+              113
+            ],
+            [
+              115,
+              124
+            ],
+            [
+              127,
+              138
+            ],
+            [
+              140,
+              142
+            ],
+            [
+              145,
+              147
+            ],
+            [
+              149,
+              149
+            ],
+            [
+              152,
+              163
+            ],
+            [
+              165,
+              168
+            ],
+            [
+              171,
+              174
+            ],
+            [
+              176,
+              181
+            ],
+            [
+              184,
+              186
+            ],
+            [
+              188,
+              188
+            ],
+            [
+              191,
+              196
+            ],
+            [
+              198,
+              198
+            ],
+            [
+              201,
+              204
+            ],
+            [
+              206,
+              206
+            ],
+            [
+              209,
+              219
+            ],
+            [
+              222,
+              224
+            ],
+            [
+              227,
+              229
+            ],
+            [
+              232,
+              239
+            ],
+            [
+              241,
+              248
+            ],
+            [
+              251,
+              258
+            ],
+            [
+              260,
+              263
+            ],
+            [
+              266,
+              266
+            ],
+            [
+              268,
+              272
+            ],
+            [
+              274,
+              274
+            ],
+            [
+              277,
+              282
+            ],
+            [
+              284,
+              289
+            ],
+            [
+              291,
+              293
+            ],
+            [
+              295,
+              299
+            ],
+            [
+              301,
+              304
+            ],
+            [
+              306,
+              312
+            ],
+            [
+              314,
+              325
+            ],
+            [
+              327,
+              328
+            ],
+            [
+              331,
+              332
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/chaos_calibrate.py": {
+          "line_total": 988,
+          "line_covered": 874,
+          "line_pct": 88.46,
+          "branch_total": 248,
+          "branch_covered": 188,
+          "branch_pct": 75.81,
+          "branch_same_line_excluded": 276,
+          "fallthrough_approx": 7,
+          "uncovered_lines": [
+            [
+              69,
+              69
+            ],
+            [
+              152,
+              152
+            ],
+            [
+              169,
+              170
+            ],
+            [
+              227,
+              227
+            ],
+            [
+              244,
+              244
+            ],
+            [
+              247,
+              247
+            ],
+            [
+              253,
+              253
+            ],
+            [
+              275,
+              277
+            ],
+            [
+              280,
+              282
+            ],
+            [
+              299,
+              299
+            ],
+            [
+              389,
+              392
+            ],
+            [
+              416,
+              416
+            ],
+            [
+              430,
+              431
+            ],
+            [
+              434,
+              434
+            ],
+            [
+              450,
+              452
+            ],
+            [
+              480,
+              480
+            ],
+            [
+              489,
+              489
+            ],
+            [
+              492,
+              492
+            ],
+            [
+              495,
+              495
+            ],
+            [
+              497,
+              497
+            ],
+            [
+              519,
+              519
+            ],
+            [
+              522,
+              522
+            ],
+            [
+              538,
+              538
+            ],
+            [
+              541,
+              541
+            ],
+            [
+              551,
+              551
+            ],
+            [
+              563,
+              563
+            ],
+            [
+              566,
+              566
+            ],
+            [
+              577,
+              577
+            ],
+            [
+              595,
+              597
+            ],
+            [
+              601,
+              602
+            ],
+            [
+              604,
+              605
+            ],
+            [
+              614,
+              614
+            ],
+            [
+              622,
+              623
+            ],
+            [
+              739,
+              739
+            ],
+            [
+              741,
+              741
+            ],
+            [
+              834,
+              834
+            ],
+            [
+              965,
+              968
+            ],
+            [
+              1055,
+              1056
+            ],
+            [
+              1080,
+              1083
+            ],
+            [
+              1087,
+              1091
+            ],
+            [
+              1096,
+              1098
+            ],
+            [
+              1119,
+              1131
+            ],
+            [
+              1143,
+              1144
+            ],
+            [
+              1167,
+              1169
+            ],
+            [
+              1204,
+              1206
+            ],
+            [
+              1211,
+              1213
+            ],
+            [
+              1216,
+              1229
+            ],
+            [
+              1231,
+              1235
+            ],
+            [
+              1248,
+              1248
+            ]
+          ],
+          "fallthrough_by_line_approx": 7,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/check_config_sync.py": {
+          "line_total": 162,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 72,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 36,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              9,
+              9
+            ],
+            [
+              11,
+              13
+            ],
+            [
+              15,
+              16
+            ],
+            [
+              18,
+              18
+            ],
+            [
+              21,
+              21
+            ],
+            [
+              80,
+              92
+            ],
+            [
+              94,
+              97
+            ],
+            [
+              100,
+              103
+            ],
+            [
+              106,
+              106
+            ],
+            [
+              108,
+              109
+            ],
+            [
+              117,
+              117
+            ],
+            [
+              122,
+              122
+            ],
+            [
+              124,
+              145
+            ],
+            [
+              148,
+              148
+            ],
+            [
+              150,
+              160
+            ],
+            [
+              163,
+              163
+            ],
+            [
+              165,
+              170
+            ],
+            [
+              172,
+              182
+            ],
+            [
+              184,
+              186
+            ],
+            [
+              189,
+              189
+            ],
+            [
+              196,
+              211
+            ],
+            [
+              213,
+              215
+            ],
+            [
+              218,
+              220
+            ],
+            [
+              222,
+              223
+            ],
+            [
+              225,
+              241
+            ],
+            [
+              243,
+              244
+            ],
+            [
+              249,
+              264
+            ],
+            [
+              266,
+              267
+            ],
+            [
+              270,
+              273
+            ],
+            [
+              275,
+              278
+            ],
+            [
+              281,
+              282
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/check_patch_yaml.py": {
+          "line_total": 52,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 28,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 6,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              18,
+              18
+            ],
+            [
+              20,
+              22
+            ],
+            [
+              25,
+              28
+            ],
+            [
+              30,
+              33
+            ],
+            [
+              35,
+              44
+            ],
+            [
+              46,
+              47
+            ],
+            [
+              49,
+              52
+            ],
+            [
+              54,
+              55
+            ],
+            [
+              57,
+              60
+            ],
+            [
+              62,
+              62
+            ],
+            [
+              65,
+              70
+            ],
+            [
+              72,
+              79
+            ],
+            [
+              82,
+              83
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/check_plugin_pack.py": {
+          "line_total": 57,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 26,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 10,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              12,
+              12
+            ],
+            [
+              14,
+              18
+            ],
+            [
+              20,
+              21
+            ],
+            [
+              24,
+              28
+            ],
+            [
+              30,
+              32
+            ],
+            [
+              35,
+              48
+            ],
+            [
+              50,
+              52
+            ],
+            [
+              54,
+              58
+            ],
+            [
+              60,
+              62
+            ],
+            [
+              64,
+              68
+            ],
+            [
+              70,
+              77
+            ],
+            [
+              80,
+              81
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/gen_ablation_script.py": {
+          "line_total": 323,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 80,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 92,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              21,
+              21
+            ],
+            [
+              23,
+              27
+            ],
+            [
+              29,
+              31
+            ],
+            [
+              33,
+              35
+            ],
+            [
+              38,
+              43
+            ],
+            [
+              45,
+              45
+            ],
+            [
+              51,
+              51
+            ],
+            [
+              53,
+              64
+            ],
+            [
+              68,
+              77
+            ],
+            [
+              80,
+              81
+            ],
+            [
+              84,
+              84
+            ],
+            [
+              86,
+              96
+            ],
+            [
+              99,
+              100
+            ],
+            [
+              103,
+              108
+            ],
+            [
+              111,
+              111
+            ],
+            [
+              113,
+              118
+            ],
+            [
+              120,
+              122
+            ],
+            [
+              124,
+              124
+            ],
+            [
+              126,
+              138
+            ],
+            [
+              142,
+              146
+            ],
+            [
+              149,
+              152
+            ],
+            [
+              155,
+              159
+            ],
+            [
+              162,
+              167
+            ],
+            [
+              170,
+              172
+            ],
+            [
+              175,
+              177
+            ],
+            [
+              180,
+              182
+            ],
+            [
+              185,
+              187
+            ],
+            [
+              190,
+              195
+            ],
+            [
+              198,
+              200
+            ],
+            [
+              203,
+              205
+            ],
+            [
+              208,
+              213
+            ],
+            [
+              216,
+              218
+            ],
+            [
+              220,
+              221
+            ],
+            [
+              226,
+              236
+            ],
+            [
+              240,
+              240
+            ],
+            [
+              245,
+              255
+            ],
+            [
+              258,
+              258
+            ],
+            [
+              260,
+              264
+            ],
+            [
+              269,
+              271
+            ],
+            [
+              274,
+              278
+            ],
+            [
+              281,
+              298
+            ],
+            [
+              301,
+              313
+            ],
+            [
+              316,
+              329
+            ],
+            [
+              332,
+              351
+            ],
+            [
+              353,
+              357
+            ],
+            [
+              360,
+              360
+            ],
+            [
+              363,
+              378
+            ],
+            [
+              380,
+              391
+            ],
+            [
+              394,
+              406
+            ],
+            [
+              408,
+              411
+            ],
+            [
+              414,
+              416
+            ],
+            [
+              419,
+              423
+            ],
+            [
+              425,
+              430
+            ],
+            [
+              432,
+              441
+            ],
+            [
+              444,
+              445
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/gen_contract.py": {
+          "line_total": 28,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 4,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 0,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              12,
+              12
+            ],
+            [
+              14,
+              17
+            ],
+            [
+              19,
+              20
+            ],
+            [
+              22,
+              22
+            ],
+            [
+              25,
+              29
+            ],
+            [
+              31,
+              34
+            ],
+            [
+              36,
+              40
+            ],
+            [
+              42,
+              44
+            ],
+            [
+              47,
+              48
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/gen_demo_report.py": {
+          "line_total": 755,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 104,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 260,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              20,
+              20
+            ],
+            [
+              22,
+              26
+            ],
+            [
+              28,
+              30
+            ],
+            [
+              33,
+              33
+            ],
+            [
+              39,
+              40
+            ],
+            [
+              42,
+              43
+            ],
+            [
+              48,
+              52
+            ],
+            [
+              55,
+              59
+            ],
+            [
+              62,
+              63
+            ],
+            [
+              66,
+              66
+            ],
+            [
+              68,
+              69
+            ],
+            [
+              72,
+              73
+            ],
+            [
+              76,
+              81
+            ],
+            [
+              86,
+              86
+            ],
+            [
+              88,
+              102
+            ],
+            [
+              104,
+              106
+            ],
+            [
+              109,
+              125
+            ],
+            [
+              128,
+              136
+            ],
+            [
+              139,
+              156
+            ],
+            [
+              158,
+              161
+            ],
+            [
+              163,
+              164
+            ],
+            [
+              168,
+              174
+            ],
+            [
+              179,
+              183
+            ],
+            [
+              185,
+              187
+            ],
+            [
+              189,
+              197
+            ],
+            [
+              199,
+              199
+            ],
+            [
+              201,
+              205
+            ],
+            [
+              207,
+              208
+            ],
+            [
+              210,
+              218
+            ],
+            [
+              220,
+              228
+            ],
+            [
+              232,
+              240
+            ],
+            [
+              242,
+              256
+            ],
+            [
+              258,
+              268
+            ],
+            [
+              270,
+              282
+            ],
+            [
+              288,
+              288
+            ],
+            [
+              290,
+              292
+            ],
+            [
+              295,
+              298
+            ],
+            [
+              300,
+              310
+            ],
+            [
+              314,
+              326
+            ],
+            [
+              329,
+              339
+            ],
+            [
+              345,
+              346
+            ],
+            [
+              348,
+              348
+            ],
+            [
+              351,
+              359
+            ],
+            [
+              363,
+              370
+            ],
+            [
+              373,
+              373
+            ],
+            [
+              375,
+              381
+            ],
+            [
+              383,
+              384
+            ],
+            [
+              386,
+              388
+            ],
+            [
+              391,
+              406
+            ],
+            [
+              408,
+              408
+            ],
+            [
+              411,
+              425
+            ],
+            [
+              427,
+              429
+            ],
+            [
+              432,
+              432
+            ],
+            [
+              435,
+              446
+            ],
+            [
+              448,
+              452
+            ],
+            [
+              454,
+              460
+            ],
+            [
+              462,
+              462
+            ],
+            [
+              465,
+              472
+            ],
+            [
+              475,
+              477
+            ],
+            [
+              480,
+              480
+            ],
+            [
+              482,
+              482
+            ],
+            [
+              484,
+              484
+            ],
+            [
+              487,
+              495
+            ],
+            [
+              497,
+              498
+            ],
+            [
+              500,
+              501
+            ],
+            [
+              504,
+              508
+            ],
+            [
+              510,
+              511
+            ],
+            [
+              514,
+              514
+            ],
+            [
+              516,
+              519
+            ],
+            [
+              521,
+              522
+            ],
+            [
+              524,
+              524
+            ],
+            [
+              526,
+              527
+            ],
+            [
+              529,
+              531
+            ],
+            [
+              534,
+              542
+            ],
+            [
+              544,
+              545
+            ],
+            [
+              547,
+              549
+            ],
+            [
+              551,
+              552
+            ],
+            [
+              554,
+              558
+            ],
+            [
+              560,
+              560
+            ],
+            [
+              562,
+              571
+            ],
+            [
+              573,
+              573
+            ],
+            [
+              576,
+              583
+            ],
+            [
+              585,
+              591
+            ],
+            [
+              593,
+              594
+            ],
+            [
+              596,
+              608
+            ],
+            [
+              610,
+              612
+            ],
+            [
+              614,
+              615
+            ],
+            [
+              617,
+              617
+            ],
+            [
+              620,
+              624
+            ],
+            [
+              626,
+              631
+            ],
+            [
+              633,
+              633
+            ],
+            [
+              636,
+              643
+            ],
+            [
+              646,
+              653
+            ],
+            [
+              655,
+              656
+            ],
+            [
+              658,
+              659
+            ],
+            [
+              661,
+              661
+            ],
+            [
+              663,
+              663
+            ],
+            [
+              666,
+              673
+            ],
+            [
+              676,
+              676
+            ],
+            [
+              678,
+              685
+            ],
+            [
+              687,
+              690
+            ],
+            [
+              692,
+              703
+            ],
+            [
+              705,
+              705
+            ],
+            [
+              707,
+              712
+            ],
+            [
+              717,
+              730
+            ],
+            [
+              732,
+              736
+            ],
+            [
+              739,
+              742
+            ],
+            [
+              744,
+              756
+            ],
+            [
+              758,
+              762
+            ],
+            [
+              764,
+              765
+            ],
+            [
+              768,
+              780
+            ],
+            [
+              783,
+              783
+            ],
+            [
+              786,
+              793
+            ],
+            [
+              796,
+              796
+            ],
+            [
+              799,
+              799
+            ],
+            [
+              872,
+              880
+            ],
+            [
+              885,
+              888
+            ],
+            [
+              893,
+              896
+            ],
+            [
+              898,
+              900
+            ],
+            [
+              903,
+              904
+            ],
+            [
+              906,
+              908
+            ],
+            [
+              910,
+              911
+            ],
+            [
+              914,
+              914
+            ],
+            [
+              916,
+              921
+            ],
+            [
+              923,
+              933
+            ],
+            [
+              937,
+              937
+            ],
+            [
+              940,
+              940
+            ],
+            [
+              942,
+              946
+            ],
+            [
+              951,
+              953
+            ],
+            [
+              968,
+              969
+            ],
+            [
+              972,
+              975
+            ],
+            [
+              979,
+              981
+            ],
+            [
+              983,
+              986
+            ],
+            [
+              988,
+              988
+            ],
+            [
+              991,
+              994
+            ],
+            [
+              998,
+              1002
+            ],
+            [
+              1009,
+              1010
+            ],
+            [
+              1013,
+              1016
+            ],
+            [
+              1019,
+              1021
+            ],
+            [
+              1024,
+              1027
+            ],
+            [
+              1030,
+              1034
+            ],
+            [
+              1039,
+              1040
+            ],
+            [
+              1042,
+              1044
+            ],
+            [
+              1048,
+              1049
+            ],
+            [
+              1051,
+              1052
+            ],
+            [
+              1057,
+              1066
+            ],
+            [
+              1068,
+              1072
+            ],
+            [
+              1074,
+              1085
+            ],
+            [
+              1087,
+              1093
+            ],
+            [
+              1095,
+              1102
+            ],
+            [
+              1104,
+              1110
+            ],
+            [
+              1113,
+              1114
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/gen_impl_status.py": {
+          "line_total": 148,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 28,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 44,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              11,
+              11
+            ],
+            [
+              13,
+              17
+            ],
+            [
+              19,
+              20
+            ],
+            [
+              23,
+              81
+            ],
+            [
+              85,
+              89
+            ],
+            [
+              92,
+              97
+            ],
+            [
+              100,
+              101
+            ],
+            [
+              104,
+              105
+            ],
+            [
+              109,
+              132
+            ],
+            [
+              134,
+              135
+            ],
+            [
+              137,
+              143
+            ],
+            [
+              145,
+              145
+            ],
+            [
+              148,
+              155
+            ],
+            [
+              157,
+              157
+            ],
+            [
+              166,
+              166
+            ],
+            [
+              169,
+              184
+            ],
+            [
+              186,
+              188
+            ],
+            [
+              191,
+              192
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/gen_replay_set.py": {
+          "line_total": 173,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 2,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 30,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              23,
+              23
+            ],
+            [
+              25,
+              26
+            ],
+            [
+              28,
+              31
+            ],
+            [
+              33,
+              33
+            ],
+            [
+              36,
+              42
+            ],
+            [
+              44,
+              45
+            ],
+            [
+              48,
+              51
+            ],
+            [
+              53,
+              53
+            ],
+            [
+              55,
+              59
+            ],
+            [
+              61,
+              61
+            ],
+            [
+              63,
+              63
+            ],
+            [
+              66,
+              77
+            ],
+            [
+              80,
+              84
+            ],
+            [
+              87,
+              96
+            ],
+            [
+              99,
+              109
+            ],
+            [
+              112,
+              121
+            ],
+            [
+              124,
+              135
+            ],
+            [
+              140,
+              153
+            ],
+            [
+              161,
+              182
+            ],
+            [
+              186,
+              200
+            ],
+            [
+              204,
+              217
+            ],
+            [
+              219,
+              220
+            ],
+            [
+              223,
+              236
+            ],
+            [
+              239,
+              240
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/report_console.py": {
+          "line_total": 112,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 16,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 68,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              14,
+              14
+            ],
+            [
+              16,
+              21
+            ],
+            [
+              23,
+              24
+            ],
+            [
+              27,
+              39
+            ],
+            [
+              42,
+              48
+            ],
+            [
+              51,
+              52
+            ],
+            [
+              55,
+              59
+            ],
+            [
+              63,
+              69
+            ],
+            [
+              71,
+              77
+            ],
+            [
+              80,
+              81
+            ],
+            [
+              83,
+              93
+            ],
+            [
+              96,
+              99
+            ],
+            [
+              102,
+              103
+            ],
+            [
+              105,
+              109
+            ],
+            [
+              111,
+              119
+            ],
+            [
+              121,
+              121
+            ],
+            [
+              123,
+              124
+            ],
+            [
+              126,
+              126
+            ],
+            [
+              172,
+              179
+            ],
+            [
+              183,
+              188
+            ],
+            [
+              190,
+              194
+            ],
+            [
+              196,
+              198
+            ],
+            [
+              201,
+              202
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/run_ablation.py": {
+          "line_total": 1254,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 200,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 664,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              25,
+              25
+            ],
+            [
+              27,
+              34
+            ],
+            [
+              36,
+              40
+            ],
+            [
+              42,
+              51
+            ],
+            [
+              53,
+              53
+            ],
+            [
+              56,
+              65
+            ],
+            [
+              67,
+              68
+            ],
+            [
+              71,
+              71
+            ],
+            [
+              74,
+              75
+            ],
+            [
+              77,
+              77
+            ],
+            [
+              82,
+              82
+            ],
+            [
+              86,
+              86
+            ],
+            [
+              95,
+              96
+            ],
+            [
+              99,
+              100
+            ],
+            [
+              103,
+              107
+            ],
+            [
+              110,
+              111
+            ],
+            [
+              114,
+              115
+            ],
+            [
+              118,
+              118
+            ],
+            [
+              123,
+              124
+            ],
+            [
+              126,
+              132
+            ],
+            [
+              134,
+              140
+            ],
+            [
+              142,
+              150
+            ],
+            [
+              152,
+              154
+            ],
+            [
+              157,
+              158
+            ],
+            [
+              160,
+              173
+            ],
+            [
+              176,
+              176
+            ],
+            [
+              178,
+              178
+            ],
+            [
+              185,
+              187
+            ],
+            [
+              189,
+              193
+            ],
+            [
+              196,
+              197
+            ],
+            [
+              199,
+              199
+            ],
+            [
+              201,
+              201
+            ],
+            [
+              205,
+              215
+            ],
+            [
+              222,
+              222
+            ],
+            [
+              229,
+              235
+            ],
+            [
+              237,
+              239
+            ],
+            [
+              246,
+              246
+            ],
+            [
+              248,
+              253
+            ],
+            [
+              256,
+              259
+            ],
+            [
+              266,
+              268
+            ],
+            [
+              276,
+              277
+            ],
+            [
+              280,
+              283
+            ],
+            [
+              286,
+              287
+            ],
+            [
+              290,
+              294
+            ],
+            [
+              297,
+              303
+            ],
+            [
+              306,
+              308
+            ],
+            [
+              311,
+              318
+            ],
+            [
+              321,
+              336
+            ],
+            [
+              339,
+              339
+            ],
+            [
+              342,
+              349
+            ],
+            [
+              352,
+              361
+            ],
+            [
+              364,
+              378
+            ],
+            [
+              380,
+              381
+            ],
+            [
+              383,
+              385
+            ],
+            [
+              387,
+              424
+            ],
+            [
+              426,
+              429
+            ],
+            [
+              437,
+              437
+            ],
+            [
+              439,
+              452
+            ],
+            [
+              455,
+              455
+            ],
+            [
+              457,
+              462
+            ],
+            [
+              465,
+              471
+            ],
+            [
+              473,
+              478
+            ],
+            [
+              481,
+              482
+            ],
+            [
+              485,
+              498
+            ],
+            [
+              500,
+              522
+            ],
+            [
+              530,
+              539
+            ],
+            [
+              541,
+              548
+            ],
+            [
+              550,
+              552
+            ],
+            [
+              555,
+              556
+            ],
+            [
+              558,
+              562
+            ],
+            [
+              564,
+              568
+            ],
+            [
+              571,
+              578
+            ],
+            [
+              580,
+              581
+            ],
+            [
+              583,
+              606
+            ],
+            [
+              610,
+              614
+            ],
+            [
+              616,
+              618
+            ],
+            [
+              622,
+              630
+            ],
+            [
+              632,
+              634
+            ],
+            [
+              636,
+              638
+            ],
+            [
+              645,
+              655
+            ],
+            [
+              657,
+              663
+            ],
+            [
+              665,
+              675
+            ],
+            [
+              677,
+              686
+            ],
+            [
+              688,
+              691
+            ],
+            [
+              696,
+              706
+            ],
+            [
+              708,
+              719
+            ],
+            [
+              721,
+              722
+            ],
+            [
+              724,
+              727
+            ],
+            [
+              731,
+              735
+            ],
+            [
+              737,
+              737
+            ],
+            [
+              741,
+              744
+            ],
+            [
+              746,
+              754
+            ],
+            [
+              756,
+              764
+            ],
+            [
+              766,
+              766
+            ],
+            [
+              771,
+              790
+            ],
+            [
+              792,
+              794
+            ],
+            [
+              796,
+              808
+            ],
+            [
+              811,
+              819
+            ],
+            [
+              828,
+              838
+            ],
+            [
+              841,
+              841
+            ],
+            [
+              844,
+              869
+            ],
+            [
+              871,
+              886
+            ],
+            [
+              893,
+              893
+            ],
+            [
+              897,
+              904
+            ],
+            [
+              907,
+              911
+            ],
+            [
+              914,
+              914
+            ],
+            [
+              925,
+              956
+            ],
+            [
+              958,
+              967
+            ],
+            [
+              970,
+              971
+            ],
+            [
+              975,
+              975
+            ],
+            [
+              977,
+              978
+            ],
+            [
+              980,
+              984
+            ],
+            [
+              991,
+              995
+            ],
+            [
+              998,
+              1018
+            ],
+            [
+              1021,
+              1044
+            ],
+            [
+              1052,
+              1069
+            ],
+            [
+              1072,
+              1077
+            ],
+            [
+              1080,
+              1085
+            ],
+            [
+              1088,
+              1088
+            ],
+            [
+              1090,
+              1100
+            ],
+            [
+              1104,
+              1108
+            ],
+            [
+              1110,
+              1110
+            ],
+            [
+              1113,
+              1126
+            ],
+            [
+              1129,
+              1143
+            ],
+            [
+              1145,
+              1145
+            ],
+            [
+              1147,
+              1151
+            ],
+            [
+              1153,
+              1156
+            ],
+            [
+              1158,
+              1167
+            ],
+            [
+              1169,
+              1169
+            ],
+            [
+              1171,
+              1174
+            ],
+            [
+              1177,
+              1177
+            ],
+            [
+              1182,
+              1185
+            ],
+            [
+              1188,
+              1193
+            ],
+            [
+              1197,
+              1211
+            ],
+            [
+              1215,
+              1227
+            ],
+            [
+              1231,
+              1236
+            ],
+            [
+              1239,
+              1244
+            ],
+            [
+              1247,
+              1250
+            ],
+            [
+              1252,
+              1252
+            ],
+            [
+              1255,
+              1255
+            ],
+            [
+              1257,
+              1285
+            ],
+            [
+              1287,
+              1287
+            ],
+            [
+              1289,
+              1292
+            ],
+            [
+              1294,
+              1328
+            ],
+            [
+              1330,
+              1346
+            ],
+            [
+              1348,
+              1348
+            ],
+            [
+              1351,
+              1357
+            ],
+            [
+              1359,
+              1364
+            ],
+            [
+              1367,
+              1369
+            ],
+            [
+              1371,
+              1372
+            ],
+            [
+              1375,
+              1390
+            ],
+            [
+              1392,
+              1393
+            ],
+            [
+              1396,
+              1414
+            ],
+            [
+              1417,
+              1438
+            ],
+            [
+              1440,
+              1443
+            ],
+            [
+              1447,
+              1458
+            ],
+            [
+              1461,
+              1472
+            ],
+            [
+              1474,
+              1480
+            ],
+            [
+              1482,
+              1496
+            ],
+            [
+              1498,
+              1506
+            ],
+            [
+              1508,
+              1513
+            ],
+            [
+              1534,
+              1537
+            ],
+            [
+              1543,
+              1543
+            ],
+            [
+              1548,
+              1551
+            ],
+            [
+              1553,
+              1557
+            ],
+            [
+              1560,
+              1572
+            ],
+            [
+              1575,
+              1582
+            ],
+            [
+              1584,
+              1584
+            ],
+            [
+              1587,
+              1589
+            ],
+            [
+              1592,
+              1603
+            ],
+            [
+              1605,
+              1615
+            ],
+            [
+              1617,
+              1628
+            ],
+            [
+              1631,
+              1638
+            ],
+            [
+              1640,
+              1660
+            ],
+            [
+              1663,
+              1664
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/run_chaos.py": {
+          "line_total": 1144,
+          "line_covered": 619,
+          "line_pct": 54.11,
+          "branch_total": 318,
+          "branch_covered": 157,
+          "branch_pct": 49.37,
+          "branch_same_line_excluded": 516,
+          "fallthrough_approx": 4,
+          "uncovered_lines": [
+            [
+              47,
+              48
+            ],
+            [
+              94,
+              94
+            ],
+            [
+              98,
+              98
+            ],
+            [
+              105,
+              105
+            ],
+            [
+              111,
+              111
+            ],
+            [
+              114,
+              116
+            ],
+            [
+              120,
+              122
+            ],
+            [
+              128,
+              131
+            ],
+            [
+              135,
+              137
+            ],
+            [
+              225,
+              225
+            ],
+            [
+              235,
+              236
+            ],
+            [
+              239,
+              240
+            ],
+            [
+              242,
+              242
+            ],
+            [
+              295,
+              295
+            ],
+            [
+              297,
+              297
+            ],
+            [
+              301,
+              302
+            ],
+            [
+              306,
+              306
+            ],
+            [
+              308,
+              308
+            ],
+            [
+              332,
+              332
+            ],
+            [
+              334,
+              334
+            ],
+            [
+              364,
+              364
+            ],
+            [
+              384,
+              385
+            ],
+            [
+              396,
+              397
+            ],
+            [
+              399,
+              400
+            ],
+            [
+              402,
+              402
+            ],
+            [
+              404,
+              404
+            ],
+            [
+              435,
+              435
+            ],
+            [
+              437,
+              438
+            ],
+            [
+              449,
+              449
+            ],
+            [
+              451,
+              451
+            ],
+            [
+              470,
+              470
+            ],
+            [
+              472,
+              472
+            ],
+            [
+              474,
+              474
+            ],
+            [
+              495,
+              496
+            ],
+            [
+              501,
+              501
+            ],
+            [
+              503,
+              504
+            ],
+            [
+              524,
+              524
+            ],
+            [
+              540,
+              540
+            ],
+            [
+              551,
+              551
+            ],
+            [
+              558,
+              562
+            ],
+            [
+              569,
+              570
+            ],
+            [
+              578,
+              579
+            ],
+            [
+              615,
+              619
+            ],
+            [
+              624,
+              625
+            ],
+            [
+              629,
+              636
+            ],
+            [
+              641,
+              649
+            ],
+            [
+              659,
+              670
+            ],
+            [
+              678,
+              679
+            ],
+            [
+              692,
+              693
+            ],
+            [
+              695,
+              696
+            ],
+            [
+              701,
+              716
+            ],
+            [
+              718,
+              723
+            ],
+            [
+              725,
+              728
+            ],
+            [
+              734,
+              744
+            ],
+            [
+              759,
+              776
+            ],
+            [
+              778,
+              811
+            ],
+            [
+              816,
+              836
+            ],
+            [
+              838,
+              851
+            ],
+            [
+              925,
+              925
+            ],
+            [
+              935,
+              935
+            ],
+            [
+              1012,
+              1016
+            ],
+            [
+              1026,
+              1027
+            ],
+            [
+              1058,
+              1069
+            ],
+            [
+              1071,
+              1075
+            ],
+            [
+              1077,
+              1094
+            ],
+            [
+              1096,
+              1110
+            ],
+            [
+              1112,
+              1120
+            ],
+            [
+              1129,
+              1155
+            ],
+            [
+              1178,
+              1181
+            ],
+            [
+              1202,
+              1207
+            ],
+            [
+              1209,
+              1216
+            ],
+            [
+              1218,
+              1239
+            ],
+            [
+              1244,
+              1248
+            ],
+            [
+              1250,
+              1252
+            ],
+            [
+              1277,
+              1297
+            ],
+            [
+              1299,
+              1301
+            ],
+            [
+              1306,
+              1307
+            ],
+            [
+              1309,
+              1309
+            ],
+            [
+              1311,
+              1315
+            ],
+            [
+              1317,
+              1317
+            ],
+            [
+              1319,
+              1323
+            ],
+            [
+              1325,
+              1330
+            ],
+            [
+              1332,
+              1332
+            ],
+            [
+              1334,
+              1340
+            ],
+            [
+              1342,
+              1347
+            ],
+            [
+              1349,
+              1351
+            ],
+            [
+              1355,
+              1364
+            ],
+            [
+              1370,
+              1380
+            ],
+            [
+              1382,
+              1382
+            ],
+            [
+              1384,
+              1388
+            ],
+            [
+              1390,
+              1392
+            ],
+            [
+              1394,
+              1406
+            ],
+            [
+              1409,
+              1411
+            ],
+            [
+              1413,
+              1414
+            ],
+            [
+              1417,
+              1418
+            ],
+            [
+              1420,
+              1430
+            ],
+            [
+              1432,
+              1432
+            ],
+            [
+              1435,
+              1459
+            ],
+            [
+              1463,
+              1463
+            ]
+          ],
+          "fallthrough_by_line_approx": 4,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/run_gray.py": {
+          "line_total": 107,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 26,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 40,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              15,
+              15
+            ],
+            [
+              17,
+              21
+            ],
+            [
+              23,
+              24
+            ],
+            [
+              26,
+              27
+            ],
+            [
+              30,
+              36
+            ],
+            [
+              39,
+              41
+            ],
+            [
+              44,
+              49
+            ],
+            [
+              52,
+              61
+            ],
+            [
+              63,
+              67
+            ],
+            [
+              69,
+              70
+            ],
+            [
+              72,
+              76
+            ],
+            [
+              78,
+              79
+            ],
+            [
+              81,
+              92
+            ],
+            [
+              95,
+              101
+            ],
+            [
+              103,
+              107
+            ],
+            [
+              109,
+              112
+            ],
+            [
+              114,
+              123
+            ],
+            [
+              125,
+              128
+            ],
+            [
+              130,
+              141
+            ],
+            [
+              144,
+              145
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/run_learning.py": {
+          "line_total": 56,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 10,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 8,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              9,
+              9
+            ],
+            [
+              11,
+              14
+            ],
+            [
+              16,
+              17
+            ],
+            [
+              19,
+              20
+            ],
+            [
+              23,
+              31
+            ],
+            [
+              34,
+              39
+            ],
+            [
+              41,
+              45
+            ],
+            [
+              47,
+              48
+            ],
+            [
+              50,
+              54
+            ],
+            [
+              56,
+              58
+            ],
+            [
+              60,
+              61
+            ],
+            [
+              63,
+              65
+            ],
+            [
+              67,
+              75
+            ],
+            [
+              78,
+              79
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/run_loop.py": {
+          "line_total": 79,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 22,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 32,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              13,
+              13
+            ],
+            [
+              15,
+              18
+            ],
+            [
+              20,
+              21
+            ],
+            [
+              23,
+              24
+            ],
+            [
+              27,
+              29
+            ],
+            [
+              32,
+              37
+            ],
+            [
+              40,
+              44
+            ],
+            [
+              46,
+              52
+            ],
+            [
+              54,
+              58
+            ],
+            [
+              60,
+              64
+            ],
+            [
+              66,
+              90
+            ],
+            [
+              92,
+              99
+            ],
+            [
+              101,
+              103
+            ],
+            [
+              106,
+              107
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/run_pipeline.py": {
+          "line_total": 45,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 8,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 10,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              7,
+              7
+            ],
+            [
+              9,
+              12
+            ],
+            [
+              14,
+              15
+            ],
+            [
+              17,
+              18
+            ],
+            [
+              21,
+              25
+            ],
+            [
+              27,
+              29
+            ],
+            [
+              31,
+              32
+            ],
+            [
+              34,
+              36
+            ],
+            [
+              38,
+              51
+            ],
+            [
+              54,
+              59
+            ],
+            [
+              62,
+              63
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/search_params.py": {
+          "line_total": 155,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 12,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 54,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              15,
+              15
+            ],
+            [
+              17,
+              23
+            ],
+            [
+              25,
+              26
+            ],
+            [
+              28,
+              29
+            ],
+            [
+              32,
+              38
+            ],
+            [
+              41,
+              42
+            ],
+            [
+              44,
+              44
+            ],
+            [
+              47,
+              52
+            ],
+            [
+              57,
+              60
+            ],
+            [
+              63,
+              65
+            ],
+            [
+              68,
+              73
+            ],
+            [
+              75,
+              77
+            ],
+            [
+              79,
+              89
+            ],
+            [
+              91,
+              93
+            ],
+            [
+              95,
+              97
+            ],
+            [
+              100,
+              108
+            ],
+            [
+              110,
+              123
+            ],
+            [
+              125,
+              146
+            ],
+            [
+              148,
+              150
+            ],
+            [
+              152,
+              156
+            ],
+            [
+              158,
+              167
+            ],
+            [
+              169,
+              177
+            ],
+            [
+              179,
+              181
+            ],
+            [
+              183,
+              186
+            ],
+            [
+              189,
+              191
+            ],
+            [
+              193,
+              193
+            ],
+            [
+              195,
+              200
+            ],
+            [
+              202,
+              203
+            ],
+            [
+              206,
+              207
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/unfreeze_status.py": {
+          "line_total": 151,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 10,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 56,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              14,
+              14
+            ],
+            [
+              16,
+              21
+            ],
+            [
+              23,
+              24
+            ],
+            [
+              27,
+              29
+            ],
+            [
+              32,
+              45
+            ],
+            [
+              48,
+              48
+            ],
+            [
+              50,
+              63
+            ],
+            [
+              66,
+              71
+            ],
+            [
+              73,
+              80
+            ],
+            [
+              84,
+              86
+            ],
+            [
+              89,
+              91
+            ],
+            [
+              94,
+              98
+            ],
+            [
+              101,
+              111
+            ],
+            [
+              114,
+              118
+            ],
+            [
+              121,
+              129
+            ],
+            [
+              131,
+              132
+            ],
+            [
+              135,
+              156
+            ],
+            [
+              158,
+              170
+            ],
+            [
+              172,
+              172
+            ],
+            [
+              175,
+              181
+            ],
+            [
+              183,
+              189
+            ],
+            [
+              191,
+              195
+            ],
+            [
+              198,
+              199
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        },
+        "tools/verify_ablation.py": {
+          "line_total": 461,
+          "line_covered": 0,
+          "line_pct": 0.0,
+          "branch_total": 200,
+          "branch_covered": 0,
+          "branch_pct": 0.0,
+          "branch_same_line_excluded": 292,
+          "fallthrough_approx": 0,
+          "uncovered_lines": [
+            [
+              2,
+              2
+            ],
+            [
+              13,
+              13
+            ],
+            [
+              15,
+              21
+            ],
+            [
+              23,
+              27
+            ],
+            [
+              29,
+              29
+            ],
+            [
+              34,
+              34
+            ],
+            [
+              37,
+              37
+            ],
+            [
+              40,
+              40
+            ],
+            [
+              43,
+              45
+            ],
+            [
+              47,
+              48
+            ],
+            [
+              50,
+              60
+            ],
+            [
+              63,
+              64
+            ],
+            [
+              67,
+              68
+            ],
+            [
+              71,
+              72
+            ],
+            [
+              75,
+              78
+            ],
+            [
+              81,
+              85
+            ],
+            [
+              88,
+              101
+            ],
+            [
+              104,
+              109
+            ],
+            [
+              112,
+              116
+            ],
+            [
+              119,
+              144
+            ],
+            [
+              146,
+              161
+            ],
+            [
+              163,
+              185
+            ],
+            [
+              188,
+              191
+            ],
+            [
+              193,
+              207
+            ],
+            [
+              209,
+              217
+            ],
+            [
+              220,
+              249
+            ],
+            [
+              252,
+              267
+            ],
+            [
+              270,
+              276
+            ],
+            [
+              279,
+              293
+            ],
+            [
+              296,
+              321
+            ],
+            [
+              324,
+              344
+            ],
+            [
+              346,
+              350
+            ],
+            [
+              353,
+              361
+            ],
+            [
+              363,
+              382
+            ],
+            [
+              384,
+              390
+            ],
+            [
+              393,
+              412
+            ],
+            [
+              415,
+              416
+            ],
+            [
+              419,
+              429
+            ],
+            [
+              432,
+              457
+            ],
+            [
+              460,
+              462
+            ],
+            [
+              465,
+              470
+            ],
+            [
+              473,
+              490
+            ],
+            [
+              492,
+              497
+            ],
+            [
+              499,
+              502
+            ],
+            [
+              505,
+              513
+            ],
+            [
+              515,
+              519
+            ],
+            [
+              521,
+              528
+            ],
+            [
+              530,
+              542
+            ],
+            [
+              545,
+              549
+            ],
+            [
+              552,
+              553
+            ]
+          ],
+          "fallthrough_by_line_approx": 0,
+          "note": "分支 = 3.12 条件跳转的两个目的地；taken 侧由 BRANCH 事件精确判定，fallthrough 侧 = BRANCH 事件或目的地行已覆盖（近似，可能偏高）；同行目的地已剔除"
+        }
+      },
+      "limitations": [
+        "fallthrough upper-bound approximation",
+        "same-line destinations excluded",
+        "DISABLE policy -> boolean coverage only"
+      ]
+    },
+    "js": {
+      "method": "NODE_V8_COVERAGE + 3 .mjs suites with --assert; line = innermost range count>0; block = isBlockCoverage ranges",
+      "total": {
+        "executable_lines": 1789,
+        "covered_lines": 1701,
+        "line_pct": 95.08,
+        "block_total": 1430,
+        "block_covered": 947,
+        "block_pct": 66.22,
+        "files": 4
+      },
+      "per_file": {
+        "control.js": {
+          "executable_lines": 360,
+          "covered_lines": 341,
+          "line_pct": 94.72,
+          "block_total": 270,
+          "block_covered": 202,
+          "block_pct": 74.81,
+          "uncovered_lines": [
+            [
+              57,
+              59
+            ],
+            [
+              136,
+              140
+            ],
+            [
+              175,
+              177
+            ],
+            [
+              181,
+              182
+            ],
+            [
+              217,
+              218
+            ],
+            [
+              220,
+              223
+            ]
+          ],
+          "uncovered_blocks": [
+            [
+              1935,
+              1951,
+              0
+            ],
+            [
+              1990,
+              2001,
+              0
+            ],
+            [
+              2035,
+              2045,
+              0
+            ],
+            [
+              2369,
+              2505,
+              0
+            ],
+            [
+              2776,
+              2779,
+              0
+            ],
+            [
+              4143,
+              4147,
+              0
+            ],
+            [
+              4856,
+              4867,
+              0
+            ],
+            [
+              6682,
+              6803,
+              0
+            ],
+            [
+              6958,
+              7039,
+              0
+            ],
+            [
+              9481,
+              9485,
+              0
+            ],
+            [
+              9700,
+              9704,
+              0
+            ],
+            [
+              10621,
+              10625,
+              0
+            ],
+            [
+              13217,
+              13221,
+              0
+            ],
+            [
+              13284,
+              13288,
+              0
+            ],
+            [
+              13376,
+              13380,
+              0
+            ],
+            [
+              13473,
+              13477,
+              0
+            ],
+            [
+              13560,
+              13566,
+              0
+            ],
+            [
+              13950,
+              13995,
+              0
+            ],
+            [
+              14094,
+              14114,
+              0
+            ],
+            [
+              14130,
+              14148,
+              0
+            ],
+            [
+              14150,
+              14170,
+              0
+            ],
+            [
+              14228,
+              14248,
+              0
+            ],
+            [
+              14280,
+              14300,
+              0
+            ],
+            [
+              14358,
+              14378,
+              0
+            ],
+            [
+              14450,
+              14470,
+              0
+            ],
+            [
+              1990,
+              2001,
+              0
+            ],
+            [
+              2405,
+              2465,
+              0
+            ],
+            [
+              2467,
+              2505,
+              0
+            ],
+            [
+              2776,
+              2779,
+              0
+            ],
+            [
+              4143,
+              4147,
+              0
+            ],
+            [
+              4856,
+              4867,
+              0
+            ],
+            [
+              5228,
+              5232,
+              0
+            ],
+            [
+              8608,
+              8612,
+              0
+            ],
+            [
+              9481,
+              9485,
+              0
+            ],
+            [
+              9700,
+              9704,
+              0
+            ],
+            [
+              13217,
+              13221,
+              0
+            ],
+            [
+              1935,
+              1951,
+              0
+            ],
+            [
+              1990,
+              2001,
+              0
+            ],
+            [
+              2035,
+              2045,
+              0
+            ],
+            [
+              2369,
+              2505,
+              0
+            ],
+            [
+              2776,
+              2779,
+              0
+            ],
+            [
+              4143,
+              4147,
+              0
+            ],
+            [
+              4593,
+              4685,
+              0
+            ],
+            [
+              4778,
+              4921,
+              0
+            ],
+            [
+              6682,
+              6803,
+              0
+            ],
+            [
+              6958,
+              7039,
+              0
+            ],
+            [
+              7137,
+              7156,
+              0
+            ],
+            [
+              7192,
+              7208,
+              0
+            ],
+            [
+              7748,
+              7778,
+              0
+            ],
+            [
+              9481,
+              9485,
+              0
+            ],
+            [
+              9700,
+              9704,
+              0
+            ],
+            [
+              10621,
+              10625,
+              0
+            ],
+            [
+              13217,
+              13221,
+              0
+            ],
+            [
+              13284,
+              13288,
+              0
+            ],
+            [
+              13376,
+              13380,
+              0
+            ],
+            [
+              13473,
+              13477,
+              0
+            ],
+            [
+              13560,
+              13566,
+              0
+            ],
+            [
+              13888,
+              14074,
+              0
+            ],
+            [
+              14094,
+              14114,
+              0
+            ],
+            [
+              14130,
+              14148,
+              0
+            ],
+            [
+              14150,
+              14170,
+              0
+            ],
+            [
+              14228,
+              14248,
+              0
+            ],
+            [
+              14280,
+              14300,
+              0
+            ],
+            [
+              14358,
+              14378,
+              0
+            ],
+            [
+              14420,
+              14448,
+              0
+            ],
+            [
+              14450,
+              14470,
+              0
+            ],
+            [
+              14584,
+              14620,
+              0
+            ],
+            [
+              14658,
+              14667,
+              0
+            ]
+          ]
+        },
+        "goalrelation.js": {
+          "executable_lines": 181,
+          "covered_lines": 163,
+          "line_pct": 90.06,
+          "block_total": 144,
+          "block_covered": 103,
+          "block_pct": 71.53,
+          "uncovered_lines": [
+            [
+              87,
+              97
+            ],
+            [
+              122,
+              124
+            ],
+            [
+              136,
+              139
+            ]
+          ],
+          "uncovered_blocks": [
+            [
+              1592,
+              1609,
+              0
+            ],
+            [
+              1639,
+              1644,
+              0
+            ],
+            [
+              1733,
+              1744,
+              0
+            ],
+            [
+              2763,
+              2774,
+              0
+            ],
+            [
+              2776,
+              2884,
+              0
+            ],
+            [
+              2921,
+              2932,
+              0
+            ],
+            [
+              2934,
+              3223,
+              0
+            ],
+            [
+              1861,
+              1868,
+              0
+            ],
+            [
+              3502,
+              3510,
+              0
+            ],
+            [
+              3879,
+              3900,
+              0
+            ],
+            [
+              3930,
+              3935,
+              0
+            ],
+            [
+              4045,
+              4106,
+              0
+            ],
+            [
+              4503,
+              4632,
+              0
+            ],
+            [
+              5610,
+              5621,
+              0
+            ],
+            [
+              5685,
+              5691,
+              0
+            ],
+            [
+              5899,
+              5911,
+              0
+            ],
+            [
+              5935,
+              5940,
+              0
+            ],
+            [
+              6196,
+              6232,
+              0
+            ],
+            [
+              6314,
+              6324,
+              0
+            ],
+            [
+              6533,
+              6538,
+              0
+            ],
+            [
+              6591,
+              6615,
+              0
+            ],
+            [
+              1592,
+              1609,
+              0
+            ],
+            [
+              1639,
+              1644,
+              0
+            ],
+            [
+              1733,
+              1744,
+              0
+            ],
+            [
+              2397,
+              2404,
+              0
+            ],
+            [
+              2763,
+              2774,
+              0
+            ],
+            [
+              2776,
+              2884,
+              0
+            ],
+            [
+              3029,
+              3147,
+              0
+            ],
+            [
+              1861,
+              1868,
+              0
+            ],
+            [
+              3502,
+              3510,
+              0
+            ],
+            [
+              3879,
+              3900,
+              0
+            ],
+            [
+              3930,
+              3935,
+              0
+            ],
+            [
+              4045,
+              4106,
+              0
+            ],
+            [
+              4652,
+              4725,
+              0
+            ],
+            [
+              5610,
+              5621,
+              0
+            ],
+            [
+              5685,
+              5691,
+              0
+            ],
+            [
+              5899,
+              5911,
+              0
+            ],
+            [
+              5935,
+              5940,
+              0
+            ],
+            [
+              6314,
+              6324,
+              0
+            ],
+            [
+              6533,
+              6538,
+              0
+            ],
+            [
+              6591,
+              6615,
+              0
+            ]
+          ]
+        },
+        "index.js": {
+          "executable_lines": 1066,
+          "covered_lines": 1018,
+          "line_pct": 95.5,
+          "block_total": 911,
+          "block_covered": 583,
+          "block_pct": 64.0,
+          "uncovered_lines": [
+            [
+              108,
+              116
+            ],
+            [
+              351,
+              353
+            ],
+            [
+              394,
+              395
+            ],
+            [
+              507,
+              509
+            ],
+            [
+              515,
+              516
+            ],
+            [
+              521,
+              523
+            ],
+            [
+              618,
+              620
+            ],
+            [
+              736,
+              754
+            ],
+            [
+              934,
+              935
+            ],
+            [
+              966,
+              966
+            ],
+            [
+              985,
+              985
+            ]
+          ],
+          "uncovered_blocks": [
+            [
+              2390,
+              2423,
+              0
+            ],
+            [
+              2833,
+              2851,
+              0
+            ],
+            [
+              3001,
+              3026,
+              0
+            ],
+            [
+              3265,
+              3287,
+              0
+            ],
+            [
+              3735,
+              3757,
+              0
+            ],
+            [
+              4226,
+              4231,
+              0
+            ],
+            [
+              4501,
+              4510,
+              0
+            ],
+            [
+              4642,
+              4646,
+              0
+            ],
+            [
+              4816,
+              4821,
+              0
+            ],
+            [
+              4856,
+              4862,
+              0
+            ],
+            [
+              4899,
+              4905,
+              0
+            ],
+            [
+              5043,
+              5108,
+              0
+            ],
+            [
+              5430,
+              5434,
+              0
+            ],
+            [
+              5928,
+              5934,
+              0
+            ],
+            [
+              5952,
+              5961,
+              0
+            ],
+            [
+              6026,
+              6030,
+              0
+            ],
+            [
+              6566,
+              6571,
+              0
+            ],
+            [
+              6656,
+              6661,
+              0
+            ],
+            [
+              6715,
+              6724,
+              0
+            ],
+            [
+              6749,
+              6760,
+              0
+            ],
+            [
+              6776,
+              6785,
+              0
+            ],
+            [
+              6823,
+              6828,
+              0
+            ],
+            [
+              6870,
+              6875,
+              0
+            ],
+            [
+              6909,
+              6918,
+              0
+            ],
+            [
+              7186,
+              7191,
+              0
+            ],
+            [
+              7878,
+              7885,
+              0
+            ],
+            [
+              7942,
+              7951,
+              0
+            ],
+            [
+              7977,
+              8044,
+              0
+            ],
+            [
+              8102,
+              8110,
+              0
+            ],
+            [
+              9915,
+              9924,
+              0
+            ],
+            [
+              10039,
+              10043,
+              0
+            ],
+            [
+              10051,
+              10070,
+              0
+            ],
+            [
+              10342,
+              10347,
+              0
+            ],
+            [
+              10927,
+              10932,
+              0
+            ],
+            [
+              10947,
+              10975,
+              0
+            ],
+            [
+              11152,
+              11157,
+              0
+            ],
+            [
+              39769,
+              39857,
+              0
+            ],
+            [
+              11672,
+              11690,
+              0
+            ],
+            [
+              11913,
+              11918,
+              0
+            ],
+            [
+              12312,
+              12317,
+              0
+            ],
+            [
+              12442,
+              12447,
+              0
+            ],
+            [
+              13053,
+              13057,
+              0
+            ],
+            [
+              13084,
+              13203,
+              0
+            ],
+            [
+              13804,
+              13809,
+              0
+            ],
+            [
+              14011,
+              14015,
+              0
+            ],
+            [
+              14154,
+              14163,
+              0
+            ],
+            [
+              14204,
+              14210,
+              0
+            ],
+            [
+              14225,
+              14230,
+              0
+            ],
+            [
+              14299,
+              14304,
+              0
+            ],
+            [
+              14442,
+              14469,
+              0
+            ],
+            [
+              14550,
+              14560,
+              0
+            ],
+            [
+              14692,
+              14764,
+              0
+            ],
+            [
+              15145,
+              15155,
+              0
+            ],
+            [
+              15325,
+              15330,
+              0
+            ],
+            [
+              15342,
+              15351,
+              0
+            ],
+            [
+              16707,
+              16731,
+              0
+            ],
+            [
+              17636,
+              17641,
+              0
+            ],
+            [
+              18291,
+              18295,
+              0
+            ],
+            [
+              19362,
+              19375,
+              0
+            ],
+            [
+              19948,
+              20044,
+              0
+            ],
+            [
+              19834,
+              19885,
+              0
+            ],
+            [
+              20295,
+              20313,
+              0
+            ],
+            [
+              20314,
+              20321,
+              0
+            ],
+            [
+              20368,
+              20374,
+              0
+            ],
+            [
+              20602,
+              20606,
+              0
+            ],
+            [
+              22390,
+              22423,
+              0
+            ],
+            [
+              23034,
+              23045,
+              0
+            ],
+            [
+              23109,
+              23113,
+              0
+            ],
+            [
+              24463,
+              24472,
+              0
+            ],
+            [
+              24562,
+              24724,
+              0
+            ],
+            [
+              25723,
+              25728,
+              0
+            ],
+            [
+              25990,
+              25999,
+              0
+            ],
+            [
+              26636,
+              26661,
+              0
+            ],
+            [
+              26849,
+              26856,
+              0
+            ],
+            [
+              26986,
+              26993,
+              0
+            ],
+            [
+              27052,
+              27056,
+              0
+            ],
+            [
+              27626,
+              27657,
+              0
+            ],
+            [
+              27803,
+              27846,
+              0
+            ],
+            [
+              28208,
+              28213,
+              0
+            ],
+            [
+              28572,
+              28576,
+              0
+            ]
+          ]
+        },
+        "memorywriter.js": {
+          "executable_lines": 182,
+          "covered_lines": 179,
+          "line_pct": 98.35,
+          "block_total": 105,
+          "block_covered": 59,
+          "block_pct": 56.19,
+          "uncovered_lines": [
+            [
+              71,
+              73
+            ]
+          ],
+          "uncovered_blocks": [
+            [
+              567,
+              572,
+              0
+            ],
+            [
+              727,
+              748,
+              0
+            ],
+            [
+              786,
+              791,
+              0
+            ],
+            [
+              811,
+              844,
+              0
+            ],
+            [
+              883,
+              889,
+              0
+            ],
+            [
+              943,
+              970,
+              0
+            ],
+            [
+              999,
+              1004,
+              0
+            ],
+            [
+              1014,
+              1040,
+              0
+            ],
+            [
+              2458,
+              2463,
+              0
+            ],
+            [
+              2584,
+              2589,
+              0
+            ],
+            [
+              2653,
+              2805,
+              0
+            ],
+            [
+              3240,
+              3245,
+              0
+            ],
+            [
+              3279,
+              3284,
+              0
+            ],
+            [
+              3314,
+              3319,
+              0
+            ],
+            [
+              3639,
+              3651,
+              0
+            ],
+            [
+              3947,
+              3956,
+              0
+            ],
+            [
+              4035,
+              4040,
+              0
+            ],
+            [
+              4111,
+              4116,
+              0
+            ],
+            [
+              4146,
+              4155,
+              0
+            ],
+            [
+              4186,
+              4191,
+              0
+            ],
+            [
+              4219,
+              4228,
+              0
+            ],
+            [
+              4869,
+              4889,
+              0
+            ],
+            [
+              5948,
+              5953,
+              0
+            ],
+            [
+              5987,
+              5992,
+              0
+            ],
+            [
+              6120,
+              6125,
+              0
+            ],
+            [
+              6278,
+              6301,
+              0
+            ],
+            [
+              6325,
+              6356,
+              0
+            ],
+            [
+              6752,
+              6763,
+              0
+            ],
+            [
+              567,
+              572,
+              0
+            ],
+            [
+              786,
+              791,
+              0
+            ],
+            [
+              883,
+              889,
+              0
+            ],
+            [
+              999,
+              1004,
+              0
+            ],
+            [
+              1014,
+              1040,
+              0
+            ],
+            [
+              2458,
+              2463,
+              0
+            ],
+            [
+              2584,
+              2589,
+              0
+            ],
+            [
+              2756,
+              2761,
+              0
+            ],
+            [
+              3240,
+              3245,
+              0
+            ],
+            [
+              3279,
+              3284,
+              0
+            ],
+            [
+              3314,
+              3319,
+              0
+            ],
+            [
+              3639,
+              3651,
+              0
+            ],
+            [
+              3947,
+              3956,
+              0
+            ],
+            [
+              3994,
+              4003,
+              0
+            ],
+            [
+              4035,
+              4040,
+              0
+            ],
+            [
+              4078,
+              4116,
+              0
+            ],
+            [
+              4146,
+              4191,
+              0
+            ],
+            [
+              4219,
+              4690,
+              0
+            ]
+          ]
+        }
+      },
+      "limitations": [
+        "block coverage approximates branches",
+        "V8 function/block granularity differs from source branches"
+      ]
+    }
+  },
+  "fake_or_weak_assertions": [
+    {
+      "file": "tests/test_astrbot_adapter.py",
+      "line": 36,
+      "issue": "tautological check(..., True)",
+      "rating": "TAUTOLOGY"
+    },
+    {
+      "file": "tests/test_control.py",
+      "line": 415,
+      "issue": "explain expected from impl constant table UCA (oracle self-proof)",
+      "rating": "WEAK"
+    },
+    {
+      "file": "tests/test_control.py",
+      "line": 448,
+      "issue": "substring check on impl constant table",
+      "rating": "WEAK"
+    },
+    {
+      "file": "tests/test_control.py",
+      "line": 262,
+      "issue": "threshold input derived from audited cfg (literal fallback exists)",
+      "rating": "WEAK"
+    },
+    {
+      "file": "tests/test_gray.py",
+      "line": 49,
+      "issue": "20<=r01<=60 loose range instead of exact ratio",
+      "rating": "WEAK"
+    },
+    {
+      "file": "tests/test_control.py",
+      "line": 242,
+      "issue": ">0.0 proves only non-negative",
+      "rating": "WEAK"
+    },
+    {
+      "file": "tests/test_pipeline.py",
+      "line": 65,
+      "issue": ">=0.60 loose threshold",
+      "rating": "WEAK"
+    },
+    {
+      "file": "tests/test_learning.py",
+      "line": 59,
+      "issue": "sha256 equality with no concrete expectation",
+      "rating": "WEAK"
+    },
+    {
+      "file": "tests/test_run_chaos.py",
+      "line": 164,
+      "issue": "uses impl function to judge impl data dir",
+      "rating": "WEAK"
+    },
+    {
+      "file": "tests/test_shadow_analysis.py",
+      "line": 653,
+      "issue": "only file existence",
+      "rating": "WEAK"
+    },
+    {
+      "file": "tests/test_proposal.py",
+      "line": 62,
+      "issue": "only truthiness of no_proposal",
+      "rating": "WEAK"
+    }
+  ],
+  "rewrite_proposals": "see report section 5.4 (proposals only, no existing test modified)",
+  "artifacts": {
+    "report": "lingshu/acceptance/audit/断言强度与覆盖率报告-2026-10-27.md",
+    "coverage_summary": "lingshu/acceptance/audit/coverage-summary-2026-10-27.json",
+    "raw_dir": ".tmp/audit-a5",
+    "robustness_tests": null
+  }
+}

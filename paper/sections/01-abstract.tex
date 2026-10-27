@@ -1,0 +1,20 @@
+\begin{abstract}
+Persistent AI companions are where many users meet long-context agents: someone
+raises a digital character over hundreds of turns, then it forgets its name or
+catchphrase, and closing the session leaves it gone. The failure is less often
+capability than the injection surface: memories are read as current facts,
+stylistic signals soften refusals, persona constraints decay, and truncation can
+push safety instructions out. We present \system{}, a deterministic and auditable
+control plane that treats prompt assembly as a control surface. Six plugins share
+one read-only constitutional boundary; a five-domain composer arbitrates among
+them; and the control plane adds integral feedback with anti-windup, phase-shift
+preemptive monitoring with persona anchors, requisite-variety reduction, and an
+STPA-derived gate that structurally constrains what reaches the model at the
+assembly boundary. Exactly one node is fail-closed---the STPA audit---so a
+violation blocks injection instead of degrading it; every other component
+degrades open and records why. The contract is machine-checkable: 892 Python
+assertions across 14 files and 396 plugin-side assertions, with cross-copy
+parameter consistency checked key by key. A chaos suite exercises each mechanism
+in simulated and real hosts. We call the union the \emph{cyber-cognitive
+envelope}; the name is ours, not a new mechanism.
+\end{abstract}

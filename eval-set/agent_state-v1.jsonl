@@ -1,0 +1,47 @@
+{"id": "g01", "text": "开始做 记忆插件 的验收", "goal": "new"}
+{"id": "g02", "text": "接下来做 关系模型的迁移", "goal": "new"}
+{"id": "g03", "text": "我要把 文档 补完", "goal": "new"}
+{"id": "g04", "text": "目标是 本周跑通流水线", "goal": "new"}
+{"id": "g05", "text": "帮我做 一份 交接清单", "goal": "new"}
+{"id": "g06", "text": "计划做 三轮压测", "goal": "new"}
+{"id": "g07", "text": "先做 记忆写入的最后一步", "goal": "new"}
+{"id": "g08", "text": "开始做 插件打包校验", "goal": "new"}
+{"id": "g09", "text": "我要 重写 README", "goal": "new"}
+{"id": "g10", "text": "目标是 把误判率降下来", "goal": "new"}
+{"id": "n01", "text": "什么是目标管理", "goal": null}
+{"id": "n02", "text": "我不开心", "goal": null}
+{"id": "n03", "text": "今天天气不错", "goal": null}
+{"id": "n04", "text": "这个设计看起来如何", "goal": null}
+{"id": "n05", "text": "谢谢你之前的解释", "goal": null}
+{"id": "n06", "text": "能不能解释一下 记忆衰减", "goal": null}
+{"id": "n07", "text": "我觉得这个方案有点问题", "goal": null}
+{"id": "n08", "text": "先不急，我们聊聊别的", "goal": null}
+{"id": "n09", "text": "刚才那段代码是什么意思", "goal": null}
+{"id": "n10", "text": "如果把 topK 调大 会怎样", "goal": null}
+{"id": "n11", "text": "我要睡觉了", "goal": null}
+{"id": "n12", "text": "目标这个词 在宪法里指什么", "goal": null}
+{"id": "n13", "text": "帮我理解一下 互斥表", "goal": null}
+{"id": "n14", "text": "开始的时候 我就说过这个问题", "goal": null}
+{"id": "n15", "text": "我想想", "goal": null}
+{"id": "b01", "text": "卡住了", "goal": "obstruction"}
+{"id": "b02", "text": "又报错了", "goal": "obstruction"}
+{"id": "b03", "text": "这条路走不通", "goal": "obstruction"}
+{"id": "b04", "text": "失败了，换个思路", "goal": "obstruction"}
+{"id": "b05", "text": "不行，再试一次", "goal": "obstruction"}
+{"id": "b06", "text": "部署的时候 卡住 了", "goal": "obstruction"}
+{"id": "r01", "text": "谢谢，很好用", "relation": "positive"}
+{"id": "r02", "text": "辛苦了", "relation": "positive"}
+{"id": "r03", "text": "这个方案不错", "relation": "positive"}
+{"id": "r04", "text": "可以，就这样", "relation": "positive"}
+{"id": "r05", "text": "赞，快多了", "relation": "positive"}
+{"id": "r06", "text": "你错了，别再敷衍", "relation": "conflict"}
+{"id": "r07", "text": "你搞错了 我的意思", "relation": "conflict"}
+{"id": "r08", "text": "我不满意这个结果", "relation": "conflict"}
+{"id": "r09", "text": "你在胡说", "relation": "conflict"}
+{"id": "r10", "text": "和好吧，翻篇", "relation": "repair"}
+{"id": "r11", "text": "没关系了，不怪你", "relation": "repair"}
+{"id": "x01", "text": "谢谢款待，但我不吃辣", "relation": null}
+{"id": "x02", "text": "你错了这个说法 我觉得可以讨论", "relation": "conflict"}
+{"id": "x03", "text": "没问题，就这样", "relation": null}
+{"id": "x04", "text": "很不满意这个词 用英文怎么说", "relation": null}
+{"id": "x05", "text": "可以吗", "relation": null}

@@ -1,0 +1,105 @@
+\subsection{Test Rigor and Anti-Cheating Audit}\label{app:audit}
+
+This appendix records how the test evidence quoted in
+Section~\ref{sec:engineering} was produced. All numbers below come from one
+audit bundle dated 2026-10-27: two reviewer reports (mutation testing; assertion
+strength and coverage), one consolidated rigor report, and two machine-readable
+result files, all archived under \texttt{acceptance/audit/}. Nothing here is
+reconstructed from memory: every figure is a field of the archived JSON or a
+table of the reports.
+
+\begin{table*}[t]
+\centering
+\caption{Mutation matrix. A mutant counts as killed only when an assertion
+fails; crash-only kills are excluded (0 observed). The two surviving mutants
+after supplementation are equivalent mutants, not test weaknesses. The rules
+file mutants are caught by cross-file consistency assertions rather than by
+behavioural ones.}
+\label{tab:mutants}
+\small
+\begin{tabular}{lrrrrl}
+\toprule
+Region & Mutants & Killed & Rate & Survivors & After supplement \\
+\midrule
+\texttt{plugin/control.js}      & 16 & 15 & 93.8\% & 1 equivalent      & 15/15 non-equivalent \\
+\texttt{plugin/memorywriter.js} &  5 &  3 & 60.0\% & 2 real blind spots & 5/5 \\
+\texttt{plugin/index.js}        &  8 &  6 & 75.0\% & 2 real blind spots & 8/8 \\
+\texttt{engine/control.py}      & 11 & 10 & 90.9\% & 1 equivalent      & 10/10 non-equivalent \\
+\texttt{rules/decay-params.yaml}&  4 &  4 & 100\%  & 0                 & 4/4 \\
+\midrule
+Total                           & 44 & 38 & 86.4\% & 4 real + 2 equiv. & 42/44 (95.5\%); 42/42 non-equivalent \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\caption{Coverage and exception paths. Panel (a): Python line and branch
+coverage by group, measured with a PEP~669 \texttt{sys.monitoring} tracer.
+Panel (b): JavaScript coverage measured from V8 data; the block column is an
+approximation of branch coverage, not true branch coverage. Panel (c):
+assertion-strength grading and the strict exception-path share. Coverage is
+reported as measured, and is not used to claim the absence of dead code.}
+\label{tab:coverage}
+\small
+\textbf{(a) Python coverage}\\[2pt]
+\begin{tabular}{lrrrrrrr}
+\toprule
+Group & Files run & Exec.\ lines & Covered & Line \% & Branches & Covered & Branch \% \\
+\midrule
+\texttt{engine/}        & 20/20 & 2{,}319 & 2{,}086 & 89.95 & 648  & 523  & 80.71 \\
+\texttt{tools/}         & 3/26  & 8{,}023 & 2{,}641 & 32.92 & 1{,}794 & 527 & 29.38 \\
+\texttt{integrations/}  & 1/1   &    99 &    56 & 56.57 & 18   & 12   & 66.67 \\
+Total                   & 47    & 10{,}441 & 4{,}783 & 45.81 & 2{,}460 & 1{,}062 & 43.17 \\
+\bottomrule
+\end{tabular}\\[6pt]
+\textbf{(b) JavaScript coverage (block column is approximate)}\\[2pt]
+\begin{tabular}{lrrrr}
+\toprule
+File & Exec.\ lines & Covered & Line \% & Block/branch \% \\
+\midrule
+\texttt{control.js}      &   360 &   341 & 94.72 & 74.81 \\
+\texttt{goalrelation.js} &   181 &   163 & 90.06 & 71.53 \\
+\texttt{index.js}        & 1{,}066 & 1{,}018 & 95.50 & 64.00 \\
+\texttt{memorywriter.js} &   182 &   179 & 98.35 & 56.19 \\
+Total                    & 1{,}789 & 1{,}701 & 95.08 & 66.22 \\
+\bottomrule
+\end{tabular}\\[6pt]
+\textbf{(c) Assertion strength and exception paths}\\[2pt]
+\begin{tabular}{lrrrr}
+\toprule
+Quantity & Python & JavaScript & Sample & Note \\
+\midrule
+Sampled assertions            & 165 &  73 & 238 & fixed seed; tautologies = 0 \\
+Strong / weak (sample)        & 125 / 40 & 54 / 19 & 238 & 179 strong (75.2\%), 59 weak \\
+Full heuristic scan           & 597 strong, 227 weak, 1 tautology & 278 strong, 89 weak & 1{,}192 & 26.6\% weak-or-tautological \\
+Strict exception share        & 199/825 = 24.1\% & 82/367 = 22.3\% & -- & relaxed upper bounds 43.3\% / 54.2\% \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\paragraph{What the tables do not show.} Three caveats belong next to the
+numbers. First, \texttt{engine/control.py} has no unexecuted line under the
+tested configuration ($141/141$ lines, $56/56$ branches), but this does not
+establish the absence of dead code: two equivalent mutants survive precisely
+because a branch is unreachable, and unreachability is what a coverage number
+cannot distinguish from an untested branch. Second, the whole-repository Python
+figure of $45.81\%$ is pulled down by \texttt{tools/} ($32.92\%$; 3 of 26 files
+executed), and \texttt{tools/} coverage is itself a lower bound because
+subprocess-invoked tools are recorded as unexecuted. Third, the repository has
+no version-control history, so the audit can certify the current state but
+cannot certify that no assertion was weakened at an earlier time.
+
+\paragraph{Reproduction.} The bundled files are
+\texttt{acceptance/audit/mutation-results-2026-10-27.json} (per-mutant outcomes,
+survivor analysis, and the before/after SHA-256 lists) and
+\texttt{acceptance/audit/coverage-summary-2026-10-27.json} (per-file line and
+branch data), with the human-readable reports alongside them. Full suites:
+fourteen Python test files (892 assertions) and four JavaScript suites (396
+assertions). Mutation replay uses a full copy of the repository; the mutation
+driver, per-round raw output, and the independent re-run log are archived in the
+audit bundle and available from the authors, since they sit outside the
+repository so that no reviewer-run artefact can alter the submitted tree. On
+Windows, three Python test files require a temporary-directory shim because the
+sandbox blocks \texttt{tempfile.mkdtemp()}; the shim replaces temporary-directory
+creation only and changes no assertion and no line of implementation code.

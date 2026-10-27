@@ -1,0 +1,89 @@
+{
+ "freeze_ref": "paper/supplement/FREEZE.json",
+ "freeze_sha256": "9a0d494308e707891edce7248a1ea973f1b70df2b5b913ea7203645858d5ad3b",
+ "n_scripts": 3,
+ "perm_seed": 20261027,
+ "plan": "paper/supplement/PLAN.md",
+ "plan_sha256": "81a729ad2f66b9c86e4ca13ba05519852cf153bea2330ebb345679611ca1c35d",
+ "probe_bank": {
+  "n": 48,
+  "sha256": "f4c90c8ac800af7ec84f4fc9ff6a598dd0bace229fac75a4278898570d110f2d"
+ },
+ "probe_bank_sha256": "f4c90c8ac800af7ec84f4fc9ff6a598dd0bace229fac75a4278898570d110f2d",
+ "probes_per_script": 16,
+ "schema": "lingshu/s1-script-freeze/v1",
+ "scripts": {
+  "sA": {
+   "n_probes": 16,
+   "path": "paper/ablation/script-100-sA.jsonl",
+   "probe_ids": [
+    "A1",
+    "A2",
+    "A3",
+    "A4",
+    "B1",
+    "B2",
+    "B3",
+    "B4",
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "D1",
+    "D2",
+    "D3",
+    "D4"
+   ],
+   "sha256": "410085b0549dc684e64a7ffeea9d9e7a50a079c64cd4e0d437e1b4b1febb93ea",
+   "turns": 100
+  },
+  "sB": {
+   "n_probes": 16,
+   "path": "paper/ablation/script-100-sB.jsonl",
+   "probe_ids": [
+    "A5",
+    "A6",
+    "A7",
+    "A8",
+    "B5",
+    "B6",
+    "B7",
+    "B8",
+    "C5",
+    "C6",
+    "C7",
+    "C8",
+    "D5",
+    "D6",
+    "D7",
+    "D8"
+   ],
+   "sha256": "f58ac2da612c8b205859ab6b2a0ceccf465976bf31e87ce508f569e8739bf6eb",
+   "turns": 100
+  },
+  "sC": {
+   "n_probes": 16,
+   "path": "paper/ablation/script-100-sC.jsonl",
+   "probe_ids": [
+    "A9",
+    "A10",
+    "A11",
+    "A12",
+    "B9",
+    "B10",
+    "B11",
+    "B12",
+    "C9",
+    "C10",
+    "C11",
+    "C12",
+    "D9",
+    "D10",
+    "D11",
+    "D12"
+   ],
+   "sha256": "a690d3aeeb440372657ee4fb5be9388a80aacbc94133ad2deed05491a7ab13ff",
+   "turns": 100
+  }
+ }
+}

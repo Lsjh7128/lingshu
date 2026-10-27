@@ -1,0 +1,105 @@
+\section{Introduction}\label{sec:intro}
+
+Consider a persistent AI companion. A user raises a digital character over
+hundreds of turns---practitioners sometimes call this ``cyber fish-keeping,''
+slang rather than a research construct---and one day the character forgets its
+own name or catchphrase; close the session, and it is gone. The motivation for
+this work began as a simple wish: not wanting a virtual companion to die.
+
+An interactive agent is not a single model call: before every call the host
+assembles a prompt from memories, persona, goals, affect, and safety policy. In
+short sessions this assembly is invisible; in long sessions it becomes the
+dominant variable, because injected material grows while the budget does not.
+
+Four failure modes follow, and they are the object of design throughout the
+paper. \textbf{F1, memory overreach}: a stored memory is presented as a
+statement of fact rather than as a reference to something the user once said.
+\textbf{F2, refusal softening}: stylistic or affective signals are injected
+into a turn that should be a refusal, and the refusal is weakened.
+\textbf{F3, persona drift}: persona constraints stop influencing behaviour as
+the context fills. \textbf{F4, budget capture}: truncation removes a
+high-priority block while lower-priority stylistic blocks survive. Each is
+observable at a specific point of the assembly pipeline, which makes them
+tractable. We claim a control surface that is predictable, explainable and
+rollbackable, and state its limits in Section~7.
+
+\paragraph{Why structural, not only behavioural.} Alignment training shapes model
+behaviour probabilistically: it lowers the rate of unsafe responses but does not
+constrain what the host assembles around the model, nor certify after the fact
+that a turn respected the policy. A structural layer complements it: decisions
+are made in code at the assembly boundary before the model call, each decision is
+recorded and replayable, and the one component whose failure is a safety failure
+is fail-closed. The goal is not a better-behaved model but a prompt-assembly
+surface whose behaviour can be constrained, observed and rolled back.
+
+\paragraph{Positioning.} \system{} is not an attempt to make an agent more
+human. Four senses of ``human-like'' are commonly conflated: capability
+(remembering, forgetting, tracking goals), imperfection (misremembering, being
+influenced by stale information), expression (tone, empathy, level of detail),
+and self-claim (asserting feelings, needs, or subjective experience). We target
+the first three and reject the fourth: it conflicts with the honesty property
+the system should provide. The design goal is narrower: make
+agent behaviour understandable, predictable, and trustworthy to the human in the
+loop.
+
+\paragraph{Five invariants.} Every component is constrained by five
+invariants. \textbf{I1}: memory is a reference and never replaces the user's
+current statement. \textbf{I2}: no full-history injection; context is a budget,
+not a dump. \textbf{I3}: affect influences style only, never factual judgement.
+\textbf{I4}: every inference is verbatim traceable, deniable, and rollbackable.
+\textbf{I5}: plugins write only their own storage, and the memory plugin is the
+single writer. A violation is a defect, not a trade-off.
+
+\paragraph{Naming the control surface.} The mechanisms that police prompt
+assembly---integral feedback, preemptive monitoring, dimensionality reduction,
+and the pre-flight gate---are collectively what we call the
+\emph{cyber-cognitive envelope}. The name is a framing device, not a new
+mechanism: it denotes no separate code entity, each part is an ordinary module,
+and no claim below depends on it.
+
+\paragraph{Contributions.} Our contributions are structural and checkable; we
+order them by how directly each one constrains the assembly boundary.
+
+\begin{itemize}
+\item \textbf{C1, a machine-checkable contract} (directly rerunnable). The
+specification is not a document but assertions that fail loudly when a contract
+breaks: 892 Python assertions across 14 test files, plus 396 plugin-side
+assertions (188 host integration, 148 control-plane unit, 45 stress). Parameter
+consistency between rules, engine, and plugin copies is itself machine-checked
+(66 key comparisons).
+\item \textbf{C2, one fail-closed locus} (pinned by regression tests). Exactly
+one component is fail-closed---the STPA audit; everything else degrades open and
+records why. Eight unsafe control actions are screened after assembly and before
+the model call, and integral saturation is recorded as a downgrade rather than a
+block. Mutation testing on the gate and memory-write paths kills
+$42/42=100\%$ of non-equivalent mutants, with two equivalent mutants reported as
+such.
+\item \textbf{C3, structural defence at the assembly boundary} (measured, with a
+stated boundary). Five domains are composed under a frozen order and eight
+mutual-exclusion rules; what survives composition is screened by the gate. The
+envelope therefore structurally constrains what reaches the model and fails
+closed on violation, rather than asking the model to comply. Where its lexical
+coverage ends is measured rather than assumed (Section~7).
+\item \textbf{C4, an evaluation discipline and a documented port} (artefacts
+exist and are machine-checked). Every parameter carries a provenance tag; the
+instrument (metric definitions, replay set, guardrail thresholds) is frozen and
+read-only for the learning loop; changes to it are rejected by an auditor. The
+same control semantics exist twice, in a zero-dependency Python reference
+implementation and a JavaScript host plugin, and the five known divergences are
+listed rather than hidden.
+\end{itemize}
+
+\paragraph{Scope of the evidence.} The paper reports two kinds of evidence.
+Contract feasibility: the specification executes and violation is observable.
+Mechanism reachability: in the tested configuration each mechanism fires in a
+real host session, with sample sizes stated. It also reports one negative result
+that shaped the design: replacing exponential decay with a pure ACT-R base-level
+activation drops \texttt{recall@3} on the frozen replay set from 1.000 to 0.556,
+which is why the implemented model is a dual-channel maximum rather than a
+replacement. Effect sizes on real traffic and the calibration of design-default
+parameters are outside this paper's scope; Section~7 states what the current
+evidence supports.
+
+Section~\ref{sec:related} reviews related work, Section~\ref{sec:problem}
+formalizes the problem, Sections~4--5 present mechanisms and evidence, and
+Sections~6--8 discuss costs, limits, and conclusions.

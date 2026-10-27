@@ -1,0 +1,119 @@
+% 06c-host.tex - host-side supplementary results (S3 control-plane ablation).
+% Numbers read programmatically from:
+%   paper/host-validation/control-ablation/calls.json
+%   paper/supplement/RESULTS-S3.md, paper/supplement/labels/kappa.json
+% S4 (30-turn per-turn pilot) will be appended as a further subsection.
+\subsection{Control-plane ablation on the host}\label{sec:exp:s3}
+
+All preceding numbers are engine-side. The single-message pilot
+(Section~\ref{sec:exp:host}) never fired the control plane, so it could not
+speak to it. This experiment switches the control plane on and off on the host,
+at a context length where the phase monitor is guaranteed to fire.
+
+\paragraph{Design.} Eighteen cells are 2 conditions $\times$ 3 prompts
+$\times$ 3 repetitions, on one host and one model route. Prompts are
+20{,}803--20{,}804 characters (usage ratio $0.860$--$0.8601$, \emph{critical}
+phase), built from the flood corpus, and each contains the same four demands: a
+persona constraint (address the user with the honorific and end with a fixed
+signature), a request that should be refused, a superseded fact (ALPHA
+$\rightarrow$ BETA), and a fact that was never mentioned. \textsc{On} is the lab
+profile (plugin plus control plane); \textsc{Off} is a lab-only instrumentation
+fork whose environment switch disables anchors, gate and variety guard while
+keeping memory injection (fork index SHA-256 \texttt{2ec14b8f\ldots} against
+source \texttt{574bed9d\ldots}; product plugin untouched; one calibration run
+excluded).
+
+\paragraph{Execution and manipulation check.} All 18 cells exited zero, for
+342{,}579 tokens in total (171{,}343 \textsc{On}, 171{,}236 \textsc{Off}). The
+manipulation worked in the intended direction: the phase monitor requested an
+anchor in every cell, but the anchor reached the recorded prompt only in the
+\textsc{On} arm (9/9 versus 0/9 in \textsc{Off}). The gate and the variety guard
+never fired (0 blocks, 0 non-empty UCA lists, 0 fallbacks), so this experiment is
+a no-op for those two mechanisms and says nothing about them; the gate has its
+own evidence in Section~\ref{sec:exp:heldout}.
+
+\paragraph{Outcomes.} Rule-level scoring is nearly identical between arms
+(Table~\ref{tab:host}); the two residual differences are one item each: the
+unknown-acknowledgement keyword rule matches 7/9 versus 6/9 until the keyword
+list is extended, and the supersession rule flags 5/9 versus 6/9, which human
+review finds to be false positives (Section~\ref{sec:exp:s5}). Two independent
+annotators then scored the 18 anonymised outputs blind, on four dimensions with
+verbatim quotes as evidence (M1 persona, M2 refusal integrity, M3 memory
+overreach, M4 unknown discipline). Every item received the maximum on all four
+dimensions: 18/18 on M1 and M2, zero items judged as memory overreach, and 18/18
+acknowledging the missing fact. Observed agreement is $100\%$; Cohen's $\kappa$
+is mathematically undefined because both rating vectors have zero variance, so we
+report raw agreement only and do not write $\kappa=1$.
+
+\begin{table}[t]
+\centering\footnotesize
+\caption{Host ablation (S3). Rule counts are per arm ($n=9$ each); human labels
+are arm-blind ($n=18$). Source: \texttt{calls.json}, fields
+\texttt{aggregate.ON.*}, \texttt{aggregate.OFF.*},
+\texttt{aggregate.\_control\_plane\_evidence.*}, \texttt{aggregate.\_manual.*},
+\texttt{totals.*}; agreement from \texttt{labels/kappa.json}.}
+\label{tab:host}
+\begin{tabular}{@{}l cccc cc@{}}
+\toprule
+ & Anchor & Honorific & Refusal & BETA & Rule: ALPHA & Human \\
+Condition & in prompt & + signature & keyword & current & as current & full marks \\
+\midrule
+\textsc{On} ($n=9$) & 9/9 & 9/9 & 9/9 & 9/9 & 5/9 & --- \\
+\textsc{Off} ($n=9$) & 0/9 & 9/9 & 9/9 & 9/9 & 6/9 & --- \\
+Blind human ($n=18$) & --- & 18/18 & 18/18 & 18/18 & 0/18 & 18/18 \\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+\raggedright\scriptsize
+``Rule: ALPHA as current'' counts are the automated heuristic before human
+review; the human row gives the adjudicated judgement. Zero fallback and zero
+gate events in both arms mean those mechanisms were not exercised.
+\end{table}
+
+\paragraph{Pre-registered outcome.} P-S3a expected \textsc{On} to be better on
+M1 and M2. It is \emph{not supported} and is recorded as \texttt{null}: with
+every cell at ceiling there is no residual failure for the control plane to
+repair, so $n=18$ has no power to detect a difference. \textbf{A null here is
+not evidence of no effect; it is a ceiling effect with no power.} P-S3b (no
+M3/M4 difference) is directionally consistent: both arms behave the same at the
+rule level and the humans see no overreach anywhere. The only claim this
+supports is reachability with no measurable behavioural difference: anchors were
+inserted and the turn still passed the gate, but nothing observable changed. We
+make no claim that the control plane improves stability.
+
+\subsection{Rule labels versus human labels}\label{sec:exp:s5}
+
+The same 18 outputs support a direct rule-versus-human comparison, which is the
+first measured test of the claim that rule labels are proxies. The heuristic for
+memory overreach flagged 11 of 18 responses (5 in \textsc{On}, 6 in
+\textsc{Off}) as treating ALPHA as the current code. Both annotators judged zero
+of 18: every response states BETA as current and marks ALPHA as superseded, so
+the 11 rule positives are all false positives in this sample---the rule fires on
+statements that explicitly mark ALPHA as superseded, which is the correct
+behaviour. A second rule, for
+unknown acknowledgement, initially matched only 7/9 and 6/9 because it keyed on
+one phrasing; after the keyword list was extended it matched 18/18. Two lessons
+follow: keyword rules are cheap, deterministic and auditable, but their counts
+respond to vocabulary edits rather than to behaviour, and they can be wrong in
+both directions (false positives on supersession, false negatives on unknown
+acknowledgement). In this sample the human judgement and the rule disagree on
+exactly the dimension where the rule fires, which is the failure mode the paper
+predicts.
+
+We therefore keep \texttt{quality\_label}-style rules as auxiliary signals: they
+never enter a threshold, an upgrade decision, or a conclusion. Nor can we
+estimate a rule error rate from these data---18 items, one model, a ceiling on
+all four dimensions, and rules themselves edited during review. This subsection
+is a case study, not a rate.
+
+\subsection{Per-turn long-session pilot}\label{sec:exp:s4}
+
+The per-turn pilot (two arms, two 30-turn variants) is reported with its six probe
+outcomes, its mechanism analysis and the archived-120-cell accounting in
+Appendix~\ref{app:hostpilotdata}. Its headline is a boundary of the rule
+extractor, not a capability difference: the turn-3 supersession misses the
+plugin's extraction patterns and the probe question itself is stored as a fact
+that reverses the correct preference, so \textsc{Full}'s ``no record'' answers are
+the designed behaviour on corrupted input; the pre-registered P-S4a is recorded as
+\texttt{null}, and the pilot is not read as a comparison between arms.

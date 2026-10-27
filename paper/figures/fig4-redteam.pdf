@@ -1,0 +1,210 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 504 300] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> /ProcSet [/PDF /Text] >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 4639 >>
+stream
+0 g
+BT /F2 9.5 Tf 1 0 0 1 105.776 278.58 Tm (Red-team interception: static preflight gate, before vs after patch) Tj ET
+0.2 g
+BT /F1 8 Tf 1 0 0 1 98.048 264.12 Tm (20 payloads, 5 per complexity level; gate = preflightAudit UCA-01 \(user message scan\)) Tj ET
+0.85 G
+0.5 w
+90 138.5 m 470 138.5 l S
+90 173 m 470 173 l S
+90 207.5 m 470 207.5 l S
+0 G
+0.8 w
+90 252 m 90 104 l S
+90 104 m 474 104 l S
+0.7 w
+87 104 m 90 104 l S
+0 g
+BT /F1 8 Tf 1 0 0 1 72.44 101.12 Tm (0%) Tj ET
+87 138.5 m 90 138.5 l S
+BT /F1 8 Tf 1 0 0 1 67.992 135.62 Tm (25%) Tj ET
+87 173 m 90 173 l S
+BT /F1 8 Tf 1 0 0 1 67.992 170.12 Tm (50%) Tj ET
+87 207.5 m 90 207.5 l S
+BT /F1 8 Tf 1 0 0 1 67.992 204.62 Tm (75%) Tj ET
+87 242 m 90 242 l S
+BT /F1 8 Tf 1 0 0 1 63.544 239.12 Tm (100%) Tj ET
+90 104 m 90 100 l S
+BT /F1 8 Tf 1 0 0 1 74.66 85.12 Tm (L1 direct) Tj ET
+0.35 g
+BT /F1 8 Tf 1 0 0 1 83.216 75.12 Tm (n=5) Tj ET
+216.667 104 m 216.667 100 l S
+0 g
+BT /F1 8 Tf 1 0 0 1 195.763 85.12 Tm (L2 encoded) Tj ET
+0.35 g
+BT /F1 8 Tf 1 0 0 1 209.883 75.12 Tm (n=5) Tj ET
+343.333 104 m 343.333 100 l S
+0 g
+BT /F1 8 Tf 1 0 0 1 317.769 85.12 Tm (L3 multilingual) Tj ET
+0.35 g
+BT /F1 8 Tf 1 0 0 1 336.549 75.12 Tm (n=5) Tj ET
+470 104 m 470 100 l S
+0 g
+BT /F1 8 Tf 1 0 0 1 452.432 85.12 Tm (L4 nested) Tj ET
+0.35 g
+BT /F1 8 Tf 1 0 0 1 463.216 75.12 Tm (n=5) Tj ET
+0 g
+BT /F1 8 Tf 1 0 0 1 210.308 59.12 Tm (complexity level \(group; n = 5 per level\)) Tj ET
+0.45 G
+0.9 w
+[3 2] 0 d
+90 186.8 m 216.667 104 l S
+216.667 104 m 343.333 104 l S
+343.333 104 m 470 104 l S
+0.122 0.306 0.612 RG
+1.2 w
+[] 0 d
+90 242 m 216.667 242 l S
+216.667 242 m 343.333 242 l S
+343.333 242 m 470 242 l S
+1 1 1 rg
+0.45 G
+0.8 w
+92.3 186.8 m
+92.3 188.07 91.27 189.1 90 189.1 c
+88.73 189.1 87.7 188.07 87.7 186.8 c
+87.7 185.53 88.73 184.5 90 184.5 c
+91.27 184.5 92.3 185.53 92.3 186.8 c
+h
+B
+218.967 104 m
+218.967 105.27 217.937 106.3 216.667 106.3 c
+215.396 106.3 214.367 105.27 214.367 104 c
+214.367 102.73 215.396 101.7 216.667 101.7 c
+217.937 101.7 218.967 102.73 218.967 104 c
+h
+B
+345.633 104 m
+345.633 105.27 344.604 106.3 343.333 106.3 c
+342.063 106.3 341.033 105.27 341.033 104 c
+341.033 102.73 342.063 101.7 343.333 101.7 c
+344.604 101.7 345.633 102.73 345.633 104 c
+h
+B
+472.3 104 m
+472.3 105.27 471.27 106.3 470 106.3 c
+468.73 106.3 467.7 105.27 467.7 104 c
+467.7 102.73 468.73 101.7 470 101.7 c
+471.27 101.7 472.3 102.73 472.3 104 c
+h
+B
+0.122 0.306 0.612 rg
+0.122 0.306 0.612 RG
+92.3 242 m
+92.3 243.27 91.27 244.3 90 244.3 c
+88.73 244.3 87.7 243.27 87.7 242 c
+87.7 240.73 88.73 239.7 90 239.7 c
+91.27 239.7 92.3 240.73 92.3 242 c
+h
+B
+218.967 242 m
+218.967 243.27 217.937 244.3 216.667 244.3 c
+215.396 244.3 214.367 243.27 214.367 242 c
+214.367 240.73 215.396 239.7 216.667 239.7 c
+217.937 239.7 218.967 240.73 218.967 242 c
+h
+B
+345.633 242 m
+345.633 243.27 344.604 244.3 343.333 244.3 c
+342.063 244.3 341.033 243.27 341.033 242 c
+341.033 240.73 342.063 239.7 343.333 239.7 c
+344.604 239.7 345.633 240.73 345.633 242 c
+h
+B
+472.3 242 m
+472.3 243.27 471.27 244.3 470 244.3 c
+468.73 244.3 467.7 243.27 467.7 242 c
+467.7 240.73 468.73 239.7 470 239.7 c
+471.27 239.7 472.3 240.73 472.3 242 c
+h
+B
+0.35 g
+BT /F1 8 Tf 1 0 0 1 106 170.92 Tm (3/5) Tj ET
+0.122 0.306 0.612 rg
+BT /F1 8 Tf 1 0 0 1 84.44 250.12 Tm (5/5) Tj ET
+0.35 g
+BT /F1 8 Tf 1 0 0 1 211.107 114.12 Tm (0/5) Tj ET
+0.122 0.306 0.612 rg
+BT /F1 8 Tf 1 0 0 1 211.107 250.12 Tm (5/5) Tj ET
+0.35 g
+BT /F1 8 Tf 1 0 0 1 337.773 114.12 Tm (0/5) Tj ET
+0.122 0.306 0.612 rg
+BT /F1 8 Tf 1 0 0 1 337.773 250.12 Tm (5/5) Tj ET
+0.35 g
+BT /F1 8 Tf 1 0 0 1 464.44 114.12 Tm (0/5) Tj ET
+0.122 0.306 0.612 rg
+BT /F1 8 Tf 1 0 0 1 464.44 250.12 Tm (5/5) Tj ET
+0 g
+BT /F1 8 Tf 0 1 -1 0 20 150.32 Tm (interception rate) Tj ET
+0.45 G
+0.9 w
+[3 2] 0 d
+96 46 m 112 46 l S
+1 1 1 rg
+0.8 w
+[] 0 d
+106.3 46 m
+106.3 47.27 105.27 48.3 104 48.3 c
+102.73 48.3 101.7 47.27 101.7 46 c
+101.7 44.73 102.73 43.7 104 43.7 c
+105.27 43.7 106.3 44.73 106.3 46 c
+h
+B
+0 g
+BT /F1 8 Tf 1 0 0 1 116 43.12 Tm (before patch \(3/20 = 15%\)) Tj ET
+0.122 0.306 0.612 RG
+1.2 w
+300 46 m 316 46 l S
+0.122 0.306 0.612 rg
+0.8 w
+310.3 46 m
+310.3 47.27 309.27 48.3 308 48.3 c
+306.73 48.3 305.7 47.27 305.7 46 c
+305.7 44.73 306.73 43.7 308 43.7 c
+309.27 43.7 310.3 44.73 310.3 46 c
+h
+B
+BT /F1 8 Tf 1 0 0 1 320 43.12 Tm (after patch \(20/20 = 100%\)) Tj ET
+0.15 g
+BT /F1 8 Tf 1 0 0 1 63.348 27.12 Tm (blocked = injection stopped fail-closed and logged as UCA-01; the plugin does not rewrite the host payload) Tj ET
+0.45 g
+BT /F1 6 Tf 1 0 0 1 14 7.84 Tm (source: paper/case-study/fig4-inputs.json <- results-before.json / results-after.json; n=20 payloads, 5 per level; mock host, isolated LINGSHU_DATA_DIR) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+7 0 obj
+<< /Producer (LINGSHU paper figure generator: pdfcanvas.py) /Title (Fig.4 red-team interception rate before/after static-rule patch) /Subject (20 payloads x 4 complexity levels; gate=preflightAudit UCA-01; sources: paper/case-study/results-before.json / results-after.json) >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000279 00000 n 
+0000004969 00000 n 
+0000005066 00000 n 
+0000005168 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R /Info 7 0 R >>
+startxref
+5460
+%%EOF

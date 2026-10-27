@@ -1,0 +1,42 @@
+# rules/capabilities.yaml
+# 能力声明（v3.0.1 新增，外部调研 C25）
+#
+# 背景：DSH 生态已有能力扫描机制（dsh-trust-check，见 awesome-dsh-plugin/data/capabilities.json，
+# 覆盖 3841 个插件，能力词表共 10 种）。LINGSHU 的原则是"用多少申请多少"，
+# 并把"不申请什么"写死 —— 这是"不可修改/不可关闭"的第二层保障：
+# 没有 network、没有 shell、没有 credentials，就没有"偷改配置后外传"的路径。
+
+meta:
+  plugin: lingshu
+  version: "1.0"
+  note: "能力清单进 frozen-manifest，改动需 ADR。"
+
+capabilities:
+  required:
+    - fs-read        # 读 rules/、replay-set/、_frozen/
+    - fs-write       # 写状态文件与记忆库
+    - llm            # 调用模型（编码器/情感评估器/目标/关系更新器）
+
+  notRequested:
+    - network        # 记忆与人格不需要外网；外部引用核验由人工完成
+    - shell          # 不执行任何外部命令
+    - credentials    # 不接触任何密钥
+    - dynamic-code   # 不在运行时执行拼接代码
+    - subagent       # 不派生子 Agent
+    - env            # 配置全部来自 rules/，不读环境变量
+
+  conditional:
+    host-runtime:
+      requested: false
+      reason: "若宿主要求通过 host-runtime 注册钩子则必须申请；需 DSH 文档确认"
+
+rationale:
+  network: "能力扫描中最常见的红线是：读凭证且联网（353/3841 命中）；LINGSHU 两者都不申请"
+  shell: "任一 shell 能力都会让插件不可修改的保证失效（可绕过只读挂载）"
+  credentials: "记忆与人格系统没有任何正当理由读取凭证"
+  env: "读环境变量是侧信道；配置只从 rules/ 读，便于审计与哈希校验"
+
+enforcement:
+  hostScan: "dsh-trust-check 的 redLines 必须为空"
+  selfCheck: "启动时校验本文件的 capabilities 与宿主授予的能力集合一致；多授即告警"
+  frozen: true

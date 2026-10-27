@@ -1,0 +1,101 @@
+{
+  "capabilities": {
+    "notRequested": [
+      "network",
+      "shell",
+      "credentials",
+      "dynamic-code",
+      "subagent",
+      "env"
+    ],
+    "rationale_ref": "rules/capabilities.yaml",
+    "required": [
+      "fs-read",
+      "fs-write",
+      "llm"
+    ]
+  },
+  "contract_id": "lingshu.agent-contract/v1",
+  "contracts": {
+    "_manifest.json": "dfdf8913b15eb2c751bb4768c506217f16761d55b6f6490a77bf335fffc3612a",
+    "memory.schema.json": "7887a914a7799adff4a49b66b7478017142d7118dc433c873c4803bab5f2358c",
+    "prompt-compose.schema.json": "62a1cd90ba834a8c279f66cbe14a0f58b52c37e306e1bd566f2d6418e387ef38",
+    "recall.schema.json": "23c6cb09a617cc9e98034673d8546a1099c5aa9bff9dccdd42ac4b93203f9d9e"
+  },
+  "defaults": {
+    "config_source": "engine/config.py（与 rules/decay-params.yaml 必须一致）",
+    "param_version": "852fbe81"
+  },
+  "digest": "14212ed30cb2f35fb170b5026d55b1ed3bebe5848810489223feaac9c1aad23f",
+  "frozen": [
+    "docs/01-宪法层.md",
+    "rules/compose-matrix.yaml",
+    "rules/degradation-matrix.yaml",
+    "rules/capabilities.yaml",
+    "rules/learning-params.yaml#objective",
+    "rules/learning-params.yaml#constraints",
+    "rules/learning-params.yaml#guardrails",
+    "replay-set/"
+  ],
+  "generated_from": [
+    "rules/*.yaml",
+    "contracts/*.json",
+    "engine/config.py"
+  ],
+  "identity": {
+    "name": "LINGSHU",
+    "positioning": "让 Agent 的行为对人类可理解、可预期、可信（不是'更像人'）",
+    "target_host": "DSH",
+    "version": "3.0.1"
+  },
+  "non_claims": [
+    "status 不代表已实现，只代表契约定稿",
+    "本契约不声明与任何第三方实现的语义等价",
+    "契约摘要相等 ≠ 行为相等；行为需由 docs/15 验收项证明"
+  ],
+  "operations": [
+    {
+      "contract": "contracts/recall.schema.json",
+      "kind": "internal",
+      "name": "memory_recall",
+      "note": "预算化召回；装不下时如实标记，不静默返回空"
+    },
+    {
+      "kind": "event",
+      "name": "memory_write_request",
+      "note": "唯一写路径；记忆是唯一写方"
+    },
+    {
+      "kind": "event",
+      "name": "memory_forget_plan",
+      "note": "阶段一：零写操作"
+    },
+    {
+      "kind": "event",
+      "name": "memory_forget_commit",
+      "note": "阶段二：需批准；软删 7 天；硬删走六步同步"
+    },
+    {
+      "kind": "internal",
+      "name": "metacog_verdict",
+      "note": "纯规则；excluded_by_budget>0 → 上限 mid + hedge"
+    },
+    {
+      "contract": "contracts/prompt-compose.schema.json",
+      "kind": "event",
+      "name": "prompt_compose",
+      "note": "五域合成；安全域最高；dropped 必须完整"
+    }
+  ],
+  "profile": "lingshu-cognitive-plugins",
+  "revision": 1,
+  "rules": {
+    "capabilities.yaml": "6622d7fe859cd8f1dbeb5928a9f0f7184d67d22047c8f80ec266b7d7a28f2553",
+    "compose-matrix.yaml": "c5e9dc30333282ce3e91226feb28df458440a755e80c2cc0d8ccc383be7bb8ea",
+    "decay-params.yaml": "efeb47c434ec8e6487e990463ed5fbf0e31fd5c37d09bc77fc19726490978497",
+    "degradation-matrix.yaml": "45576621520f33a15faecf2c415fdec5b3115dce9aa254a3c612bebc03e26350",
+    "frozen-manifest.yaml": "d68785a63a8993ef4d772256f1cf17f2a2f50f6c11ca21326255d4f80d3c397c",
+    "learning-params.yaml": "86e0f0d399032c9e8e22e8a1dfb226995efe5678e51b4caab30e86c1436c3057"
+  },
+  "status": "designed-not-implemented"
+}

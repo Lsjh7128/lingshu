@@ -1,0 +1,53 @@
+{
+  "contract_id": "lingshu.agent-contract/v1",
+  "revision": 1,
+  "profile": "lingshu-cognitive-plugins",
+  "status": "designed-not-implemented",
+  "generated_from": [
+    "rules/*.yaml",
+    "contracts/*.json",
+    "engine/config.py"
+  ],
+  "identity": {
+    "name": "LINGSHU",
+    "version": "3.0.1",
+    "target_host": "DSH",
+    "positioning": "让 Agent 的行为对人类可理解、可预期、可信（不是'更像人'）"
+  },
+  "capabilities": {
+    "required": ["fs-read", "fs-write", "llm"],
+    "notRequested": ["network", "shell", "credentials", "dynamic-code", "subagent", "env"],
+    "rationale_ref": "rules/capabilities.yaml"
+  },
+  "operations": [
+    {"name": "memory_recall", "kind": "internal",
+     "contract": "contracts/recall.schema.json",
+     "note": "预算化召回；装不下时如实标记，不静默返回空"},
+    {"name": "memory_write_request", "kind": "event",
+     "note": "唯一写路径；记忆是唯一写方"},
+    {"name": "memory_forget_plan", "kind": "event",
+     "note": "阶段一：零写操作"},
+    {"name": "memory_forget_commit", "kind": "event",
+     "note": "阶段二：需批准；软删 7 天；硬删走六步同步"},
+    {"name": "metacog_verdict", "kind": "internal",
+     "note": "纯规则；excluded_by_budget>0 → 上限 mid + hedge"},
+    {"name": "prompt_compose", "kind": "event",
+     "contract": "contracts/prompt-compose.schema.json",
+     "note": "五域合成；安全域最高；dropped 必须完整"}
+  ],
+  "frozen": [
+    "docs/01-宪法层.md",
+    "rules/compose-matrix.yaml",
+    "rules/degradation-matrix.yaml",
+    "rules/capabilities.yaml",
+    "rules/learning-params.yaml#objective",
+    "rules/learning-params.yaml#constraints",
+    "rules/learning-params.yaml#guardrails",
+    "replay-set/"
+  ],
+  "non_claims": [
+    "status 不代表已实现，只代表契约定稿",
+    "本契约不声明与任何第三方实现的语义等价",
+    "契约摘要相等 ≠ 行为相等；行为需由 docs/15 验收项证明"
+  ]
+}

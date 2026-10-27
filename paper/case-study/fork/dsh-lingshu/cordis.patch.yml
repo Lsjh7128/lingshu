@@ -1,0 +1,32 @@
+# dsh-lingshu bundle patch：把 LINGSHU 插件挂进 profile 的 loader tree。
+#
+# 与 dsh-novel-writer / dsh-whale-widget 同一套机制：本包在 package.json 里声明
+# `dsh.bundle.patch`，被列进 profile 的 `dsh.profile.bundles` 后，loader 会应用这份补丁。
+# entry 的 name 就是包名本身，从 profile 的 node_modules 里解析。
+- insert:
+    - id: lingshu
+      name: 'dsh-lingshu'
+      config:
+        coldTurns: 3
+        warmTurns: 20
+        warmConfidenceFloor: 0.7
+        topK: 3
+        tokenBudgetTokens: 900
+        archiveThreshold: 0.15
+        # 控制论层（v4.2）：数值与 rules/decay-params.yaml#control 保持一致
+        contextWindowTokens: 1048576
+        charsPerToken: 3
+        integralApply: false
+        # 影子模式（v4.3 真实标定阶段）：目标/关系误报率高，先只记录不注入
+        shadowGoal: true
+        shadowRelation: true
+        control:
+          integralKi: 0.15
+          integralCap: 0.4
+          integralLeak: 0.05
+          integralDeadband: 0.02
+          phaseShiftRatio: 0.7
+          phaseShiftHardRatio: 0.85
+          trendThreshold: 0.02
+          ratioMax: 1.5
+          historyCapacity: 64

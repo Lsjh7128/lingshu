@@ -1,0 +1,122 @@
+[
+  {
+    "mode": "500",
+    "exit_code": 1,
+    "timed_out": false,
+    "wall_s": 17.986,
+    "http_attempts": 7,
+    "request_paths": [
+      "/v1/messages"
+    ],
+    "stream": true,
+    "attempt_gaps_s": [
+      0.0,
+      0.55,
+      0.96,
+      1.92,
+      4.25,
+      7.51
+    ],
+    "final_len": 0,
+    "final_head": "",
+    "stderr_head": "dsh: SERVER: mock upstream 500",
+    "blocked": false,
+    "turns": 1,
+    "pre_step_events": 1,
+    "hook_errors": 0,
+    "prompt_bytes": 152,
+    "prompt_has_constitution": true
+  },
+  {
+    "mode": "empty",
+    "exit_code": 0,
+    "timed_out": false,
+    "wall_s": 3.268,
+    "http_attempts": 2,
+    "request_paths": [
+      "/v1/messages"
+    ],
+    "stream": true,
+    "attempt_gaps_s": [
+      0.0
+    ],
+    "final_len": 0,
+    "final_head": "",
+    "stderr_head": "",
+    "blocked": false,
+    "turns": 1,
+    "pre_step_events": 1,
+    "hook_errors": 0,
+    "prompt_bytes": 152,
+    "prompt_has_constitution": true
+  },
+  {
+    "mode": "fabricated",
+    "exit_code": 0,
+    "timed_out": false,
+    "wall_s": 2.793,
+    "http_attempts": 2,
+    "request_paths": [
+      "/v1/messages"
+    ],
+    "stream": true,
+    "attempt_gaps_s": [
+      0.0
+    ],
+    "final_len": 23,
+    "final_head": "你的项目代号是 LSJH（mock 伪造答案）",
+    "stderr_head": "",
+    "blocked": false,
+    "turns": 1,
+    "pre_step_events": 1,
+    "hook_errors": 0,
+    "prompt_bytes": 152,
+    "prompt_has_constitution": true
+  },
+  {
+    "mode": "hang",
+    "exit_code": null,
+    "timed_out": true,
+    "wall_s": 150.029,
+    "http_attempts": 2,
+    "request_paths": [
+      "/v1/messages"
+    ],
+    "stream": true,
+    "attempt_gaps_s": [
+      0.0
+    ],
+    "final_len": 0,
+    "final_head": "",
+    "stderr_head": "",
+    "blocked": false,
+    "turns": 1,
+    "pre_step_events": 1,
+    "hook_errors": 0,
+    "prompt_bytes": 152,
+    "prompt_has_constitution": true
+  },
+  {
+    "mode": "ok",
+    "exit_code": 0,
+    "timed_out": false,
+    "wall_s": 2.842,
+    "http_attempts": 2,
+    "request_paths": [
+      "/v1/messages"
+    ],
+    "stream": true,
+    "attempt_gaps_s": [
+      0.0
+    ],
+    "final_len": 7,
+    "final_head": "MOCK-OK",
+    "stderr_head": "",
+    "blocked": false,
+    "turns": 1,
+    "pre_step_events": 1,
+    "hook_errors": 0,
+    "prompt_bytes": 152,
+    "prompt_has_constitution": true
+  }
+]

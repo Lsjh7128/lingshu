@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>LINGSHU 控制台 · 跨环境观测</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <h1>LINGSHU 控制台 · 跨环境观测</h1>
+    <p class="sub" id="subLine">本地只读观测 · 数据由 console 服务提供</p>
+  </div>
+  <div class="controls">
+    <label class="field">
+      <span class="field-label">profile</span>
+      <select id="profileSelect" disabled aria-label="选择 profile">
+        <option value="">加载中…</option>
+      </select>
+    </label>
+    <span id="modeBadge" class="badge badge-mode" title="注册表中的 mode">—</span>
+    <span id="kindBadge" class="badge badge-mode" title="注册表中的 kind" hidden>—</span>
+    <span id="connBadge" class="conn conn-connecting" title="实时连接状态">
+      <i class="dot" aria-hidden="true"></i><span id="connText" aria-live="polite">连接中…</span>
+    </span>
+    <span id="privacyBadge" class="badge badge-privacy" title="隐私策略：仅聚合计数，服务端脱敏">只读 · 不展示对话原文</span>
+  </div>
+</header>
+
+<div class="banners" id="banners">
+  <div class="banner banner-error" id="bannerError" hidden role="alert">
+    <strong>错误</strong><span id="bannerErrorText"></span>
+  </div>
+  <div class="banner banner-warn" id="bannerStale" hidden>
+    <strong>新鲜度</strong><span id="bannerStaleText"></span>
+  </div>
+  <div class="banner banner-warn" id="bannerWarn" hidden>
+    <strong>数据源告警</strong><span id="bannerWarnText"></span>
+  </div>
+  <div class="banner banner-info" id="bannerInfo" hidden>
+    <strong>提示</strong><span id="bannerInfoText"></span>
+  </div>
+</div>
+
+<main>
+  <section id="emptyState" class="empty" hidden>
+    <h2>该 profile 尚未接入</h2>
+    <p class="empty-label" id="emptyLabel">—</p>
+    <p class="empty-reason">reason：<code id="emptyReason">—</code></p>
+    <p class="empty-display">数据目录：<code id="emptyDisplay">—</code></p>
+    <p class="empty-hint" id="emptyHint">—</p>
+    <ul class="warn-list" id="emptyWarnings" hidden></ul>
+    <p class="empty-note">控制台不会自动切换到其他 profile，也不会用 0 值冒充数据。接入完成后本页会自动开始接收数据。</p>
+  </section>
+
+  <div class="grid" id="dataGrid">
+
+    <article class="card">
+      <header class="card-head">
+        <h2>上下文相变</h2>
+        <span class="tag" id="phaseTag">—</span>
+      </header>
+      <div class="phase-body">
+        <svg id="ring" class="ring" viewBox="0 0 160 160" role="img" aria-label="上下文占用比例环形图">
+          <circle class="ring-track" cx="80" cy="80" r="54"></circle>
+          <circle id="ringArc" class="ring-arc" cx="80" cy="80" r="54" transform="rotate(-90 80 80)" stroke-dasharray="339.292 339.292" stroke-dashoffset="339.292"></circle>
+          <g id="ringTicks" class="ring-ticks"></g>
+          <text id="ringPct" class="ring-pct" x="80" y="85" text-anchor="middle">—</text>
+          <text id="ringPhase" class="ring-phase" x="80" y="102" text-anchor="middle">未观测</text>
+        </svg>
+        <dl class="kv">
+          <div><dt>用量</dt><dd id="phaseUsage">—</dd></div>
+          <div><dt>阈值</dt><dd id="phaseThresholds">—</dd></div>
+          <div><dt>趋势</dt><dd id="phaseTrend">—</dd></div>
+          <div><dt>告警</dt><dd id="phaseAlerts">—</dd></div>
+          <div><dt>来源</dt><dd id="phaseSource">—</dd></div>
+        </dl>
+      </div>
+    </article>
+
+    <article class="card">
+      <header class="card-head">
+        <h2>记忆</h2>
+        <span class="tag" id="memTag">—</span>
+      </header>
+      <div class="statrow">
+        <div class="stat"><span class="k">active</span><span class="v" id="memActive">—</span></div>
+        <div class="stat"><span class="k">unique</span><span class="v" id="memUnique">—</span></div>
+        <div class="stat"><span class="k">total_rows</span><span class="v" id="memRows">—</span></div>
+      </div>
+      <p class="muted small" id="memSub">—</p>
+      <div class="spark-head">
+        <span>active 采样 · 本地内存保留最近 60 帧</span>
+        <span class="muted small" id="sparkMeta">暂无采样</span>
+      </div>
+      <svg id="spark" class="spark" viewBox="0 0 240 48" preserveAspectRatio="none" aria-label="active 计数本地采样曲线">
+        <polyline id="sparkLine" class="spark-line" points=""></polyline>
+        <circle id="sparkDot" class="spark-dot" r="2.6" cx="-10" cy="-10"></circle>
+      </svg>
+      <h3 class="sub-h">by_origin</h3>
+      <div class="bars" id="memOrigin"><p class="muted small">—</p></div>
+    </article>
+
+    <article class="card span2">
+      <header class="card-head">
+        <h2>STPA 门控</h2>
+        <span class="tag" id="stpaTag">—</span>
+      </header>
+      <div class="statrow">
+        <div class="stat"><span class="k">verdict</span><span class="v" id="stpaVerdict">—</span></div>
+        <div class="stat"><span class="k">ucas</span><span class="v" id="stpaUcas">—</span></div>
+        <div class="stat"><span class="k">downgrades</span><span class="v" id="stpaDowngrades">—</span></div>
+        <div class="stat"><span class="k">fail_mode</span><span class="v" id="stpaFailMode">—</span></div>
+        <div class="stat"><span class="k">blocked</span><span class="v" id="stpaBlocked">—</span></div>
+      </div>
+      <p class="muted small" id="stpaSub">—</p>
+      <h3 class="sub-h">放行日志 · audit.recent 相关事件 <span class="muted small" id="logMeta"></span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>时间</th><th>kind</th><th>fields</th></tr></thead>
+          <tbody id="stpaLog">
+            <tr><td colspan="3" class="muted small">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="card">
+      <header class="card-head">
+        <h2>审计概览</h2>
+        <span class="tag" id="auditTag">—</span>
+      </header>
+      <div class="statrow">
+        <div class="stat"><span class="k">total</span><span class="v" id="auditTotal">—</span></div>
+        <div class="stat"><span class="k">turns</span><span class="v" id="turnsCount">—</span></div>
+        <div class="stat"><span class="k">state_writes</span><span class="v" id="stateWrites">—</span></div>
+        <div class="stat"><span class="k">stage</span><span class="v" id="stageValue">—</span></div>
+      </div>
+      <p class="muted small" id="auditSub">—</p>
+      <h3 class="sub-h">by_kind · 前 8</h3>
+      <div class="bars" id="auditKinds"><p class="muted small">—</p></div>
+    </article>
+
+    <article class="card">
+      <header class="card-head">
+        <h2>数据源</h2>
+        <span class="tag" id="freshTag">—</span>
+      </header>
+      <dl class="kv kv-block">
+        <div><dt>profile</dt><dd id="dsLabel">—</dd></div>
+        <div><dt>source</dt><dd><code id="dsDisplay">—</code></dd></div>
+        <div><dt>data_asof</dt><dd id="dsAsof">—</dd></div>
+        <div><dt>data_age</dt><dd id="dsAge">—</dd></div>
+        <div><dt>stale_after</dt><dd id="dsStaleAfter">—</dd></div>
+        <div><dt>revision</dt><dd><code id="dsRevision">—</code></dd></div>
+      </dl>
+      <h3 class="sub-h">files</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>文件</th><th>存在</th><th>字节</th><th>mtime</th></tr></thead>
+          <tbody id="dsFiles"><tr><td colspan="4" class="muted small">—</td></tr></tbody>
+        </table>
+      </div>
+      <h3 class="sub-h">warnings</h3>
+      <div class="warn-chips" id="dsWarnings"><span class="muted small">无</span></div>
+    </article>
+
+  </div>
+</main>
+
+<footer class="foot">LINGSHU · 本地只读控制台 · 无任何外部资源请求 · 不展示对话原文</footer>
+
+<noscript><p class="noscript">本页需要启用 JavaScript 才能读取控制台数据。</p></noscript>
+
+<script src="app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,6253 @@
+{
+  "generated_at": "2026-10-27",
+  "runner": "<REPO_ROOT>\\.tmp\\audit-a4\\mutate.py",
+  "copy_repo": "<REPO_ROOT>\\.tmp\\audit-a4\\repo",
+  "baseline": {
+    "js": {
+      "control-sim.mjs": 148,
+      "host-sim.mjs": 188,
+      "stress.mjs": 45
+    },
+    "python": {
+      "files": 13,
+      "passed": 868,
+      "failed": 0
+    }
+  },
+  "total_mutations": 44,
+  "killed": 38,
+  "survived": 6,
+  "error_killed": 0,
+  "crash_observed_after_assert_fail": [
+    "YAML-03",
+    "YAML-04"
+  ],
+  "by_area": {
+    "js_control_memorywriter_index": {
+      "total": 16,
+      "killed": 15,
+      "survived": 1
+    },
+    "js_memorywriter": {
+      "total": 5,
+      "killed": 3,
+      "survived": 2
+    },
+    "js_index": {
+      "total": 8,
+      "killed": 6,
+      "survived": 2
+    },
+    "py_engine_control": {
+      "total": 11,
+      "killed": 10,
+      "survived": 1
+    },
+    "rules_yaml": {
+      "total": 4,
+      "killed": 4,
+      "survived": 0
+    }
+  },
+  "survivors": [
+    {
+      "id": "JS-16",
+      "category": "抗饱和钳位（疑似等价）",
+      "mutation": {
+        "before": "        next = next < 0 ? -this.cap : this.cap;",
+        "after": "        next = this.cap;"
+      },
+      "note": "见报告：等价变异 / 已由新增回归断言补杀"
+    },
+    {
+      "id": "MW-04",
+      "category": "工作副本失效",
+      "mutation": {
+        "before": "          e.status = 'superseded';       // 工作副本立即失效，避免同一旧条目写两条墓碑",
+        "after": "          // (mutated) 工作副本不失效"
+      },
+      "note": "见报告：等价变异 / 已由新增回归断言补杀"
+    },
+    {
+      "id": "MW-05",
+      "category": "墓碑排序 last-wins",
+      "mutation": {
+        "before": "    store.append(fresh.concat(tombstones));",
+        "after": "    store.append(tombstones.concat(fresh));"
+      },
+      "note": "见报告：等价变异 / 已由新增回归断言补杀"
+    },
+    {
+      "id": "IDX-03",
+      "category": "冲突判定 status 过滤",
+      "mutation": {
+        "before": "    if (String(e.status ?? 'active') !== 'active') continue;",
+        "after": "    if (false) continue;"
+      },
+      "note": "见报告：等价变异 / 已由新增回归断言补杀"
+    },
+    {
+      "id": "IDX-05",
+      "category": "quality_label 规则",
+      "mutation": {
+        "before": "  ['wrong', ['不对', '错了', '不是这样', '记错', '说错', '搞错']],",
+        "after": "  ['wrong', ['错了', '不是这样', '记错', '说错', '搞错']],"
+      },
+      "note": "见报告：等价变异 / 已由新增回归断言补杀"
+    },
+    {
+      "id": "PY-11",
+      "category": "钳位（疑似等价）",
+      "mutation": {
+        "before": "                nxt = math.copysign(self.cap, nxt)",
+        "after": "                nxt = self.cap"
+      },
+      "note": "见报告：等价变异 / 已由新增回归断言补杀"
+    }
+  ],
+  "results": [
+    {
+      "id": "JS-01",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "阈值/默认参数",
+      "mutation": {
+        "before": "  phaseShiftRatio: 0.7,",
+        "after": "  phaseShiftRatio: 0.75,"
+      },
+      "expected_killer": "control-sim 默认参数/0.70→shift 边界",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 1,
+          "passed": 143,
+          "failed": 5,
+          "fails": [
+            "相变阈值正确",
+            "ratio=0.70 恰好触发 shift",
+            "shift：提升自我指涉",
+            "上升趋势 → shift 阶段也补锚点",
+            "trendThreshold 可配置（0.5 → 0.11 的趋势不足）"
+          ]
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 16.2,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 5,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "control-sim.mjs: 相变阈值正确",
+        "control-sim.mjs: ratio=0.70 恰好触发 shift"
+      ]
+    },
+    {
+      "id": "JS-02",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "阈值/默认参数",
+      "mutation": {
+        "before": "  phaseShiftHardRatio: 0.85,",
+        "after": "  phaseShiftHardRatio: 0.9,"
+      },
+      "expected_killer": "control-sim 默认参数/0.85→critical 边界",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 1,
+          "passed": 145,
+          "failed": 3,
+          "fails": [
+            "相变阈值正确",
+            "ratio=0.85 → critical（双阈值可达；v4.0 \"critical 被 shift 吞掉\"回归点）",
+            "critical 强制首尾锚点"
+          ]
+        },
+        "host-sim.mjs": {
+          "exit": 1,
+          "passed": 187,
+          "failed": 1,
+          "fails": [
+            "覆盖窗口后相变触发且要求锚点  — {\"ratio\":0.852,\"phase\":\"shift\",\"trend\":0,\"prefeed\":true,\"selfReferenceBoost\":true,\"anchorRequired\":false}"
+          ]
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 16.0,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 4,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "control-sim.mjs: 相变阈值正确",
+        "control-sim.mjs: ratio=0.85 → critical（双阈值可达；v4.0 \"critical 被 shift 吞掉\"回归点）",
+        "host-sim.mjs: 覆盖窗口后相变触发且要求锚点  — {\"ratio\":0.852,\"phase\":\"shift\",\"trend\":0,\"prefeed\":true,\"selfReferenceBoost\":true,\"anchorRequired\":false}"
+      ]
+    },
+    {
+      "id": "JS-03",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "阈值边界",
+      "mutation": {
+        "before": "    if (r >= this.hardRatio) phase = 'critical';",
+        "after": "    if (r > this.hardRatio) phase = 'critical';"
+      },
+      "expected_killer": "control-sim ratio=0.85 → critical",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 1,
+          "passed": 146,
+          "failed": 2,
+          "fails": [
+            "ratio=0.85 → critical（双阈值可达；v4.0 \"critical 被 shift 吞掉\"回归点）",
+            "critical 强制首尾锚点"
+          ]
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.3,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 2,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "control-sim.mjs: ratio=0.85 → critical（双阈值可达；v4.0 \"critical 被 shift 吞掉\"回归点）",
+        "control-sim.mjs: critical 强制首尾锚点"
+      ]
+    },
+    {
+      "id": "JS-04",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "阈值边界",
+      "mutation": {
+        "before": "    else if (r >= this.shiftRatio) phase = 'shift';",
+        "after": "    else if (r > this.shiftRatio) phase = 'shift';"
+      },
+      "expected_killer": "control-sim ratio=0.70 → shift",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 1,
+          "passed": 146,
+          "failed": 2,
+          "fails": [
+            "ratio=0.70 恰好触发 shift",
+            "shift：提升自我指涉"
+          ]
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.8,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 2,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "control-sim.mjs: ratio=0.70 恰好触发 shift",
+        "control-sim.mjs: shift：提升自我指涉"
+      ]
+    },
+    {
+      "id": "JS-05",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "trend 公式",
+      "mutation": {
+        "before": "      trend = (this.history[this.history.length - 1] - this.history[this.history.length - 3]) / 2;",
+        "after": "      trend = (this.history[this.history.length - 1] - this.history[this.history.length - 3]) / 3;"
+      },
+      "expected_killer": "control-sim trend=(r[-1]-r[-3])/2",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 1,
+          "passed": 147,
+          "failed": 1,
+          "fails": [
+            "trend=(r[-1]−r[-3])/2"
+          ]
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.4,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 1,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "control-sim.mjs: trend=(r[-1]−r[-3])/2"
+      ]
+    },
+    {
+      "id": "JS-06",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "anchor 条件",
+      "mutation": {
+        "before": "      anchorRequired: phase === 'critical' || (phase === 'shift' && trend > this.trendThreshold),",
+        "after": "      anchorRequired: phase === 'critical' || (phase === 'shift' && trend >= 0),"
+      },
+      "expected_killer": "control-sim 平台期 shift 不强制锚点",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 1,
+          "passed": 145,
+          "failed": 3,
+          "fails": [
+            "shift 首条无趋势 → 不强制锚点",
+            "平台期 shift 不强制锚点（trend=0）",
+            "trendThreshold 可配置（0.5 → 0.11 的趋势不足）"
+          ]
+        },
+        "host-sim.mjs": {
+          "exit": 1,
+          "passed": 187,
+          "failed": 1,
+          "fails": [
+            "shift 首轮无趋势 → anchorTail 仍为空"
+          ]
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.5,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 4,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "control-sim.mjs: shift 首条无趋势 → 不强制锚点",
+        "control-sim.mjs: 平台期 shift 不强制锚点（trend=0）",
+        "host-sim.mjs: shift 首轮无趋势 → anchorTail 仍为空"
+      ]
+    },
+    {
+      "id": "JS-07",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "anchor 条件",
+      "mutation": {
+        "before": "      anchorRequired: phase === 'critical' || (phase === 'shift' && trend > this.trendThreshold),",
+        "after": "      anchorRequired: (phase === 'shift' && trend > this.trendThreshold),"
+      },
+      "expected_killer": "control-sim critical 强制锚点",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 1,
+          "passed": 147,
+          "failed": 1,
+          "fails": [
+            "critical 强制首尾锚点"
+          ]
+        },
+        "host-sim.mjs": {
+          "exit": 1,
+          "passed": 183,
+          "failed": 5,
+          "fails": [
+            "critical → anchorRequired=true",
+            "critical → anchorTail 段含复核",
+            "critical → last-prompt 尾部是复核锚点  — 等于用户没说过，不得编造。",
+            "同 turn 第二步仍保留 anchorRequired",
+            "覆盖窗口后相变触发且要求锚点  — {\"ratio\":0.852,\"phase\":\"critical\",\"trend\":0,\"prefeed\":true,\"selfReferenceBoost\":true,\"anchorRequired\":false}"
+          ]
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.6,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 6,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "control-sim.mjs: critical 强制首尾锚点",
+        "host-sim.mjs: critical → anchorRequired=true",
+        "host-sim.mjs: critical → anchorTail 段含复核"
+      ]
+    },
+    {
+      "id": "JS-08",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "prefeed 条件",
+      "mutation": {
+        "before": "      prefeed: phase === 'shift' || phase === 'critical',",
+        "after": "      prefeed: phase === 'shift',"
+      },
+      "expected_killer": "control-sim critical 触发前馈",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 1,
+          "passed": 143,
+          "failed": 5,
+          "fails": [
+            "ratio=0.85 → critical（双阈值可达；v4.0 \"critical 被 shift 吞掉\"回归点）",
+            "UCA-07 命中 → verdict=block 且只列它  — []",
+            "UCA-07 解释指向 UCA 表",
+            "相变期 prefeed 但 prompt 无锚点 → UCA-07",
+            "多命中完整顺序 UCA-01…07"
+          ]
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.4,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 5,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "control-sim.mjs: ratio=0.85 → critical（双阈值可达；v4.0 \"critical 被 shift 吞掉\"回归点）",
+        "control-sim.mjs: UCA-07 命中 → verdict=block 且只列它  — []"
+      ]
+    },
+    {
+      "id": "JS-09",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "selfReferenceBoost 条件",
+      "mutation": {
+        "before": "      selfReferenceBoost: phase !== 'normal',",
+        "after": "      selfReferenceBoost: phase === 'critical',"
+      },
+      "expected_killer": "control-sim shift 仍提升自我指涉",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 1,
+          "passed": 147,
+          "failed": 1,
+          "fails": [
+            "shift：提升自我指涉"
+          ]
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.3,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 1,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "control-sim.mjs: shift：提升自我指涉"
+      ]
+    },
+    {
+      "id": "JS-10",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "UCA-06 条件",
+      "mutation": {
+        "before": "  if (a.conflict === 'unresolved' && !a.fallbackApplied) hits.push('UCA-06');",
+        "after": "  if (a.conflict === 'unresolved' && a.fallbackApplied) hits.push('UCA-06');"
+      },
+      "expected_killer": "control-sim UCA-06 未降维才熔断",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 1,
+          "passed": 144,
+          "failed": 4,
+          "fails": [
+            "UCA-06 命中 → verdict=block 且只列它  — []",
+            "UCA-06 解释指向 UCA 表",
+            "已降维的未定义冲突 → 不触发 UCA-06",
+            "多命中完整顺序 UCA-01…07"
+          ]
+        },
+        "host-sim.mjs": {
+          "exit": 1,
+          "passed": 182,
+          "failed": 6,
+          "fails": [
+            "降维不熔断：verdict=allow  — {\"verdict\":\"block\",\"ucas\":[\"UCA-06\"],\"downgrades\":[],\"failMode\":\"closed\",\"explain\":[\"未定义冲突未降维（继续输出风格化内容）\"],\"explainDowngrades\":[],\"sources\":{}}",
+            "降维不熔断：blocked=false",
+            "UCA-06 不命中（已降维）  — [\"UCA-06\"]",
+            "organization 只留中性内容组织",
+            "fact 段有冲突待澄清提示",
+            "last-prompt 含冲突提示与宪法"
+          ]
+        },
+        "stress.mjs": {
+          "exit": 1,
+          "passed": 43,
+          "failed": 2,
+          "fails": [
+            "审计无 preflight_block（40 轮全放行）  — 2 条",
+            "每次 pre_step 审计 verdict=allow  — 4 条非 allow"
+          ]
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.3,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 12,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "control-sim.mjs: UCA-06 命中 → verdict=block 且只列它  — []",
+        "control-sim.mjs: UCA-06 解释指向 UCA 表",
+        "host-sim.mjs: 降维不熔断：verdict=allow  — {\"verdict\":\"block\",\"ucas\":[\"UCA-06\"],\"downgrades\":[],\"failMode\":\"closed\",\"explain\":[\"未定义冲突未降维（继续输出风格化内容）\"],\"explainDowngrades\":[],\"sources\":{}}",
+        "host-sim.mjs: 降维不熔断：blocked=false",
+        "stress.mjs: 审计无 preflight_block（40 轮全放行）  — 2 条",
+        "stress.mjs: 每次 pre_step 审计 verdict=allow  — 4 条非 allow"
+      ]
+    },
+    {
+      "id": "JS-11",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "UCA-08 any→all",
+      "mutation": {
+        "before": "  if (isObj(a.saturated) && Object.values(a.saturated).some((v) => !!v)) {",
+        "after": "  if (isObj(a.saturated) && Object.values(a.saturated).every((v) => !!v)) {"
+      },
+      "expected_killer": "control-sim 单维饱和 → 记降级",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 1,
+          "passed": 145,
+          "failed": 3,
+          "fails": [
+            "UCA-08 记入 downgrades",
+            "UCA-08 降级解释指向 UCA 表",
+            "空 saturated 对象 → 无降级"
+          ]
+        },
+        "host-sim.mjs": {
+          "exit": 1,
+          "passed": 182,
+          "failed": 6,
+          "fails": [
+            "audit.downgrades 含 UCA-08  — {\"verdict\":\"allow\",\"ucas\":[],\"downgrades\":[],\"failMode\":\"closed\",\"explain\":[],\"explainDowngrades\":[],\"sources\":{}}",
+            "audit.jsonl 有 preflight_downgrade",
+            "preflight_downgrade 记录 UCA-08",
+            "pre_step 审计行也带 downgrades=UCA-08",
+            "UCA-08 进 downgrades  — {\"verdict\":\"allow\",\"ucas\":[],\"downgrades\":[],\"failMode\":\"closed\",\"explain\":[],\"explainDowngrades\":[],\"sources\":{}}",
+            "审计有 preflight_downgrade"
+          ]
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.3,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 9,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "control-sim.mjs: UCA-08 记入 downgrades",
+        "control-sim.mjs: UCA-08 降级解释指向 UCA 表",
+        "host-sim.mjs: audit.downgrades 含 UCA-08  — {\"verdict\":\"allow\",\"ucas\":[],\"downgrades\":[],\"failMode\":\"closed\",\"explain\":[],\"explainDowngrades\":[],\"sources\":{}}",
+        "host-sim.mjs: audit.jsonl 有 preflight_downgrade"
+      ]
+    },
+    {
+      "id": "JS-12",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "guard 条件取反",
+      "mutation": {
+        "before": "    if (v.conflict !== 'unresolved' || v.matchedMutex) {",
+        "after": "    if (v.conflict !== 'unresolved' && v.matchedMutex) {"
+      },
+      "expected_killer": "control-sim 冲突已解决/无冲突不降维",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 1,
+          "passed": 143,
+          "failed": 5,
+          "fails": [
+            "已命中互斥表 → 不降维",
+            "命中互斥表不追加事件",
+            "冲突已解决 → 不降维",
+            "无冲突 → 不降维",
+            "缺省 conflict → 不降维"
+          ]
+        },
+        "host-sim.mjs": {
+          "exit": 1,
+          "passed": 187,
+          "failed": 1,
+          "fails": [
+            "降级轮仍正常注入 style 段"
+          ]
+        },
+        "stress.mjs": {
+          "exit": 1,
+          "passed": 44,
+          "failed": 1,
+          "fails": [
+            "风格段注入表达状态"
+          ]
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.5,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 7,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "control-sim.mjs: 已命中互斥表 → 不降维",
+        "control-sim.mjs: 命中互斥表不追加事件",
+        "host-sim.mjs: 降级轮仍正常注入 style 段",
+        "stress.mjs: 风格段注入表达状态"
+      ]
+    },
+    {
+      "id": "JS-13",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "抗饱和 windup",
+      "mutation": {
+        "before": "      if (this.saturated[k]) {",
+        "after": "      if (false) {"
+      },
+      "expected_killer": "control-sim 抗饱和：饱和后不再增长",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 1,
+          "passed": 147,
+          "failed": 1,
+          "fails": [
+            "抗饱和：饱和后按 leak 回落"
+          ]
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.6,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 1,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "control-sim.mjs: 抗饱和：饱和后按 leak 回落"
+      ]
+    },
+    {
+      "id": "JS-14",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "死区",
+      "mutation": {
+        "before": "      if (Math.abs(e) < this.deadband) {",
+        "after": "      if (Math.abs(e) < 0) {"
+      },
+      "expected_killer": "control-sim 死区内不积分（只泄放）",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 1,
+          "passed": 146,
+          "failed": 2,
+          "fails": [
+            "死区内不积分（只泄放）",
+            "死区内泄放使基线下降"
+          ]
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.4,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 2,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "control-sim.mjs: 死区内不积分（只泄放）",
+        "control-sim.mjs: 死区内泄放使基线下降"
+      ]
+    },
+    {
+      "id": "JS-15",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "leak",
+      "mutation": {
+        "before": "    const decay = Math.exp(-this.leak * dt);",
+        "after": "    const decay = Math.exp(-dt);"
+      },
+      "expected_killer": "control-sim 泄放量 = I·exp(-leak·dt)",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 1,
+          "passed": 145,
+          "failed": 3,
+          "fails": [
+            "死区内不积分（只泄放）",
+            "抗饱和：饱和后按 leak 回落",
+            "泄放量 = I·exp(−leak·dt）"
+          ]
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.2,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 3,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "control-sim.mjs: 死区内不积分（只泄放）",
+        "control-sim.mjs: 抗饱和：饱和后按 leak 回落"
+      ]
+    },
+    {
+      "id": "JS-16",
+      "file": "plugin\\dsh-lingshu\\control.js",
+      "category": "抗饱和钳位（疑似等价）",
+      "mutation": {
+        "before": "        next = next < 0 ? -this.cap : this.cap;",
+        "after": "        next = this.cap;"
+      },
+      "expected_killer": "疑似等价：负向分支在 e>0 下不可达 → 预期 SURVIVED",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.5,
+      "killed": false,
+      "killed_by_js": false,
+      "killed_by_py": false,
+      "js_failed_checks": 0,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": []
+    },
+    {
+      "id": "MW-01",
+      "file": "plugin\\dsh-lingshu\\memorywriter.js",
+      "category": "supersede 条件",
+      "mutation": {
+        "before": "          if (String(e.object ?? '') === String(entry.object)) continue;",
+        "after": "          if (String(e.object ?? '') !== String(entry.object)) continue;"
+      },
+      "expected_killer": "host-sim supersede：同键不同 object 才墓碑",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 1,
+          "passed": 183,
+          "failed": 5,
+          "fails": [
+            "旧值墓碑 superseded  — \"active\"",
+            "墓碑 supersededBy=新条目 id  — undefined",
+            "审计 memory_supersede 记录旧值",
+            "状态统计 supersedeEvents>=1",
+            "检索不命中被 supersede 的旧值  — [\"mem_001\",\"mem_005\",\"mem_003\"]"
+          ]
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.8,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 5,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "host-sim.mjs: 旧值墓碑 superseded  — \"active\"",
+        "host-sim.mjs: 墓碑 supersededBy=新条目 id  — undefined"
+      ]
+    },
+    {
+      "id": "MW-02",
+      "file": "plugin\\dsh-lingshu\\memorywriter.js",
+      "category": "批内去重",
+      "mutation": {
+        "before": "      if (batch.has(key)) {",
+        "after": "      if (false) {"
+      },
+      "expected_killer": "stress/host-sim 同批同三元组只写一条",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 1,
+          "passed": 187,
+          "failed": 1,
+          "fails": [
+            "同批同 (subject,relation,object) 重复仍拒绝  — {\"written\":2,\"ids\":[\"mem_006\",\"mem_007\"],\"rejected\":[],\"superseded\":[]}"
+          ]
+        },
+        "stress.mjs": {
+          "exit": 1,
+          "passed": 44,
+          "failed": 1,
+          "fails": [
+            "同批同三元组只写一条  — 2 written"
+          ]
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.4,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 2,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "host-sim.mjs: 同批同 (subject,relation,object) 重复仍拒绝  — {\"written\":2,\"ids\":[\"mem_006\",\"mem_007\"],\"rejected\":[],\"superseded\":[]}",
+        "stress.mjs: 同批同三元组只写一条  — 2 written"
+      ]
+    },
+    {
+      "id": "MW-03",
+      "file": "plugin\\dsh-lingshu\\memorywriter.js",
+      "category": "墓碑状态",
+      "mutation": {
+        "before": "            status: 'superseded',",
+        "after": "            status: 'active',"
+      },
+      "expected_killer": "host-sim supersede 后旧条目不可召回",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 1,
+          "passed": 186,
+          "failed": 2,
+          "fails": [
+            "旧值墓碑 superseded  — \"active\"",
+            "检索不命中被 supersede 的旧值  — [\"mem_001\",\"mem_005\",\"mem_003\"]"
+          ]
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.5,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 2,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "host-sim.mjs: 旧值墓碑 superseded  — \"active\"",
+        "host-sim.mjs: 检索不命中被 supersede 的旧值  — [\"mem_001\",\"mem_005\",\"mem_003\"]"
+      ]
+    },
+    {
+      "id": "MW-04",
+      "file": "plugin\\dsh-lingshu\\memorywriter.js",
+      "category": "工作副本失效",
+      "mutation": {
+        "before": "          e.status = 'superseded';       // 工作副本立即失效，避免同一旧条目写两条墓碑",
+        "after": "          // (mutated) 工作副本不失效"
+      },
+      "expected_killer": "host-sim 同一旧条目只写一条墓碑/批内 supersede",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.4,
+      "killed": false,
+      "killed_by_js": false,
+      "killed_by_py": false,
+      "js_failed_checks": 0,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": []
+    },
+    {
+      "id": "MW-05",
+      "file": "plugin\\dsh-lingshu\\memorywriter.js",
+      "category": "墓碑排序 last-wins",
+      "mutation": {
+        "before": "    store.append(fresh.concat(tombstones));",
+        "after": "    store.append(tombstones.concat(fresh));"
+      },
+      "expected_killer": "host-sim 批内先阿尔法后贝塔 last-wins",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.6,
+      "killed": false,
+      "killed_by_js": false,
+      "killed_by_py": false,
+      "js_failed_checks": 0,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": []
+    },
+    {
+      "id": "IDX-01",
+      "file": "plugin\\dsh-lingshu\\index.js",
+      "category": "superseded 过滤/阿尔法泄漏",
+      "mutation": {
+        "before": "  return [...byId.values()];",
+        "after": "  return readJsonl(file);"
+      },
+      "expected_killer": "host-sim 墓碑 last-wins 覆盖（旧值不再召回）",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 1,
+          "passed": 186,
+          "failed": 2,
+          "fails": [
+            "清理后不再召回（last-wins）  — [\"mem_001\"]",
+            "检索不命中被 supersede 的旧值  — [\"mem_001\",\"mem_005\",\"mem_003\"]"
+          ]
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.9,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 2,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "host-sim.mjs: 清理后不再召回（last-wins）  — [\"mem_001\"]",
+        "host-sim.mjs: 检索不命中被 supersede 的旧值  — [\"mem_001\",\"mem_005\",\"mem_003\"]"
+      ]
+    },
+    {
+      "id": "IDX-02",
+      "file": "plugin\\dsh-lingshu\\index.js",
+      "category": "potency superseded 过滤",
+      "mutation": {
+        "before": "  if (entry.status === 'superseded' || entry.status === 'suppressed') return 0;",
+        "after": "  if (entry.status === 'suppressed') return 0;"
+      },
+      "expected_killer": "host-sim superseded 条目不参与召回",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 1,
+          "passed": 187,
+          "failed": 1,
+          "fails": [
+            "检索不命中被 supersede 的旧值  — [\"mem_001\",\"mem_005\",\"mem_003\"]"
+          ]
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 16.0,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 1,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "host-sim.mjs: 检索不命中被 supersede 的旧值  — [\"mem_001\",\"mem_005\",\"mem_003\"]"
+      ]
+    },
+    {
+      "id": "IDX-03",
+      "file": "plugin\\dsh-lingshu\\index.js",
+      "category": "冲突判定 status 过滤",
+      "mutation": {
+        "before": "    if (String(e.status ?? 'active') !== 'active') continue;",
+        "after": "    if (false) continue;"
+      },
+      "expected_killer": "host-sim superseded 不产生 unresolved 冲突",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.4,
+      "killed": false,
+      "killed_by_js": false,
+      "killed_by_py": false,
+      "js_failed_checks": 0,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": []
+    },
+    {
+      "id": "IDX-04",
+      "file": "plugin\\dsh-lingshu\\index.js",
+      "category": "冲突判定阈值",
+      "mutation": {
+        "before": "    if (objects.length > 1) {",
+        "after": "    if (objects.length >= 1) {"
+      },
+      "expected_killer": "host-sim 单条命中不判冲突",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 1,
+          "passed": 186,
+          "failed": 2,
+          "fails": [
+            "supersede 已处理的旧值不制造冲突  — {\"level\":\"high\",\"expression\":\"state\",\"path\":\"direct\",\"conflict\":\"unresolved\"}",
+            "无冲突时 control.conflict.unresolved=false"
+          ]
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.4,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 2,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "host-sim.mjs: supersede 已处理的旧值不制造冲突  — {\"level\":\"high\",\"expression\":\"state\",\"path\":\"direct\",\"conflict\":\"unresolved\"}",
+        "host-sim.mjs: 无冲突时 control.conflict.unresolved=false"
+      ]
+    },
+    {
+      "id": "IDX-05",
+      "file": "plugin\\dsh-lingshu\\index.js",
+      "category": "quality_label 规则",
+      "mutation": {
+        "before": "  ['wrong', ['不对', '错了', '不是这样', '记错', '说错', '搞错']],",
+        "after": "  ['wrong', ['错了', '不是这样', '记错', '说错', '搞错']],"
+      },
+      "expected_killer": "host-sim 结果标签闭集/quote 逐字回指（'不对'）",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 16.7,
+      "killed": false,
+      "killed_by_js": false,
+      "killed_by_py": false,
+      "js_failed_checks": 0,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": []
+    },
+    {
+      "id": "IDX-06",
+      "file": "plugin\\dsh-lingshu\\index.js",
+      "category": "事实提取：元指令拒绝",
+      "mutation": {
+        "before": "  if (FACT_META.some((w) => raw.includes(w))) { reject('meta_instruction'); return out; }",
+        "after": "  if (false) { reject('meta_instruction'); return out; }"
+      },
+      "expected_killer": "host-sim fact_extract_rejected reason=meta_instruction",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 1,
+          "passed": 186,
+          "failed": 2,
+          "fails": [
+            "元指令被拒（MEM-2.4）",
+            "无事实句式不写"
+          ]
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.8,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 2,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "host-sim.mjs: 元指令被拒（MEM-2.4）",
+        "host-sim.mjs: 无事实句式不写"
+      ]
+    },
+    {
+      "id": "IDX-07",
+      "file": "plugin\\dsh-lingshu\\index.js",
+      "category": "事实提取：禁忌主题拒绝",
+      "mutation": {
+        "before": "  if (FACT_FORBIDDEN_TOPIC.some((w) => subject.includes(w) || object.includes(w))) {",
+        "after": "  if (false) {"
+      },
+      "expected_killer": "host-sim fact_extract_rejected reason=forbidden_topic",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 1,
+          "passed": 185,
+          "failed": 3,
+          "fails": [
+            "配置/提示词被拒（MEM-2.2）",
+            "元指令被拒（MEM-2.4）",
+            "无事实句式不写"
+          ]
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.1,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 3,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "host-sim.mjs: 配置/提示词被拒（MEM-2.2）",
+        "host-sim.mjs: 元指令被拒（MEM-2.4）"
+      ]
+    },
+    {
+      "id": "IDX-08",
+      "file": "plugin\\dsh-lingshu\\index.js",
+      "category": "事实提取：祈使内容拒绝",
+      "mutation": {
+        "before": "  if (FACT_IMPERATIVE.some((w) => subject.includes(w) || object.includes(w))) {",
+        "after": "  if (false) {"
+      },
+      "expected_killer": "host-sim fact_extract_rejected reason=imperative_content",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 1,
+          "passed": 184,
+          "failed": 4,
+          "fails": [
+            "祈使内容被拒（MEM-2.1）",
+            "配置/提示词被拒（MEM-2.2）",
+            "元指令被拒（MEM-2.4）",
+            "无事实句式不写"
+          ]
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 14.9,
+      "killed": true,
+      "killed_by_js": true,
+      "killed_by_py": false,
+      "js_failed_checks": 4,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "host-sim.mjs: 祈使内容被拒（MEM-2.1）",
+        "host-sim.mjs: 配置/提示词被拒（MEM-2.2）"
+      ]
+    },
+    {
+      "id": "PY-01",
+      "file": "engine\\control.py",
+      "category": "阈值边界 shift",
+      "mutation": {
+        "before": "        elif r >= self.ratio:",
+        "after": "        elif r > self.ratio:"
+      },
+      "expected_killer": "test_control ratio=0.70 → shift",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 1,
+          "passed": 157,
+          "failed": 2,
+          "fails": [
+            "ratio=0.70 → shift, shift 触发前馈",
+            "ratio=0.70 → shift  — normal",
+            "shift 触发前馈"
+          ],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.0,
+      "killed": true,
+      "killed_by_js": false,
+      "killed_by_py": true,
+      "js_failed_checks": 0,
+      "py_failed_checks": 2,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "test_control.py: ratio=0.70 → shift, shift 触发前馈",
+        "test_control.py: ratio=0.70 → shift  — normal",
+        "test_control.py: shift 触发前馈"
+      ]
+    },
+    {
+      "id": "PY-02",
+      "file": "engine\\control.py",
+      "category": "阈值边界 critical",
+      "mutation": {
+        "before": "        if r >= self.hard:",
+        "after": "        if r > self.hard:"
+      },
+      "expected_killer": "test_control ratio=0.85 → critical",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 1,
+          "passed": 157,
+          "failed": 2,
+          "fails": [
+            "ratio=0.85 → critical（双阈值可达）, critical 强制首尾人格锚点",
+            "ratio=0.85 → critical（双阈值可达）  — shift",
+            "critical 强制首尾人格锚点"
+          ],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.1,
+      "killed": true,
+      "killed_by_js": false,
+      "killed_by_py": true,
+      "js_failed_checks": 0,
+      "py_failed_checks": 2,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "test_control.py: ratio=0.85 → critical（双阈值可达）, critical 强制首尾人格锚点",
+        "test_control.py: ratio=0.85 → critical（双阈值可达）  — shift",
+        "test_control.py: critical 强制首尾人格锚点"
+      ]
+    },
+    {
+      "id": "PY-03",
+      "file": "engine\\control.py",
+      "category": "trend 公式",
+      "mutation": {
+        "before": "            trend = (self.history[-1] - self.history[-3]) / 2.0",
+        "after": "            trend = (self.history[-1] - self.history[-3]) / 3.0"
+      },
+      "expected_killer": "test_control trend=(r[-1]-r[-3])/2",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 1,
+          "passed": 158,
+          "failed": 1,
+          "fails": [
+            "trend=(r[-1]−r[-3])/2",
+            "trend=(r[-1]−r[-3])/2  — 0.0733"
+          ],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.9,
+      "killed": true,
+      "killed_by_js": false,
+      "killed_by_py": true,
+      "js_failed_checks": 0,
+      "py_failed_checks": 1,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "test_control.py: trend=(r[-1]−r[-3])/2",
+        "test_control.py: trend=(r[-1]−r[-3])/2  — 0.0733"
+      ]
+    },
+    {
+      "id": "PY-04",
+      "file": "engine\\control.py",
+      "category": "anchor 条件",
+      "mutation": {
+        "before": "                                    and trend > self.trend_threshold)),",
+        "after": "                                    and trend >= 0)),"
+      },
+      "expected_killer": "test_control 平台期 shift 不强制锚点",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 1,
+          "passed": 156,
+          "failed": 3,
+          "fails": [
+            "刚触发且无趋势 → 有前馈但不强制锚点, 平台期 shift 不强制锚点（趋势=0）, trendThreshold=0.5 → 趋势不足不再提前补锚点",
+            "刚触发且无趋势 → 有前馈但不强制锚点",
+            "平台期 shift 不强制锚点（趋势=0）  — trend=0.0000",
+            "trendThreshold=0.5 → 趋势不足不再提前补锚点  — shift/trend=0.110"
+          ],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.0,
+      "killed": true,
+      "killed_by_js": false,
+      "killed_by_py": true,
+      "js_failed_checks": 0,
+      "py_failed_checks": 3,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "test_control.py: 刚触发且无趋势 → 有前馈但不强制锚点, 平台期 shift 不强制锚点（趋势=0）, trendThreshold=0.5 → 趋势不足不再提前补锚点",
+        "test_control.py: 刚触发且无趋势 → 有前馈但不强制锚点",
+        "test_control.py: 平台期 shift 不强制锚点（趋势=0）  — trend=0.0000"
+      ]
+    },
+    {
+      "id": "PY-05",
+      "file": "engine\\control.py",
+      "category": "UCA-06 条件",
+      "mutation": {
+        "before": "    if conflict == \"unresolved\" and not fallback_applied:",
+        "after": "    if conflict == \"unresolved\" and fallback_applied:"
+      },
+      "expected_killer": "test_control UCA-06 未降维熔断",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 1,
+          "passed": 156,
+          "failed": 3,
+          "fails": [
+            "UCA-06 命中 → verdict=block, UCA-06 解释指向 UCA 表, 未定义冲突已降维 → 不熔断",
+            "UCA-06 命中 → verdict=block  — []",
+            "UCA-06 解释指向 UCA 表  — []",
+            "未定义冲突已降维 → 不熔断  — ['UCA-06']"
+          ],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.2,
+      "killed": true,
+      "killed_by_js": false,
+      "killed_by_py": true,
+      "js_failed_checks": 0,
+      "py_failed_checks": 3,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "test_control.py: UCA-06 命中 → verdict=block, UCA-06 解释指向 UCA 表, 未定义冲突已降维 → 不熔断",
+        "test_control.py: UCA-06 命中 → verdict=block  — []",
+        "test_control.py: UCA-06 解释指向 UCA 表  — []"
+      ]
+    },
+    {
+      "id": "PY-06",
+      "file": "engine\\control.py",
+      "category": "UCA-08 any→all",
+      "mutation": {
+        "before": "    if saturated and any(bool(v) for v in saturated.values()):",
+        "after": "    if saturated and all(bool(v) for v in saturated.values()):"
+      },
+      "expected_killer": "test_control 单维饱和 → 记降级",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 1,
+          "passed": 157,
+          "failed": 2,
+          "fails": [
+            "UCA-08 饱和记入 downgrades, UCA-08 降级解释指向 UCA 表",
+            "UCA-08 饱和记入 downgrades  — []",
+            "UCA-08 降级解释指向 UCA 表  — []"
+          ],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 1,
+          "passed": 63,
+          "failed": 2,
+          "fails": [
+            "UCA-08 饱和：audit 记录 downgrades, UCA-08 饱和：事件留痕",
+            "UCA-08 饱和：audit 记录 downgrades  — {'verdict': 'allow', 'ucas': [], 'downgrades': [], 'fail_mode': 'closed', 'explain': [], 'explain_downgrades': []}",
+            "UCA-08 饱和：事件留痕  — {'verdict': 'allow', 'ucas': [], 'downgrades': [], 'fail_mode': 'closed', 'explain': [], 'explain_downgrades': []}"
+          ],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.3,
+      "killed": true,
+      "killed_by_js": false,
+      "killed_by_py": true,
+      "js_failed_checks": 0,
+      "py_failed_checks": 4,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "test_control.py: UCA-08 饱和记入 downgrades, UCA-08 降级解释指向 UCA 表",
+        "test_control.py: UCA-08 饱和记入 downgrades  — []",
+        "test_control.py: UCA-08 降级解释指向 UCA 表  — []",
+        "test_pipeline_integration.py: UCA-08 饱和：audit 记录 downgrades, UCA-08 饱和：事件留痕",
+        "test_pipeline_integration.py: UCA-08 饱和：audit 记录 downgrades  — {'verdict': 'allow', 'ucas': [], 'downgrades': [], 'fail_mode': 'closed', 'explain': [], 'explain_downgrades': []}",
+        "test_pipeline_integration.py: UCA-08 饱和：事件留痕  — {'verdict': 'allow', 'ucas': [], 'downgrades': [], 'fail_mode': 'closed', 'explain': [], 'explain_downgrades': []}"
+      ]
+    },
+    {
+      "id": "PY-07",
+      "file": "engine\\control.py",
+      "category": "guard 条件取反",
+      "mutation": {
+        "before": "        if conflict != \"unresolved\" or matched_mutex:",
+        "after": "        if conflict != \"unresolved\" and matched_mutex:"
+      },
+      "expected_killer": "test_control 冲突已解决/无冲突不降维",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 1,
+          "passed": 155,
+          "failed": 4,
+          "fails": [
+            "已命中互斥表 → 不降维, 命中互斥表不追加事件, 冲突已解决 → 不降维, 无冲突 → 不降维",
+            "已命中互斥表 → 不降维  — {'fallback': True, 'marker': 'requisite_variety_fallback', 'reason': 'unresolved_conflict_without_mutex_rule', 'drop_domains': ['style'], 'action': 'degrade_to_fact_and_clarify'}",
+            "命中互斥表不追加事件",
+            "冲突已解决 → 不降维",
+            "无冲突 → 不降维"
+          ],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 14.9,
+      "killed": true,
+      "killed_by_js": false,
+      "killed_by_py": true,
+      "js_failed_checks": 0,
+      "py_failed_checks": 4,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "test_control.py: 已命中互斥表 → 不降维, 命中互斥表不追加事件, 冲突已解决 → 不降维, 无冲突 → 不降维",
+        "test_control.py: 已命中互斥表 → 不降维  — {'fallback': True, 'marker': 'requisite_variety_fallback', 'reason': 'unresolved_conflict_without_mutex_rule', 'drop_domains': ['style'], 'action': 'degrade_to_fact_and_clarify'}",
+        "test_control.py: 命中互斥表不追加事件"
+      ]
+    },
+    {
+      "id": "PY-08",
+      "file": "engine\\control.py",
+      "category": "抗饱和 windup",
+      "mutation": {
+        "before": "            if self.saturated[k]:",
+        "after": "            if False:"
+      },
+      "expected_killer": "test_control 抗饱和：饱和后不再增长",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 1,
+          "passed": 158,
+          "failed": 1,
+          "fails": [
+            "抗饱和：饱和后按 leak 回落",
+            "抗饱和：饱和后按 leak 回落  — 0.4"
+          ],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.7,
+      "killed": true,
+      "killed_by_js": false,
+      "killed_by_py": true,
+      "js_failed_checks": 0,
+      "py_failed_checks": 1,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "test_control.py: 抗饱和：饱和后按 leak 回落",
+        "test_control.py: 抗饱和：饱和后按 leak 回落  — 0.4"
+      ]
+    },
+    {
+      "id": "PY-09",
+      "file": "engine\\control.py",
+      "category": "死区",
+      "mutation": {
+        "before": "            if abs(e) < self.deadband:",
+        "after": "            if abs(e) < 0.0:"
+      },
+      "expected_killer": "test_control 死区内不积分",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 1,
+          "passed": 157,
+          "failed": 2,
+          "fails": [
+            "死区内不积分（只泄放）, 死区内泄放使基线下降",
+            "死区内不积分（只泄放）  — 0.076500",
+            "死区内泄放使基线下降  — 0.076500 < 0.075000"
+          ],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.3,
+      "killed": true,
+      "killed_by_js": false,
+      "killed_by_py": true,
+      "js_failed_checks": 0,
+      "py_failed_checks": 2,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "test_control.py: 死区内不积分（只泄放）, 死区内泄放使基线下降",
+        "test_control.py: 死区内不积分（只泄放）  — 0.076500",
+        "test_control.py: 死区内泄放使基线下降  — 0.076500 < 0.075000"
+      ]
+    },
+    {
+      "id": "PY-10",
+      "file": "engine\\control.py",
+      "category": "leak",
+      "mutation": {
+        "before": "        self.leak = float(c[\"integralLeak\"])",
+        "after": "        self.leak = 0.0"
+      },
+      "expected_killer": "test_control 泄放量 = I·exp(-leak·dt)",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 1,
+          "passed": 154,
+          "failed": 5,
+          "fails": [
+            "死区内不积分（只泄放）, 死区内泄放使基线下降, 抗饱和：饱和后按 leak 回落, 正偏离触发泄放（不推高）, 泄放量 = I·exp(−leak·dt)",
+            "死区内不积分（只泄放）  — 0.075000",
+            "死区内泄放使基线下降  — 0.075000 < 0.075000",
+            "抗饱和：饱和后按 leak 回落  — 0.4",
+            "正偏离触发泄放（不推高）  — 0.075000 < 0.075000",
+            "泄放量 = I·exp(−leak·dt)  — 0.075"
+          ],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.0,
+      "killed": true,
+      "killed_by_js": false,
+      "killed_by_py": true,
+      "js_failed_checks": 0,
+      "py_failed_checks": 5,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "test_control.py: 死区内不积分（只泄放）, 死区内泄放使基线下降, 抗饱和：饱和后按 leak 回落, 正偏离触发泄放（不推高）, 泄放量 = I·exp(−leak·dt)",
+        "test_control.py: 死区内不积分（只泄放）  — 0.075000",
+        "test_control.py: 死区内泄放使基线下降  — 0.075000 < 0.075000"
+      ]
+    },
+    {
+      "id": "PY-11",
+      "file": "engine\\control.py",
+      "category": "钳位（疑似等价）",
+      "mutation": {
+        "before": "                nxt = math.copysign(self.cap, nxt)",
+        "after": "                nxt = self.cap"
+      },
+      "expected_killer": "疑似等价：e>0 时 nxt 恒正 → 预期 SURVIVED",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 0,
+          "passed": 134,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.2,
+      "killed": false,
+      "killed_by_js": false,
+      "killed_by_py": false,
+      "js_failed_checks": 0,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": []
+    },
+    {
+      "id": "YAML-01",
+      "file": "rules\\decay-params.yaml",
+      "category": "配置值钉住",
+      "mutation": {
+        "before": "  phaseShiftRatio: 0.7             # 相变阈值：shift",
+        "after": "  phaseShiftRatio: 0.5             # 相变阈值：shift"
+      },
+      "expected_killer": "test_chaos_calibrate 的 check_config_sync / 配置单一来源",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 1,
+          "passed": 133,
+          "failed": 1,
+          "fails": [
+            "真实 rules shift 仍 0.7（未被 fixture 污染）",
+            "真实 rules shift 仍 0.7（未被 fixture 污染）  — 0.5"
+          ],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 15.1,
+      "killed": true,
+      "killed_by_js": false,
+      "killed_by_py": true,
+      "js_failed_checks": 0,
+      "py_failed_checks": 1,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "test_chaos_calibrate.py: 真实 rules shift 仍 0.7（未被 fixture 污染）",
+        "test_chaos_calibrate.py: 真实 rules shift 仍 0.7（未被 fixture 污染）  — 0.5"
+      ]
+    },
+    {
+      "id": "YAML-02",
+      "file": "rules\\decay-params.yaml",
+      "category": "配置值钉住（补充）",
+      "mutation": {
+        "before": "  phaseShiftHardRatio: 0.85        # 相变阈值：critical",
+        "after": "  phaseShiftHardRatio: 0.80        # 相变阈值：critical"
+      },
+      "expected_killer": "check_config_sync 单一来源（非行为断言）",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 1,
+          "passed": 133,
+          "failed": 1,
+          "fails": [
+            "真实 rules hard 仍 0.85",
+            "真实 rules hard 仍 0.85  — 0.80"
+          ],
+          "traceback": false
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 14.7,
+      "killed": true,
+      "killed_by_js": false,
+      "killed_by_py": true,
+      "js_failed_checks": 0,
+      "py_failed_checks": 1,
+      "error_killed": false,
+      "crash_observed": false,
+      "first_killers": [
+        "test_chaos_calibrate.py: 真实 rules hard 仍 0.85",
+        "test_chaos_calibrate.py: 真实 rules hard 仍 0.85  — 0.80"
+      ]
+    },
+    {
+      "id": "YAML-03",
+      "file": "rules\\decay-params.yaml",
+      "category": "配置值钉住（补充）",
+      "mutation": {
+        "before": "  integralKi: 0.15                 # 积分增益 Ki",
+        "after": "  integralKi: 0.25                 # 积分增益 Ki"
+      },
+      "expected_killer": "check_config_sync 单一来源（非行为断言）",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 1,
+          "passed": null,
+          "failed": null,
+          "fails": [
+            "副本仓库初始 check_config_sync 0 fail  — ARAMS.phaseShiftRatio = 0.8",
+            "apply 成功 exit 0  — 2",
+            "四处全部同步为 shift=0.56 / hard=0.71（8 个值）  — {'rules/decay-params.yaml': (0.8, 0.9), 'engine/config.py': (0.8, 0.9), 'plugin/dsh-lingshu/cordis.patch.yml': (0.8, 0.9), 'plugin/dsh-lingshu/control.js': (0.8, 0.9)}",
+            "rules/decay-params.yaml 的 shift/hard 都写入新值  — rules/decay-params.yaml",
+            "engine/config.py 的 shift/hard 都写入新值  — engine/config.py",
+            "plugin/dsh-lingshu/cordis.patch.yml 的 shift/hard 都写入新值  — plugin/dsh-lingshu/cordis.patch.yml",
+            "plugin/dsh-lingshu/control.js 的 shift/hard 都写入新值  — plugin/dsh-lingshu/control.js",
+            "rules shift/hard 两行都有 provenance: measured",
+            "rules 注释带依据 E-M1 与 ADR-011",
+            "apply 后 check_config_sync 0 fail  — ARAMS.phaseShiftRatio = 0.8",
+            "生成 decisions/009"
+          ],
+          "traceback": true
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 14.3,
+      "killed": true,
+      "killed_by_js": false,
+      "killed_by_py": true,
+      "js_failed_checks": 0,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": true,
+      "first_killers": [
+        "test_chaos_calibrate.py: 副本仓库初始 check_config_sync 0 fail  — ARAMS.phaseShiftRatio = 0.8",
+        "test_chaos_calibrate.py: apply 成功 exit 0  — 2",
+        "test_chaos_calibrate.py: 四处全部同步为 shift=0.56 / hard=0.71（8 个值）  — {'rules/decay-params.yaml': (0.8, 0.9), 'engine/config.py': (0.8, 0.9), 'plugin/dsh-lingshu/cordis.patch.yml': (0.8, 0.9), 'plugin/dsh-lingshu/control.js': (0.8, 0.9)}"
+      ]
+    },
+    {
+      "id": "YAML-04",
+      "file": "rules\\decay-params.yaml",
+      "category": "配置值钉住（补充）",
+      "mutation": {
+        "before": "  trendThreshold: 0.02             # v3.2：上升趋势提前补锚点的门槛（原硬编码）",
+        "after": "  trendThreshold: 0.05             # v3.2：上升趋势提前补锚点的门槛（原硬编码）"
+      },
+      "expected_killer": "check_config_sync 单一来源（非行为断言）",
+      "js": {
+        "control-sim.mjs": {
+          "exit": 0,
+          "passed": 148,
+          "failed": 0,
+          "fails": []
+        },
+        "host-sim.mjs": {
+          "exit": 0,
+          "passed": 188,
+          "failed": 0,
+          "fails": []
+        },
+        "stress.mjs": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": []
+        }
+      },
+      "py": {
+        "test_agent_state.py": {
+          "exit": 0,
+          "passed": 45,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_astrbot_adapter.py": {
+          "exit": 0,
+          "passed": 12,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_chaos_calibrate.py": {
+          "exit": 1,
+          "passed": null,
+          "failed": null,
+          "fails": [
+            "副本仓库初始 check_config_sync 0 fail  — Ratio = 0.8",
+            "plugin/control.js#DEFAULT_PARAMS.trendThreshold rules=0.05 plugin=0.02",
+            "apply 成功 exit 0  — 2",
+            "四处全部同步为 shift=0.56 / hard=0.71（8 个值）  — {'rules/decay-params.yaml': (0.8, 0.9), 'engine/config.py': (0.8, 0.9), 'plugin/dsh-lingshu/cordis.patch.yml': (0.8, 0.9), 'plugin/dsh-lingshu/control.js': (0.8, 0.9)}",
+            "rules/decay-params.yaml 的 shift/hard 都写入新值  — rules/decay-params.yaml",
+            "engine/config.py 的 shift/hard 都写入新值  — engine/config.py",
+            "plugin/dsh-lingshu/cordis.patch.yml 的 shift/hard 都写入新值  — plugin/dsh-lingshu/cordis.patch.yml",
+            "plugin/dsh-lingshu/control.js 的 shift/hard 都写入新值  — plugin/dsh-lingshu/control.js",
+            "rules shift/hard 两行都有 provenance: measured",
+            "rules 注释带依据 E-M1 与 ADR-011",
+            "apply 后 check_config_sync 0 fail  — Ratio = 0.8",
+            "plugin/control.js#DEFAULT_PARAMS.trendThreshold rules=0.05 plugin=0.02",
+            "生成 decisions/009"
+          ],
+          "traceback": true
+        },
+        "test_constitution.py": {
+          "exit": 0,
+          "passed": 26,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_control.py": {
+          "exit": 0,
+          "passed": 159,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_gray.py": {
+          "exit": 0,
+          "passed": 27,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_learning.py": {
+          "exit": 0,
+          "passed": 23,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_onboarding_persona.py": {
+          "exit": 0,
+          "passed": 50,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline.py": {
+          "exit": 0,
+          "passed": 36,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_pipeline_integration.py": {
+          "exit": 0,
+          "passed": 65,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_proposal.py": {
+          "exit": 0,
+          "passed": 18,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_run_chaos.py": {
+          "exit": 0,
+          "passed": 117,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        },
+        "test_shadow_analysis.py": {
+          "exit": 0,
+          "passed": 156,
+          "failed": 0,
+          "fails": [],
+          "traceback": false
+        }
+      },
+      "elapsed_sec": 14.4,
+      "killed": true,
+      "killed_by_js": false,
+      "killed_by_py": true,
+      "js_failed_checks": 0,
+      "py_failed_checks": 0,
+      "error_killed": false,
+      "crash_observed": true,
+      "first_killers": [
+        "test_chaos_calibrate.py: 副本仓库初始 check_config_sync 0 fail  — Ratio = 0.8",
+        "test_chaos_calibrate.py: plugin/control.js#DEFAULT_PARAMS.trendThreshold rules=0.05 plugin=0.02",
+        "test_chaos_calibrate.py: apply 成功 exit 0  — 2"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lingshu/prompt-compose.schema.json",
+  "title": "LINGSHU prompt/compose event",
+  "version": "compose-3.1",
+  "type": "object",
+  "required": ["event_id", "at", "session_id", "turn_id",
+               "param_version", "prompt_version", "compose_version",
+               "domains", "dropped", "final_style_multiplier", "soft_buffer"],
+  "additionalProperties": false,
+  "properties": {
+    "event_id": { "type": "string" },
+    "at": { "type": "string", "format": "date-time" },
+    "session_id": { "type": "string" },
+    "turn_id": { "type": "string" },
+    "param_version": { "type": "string" },
+    "prompt_version": { "type": "string" },
+    "compose_version": { "type": "string", "const": "compose-3.1" },
+
+    "domains": {
+      "type": "object",
+      "required": ["safety", "fact", "organization", "style", "retrieval"],
+      "additionalProperties": false,
+      "properties": {
+        "safety": {
+          "type": "object",
+          "required": ["refuse"],
+          "properties": {
+            "refuse": { "type": "boolean" },
+            "reason": { "type": ["string", "null"] },
+            "severity": {
+              "description": "ADR-014：表达层严重度。缺省/null = v3.0 hard 行为（默认零回归）。",
+              "enum": ["soft", "hard", null]
+            },
+            "safe_redirect": { "type": "boolean" },
+            "categories": {
+              "type": "array",
+              "items": {
+                "enum": ["illegal", "harmful", "privacy", "unauthorized",
+                         "manipulation", "impersonation", "deception"]
+              }
+            }
+          }
+        },
+        "fact": {
+          "type": "object",
+          "required": ["metacog_level", "recall_path", "conflict"],
+          "properties": {
+            "metacog_level": { "enum": ["high", "mid", "low", "unknown"] },
+            "recall_path": { "enum": ["direct", "diffused", "cold", "none"] },
+            "conflict": {
+              "enum": ["none", "memory_vs_user", "memory_vs_memory", "stale_dependency"]
+            },
+            "entry_ids": { "type": "array", "items": { "type": "string" }, "maxItems": 3 }
+          }
+        },
+        "organization": {
+          "type": "object",
+          "required": ["goal_status", "narrative_triggered", "assist_stage"],
+          "properties": {
+            "goal_status": { "enum": ["doing", "blocked", "done", "none"] },
+            "narrative_triggered": { "type": "boolean" },
+            "assist_stage": { "enum": ["off", "S2", "S3"] }
+          }
+        },
+        "style": {
+          "type": "object",
+          "required": ["modifier"],
+          "properties": {
+            "tone_profile": { "type": ["string", "null"] },
+            "persona_traits": { "type": "object" },
+            "emotion_label": {
+              "enum": ["中性", "愉悦", "专注", "好奇", "欣慰", "振奋",
+                       "低落", "受挫", "不满", "困惑", "警觉", "谨慎"]
+            },
+            "emotion_intensity": { "type": "number", "minimum": 0, "maximum": 0.85 },
+            "relation_modifier": { "type": "number", "minimum": 0.8, "maximum": 1.2 },
+            "drift": { "type": "object" },
+            "modifier": { "type": "number", "minimum": 0.8, "maximum": 1.2 }
+          }
+        },
+        "retrieval": {
+          "type": "object",
+          "required": ["strategy", "source"],
+          "properties": {
+            "strategy": { "enum": ["default", "counter_congruent"] },
+            "source": { "enum": ["memory", "user_emotion"] }
+          }
+        }
+      }
+    },
+
+    "dropped": {
+      "type": "array",
+      "description": "完整记录每一次丢弃。这是可解释性的唯一证据。soft 模式不记录 style（它没有被丢弃）。",
+      "items": {
+        "type": "object",
+        "required": ["plugin", "reason"],
+        "properties": {
+          "plugin": { "type": "string" },
+          "reason": {
+            "type": "string",
+            "examples": ["metacog_refuse_claim", "goal_blocked", "no_mutex_rule",
+                         "budget_exceeded", "constitution_reject", "stale_dependency"]
+          }
+        }
+      }
+    },
+
+    "final_style_multiplier": { "type": "number", "minimum": 0.8, "maximum": 1.2 },
+
+    "soft_buffer": {
+      "type": "object",
+      "description": "ADR-014 §4.1：互斥表第 9 条（soft_buffer）的可观测快照。未触发时 applied=false。",
+      "required": ["applied", "reason", "emotion_label", "notice", "intensity"],
+      "additionalProperties": false,
+      "properties": {
+        "applied": { "type": "boolean" },
+        "reason": { "type": ["string", "null"],
+                    "examples": ["constitution_reject_soft", "immersive_disabled", null] },
+        "emotion_label": { "enum": ["警觉", "困惑", null] },
+        "notice": { "enum": ["Safe_Redirect", null] },
+        "intensity": { "type": "number", "minimum": 0, "maximum": 0.45 }
+      }
+    },
+
+    "budget": {
+      "type": "object",
+      "properties": {
+        "injected_token_ratio": { "type": "number", "maximum": 0.15 },
+        "truncated": { "type": "boolean" }
+      }
+    }
+  },
+  "x-invariants": {
+    "safety_first": "hard reject（safety.refuse=true 且 severity!=soft）时 style / organization 必须全部出现在 dropped 中；soft reject（severity=soft）时 style 不得出现在 dropped，必须出现在 soft_buffer 中且 applied=true",
+    "order_frozen": ["constitution", "fact", "safety", "organization", "style", "user_message"],
+    "no_mutex_default": "未覆盖的冲突必须记 dropped.reason=no_mutex_rule",
+    "never_drop_safety": true,
+    "soft_buffer_style": "soft 时 style.emotion_label ∈ {警觉, 困惑}、style.emotion_intensity ≤ control.softBufferMaxIntensity（默认 0.45）、style.relation_modifier ∈ [0.8, 1.0]、style.emotion_valence ≤ 0",
+    "safe_redirect_notice": "soft 时安全域块（第 3 块）必须包含 [System_Notice: Safe_Redirect]",
+    "hard_path_unchanged": "severity != soft 时 blocks / dropped / final_style_multiplier 与 compose-3.0 逐字节一致（默认零回归）",
+    "failed_reject_requires_refusal_instruction": "soft 也是 block：提示词必须包含事实层拒绝指令；不得返回可正常对话的 prompt"
+  }
+}

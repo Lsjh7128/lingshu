@@ -1,0 +1,14 @@
+{"case":"f6_read_throws_01","expect":{},"family":"f6_storage_faults","input":{"scenario":"read_throws"},"severity":"severe"}
+{"case":"f6_append_throws_01","expect":{},"family":"f6_storage_faults","input":{"scenario":"append_throws"},"severity":"severe"}
+{"case":"f6_append_partial_01","expect":{},"family":"f6_storage_faults","input":{"scenario":"append_partial"},"severity":"severe"}
+{"case":"f6_memory_path_is_dir_01","expect":{},"family":"f6_storage_faults","input":{"scenario":"memory_path_is_dir"},"severity":"severe"}
+{"case":"f6_existing_dup_ids_01","expect":{},"family":"f6_storage_faults","input":{"scenario":"existing_duplicate_ids"},"severity":"moderate"}
+{"case":"f6_existing_torn_line_01","expect":{},"family":"f6_storage_faults","input":{"scenario":"existing_torn_line"},"severity":"moderate"}
+{"case":"f6_clock_skew_future_01","expect":{},"family":"f6_storage_faults","input":{"scenario":"clock_skew_future"},"severity":"mild"}
+{"case":"f6_clock_skew_past_01","expect":{},"family":"f6_storage_faults","input":{"scenario":"clock_skew_past"},"severity":"mild"}
+{"case":"f6_huge_batch_200","expect":{},"family":"f6_storage_faults","input":{"count":200,"scenario":"huge_batch"},"severity":"moderate"}
+{"case":"f6_bad_items_01","expect":{},"family":"f6_storage_faults","input":{"scenario":"bad_items"},"severity":"moderate"}
+{"case":"f6_double_batch_01","expect":{},"family":"f6_storage_faults","input":{"scenario":"double_batch"},"severity":"moderate"}
+{"case":"f6_silent_loss_probe_01","expect":{},"family":"f6_storage_faults","input":{"scenario":"silent_loss_probe"},"severity":"mild"}
+{"case":"f6_cleanup_tombstone_01","expect":{},"family":"f6_storage_faults","input":{"scenario":"cleanup_tombstone_conflict"},"severity":"moderate"}
+{"case":"f6_clean_batch_control","expect":{},"family":"f6_storage_faults","input":{"scenario":"clean_batch"},"severity":"control"}

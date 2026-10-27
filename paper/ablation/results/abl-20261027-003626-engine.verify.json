@@ -1,0 +1,263 @@
+{
+ "checks": [
+  {
+   "id": "C01",
+   "pass": true,
+   "title": "schema == lingshu/ablation-result/v1"
+  },
+  {
+   "id": "C02",
+   "pass": true,
+   "title": "mode=engine 且 zero_model=true"
+  },
+  {
+   "id": "C03",
+   "pass": true,
+   "title": "model_calls == 0"
+  },
+  {
+   "id": "C04",
+   "pass": true,
+   "title": "deterministic=true 且 repetition_model 非空"
+  },
+  {
+   "id": "C05",
+   "pass": true,
+   "title": "run_id 与文件名一致且形如 abl-<stamp>-engine"
+  },
+  {
+   "id": "C06",
+   "pass": true,
+   "title": "valid=true"
+  },
+  {
+   "id": "C07",
+   "pass": true,
+   "title": "started_at/finished_at 可解析且 finished>=started"
+  },
+  {
+   "id": "C08",
+   "pass": true,
+   "title": "三个条件齐全（baseline/basic/full）"
+  },
+  {
+   "id": "C09",
+   "pass": true,
+   "title": "每条件三个 metrics 块齐全"
+  },
+  {
+   "id": "C10",
+   "pass": true,
+   "title": "m1.n_probes == 12（三臂）"
+  },
+  {
+   "id": "C11",
+   "pass": true,
+   "title": "探针 evidence 12 条/类 3 条/turn 为实际轮次"
+  },
+  {
+   "id": "C12",
+   "pass": true,
+   "title": "m1 指标可由 probes evidence 复算"
+  },
+  {
+   "id": "C13",
+   "pass": true,
+   "title": "M2 结构完整且可由 evidence 复算（null+reason 纪律）"
+  },
+  {
+   "id": "C14",
+   "pass": true,
+   "title": "M3 in/held/fp/script 齐全（Basic/Baseline null+reason）"
+  },
+  {
+   "id": "C15",
+   "pass": true,
+   "title": "script.turns == 100 且 blocks 覆盖 1..100"
+  },
+  {
+   "id": "C16",
+   "pass": true,
+   "title": "script.max_ratio >= 0.85"
+  },
+  {
+   "id": "C17",
+   "pass": true,
+   "title": "script.phase_trigger_turns 非空且 > 60"
+  },
+  {
+   "id": "C18",
+   "pass": true,
+   "title": "script.probe_ids == 12 且 nohit_turns 2 条"
+  },
+  {
+   "id": "C19",
+   "pass": true,
+   "title": "script.store_seeds 含 D 类合成前提（30 次/100 天）"
+  },
+  {
+   "id": "C20",
+   "pass": true,
+   "title": "equivalence_check == pass 且 100/100"
+  },
+  {
+   "id": "C21",
+   "pass": true,
+   "title": "等价性比对字段齐全"
+  },
+  {
+   "id": "C22",
+   "pass": true,
+   "title": "等价性无 mismatch"
+  },
+  {
+   "id": "C23",
+   "pass": true,
+   "title": "honesty.measured_parameters==0 且 provenance==guess"
+  },
+  {
+   "id": "C24",
+   "pass": true,
+   "title": "valinity_flags 含 DESIGN §1.4/§1.5/§2.4/§3 必报项"
+  },
+  {
+   "id": "C25",
+   "pass": true,
+   "title": "callset 未出现四冻结方向"
+  },
+  {
+   "id": "C26",
+   "pass": true,
+   "title": "inputs 常量正确（window/topK/budget/renderer）"
+  },
+  {
+   "id": "C27",
+   "pass": true,
+   "title": "剧本文件存在且 sha256 与结果一致"
+  },
+  {
+   "id": "C28",
+   "pass": true,
+   "title": "engine 文件指纹与当前磁盘一致（未被改动）"
+  },
+  {
+   "id": "C29",
+   "pass": true,
+   "title": "语料指纹与当前磁盘一致（未被改动）"
+  },
+  {
+   "id": "C30",
+   "pass": true,
+   "title": "git_commit 不可得时有 reason"
+  },
+  {
+   "id": "C31",
+   "pass": true,
+   "title": "R=3 且 p0 为原序、置换已冻结落盘"
+  },
+  {
+   "id": "C32",
+   "pass": true,
+   "title": "每个置换 × 每条件都有独立 metrics"
+  },
+  {
+   "id": "C33",
+   "pass": true,
+   "title": "跨置换极差已报告"
+  },
+  {
+   "id": "C34",
+   "pass": true,
+   "title": "comparisons 含 by_construction 与缺对照臂两条"
+  },
+  {
+   "id": "C35",
+   "pass": true,
+   "title": "预注册预期 P0–P7 逐条判定已落盘"
+  },
+  {
+   "id": "C36",
+   "pass": true,
+   "title": "bootstrap CI 已落盘（非 numpy 口径）"
+  },
+  {
+   "id": "C37",
+   "pass": true,
+   "title": "notes.deviations 非空（DESIGN 与代码冲突已记录）"
+  },
+  {
+   "id": "C38",
+   "pass": true,
+   "title": "逐轮溯源字段齐全（Fig.2：注入项/设定出现/相位）"
+  },
+  {
+   "id": "C39",
+   "pass": true,
+   "title": "遥测与逐轮记录一致（未越阈时显式 []）"
+  },
+  {
+   "id": "C40",
+   "pass": true,
+   "title": "缺指标为 null+reason（禁止 0 顶替）"
+  },
+  {
+   "id": "C41",
+   "pass": true,
+   "title": "side_effects 声明无外部写入/网络"
+  },
+  {
+   "id": "C42",
+   "pass": true,
+   "title": "python 版本已记录"
+  },
+  {
+   "id": "C43",
+   "pass": true,
+   "title": "三臂 param_version 已记录且 baseline/basic 与 full 不同"
+  },
+  {
+   "id": "C44",
+   "pass": true,
+   "title": "verify 旁证若已嵌入则必须 exit_code==0 且无失败项"
+  },
+  {
+   "id": "C44b",
+   "pass": true,
+   "title": "终版必须已嵌入 verify 旁证（--require-verify）"
+  },
+  {
+   "id": "C45",
+   "pass": true,
+   "title": "telemetry.budget_truncated_turns 为数值（DESIGN §6 schema 字段）"
+  },
+  {
+   "id": "C46",
+   "pass": true,
+   "title": "budget_truncated_turns <= recall_incomplete_turns（口径自洽）"
+  },
+  {
+   "id": "S01",
+   "pass": true,
+   "title": "重生成剧本逐字节一致（确定性）"
+  },
+  {
+   "id": "S02",
+   "pass": true,
+   "title": "整跑复现：除时间戳外全字段逐值相等"
+  },
+  {
+   "id": "S03",
+   "pass": true,
+   "title": "summary 由脚本复现（conditions/probe/jailbreak 计数）"
+  },
+  {
+   "id": "S04",
+   "pass": true,
+   "title": "结果 JSON 已嵌入 verify 旁证（--require-verify 时强制）"
+  }
+ ],
+ "exit_code": 0,
+ "require_verify": true,
+ "result": "paper/ablation/results/abl-20261027-003626-engine.json",
+ "strict": true
+}

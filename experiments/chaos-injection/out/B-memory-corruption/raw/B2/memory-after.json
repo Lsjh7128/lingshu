@@ -1,0 +1,125 @@
+{
+  "path": "experiments\\chaos-injection\\_runtime\\B-memory-corruption\\B2\\data\\memory.jsonl",
+  "path_kind": "file",
+  "path_is_dir": false,
+  "dir_entries": null,
+  "raw_rows": 7,
+  "unparsable_rows": 1,
+  "unparsable_head": [
+    "{\"id\":\"mem_000\",\"type\":\"semantic\",\"subject\":\"项目代号\",\"relation\":\"是\",\"object\":\"撕裂"
+  ],
+  "entries": [
+    {
+      "id": "mem_001",
+      "subject": "项目代号",
+      "relation": "是",
+      "object": "伽马",
+      "status": "active",
+      "origin": "chaos_setup",
+      "confidence": 0.9
+    },
+    {
+      "id": "mem_001",
+      "subject": "项目代号",
+      "relation": "是",
+      "object": "伽马",
+      "status": "superseded",
+      "origin": "chaos_setup",
+      "confidence": 0.9
+    },
+    {
+      "id": "mem_002",
+      "subject": "项目代号",
+      "relation": "是",
+      "object": "阿尔法",
+      "status": "active",
+      "origin": "chaos_setup",
+      "confidence": 0.9
+    },
+    {
+      "id": "mem_003",
+      "subject": "项目代号",
+      "relation": "是",
+      "object": "贝塔",
+      "status": "active",
+      "origin": "chaos_setup",
+      "confidence": 0.9
+    },
+    {
+      "id": "mem_004",
+      "subject": "项目代号",
+      "relation": "是",
+      "object": "什么",
+      "status": "active",
+      "origin": "user_fact",
+      "confidence": 0.9
+    },
+    {
+      "id": "mem_003",
+      "subject": "项目代号",
+      "relation": "是",
+      "object": "贝塔",
+      "status": "superseded",
+      "origin": "chaos_setup",
+      "confidence": 0.9
+    },
+    {
+      "id": "mem_002",
+      "subject": "项目代号",
+      "relation": "是",
+      "object": "阿尔法",
+      "status": "superseded",
+      "origin": "chaos_setup",
+      "confidence": 0.9
+    }
+  ],
+  "last_wins": [
+    {
+      "id": "mem_001",
+      "subject": "项目代号",
+      "relation": "是",
+      "object": "伽马",
+      "status": "superseded",
+      "origin": "chaos_setup",
+      "confidence": 0.9
+    },
+    {
+      "id": "mem_002",
+      "subject": "项目代号",
+      "relation": "是",
+      "object": "阿尔法",
+      "status": "superseded",
+      "origin": "chaos_setup",
+      "confidence": 0.9
+    },
+    {
+      "id": "mem_003",
+      "subject": "项目代号",
+      "relation": "是",
+      "object": "贝塔",
+      "status": "superseded",
+      "origin": "chaos_setup",
+      "confidence": 0.9
+    },
+    {
+      "id": "mem_004",
+      "subject": "项目代号",
+      "relation": "是",
+      "object": "什么",
+      "status": "active",
+      "origin": "user_fact",
+      "confidence": 0.9
+    }
+  ],
+  "active_ids": [
+    "mem_004"
+  ],
+  "superseded_ids": [
+    "mem_001",
+    "mem_002",
+    "mem_003"
+  ],
+  "active_objects": {
+    "mem_004": "什么"
+  }
+}

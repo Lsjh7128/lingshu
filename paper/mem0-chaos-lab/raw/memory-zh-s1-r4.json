@@ -1,0 +1,374 @@
+{
+ "run": "s1-zh-r4",
+ "scenario": "s1",
+ "variant": "zh",
+ "round": 4,
+ "tag": null,
+ "started_at": "2026-10-27T10:50:04.857196+00:00",
+ "status": "ok",
+ "error": null,
+ "user_id": "lingshu-lab-user",
+ "config": {
+  "mem0_version": "2.2.1",
+  "llm": {
+   "provider": "deepseek",
+   "model": "deepseek-chat",
+   "base_url": "https://api.deepseek.com/v1"
+  },
+  "embedder": {
+   "provider": "local_hashed_bigram",
+   "dims": 256,
+   "note": "local deterministic hashed character-bigram embedder (not neural)"
+  },
+  "vector_store": {
+   "provider": "qdrant",
+   "mode": "in-memory (:memory:)",
+   "collection": "mem0_ce3753a31873"
+  },
+  "custom_instructions": "请用简体中文记录抽取出的记忆文本，不要翻译成英文。"
+ },
+ "adds": [
+  {
+   "step": "U1",
+   "input": "记住一件事：我的项目代号是阿尔法。",
+   "duration_s": 2.08,
+   "result": {
+    "results": [
+     {
+      "id": "8b1840ec-3280-4791-8c1a-1aba650b5c91",
+      "memory": "用户的项目代号是阿尔法。",
+      "event": "ADD"
+     }
+    ]
+   },
+   "store_after": [
+    {
+     "id": "8b1840ec-3280-4791-8c1a-1aba650b5c91",
+     "memory": "用户的项目代号是阿尔法。"
+    }
+   ]
+  },
+  {
+   "step": "U2",
+   "input": "顺便记住：我平时喝美式咖啡。",
+   "duration_s": 0.821,
+   "result": {
+    "results": [
+     {
+      "id": "69733d52-5750-470d-800f-0c0b4cd1e9e1",
+      "memory": "用户平时喝美式咖啡。",
+      "event": "ADD"
+     }
+    ]
+   },
+   "store_after": [
+    {
+     "id": "69733d52-5750-470d-800f-0c0b4cd1e9e1",
+     "memory": "用户平时喝美式咖啡。"
+    },
+    {
+     "id": "8b1840ec-3280-4791-8c1a-1aba650b5c91",
+     "memory": "用户的项目代号是阿尔法。"
+    }
+   ]
+  },
+  {
+   "step": "U3",
+   "input": "我改主意了：我的项目代号现在改成贝塔，之前那个阿尔法作废。",
+   "duration_s": 1.213,
+   "result": {
+    "results": [
+     {
+      "id": "d975e32c-9826-4d0b-8ea3-57b83ff25a6f",
+      "memory": "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。",
+      "event": "ADD"
+     }
+    ]
+   },
+   "store_after": [
+    {
+     "id": "69733d52-5750-470d-800f-0c0b4cd1e9e1",
+     "memory": "用户平时喝美式咖啡。"
+    },
+    {
+     "id": "8b1840ec-3280-4791-8c1a-1aba650b5c91",
+     "memory": "用户的项目代号是阿尔法。"
+    },
+    {
+     "id": "d975e32c-9826-4d0b-8ea3-57b83ff25a6f",
+     "memory": "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。"
+    }
+   ]
+  }
+ ],
+ "store_final": [
+  {
+   "id": "69733d52-5750-470d-800f-0c0b4cd1e9e1",
+   "memory": "用户平时喝美式咖啡。",
+   "hash": "b977aea0fcee483d18ae09b903527575",
+   "metadata": null,
+   "created_at": "2026-10-27T10:50:07.769803+00:00",
+   "updated_at": "2026-10-27T10:50:07.769803+00:00",
+   "user_id": "lingshu-lab-user",
+   "attributed_to": "user"
+  },
+  {
+   "id": "8b1840ec-3280-4791-8c1a-1aba650b5c91",
+   "memory": "用户的项目代号是阿尔法。",
+   "hash": "6690e089e9910d1d9064f1006a10190e",
+   "metadata": null,
+   "created_at": "2026-10-27T10:50:06.948824+00:00",
+   "updated_at": "2026-10-27T10:50:06.948824+00:00",
+   "user_id": "lingshu-lab-user",
+   "attributed_to": "user"
+  },
+  {
+   "id": "d975e32c-9826-4d0b-8ea3-57b83ff25a6f",
+   "memory": "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。",
+   "hash": "1e6a31a434f50a54f5058383137cdeb6",
+   "metadata": null,
+   "created_at": "2026-10-27T10:50:08.983397+00:00",
+   "updated_at": "2026-10-27T10:50:08.983397+00:00",
+   "user_id": "lingshu-lab-user",
+   "attributed_to": "user"
+  }
+ ],
+ "history": {
+  "69733d52-5750-470d-800f-0c0b4cd1e9e1": [
+   {
+    "id": "9070cb78-341c-42f4-bde2-1eda87ceeb5e",
+    "memory_id": "69733d52-5750-470d-800f-0c0b4cd1e9e1",
+    "old_memory": null,
+    "new_memory": "用户平时喝美式咖啡。",
+    "event": "ADD",
+    "created_at": "2026-10-27T10:50:07.769803+00:00",
+    "updated_at": null,
+    "is_deleted": false,
+    "actor_id": null,
+    "role": null
+   }
+  ],
+  "8b1840ec-3280-4791-8c1a-1aba650b5c91": [
+   {
+    "id": "5118a084-f008-490e-964c-d973d82142e1",
+    "memory_id": "8b1840ec-3280-4791-8c1a-1aba650b5c91",
+    "old_memory": null,
+    "new_memory": "用户的项目代号是阿尔法。",
+    "event": "ADD",
+    "created_at": "2026-10-27T10:50:06.948824+00:00",
+    "updated_at": null,
+    "is_deleted": false,
+    "actor_id": null,
+    "role": null
+   }
+  ],
+  "d975e32c-9826-4d0b-8ea3-57b83ff25a6f": [
+   {
+    "id": "c780784b-364c-49f6-8c37-308ba3e3f960",
+    "memory_id": "d975e32c-9826-4d0b-8ea3-57b83ff25a6f",
+    "old_memory": null,
+    "new_memory": "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。",
+    "event": "ADD",
+    "created_at": "2026-10-27T10:50:08.983397+00:00",
+    "updated_at": null,
+    "is_deleted": false,
+    "actor_id": null,
+    "role": null
+   }
+  ]
+ },
+ "search": {
+  "query": "我的项目代号到底是什么？只回答代号，不要解释。",
+  "primary": {
+   "threshold": 0.1,
+   "top_k": 10,
+   "duration_ms": 0.6,
+   "results": [
+    {
+     "id": "8b1840ec-3280-4791-8c1a-1aba650b5c91",
+     "memory": "用户的项目代号是阿尔法。",
+     "hash": "6690e089e9910d1d9064f1006a10190e",
+     "metadata": null,
+     "score": 0.3208739883248263,
+     "created_at": "2026-10-27T10:50:06.948824+00:00",
+     "updated_at": "2026-10-27T10:50:06.948824+00:00",
+     "user_id": "lingshu-lab-user",
+     "attributed_to": "user",
+     "score_details": {
+      "semantic_score": 0.3208739883248263,
+      "bm25_score": 0.0,
+      "entity_boost": 0.0,
+      "raw_score": 0.3208739883248263,
+      "max_possible_score": 1.0,
+      "final_score": 0.3208739883248263,
+      "threshold": 0.1
+     }
+    },
+    {
+     "id": "d975e32c-9826-4d0b-8ea3-57b83ff25a6f",
+     "memory": "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。",
+     "hash": "1e6a31a434f50a54f5058383137cdeb6",
+     "metadata": null,
+     "score": 0.24841093506284917,
+     "created_at": "2026-10-27T10:50:08.983397+00:00",
+     "updated_at": "2026-10-27T10:50:08.983397+00:00",
+     "user_id": "lingshu-lab-user",
+     "attributed_to": "user",
+     "score_details": {
+      "semantic_score": 0.24841093506284917,
+      "bm25_score": 0.0,
+      "entity_boost": 0.0,
+      "raw_score": 0.24841093506284917,
+      "max_possible_score": 1.0,
+      "final_score": 0.24841093506284917,
+      "threshold": 0.1
+     }
+    }
+   ]
+  },
+  "unthresholded": {
+   "threshold": 0.0,
+   "top_k": 10,
+   "duration_ms": 0.4,
+   "results": [
+    {
+     "id": "8b1840ec-3280-4791-8c1a-1aba650b5c91",
+     "memory": "用户的项目代号是阿尔法。",
+     "hash": "6690e089e9910d1d9064f1006a10190e",
+     "metadata": null,
+     "score": 0.3208739883248263,
+     "created_at": "2026-10-27T10:50:06.948824+00:00",
+     "updated_at": "2026-10-27T10:50:06.948824+00:00",
+     "user_id": "lingshu-lab-user",
+     "attributed_to": "user",
+     "score_details": {
+      "semantic_score": 0.3208739883248263,
+      "bm25_score": 0.0,
+      "entity_boost": 0.0,
+      "raw_score": 0.3208739883248263,
+      "max_possible_score": 1.0,
+      "final_score": 0.3208739883248263,
+      "threshold": 0.0
+     }
+    },
+    {
+     "id": "d975e32c-9826-4d0b-8ea3-57b83ff25a6f",
+     "memory": "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。",
+     "hash": "1e6a31a434f50a54f5058383137cdeb6",
+     "metadata": null,
+     "score": 0.24841093506284917,
+     "created_at": "2026-10-27T10:50:08.983397+00:00",
+     "updated_at": "2026-10-27T10:50:08.983397+00:00",
+     "user_id": "lingshu-lab-user",
+     "attributed_to": "user",
+     "score_details": {
+      "semantic_score": 0.24841093506284917,
+      "bm25_score": 0.0,
+      "entity_boost": 0.0,
+      "raw_score": 0.24841093506284917,
+      "max_possible_score": 1.0,
+      "final_score": 0.24841093506284917,
+      "threshold": 0.0
+     }
+    },
+    {
+     "id": "69733d52-5750-470d-800f-0c0b4cd1e9e1",
+     "memory": "用户平时喝美式咖啡。",
+     "hash": "b977aea0fcee483d18ae09b903527575",
+     "metadata": null,
+     "score": 0.0,
+     "created_at": "2026-10-27T10:50:07.769803+00:00",
+     "updated_at": "2026-10-27T10:50:07.769803+00:00",
+     "user_id": "lingshu-lab-user",
+     "attributed_to": "user",
+     "score_details": {
+      "semantic_score": 0.0,
+      "bm25_score": 0.0,
+      "entity_boost": 0.0,
+      "raw_score": 0.0,
+      "max_possible_score": 1.0,
+      "final_score": 0.0,
+      "threshold": 0.0
+     }
+    }
+   ]
+  }
+ },
+ "answer": {
+  "messages": [
+   {
+    "role": "system",
+    "content": "你是一个助手。下面会给你从记忆中检索到的内容，以及用户的问题。请基于这些内容作答。"
+   },
+   {
+    "role": "user",
+    "content": "【检索到的记忆】\n- 用户的项目代号是阿尔法。\n- 用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。\n\n【用户的问题】\n我的项目代号到底是什么？只回答代号，不要解释。"
+   }
+  ],
+  "raw": "贝塔",
+  "duration_ms": 1738.0
+ },
+ "answer_recall0": {
+  "messages": [
+   {
+    "role": "system",
+    "content": "你是一个助手。下面会给你从记忆中检索到的内容，以及用户的问题。请基于这些内容作答。"
+   },
+   {
+    "role": "user",
+    "content": "【检索到的记忆】\n- 用户的项目代号是阿尔法。\n- 用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。\n- 用户平时喝美式咖啡。\n\n【用户的问题】\n我的项目代号到底是什么？只回答代号，不要解释。"
+   }
+  ],
+  "raw": "贝塔",
+  "duration_ms": 1654.2,
+  "reused_from_primary": false
+ },
+ "metrics": {
+  "answer_raw": "贝塔",
+  "answer_len": 2,
+  "recall_ids": [
+   "8b1840ec-3280-4791-8c1a-1aba650b5c91",
+   "d975e32c-9826-4d0b-8ea3-57b83ff25a6f"
+  ],
+  "recall_texts": [
+   "用户的项目代号是阿尔法。",
+   "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。"
+  ],
+  "recall_scores": [
+   0.3208739883248263,
+   0.24841093506284917
+  ],
+  "hit": 1,
+  "leak": 0,
+  "intercept": 0,
+  "alpha_in_recall": 1,
+  "judge_note": "machine rule only; raw answer kept for human re-review (PROTOCOL §1)"
+ },
+ "metrics_recall0": {
+  "answer_raw": "贝塔",
+  "answer_len": 2,
+  "recall_ids": [
+   "8b1840ec-3280-4791-8c1a-1aba650b5c91",
+   "d975e32c-9826-4d0b-8ea3-57b83ff25a6f",
+   "69733d52-5750-470d-800f-0c0b4cd1e9e1"
+  ],
+  "recall_texts": [
+   "用户的项目代号是阿尔法。",
+   "用户的项目代号已从阿尔法改为贝塔，之前的阿尔法代号作废。",
+   "用户平时喝美式咖啡。"
+  ],
+  "recall_scores": [
+   0.3208739883248263,
+   0.24841093506284917,
+   0.0
+  ],
+  "hit": 1,
+  "leak": 0,
+  "intercept": 0,
+  "alpha_in_recall": 1,
+  "judge_note": "machine rule only; raw answer kept for human re-review (PROTOCOL §1)"
+ },
+ "vector_store_dim": 256,
+ "duration_s": 7.527,
+ "ended_at": "2026-10-27T10:50:12.383999+00:00"
+}

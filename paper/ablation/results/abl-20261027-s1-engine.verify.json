@@ -1,0 +1,219 @@
+{
+ "checks": [
+  {
+   "id": "C01",
+   "pass": true,
+   "title": "schema/design_version 正确"
+  },
+  {
+   "id": "C02",
+   "pass": true,
+   "title": "mode=engine / zero_model / model_calls=0 / deterministic"
+  },
+  {
+   "id": "C03",
+   "pass": true,
+   "title": "valid=true"
+  },
+  {
+   "id": "C04",
+   "pass": true,
+   "title": "run_id 与文件名一致且形如 abl-<date>-s1-engine"
+  },
+  {
+   "id": "C05",
+   "pass": true,
+   "title": "时间戳可解析且 finished>=started"
+  },
+  {
+   "id": "C06",
+   "pass": true,
+   "title": "FREEZE.json 存在、sha 一致、状态 frozen-before-execution"
+  },
+  {
+   "id": "C07",
+   "pass": true,
+   "title": "PLAN.md sha256 与冻结清单一致（跑前冻结未被改）"
+  },
+  {
+   "id": "C08",
+   "pass": true,
+   "title": "剧本冻结清单存在且与结果一致"
+  },
+  {
+   "id": "C09",
+   "pass": true,
+   "title": "探针库 48 条、每类 12、id 唯一"
+  },
+  {
+   "id": "C10",
+   "pass": true,
+   "title": "探针 by_class/by_script 计数与探针库一致"
+  },
+  {
+   "id": "C11",
+   "pass": true,
+   "title": "探针库文件存在且 sha256 一致"
+  },
+  {
+   "id": "C12",
+   "pass": true,
+   "title": "探针文本 sha256 自校验通过"
+  },
+  {
+   "id": "C13",
+   "pass": true,
+   "title": "三剧本：100 轮 / 16 探针 / 每类 4 / sha 一致 / 越过 0.85"
+  },
+  {
+   "id": "C14",
+   "pass": true,
+   "title": "探针落点为实际轮次（85–100）且与探针库逐字一致"
+  },
+  {
+   "id": "C15",
+   "pass": true,
+   "title": "三剧本覆盖三个不同固定置换（p0/p1/p2）"
+  },
+  {
+   "id": "C16",
+   "pass": true,
+   "title": "48 条探针在剧本中恰好各出现一次"
+  },
+  {
+   "id": "C17",
+   "pass": true,
+   "title": "9 个臂齐全（PLAN §1.2 逐字）"
+  },
+  {
+   "id": "C18",
+   "pass": true,
+   "title": "每臂 × 每剧本：100 轮 / 16 探针 / pooled 四类齐全"
+  },
+  {
+   "id": "C19",
+   "pass": true,
+   "title": "9 臂 callset 未出现四冻结方向"
+  },
+  {
+   "id": "C20",
+   "pass": true,
+   "title": "SFR（每剧本 + pooled 四类，text/id 双口径）可由 probes 复算"
+  },
+  {
+   "id": "C21",
+   "pass": true,
+   "title": "每类 12 对精确符号检验可由 probes 复算（α=0.0125）"
+  },
+  {
+   "id": "C22",
+   "pass": true,
+   "title": "Bonferroni α=0.0125 且 MDD=7 已落盘"
+  },
+  {
+   "id": "C23",
+   "pass": true,
+   "title": "每剧本点估计与跨剧本极差一致"
+  },
+  {
+   "id": "C24",
+   "pass": true,
+   "title": "预注册 P-S1a..d 逐条给 observed/pass"
+  },
+  {
+   "id": "C25",
+   "pass": true,
+   "title": "summary.prereg_pass 与逐条判定一致"
+  },
+  {
+   "id": "C26",
+   "pass": true,
+   "title": "D 类 n=12 且 P-S1a 的观测值与 pooled 一致"
+  },
+  {
+   "id": "C27",
+   "pass": true,
+   "title": "D 类 12 对（3 剧本 × 4 探针）已对齐"
+  },
+  {
+   "id": "C28",
+   "pass": true,
+   "title": "等价性 pass 且 300 轮"
+  },
+  {
+   "id": "C29",
+   "pass": true,
+   "title": "honesty: measured=0 / provenance=guess"
+  },
+  {
+   "id": "C30",
+   "pass": true,
+   "title": "validity_flags 含 S1 必报项"
+  },
+  {
+   "id": "C31",
+   "pass": true,
+   "title": "缺指标 null+reason 纪律（baseline/basic JI、ji_held、sfr_id）"
+  },
+  {
+   "id": "C32",
+   "pass": true,
+   "title": "机制遥测与臂定义自洽（−gate/−integral/−anchor/−variety）"
+  },
+  {
+   "id": "C33",
+   "pass": true,
+   "title": "语料指纹与磁盘一致（frozen 未被改）"
+  },
+  {
+   "id": "C34",
+   "pass": true,
+   "title": "engine 文件指纹与磁盘一致（未被改）"
+  },
+  {
+   "id": "C35",
+   "pass": true,
+   "title": "summary 计数自洽"
+  },
+  {
+   "id": "C36",
+   "pass": true,
+   "title": "notes.deviations 非空（PLAN/代码偏差已记录）"
+  },
+  {
+   "id": "C37",
+   "pass": true,
+   "title": "side_effects：无模型调用/网络调用"
+  },
+  {
+   "id": "C38",
+   "pass": true,
+   "title": "verify 旁证若已嵌入则 exit_code==0 且无失败项"
+  },
+  {
+   "id": "C39",
+   "pass": true,
+   "title": "S2 留出集未产出时 ji_held 为 null（不编造）"
+  },
+  {
+   "id": "S01",
+   "pass": true,
+   "title": "重生成三剧本 + 探针库逐字节一致（确定性）"
+  },
+  {
+   "id": "S02",
+   "pass": true,
+   "title": "整跑复现：除时间戳外全字段逐值相等"
+  },
+  {
+   "id": "S03",
+   "pass": true,
+   "title": "结果 JSON 已嵌入 verify 旁证（--require-verify 时强制）"
+  }
+ ],
+ "exit_code": 0,
+ "require_verify": false,
+ "result": "paper/ablation/results/abl-20261027-s1-engine.json",
+ "schema_kind": "s1",
+ "strict": true
+}

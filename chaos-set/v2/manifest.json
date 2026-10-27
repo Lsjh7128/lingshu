@@ -1,0 +1,286 @@
+{
+  "base_ts": 1761541200.0,
+  "budget": {
+    "max_node_processes": 1,
+    "model_calls": 0,
+    "wall_clock_seconds_soft": 90,
+    "write_roots": [
+      "acceptance/chaos/v2",
+      ".chaos-v2"
+    ]
+  },
+  "corpus_sha256": {
+    "f1_stpa_matrix.jsonl": "c78ad9bfcfd30a5d4de8e8c2317d49a9c8376818c5c6aae47b1551bf11b04624",
+    "f2_phase_boundary.jsonl": "de404d3c0c65ff7372620971af6b241dbd4a40a262913717ce2322d2e4f5d718",
+    "f3_integral_windup.jsonl": "75e8d1f636c7628d846b859c0e7cf2c2a8b262664526b1e7b6a7161bc876bd59",
+    "f4_recall_adversarial.jsonl": "b0a8481db98e7036af5608724b15a09f9425b815c58bce0fe616d2a98e4e4df8",
+    "f5_assembly_pressure.jsonl": "fc9170875c9faf2e7c7617820928009acdf2d397b19ae499c25802c91f0e6e0e",
+    "f6_storage_faults.jsonl": "71785f63ff11ce7a164340707d0c38616dd7f7b81215c1257f199ecf655ed308",
+    "f7_steady_state.jsonl": "4cf10cc5d167be0b3f4f13ae3fdec017c646970da0c3f379d291cfee971370a6",
+    "f8_metamorphic.jsonl": "c31b6b5907113ac8126455e6723dfcf720086b762599f1f66edbf17c12702fe5"
+  },
+  "corpus_version": "v2.0",
+  "families": [
+    {
+      "corpus": "f1_stpa_matrix.jsonl",
+      "hypothesis": "H1：preflight_audit 对 UCA-01…08 的每个可疑前置条件必然命中（灵敏度 100%），对良性近邻绝不命中（特异度 100%）；UCA-08 只进 downgrades，不熔断。",
+      "id": "f1_stpa_matrix",
+      "invariants": [
+        "INV-03",
+        "INV-04",
+        "INV-05",
+        "INV-06"
+      ],
+      "mechanism": "preflight_audit",
+      "module": "f1_stpa_matrix",
+      "non_claims": [
+        "合成刺激集不构成真实误报率/发生率证据（docs/20 §1.2）",
+        "UCA-01 是子串词表：语义改写不命中，semantic_miss 行是显式诚实缺口，不算失败也不算通过",
+        "不证明任何阈值或判定正确"
+      ],
+      "repeats": 3,
+      "rows": 30,
+      "severity_levels": [
+        "mild",
+        "moderate",
+        "severe",
+        "control"
+      ],
+      "stress_class": "adversarial",
+      "title": "F1 STPA 决策表（UCA-01…08 全扫 + 良性近邻 + 词表盲区）",
+      "ucas": [
+        "UCA-01",
+        "UCA-02",
+        "UCA-03",
+        "UCA-04",
+        "UCA-05",
+        "UCA-06",
+        "UCA-07",
+        "UCA-08"
+      ],
+      "verdict_kind": "invariant",
+      "window": "single"
+    },
+    {
+      "corpus": "f2_phase_boundary.jsonl",
+      "hypothesis": "H2：phase 是 ratio 的精确分段函数（0.70/0.85）；prefeed 在 shift 起为真；anchor_required 在 critical 恒真、在 shift 仅在趋势超阈值时真；触发轮锚点真的在首尾。",
+      "id": "f2_phase_boundary",
+      "invariants": [
+        "INV-10",
+        "INV-13",
+        "INV-14"
+      ],
+      "mechanism": "PhaseShiftMonitor",
+      "module": "f2_phase_boundary",
+      "non_claims": [
+        "这些是合成边界样本，只能证明检测器在阈值附近行为正确",
+        "不得计入 docs/20 §4.1 的'真实边界样本 ≥10'门槛",
+        "不证明 0.70/0.85 这两个值正确（docs/20 §8.2 另有标定流程）"
+      ],
+      "repeats": 3,
+      "rows": 29,
+      "severity_levels": [
+        "mild",
+        "moderate",
+        "severe",
+        "control"
+      ],
+      "stress_class": "resource",
+      "title": "F2 相变边界扫描（0.70/0.85 邻域 + 趋势 + 锚点渲染）",
+      "ucas": [
+        "UCA-07"
+      ],
+      "verdict_kind": "boundary",
+      "window": "single"
+    },
+    {
+      "corpus": "f3_integral_windup.jsonl",
+      "hypothesis": "H3：连续负偏离使 baseline 单调上升至 cap 后停止积分（抗饱和）；死区内只泄放不积分；正偏离不推基线；饱和后中性轮次可泄漏回落；任一时刻 |I_k|≤cap；UCA-08 降级留痕但不熔断。",
+      "id": "f3_integral_windup",
+      "invariants": [
+        "INV-10",
+        "INV-11",
+        "INV-12",
+        "INV-05"
+      ],
+      "mechanism": "IntegralBaseline",
+      "module": "f3_integral_windup",
+      "non_claims": [
+        "参数全部来自 rules/decay-params.yaml 的 control 段（guess 级 provenance），不证明参数正确",
+        "合成轮次不构成真实情绪轨迹证据",
+        "不测真实模型行为（v2 零模型调用）"
+      ],
+      "repeats": 3,
+      "rows": 13,
+      "severity_levels": [
+        "mild",
+        "moderate",
+        "severe"
+      ],
+      "stress_class": "temporal",
+      "title": "F3 积分抗饱和与恢复（recipe 驱动的 8 类刺激）",
+      "ucas": [
+        "UCA-08"
+      ],
+      "verdict_kind": "recovery",
+      "window": "multi_turn"
+    },
+    {
+      "corpus": "f4_recall_adversarial.jsonl",
+      "hypothesis": "H4：干扰条目密度上升时关键条目仍在 topK 内；被 supersede 的旧值永不返回；预算不足时如实标记（excluded_by_budget/truncated）而不是静默空；同义改写查询命中率随词元重叠下降——这条只测量，不下'应当 100%'的断言。",
+      "id": "f4_recall_adversarial",
+      "invariants": [
+        "INV-08",
+        "INV-09",
+        "INV-10"
+      ],
+      "mechanism": "memory.recall",
+      "module": "f4_recall_adversarial",
+      "non_claims": [
+        "干扰条目是固定词库/固定整数算法生成的合成压力，不是真实流量分布",
+        "近义改写的命中/不命中是规则桩行为，不能外推为语义检索质量",
+        "不证明 topK / tokenBudget 默认值正确"
+      ],
+      "repeats": 3,
+      "rows": 15,
+      "severity_levels": [
+        "mild",
+        "moderate",
+        "severe",
+        "control"
+      ],
+      "stress_class": "adversarial",
+      "title": "F4 召回对抗与预算诚实（干扰密度 × supersede × 查询形态）",
+      "ucas": [],
+      "verdict_kind": "rate",
+      "window": "single"
+    },
+    {
+      "corpus": "f5_assembly_pressure.jsonl",
+      "hypothesis": "H5：任意 tokenRatioMax（2%–30%）下宪法块都在首位且不被丢弃；refuse 场景必丢 style/organization/retrieval；8 条互斥规则各丢对域且 dropped 留痕；ASSEMBLY_ORDER 恒定；风格系数恒在 [0.8,1.2]。",
+      "id": "f5_assembly_pressure",
+      "invariants": [
+        "INV-06",
+        "INV-07",
+        "INV-10"
+      ],
+      "mechanism": "compose",
+      "module": "f5_assembly_pressure",
+      "non_claims": [
+        "tokenRatioMax 只在内存 cfg 副本上改，绝不改 rules/（docs/23 §8）",
+        "合成 payload 不代表真实会话的五域分布",
+        "不证明 2%–30% 这个区间覆盖真实窗口"
+      ],
+      "repeats": 3,
+      "rows": 33,
+      "severity_levels": [
+        "mild",
+        "moderate",
+        "severe",
+        "control"
+      ],
+      "stress_class": "resource",
+      "title": "F5 合成矩阵与预算压力（24 格 + 8 条互斥 + 巨型 style）",
+      "ucas": [
+        "UCA-03",
+        "UCA-05",
+        "UCA-06"
+      ],
+      "verdict_kind": "invariant",
+      "window": "single"
+    },
+    {
+      "corpus": "f6_storage_faults.jsonl",
+      "hypothesis": "H6：真实 plugin/dsh-lingshu/memorywriter.js 在 store 故障（读抛错、写抛错、半行写入、已存在重复 id、已存在坏行、时钟回拨、超大批次）下，要么确认写入、要么显式失败，绝不静默丢数据；非法条目继续被 rejected；supersede 墓碑语义在脏数据上仍成立。",
+      "id": "f6_storage_faults",
+      "invariants": [
+        "INV-16"
+      ],
+      "mechanism": "memorywriter",
+      "module": "f6_storage_faults",
+      "non_claims": [
+        "这是参考实现的函数级存储层故障注入，不是真实磁盘坏块/断电",
+        "不模拟操作系统级 IO 故障，也不测多进程并发写",
+        "发现静默丢数据只记 finding，不在压测任务里改插件代码（docs/23 §8 红线 8）"
+      ],
+      "repeats": 3,
+      "rows": 14,
+      "severity_levels": [
+        "mild",
+        "moderate",
+        "severe",
+        "control"
+      ],
+      "stress_class": "storage",
+      "title": "F6 存储层故障注入（真实 memorywriter × 14 个 scenario）",
+      "ucas": [],
+      "verdict_kind": "invariant",
+      "window": "single"
+    },
+    {
+      "corpus": "f7_steady_state.jsonl",
+      "hypothesis": "H7：良性流量下系统处于稳态：冻结回放集 recall@3=1.000、forbidden_leak=0、truncated_turns=0、blocked_turns=0；10 条良性自然语言输入经 PipelineSession 后零熔断、零降维、零锚点。",
+      "id": "f7_steady_state",
+      "invariants": [
+        "INV-17"
+      ],
+      "mechanism": "memory.recall",
+      "module": "f7_steady_state",
+      "non_claims": [
+        "回放集是合成的（docs/20 §1.2），只作稳态回归，不是真实流量证据",
+        "良性输入是字面量表，不覆盖真实用户语言分布",
+        "不说明模型行为正常（v2 零模型调用）"
+      ],
+      "repeats": 3,
+      "rows": 11,
+      "severity_levels": [
+        "control"
+      ],
+      "stress_class": "control",
+      "title": "F7 稳态基线与良性对照（冻结回放集 v1 + 10 条良性输入）",
+      "ucas": [],
+      "verdict_kind": "invariant",
+      "window": "cross_run"
+    },
+    {
+      "corpus": "f8_metamorphic.jsonl",
+      "hypothesis": "H8：六条语义等价/单调关系成立（MR1 缩放不变、MR2 单调不降、MR3 置换等价、MR4 u_shape 多重集置换、MR5 边界±0.0001 恰好翻转一档、MR6 种子稳定性）。",
+      "id": "f8_metamorphic",
+      "invariants": [
+        "INV-15",
+        "INV-10",
+        "INV-13"
+      ],
+      "mechanism": "all",
+      "module": "f8_metamorphic",
+      "non_claims": [
+        "MR3 的置换等价在 engine.model.Store.all() 按 id 排序的实现下是构造性成立，不是独立证据",
+        "MR 只检验实现内部一致性，不证明语义正确或阈值正确",
+        "不构成 measured 证据（docs/23 §8 红线 5）"
+      ],
+      "repeats": 3,
+      "rows": 15,
+      "severity_levels": [
+        "mild",
+        "moderate",
+        "severe"
+      ],
+      "stress_class": "ordering",
+      "title": "F8 变形关系（MR1 缩放/MR2 单调/MR3 置换/MR4 U 型/MR5 边界/MR6 种子）",
+      "ucas": [],
+      "verdict_kind": "invariant",
+      "window": "permutation"
+    }
+  ],
+  "generated_by": "tools/gen_chaos_v2.py",
+  "honest_limits": [
+    "v2 零模型调用：不测真实模型行为、不测语义能力",
+    "合成刺激集不构成发生率证据（docs/20 §1.2）",
+    "F6 是函数级存储故障注入，不是 OS/磁盘级故障",
+    "不测多进程并发写、不测网络、不测 P95 延迟",
+    "只证明'检测器在阈值附近按设计动作'，不证明 0.70/0.85 正确"
+  ],
+  "repeats": 3,
+  "schema": "lingshu-chaos-campaign/2",
+  "seed_base": 20261027
+}

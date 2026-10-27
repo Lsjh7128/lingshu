@@ -1,0 +1,55 @@
+--- plugin/dsh-lingshu/index.js
++++ fork/dsh-lingshu/index.js
+@@ -30,6 +30,11 @@
+ export const inject = ['tools', 'systemPrompt'];
+ 
+ // order 90/140 是"首尾人格锚点"，105 是前置审计熔断提示；100/110/120/130 是原有四段。
++// ── LAB-ONLY INSTRUMENTATION (S3 control ablation) ──
++// 环境开关：LINGSHU_CONTROL=off 只关 anchor / gate / variety，保留记忆注入与状态落盘。
++// 产品插件（plugin/dsh-lingshu）不包含本段；本文件仅存于 paper/host-validation/control-ablation/fork/。
++const LINGSHU_CONTROL_OFF = String(process.env.LINGSHU_CONTROL || '').toLowerCase() === 'off';
++
+ const SECTION_ORDER = { anchorHead: 90, constitution: 100, blocked: 105,
+                         fact: 110, organization: 120, style: 130, anchorTail: 140 };
+ const DEFAULT_CONFIG = {
+@@ -453,11 +458,13 @@
+   // 分别贴在首/尾，等价于"prompt 首尾都有人格锚点"（docs/19 §2.3）。
+   const anchorBody = () => '记忆不等于当前陈述；情感不参与事实；关系不软化拒绝。';
+   const renderAnchorHead = () => {
++    if (LINGSHU_CONTROL_OFF) return '';
+     const p = st.control.phase;
+     if (!p || !(p.prefeed || p.anchorRequired)) return '';
+     return ANCHOR_PREFIX + anchorBody();
+   };
+   const renderAnchorTail = () => {
++    if (LINGSHU_CONTROL_OFF) return '';
+     const p = st.control.phase;
+     if (!p || !p.anchorRequired) return '';
+     return ANCHOR_SUFFIX;
+@@ -609,7 +616,7 @@
+         || (!cfg.shadowRelation && String(renderRelationBlock(st.relation) || '').trim() !== '');
+       let varietyRes;
+       try {
+-        varietyRes = variety.check({
++        varietyRes = LINGSHU_CONTROL_OFF ? { fallback: false, marker: null, reason: 'lab_control_off', dropDomains: [] } : variety.check({
+           conflict: String(v.conflict || 'none'),
+           matchedMutex: false,
+           domains: { style: true },
+@@ -635,7 +642,7 @@
+                          preview.fact, preview.organization, preview.style, preview.anchorTail]
+         .filter(Boolean).join('\n');
+       const frozen = verifyFrozen();
+-      const auditRes = preflightAudit({
++      const auditRes = LINGSHU_CONTROL_OFF ? { verdict: 'allow', ucas: [], downgrades: [], sources: {}, explain: [], explainDowngrades: [], failMode: 'closed', labControlOff: true } : preflightAudit({
+         prompt: promptAll,
+         // v4.3 真实标定红线：用户消息里的越狱指令也要在闸门里拦（fail-closed 停止注入 + 留痕）。
+         userText: String(text || ''),
+@@ -661,7 +668,7 @@
+       } catch { /* 预览失败不影响注入 */ }
+       audit('pre_step', { stage: st2, matched: rec.matched, level: v.level,
+                           excluded: rec.excluded, turn: turnKey,
+-                          step: payload?.step ?? null, firstStep: true,
++                          step: payload?.step ?? null, firstStep: true, controlOff: LINGSHU_CONTROL_OFF,
+                           chars: String(text).length,
+                           phase: st.control.phase?.phase ?? null,
+                           ratio: st.control.phase?.ratio ?? 0,

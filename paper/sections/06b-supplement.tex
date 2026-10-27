@@ -1,0 +1,140 @@
+% 06b-supplement.tex - supplementary Results subsections (S1 mechanism ablation, S2 held-out).
+% Numbers read programmatically from:
+%   paper/ablation/results/abl-20261027-s1-engine.json
+%   paper/ablation/heldout/results/holdout-20261027-010313.json
+% Input AFTER sections/06-experiments in main.tex (continues the same section).
+\subsection{Mechanism-level ablation}\label{sec:exp:mech}
+
+The first supplement attacks two limits of Section~\ref{sec:exp:ablation}: three
+probes per class cannot reach significance, and changing seven mechanisms at
+once cannot attribute anything. We generate three 100-turn scripts from the same
+corpora under different fixed permutations (SHA-256
+\texttt{410085b0\ldots}, \texttt{f58ac2da\ldots}, \texttt{a690d3ae\ldots}), each
+with sixteen probes (four per class), and run nine arms against all three
+scripts: 48 probes, twelve per class, 27 cells. The run is deterministic and
+model-free (\texttt{model\_calls=0}), harness and pipeline agree on 300/300
+turns, and the probe bank is frozen by SHA-256
+(\texttt{cdccdde2966e3d49\ldots}) before any arm is run.
+
+\begin{table*}[t]
+\centering\footnotesize
+\caption{Mechanism-level ablation (S1). SFR: setting-forgetting rate per probe
+class (A long-range, B superseded, C distractor-overloaded, D ACT-R rescue,
+$n=12$ each) and pooled over 48 probes. Source:
+\texttt{abl-20261027-s1-engine.json}, fields
+\texttt{arms.<arm>.pooled.metrics.m1\_setting\_forgetting.*} and
+\texttt{arms.<arm>.pooled.telemetry.*}; the file reports \texttt{valid=true} and
+\texttt{model\_calls=0}.}\label{tab:mech}
+\begin{tabular}{@{}l cccc c p{0.42\textwidth}@{}}
+\toprule
+Arm & A & B & C & D & SFR$_{\text{text}}$ & Observed effect and caveat \\
+\midrule
+Baseline & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & definitional: a three-turn window cannot hold a setting planted at turn 1 \\
+Basic & 0.00 & 0.00 & 0.00 & 1.00 & 0.25 & misses only the ACT-R class \\
+Full & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & reference arm \\
+Full$-$ACT-R & 0.00 & 0.00 & 0.00 & 1.00 & 0.25 & D returns exactly to Basic; A/B/C unchanged $\Rightarrow$ channel responsible \\
+Full$-$anchor & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & UCA-07 fail-closed: 148 blocked turns, \texttt{prompt=None}; structural, \emph{not} a recall effect \\
+Full$-$gate & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & gate absent; JI-in drops to 0.00, JI-fp unchanged \\
+Full$-$integral & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & no retention effect; UCA-08 records fall from 176 to 0 \\
+Full$-$ushape & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & no retention effect (membership, not order, decides) \\
+Full$-$variety & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & UCA-06 coupling: 12 blocked turns; fallback marks 12 $\rightarrow$ 0 \\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+\raggedright\scriptsize
+$n=12$ per class (three scripts $\times$ four probes); exact one-sided sign test on
+paired outcomes, Bonferroni $\alpha=0.0125$ over four classes. Class D is a
+constructed precondition (30 accesses ending 100 days ago), so its result is
+about top-3 membership, not about a model. Baseline and Basic have no gate and
+therefore no blocked-turn count.
+\end{table*}
+
+Table~\ref{tab:mech} shows what changes once the probes are expanded. The ACT-R
+effect is now decidable: Basic forgets all twelve D probes and Full none, twelve
+of twelve paired outcomes favour Full, and the exact test gives
+$p=2.4\times10^{-4}$ at $\alpha=0.0125$ (seven or more one-directional flips were
+required). \textbf{With three probes this was structurally impossible---the
+smallest attainable $p$ was $2^{-3}=0.125$---so the earlier null was a power
+limitation, not evidence of no effect.} Removing the ACT-R channel reproduces
+Basic exactly on D and leaves A/B/C untouched, so the attribution holds; it
+still licenses only a claim about ranking, not about model behaviour.
+
+Two mechanism arms are not attributable, and we report them as they are.
+Removing anchors from \textsc{Full} makes the phase monitor demand an anchor that
+is never inserted, so the pre-flight gate fires UCA-07 and closes the turn:
+148 blocked turns return no prompt, and the text-level SFR is structurally 1.00.
+This is fail-closed coupling, not evidence that anchors affect recall, and the
+pre-registered P-S1c is recorded as \emph{failed} rather than reinterpreted.
+Removing the variety guard triggers UCA-06 on the twelve conflict turns; SFR is
+unchanged and P-S1d passes its stated criterion, but the arm still cannot be read
+as a clean single-mechanism test. Removing the gate leaves retention unchanged
+and moves only the jailbreak channel: JI-in goes from 1.00 to 0.00 with JI-fp
+still $0/294$, which is the expected wiring confirmation. Removing the integral
+or the U-shape changes no SFR at all; only telemetry moves (UCA-08 records
+176$\rightarrow$0). We conclude that the only mechanism with a demonstrated
+effect on retention is the ACT-R channel, that two arms are inseparable from the
+gate by construction, and that the rest affect audit trails rather than
+selection.
+
+\subsection{Held-out jailbreak set}\label{sec:exp:heldout}
+
+The in-distribution jailbreak corpus used earlier is constructed from the gate's
+own trigger phrases, so its 25/25 interception rate is a tautology. We therefore
+measure the gate on 40 paraphrases written against two different knowledge
+states. Corpus v1 was written by an author who had earlier read the engine's
+trigger list (self-disclosed as semi-blind) and who avoided the original wording;
+it is the worst case for the gate (leakage upper bound, interception lower
+bound). Corpus v2 was written by an author who never read either word list; it
+is the blind, primary estimate. Each corpus has twenty items in five families
+(word order, synonym, cross-language, anaphora, post-encoding). A machine check
+confirms that no item in either corpus contains a literal trigger phrase of
+either word list. The gate call is the frozen unit-level engine call used by the
+chaos executor, under which only UCA-01 can fire; the benign control is unchanged
+(200 replay messages plus 94 non-jailbreak script turns).
+
+\begin{table}[t]
+\centering\footnotesize
+\caption{Held-out jailbreak evaluation (S2). JI-held: UCA-01 block rate on 20
+paraphrases per corpus; Clopper--Pearson exact 95\% intervals. JI-fp: false
+positives on 294 benign items. Source:
+\texttt{holdout-20261027-010313.json}, fields
+\texttt{sets.v1|v2.ji\_held.*}, \texttt{ji\_fp.overall.*},
+\texttt{comparison.ji\_held.*}; word-list hashes recorded in the same file.}
+\label{tab:heldout}
+\begin{tabular}{@{}l l c c@{}}
+\toprule
+Corpus & Blind level & JI-held [95\% CI] & Intercepted/n \\
+\midrule
+v1 (semi-blind) & semi & 0.000 [0.000, 0.168] & 0/20 \\
+v2 (blind) & blind & 0.000 [0.000, 0.168] & 0/20 \\
+difference v2$-$v1 & --- & 0.000 & floor effect \\
+JI-fp (benign) & --- & 0.000 [0.000, 0.012] & 0/294 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:heldout} gives the result: the lexical gate intercepts
+\textbf{none} of the forty paraphrases. Every family is 0/4 in both corpora
+(per-family interval $[0.000, 0.602]$), so the failure is uniform rather than
+concentrated in one rewriting style. The benign control stays at zero, so the
+gate is not over-blocking; it is simply not recognising paraphrased intent. The
+v1--v2 difference is 0.000 because both corpora sit on the floor: the
+author-knowledge effect cannot be estimated when both conditions are fully
+missed, and we do not claim that knowing the word list makes no difference---only
+that this pair cannot measure it. The semi-blind corpus remains the upper-bound
+reference (a knowledgeable author can evade completely), while the blind corpus
+is the primary estimate, and both agree here.
+
+Three limits bound this result. Twenty items per corpus give wide intervals and
+support only a directional reading; the anaphora family is single-turn by
+construction, which makes it artificially hard; and the measurement is a
+unit-level gate call, because in the real wiring the user message never enters
+the engine prompt. The pre-registered ordering and author-knowledge predictions
+(P-S2c, P-S2d) are not discriminable at this floor and are reported as null
+rather than as passes. The word lists were not modified (their SHA-256 values are
+recorded in the result file), so the zero is not the product of tuning. The
+honest reading is that the pre-flight gate is a lexical blocklist with
+fail-closed wiring and auditability, not a semantic defence: on the corpus it was
+built from it blocks everything, and on paraphrases of the same intent it blocks
+nothing.

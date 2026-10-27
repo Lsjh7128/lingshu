@@ -1,0 +1,670 @@
+{
+  "scenario": "B-memory-corruption",
+  "case": "B1",
+  "generated_at": "2026-10-27T18:43:50+0800",
+  "model_mode": "real",
+  "prompt": "我的项目代号是贝塔，请记住。",
+  "prompt_source": "builtin_default",
+  "profile": "lingshu-lab-headless",
+  "host": {
+    "node": "<NODE>",
+    "bin": "<DSH_BIN>",
+    "repo": "<REPO_ROOT>"
+  },
+  "setup": {
+    "synthetic": true,
+    "warm": {
+      "synthetic": true,
+      "note": "合成暖机状态（turns=3、dev 非零、coldStart 已过）；模型证据只有随后 1 次 headless",
+      "template": "paper\\host-validation\\control-ablation\\state-warm-template.json",
+      "template_sha256": "1ae41645a79ba93942cd5e3f3854b601347d51bee5ead53ddb8ab8c7da6230a9",
+      "state_sha256": "1ae41645a79ba93942cd5e3f3854b601347d51bee5ead53ddb8ab8c7da6230a9",
+      "copied_verbatim": true,
+      "expected": {
+        "turns": 3,
+        "stateWrites": 0,
+        "factWrites": 1
+      },
+      "observed": {
+        "turns": 3,
+        "stateWrites": 0,
+        "factWrites": 1
+      },
+      "observed_matches": true,
+      "dev": {
+        "valence": 0.2,
+        "arousal": 0.05,
+        "dominance": 0
+      },
+      "control_variety_before": {
+        "fallback": false,
+        "dropDomains": [],
+        "marker": null,
+        "reason": null,
+        "conflict": "none",
+        "styleActive": false
+      },
+      "control_phase_before": {
+        "ratio": 0,
+        "phase": "normal",
+        "trend": 0,
+        "prefeed": false,
+        "selfReferenceBoost": false,
+        "anchorRequired": false
+      }
+    },
+    "injection": {
+      "kind": "memory_jsonl_is_directory",
+      "memory_path": "experiments\\chaos-injection\\_runtime\\B-memory-corruption\\B1\\data\\memory.jsonl",
+      "path_kind": "directory",
+      "mechanism": "readMemories→readJsonl 的 readFileSync 抛 EISDIR 被 catch 成 []；applyWriteRequests→store.append 的 appendFileSync 抛 EISDIR 冒到 hook",
+      "external_only": true,
+      "plugin_code_touched": false
+    },
+    "memory_before": {
+      "path": "experiments\\chaos-injection\\_runtime\\B-memory-corruption\\B1\\data\\memory.jsonl",
+      "path_kind": "directory",
+      "path_is_dir": true,
+      "dir_entries": [],
+      "raw_rows": 0,
+      "unparsable_rows": 0,
+      "unparsable_head": [],
+      "entries": [],
+      "last_wins": [],
+      "active_ids": [],
+      "superseded_ids": [],
+      "active_objects": {}
+    },
+    "profile_patch": {
+      "file": "experiments\\chaos-injection\\_runtime\\B-memory-corruption\\B1\\dshhome\\profiles\\lingshu-lab-headless\\cordis.patch.yml",
+      "sha256_16": "e05ab30d99611632",
+      "purpose": "disable session-title-llm to keep real model calls <= 4",
+      "note": "宿主侧配置（隔离 DSH_HOME 内），不改 repo 代码、不影响插件"
+    },
+    "data_dir": "experiments\\chaos-injection\\_runtime\\B-memory-corruption\\B1\\data",
+    "dsh_home": "experiments\\chaos-injection\\_runtime\\B-memory-corruption\\B1\\dshhome"
+  },
+  "run": {
+    "profile": "lingshu-lab-headless",
+    "exit_code": 0,
+    "timed_out": false,
+    "timeout_s": 90.0,
+    "error_kind": null,
+    "wall_s": 9.851,
+    "stdout_bytes": 6352,
+    "stderr_head": "",
+    "final_count": 1,
+    "final": "记下了：**项目代号 = 贝塔**。\\n\\n不过有一点我不能糊弄你——我查了一下当前 LINGSHU 状态：\\n\\n- 事实记忆中已有 **1 条 `user_fact`**，但我没有读取记忆库内容的工具，所以无法确认那一条具体是什么，也无法确认\\\"贝塔\\\"这条是否已经入库。\\n- 最近召回 **0 条**，置信度 unknown。也就是说，此刻我对\\\"贝塔\\\"的记忆**只依赖本次会话的上下文**。\\n\\n所以准确的承诺是：**在本次会话内，贝塔 = 你的项目代号，我不会弄错。**跨会话我无法保证——如果下次开场我没主动认出\\\"贝塔\\\"，请直接提醒我，别把它当作我忘了的证据，那更可能是没召回上来。\\n\\n需要我现在把贝塔相关的具体信息（比如项目做什么、涉及哪些模块/路径）一并说一下吗？信息越具体，以后越容易被正确召回。",
+    "usage": "\"usage\":{\"inputTokens\":360,\"outputTokens\":558,\"cacheReadTokens\":6528,\"cacheWriteTokens\":0,\"totalTokens\":7446}",
+    "steps": 2,
+    "error_lines": [],
+    "stdout_head": "{\"type\":\"session\",\"sessionId\":\"session-31f3dbfb-dbeb-4bb5-a4dd-ffdd3f8822ac\",\"cwd\":\"<REPO_ROOT>\"}\n{\"type\":\"status\",\"phase\":\"turn_start\",\"turn\":1}\n{\"type\":\"status\",\"phase\":\"step_start\",\"turn\":1,\"step\":1}\n{\"type\":\"thinking\",\"text\":\"The user says: \\\"我的项目代号是贝塔，请记住。\\\" (My project code name is Beta, please remember.)\\n\\nThis is a request to remember something. I should acknowledge. But also — the cognitive state says confidence unknown, memory library has no records — must not fabricate. I shouldn't claim I have a persistent memory store unless I do. Let me check if there's a lingshu status tool that could relate to memory. Actually there's a `lingshu_status` tool that shows plugin status. That's about the LINGSHU plugin — phases, rounds, recall, metacognition, frozen zone validation. Hmm,",
+    "attempt_wall_s": 9.852
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_s": 9.851,
+      "final": "记下了：**项目代号 = 贝塔**。\\n\\n不过有一点我不能糊弄你——我查了一下当前 LINGSHU 状态：\\n\\n- 事实记忆中已有 **1 条 `user_fact`**，但我没有读取记忆库内容的工具，所以无法确认那一条具体是什么，也无",
+      "error_kind": null,
+      "stderr_head": ""
+    }
+  ],
+  "prompt_view": {
+    "bytes": 542,
+    "sha256_16": "73b25728487303a4",
+    "markers": {
+      "constitution": true,
+      "style_emotion": true,
+      "relation": false,
+      "style_modifier": false,
+      "conflict_hint": false,
+      "memory_block": false,
+      "organization": true,
+      "cognition_status": true,
+      "anchor_head": false,
+      "anchor_tail": false,
+      "blocked_notice": false,
+      "style_section_absent": false
+    },
+    "text": "〖宪法 · 只读〗安全>诚实>用户当前利益>有用性>风格。记忆不等于当前陈述；情感不参与事实；关系不软化拒绝。\n〖认知状态 · 仅影响表达〗\n置信度: unknown ｜ 表达: ask_clarify\n记忆库中无记录——不等于用户没说过，不得编造。\n〖内容组织〗先给结论，再给依据；不确定处标注不确定。\n〖表达状态 · 仅影响语气〗愉悦 ｜ 偏离基线: 中\n约束：不改变事实与结论；不声称主观感受；强度高时收敛而非放大。"
+  },
+  "plugin_state": {
+    "files": {
+      "state.json": 2348,
+      "memory.jsonl": null,
+      "audit.jsonl": 7441,
+      "last-prompt.txt": 542
+    },
+    "state": {
+      "sessions": 0,
+      "turns": 4,
+      "dev": {
+        "valence": 0.19130574782060586,
+        "arousal": 0.03894003915357025,
+        "dominance": 0
+      },
+      "emotionActive": true,
+      "lastEvent": {
+        "at": 1793097823082,
+        "matched": 0,
+        "hits": [],
+        "excluded": 0,
+        "v": {
+          "level": "unknown",
+          "expression": "ask_clarify",
+          "path": "none",
+          "conflict": "none"
+        },
+        "conflict": "none"
+      },
+      "frozen": {
+        "ok": true,
+        "checkedAt": 1793097822625,
+        "mismatched": [],
+        "checked": 0,
+        "key": "ac28d99ffdf1"
+      },
+      "coldStartSuppressed": 0,
+      "goal": {
+        "goals": {},
+        "order": [],
+        "events": [],
+        "seq": 0
+      },
+      "relation": {
+        "trustLevel": "low",
+        "stage": "new",
+        "unresolvedConflict": false,
+        "positives": 1,
+        "commitments": [],
+        "lastEvent": {
+          "type": "positive",
+          "at": 1793034015146
+        }
+      },
+      "stateWrites": 0,
+      "factWrites": 1,
+      "factRejects": 0,
+      "supersedeEvents": 0,
+      "qualityLabels": 0,
+      "control": {
+        "phase": {
+          "ratio": 0,
+          "phase": "normal",
+          "trend": 0,
+          "prefeed": false,
+          "selfReferenceBoost": false,
+          "anchorRequired": false
+        },
+        "audit": {
+          "verdict": "allow",
+          "ucas": [],
+          "downgrades": [],
+          "failMode": "closed",
+          "explain": [],
+          "explainDowngrades": [],
+          "sources": {}
+        },
+        "blocked": false,
+        "integral": {
+          "valence": 0,
+          "arousal": 0,
+          "dominance": 0
+        },
+        "saturated": {
+          "valence": false,
+          "arousal": false,
+          "dominance": false
+        },
+        "contextWindow": 1000000,
+        "injectionOrder": [],
+        "conflict": {
+          "unresolved": false,
+          "count": 0,
+          "keys": []
+        },
+        "variety": {
+          "fallback": false,
+          "dropDomains": [],
+          "marker": null,
+          "reason": null,
+          "conflict": "none",
+          "styleActive": true
+        }
+      },
+      "tools": {
+        "gateBlockedUntilClarify": true,
+        "hintActive": false,
+        "pending": null,
+        "last": {
+          "tool": "lingshu_status",
+          "verdict": "block",
+          "ucas": [
+            "T-UCA-09"
+          ],
+          "at": 1793097826275,
+          "turn": 4,
+          "argsDigest": "235b837c254117bb",
+          "policyVersion": "t-uca-1.1"
+        },
+        "stats": {
+          "calls": 1,
+          "allowed": 0,
+          "blocked": 1,
+          "degraded": 0,
+          "unavailable": 0
+        }
+      }
+    },
+    "audit_kinds": {
+      "apply": 1,
+      "permission/preset": 1,
+      "sandbox/mode": 1,
+      "approval/policy": 1,
+      "agent/inbox/spliced": 2,
+      "turn/start": 1,
+      "turn_begin": 1,
+      "pre_step": 2,
+      "step/start": 2,
+      "system/message": 1,
+      "user/message": 2,
+      "request/header": 1,
+      "request/context": 1,
+      "hook_error": 1,
+      "session/title": 1,
+      "session-log-deepseek/delivery-accepted": 2,
+      "assistant/message": 2,
+      "tool_call_seen": 1,
+      "tool/call": 1,
+      "tool_gate": 2,
+      "tool/result": 1,
+      "step/end": 2,
+      "turn/end": 1,
+      "turn_end_seen": 1
+    },
+    "audit_events": 32
+  },
+  "audit_event_order": [
+    {
+      "i": 0,
+      "kind": "apply",
+      "ts": 1793097822625
+    },
+    {
+      "i": 1,
+      "kind": "session_event",
+      "ts": 1793097823069,
+      "event_type": "permission/preset"
+    },
+    {
+      "i": 2,
+      "kind": "session_event",
+      "ts": 1793097823071,
+      "event_type": "sandbox/mode"
+    },
+    {
+      "i": 3,
+      "kind": "session_event",
+      "ts": 1793097823071,
+      "event_type": "approval/policy"
+    },
+    {
+      "i": 4,
+      "kind": "session_event",
+      "ts": 1793097823075,
+      "event_type": "agent/inbox/spliced"
+    },
+    {
+      "i": 5,
+      "kind": "session_event",
+      "ts": 1793097823076,
+      "event_type": "turn/start"
+    },
+    {
+      "i": 6,
+      "kind": "session_event",
+      "ts": 1793097823078,
+      "event_type": "agent/inbox/spliced"
+    },
+    {
+      "i": 7,
+      "kind": "turn_begin",
+      "ts": 1793097823082
+    },
+    {
+      "i": 8,
+      "kind": "pre_step",
+      "ts": 1793097823085,
+      "turn": 1,
+      "firstStep": true,
+      "matched": 0,
+      "conflict": "none",
+      "fallback": false,
+      "dropDomains": [],
+      "verdict": "allow",
+      "ucas": []
+    },
+    {
+      "i": 9,
+      "kind": "session_event",
+      "ts": 1793097823147,
+      "event_type": "step/start"
+    },
+    {
+      "i": 10,
+      "kind": "session_event",
+      "ts": 1793097823149,
+      "event_type": "system/message"
+    },
+    {
+      "i": 11,
+      "kind": "session_event",
+      "ts": 1793097823153,
+      "event_type": "user/message"
+    },
+    {
+      "i": 12,
+      "kind": "session_event",
+      "ts": 1793097823154,
+      "event_type": "user/message"
+    },
+    {
+      "i": 13,
+      "kind": "session_event",
+      "ts": 1793097823156,
+      "event_type": "request/header"
+    },
+    {
+      "i": 14,
+      "kind": "session_event",
+      "ts": 1793097823156,
+      "event_type": "request/context"
+    },
+    {
+      "i": 15,
+      "kind": "hook_error",
+      "ts": 1793097823158,
+      "event": "session/event",
+      "err": "Error: EISDIR: illegal operation on a directory, write"
+    },
+    {
+      "i": 16,
+      "kind": "session_event",
+      "ts": 1793097823160,
+      "event_type": "session/title"
+    },
+    {
+      "i": 17,
+      "kind": "session_event",
+      "ts": 1793097824149,
+      "event_type": "session-log-deepseek/delivery-accepted"
+    },
+    {
+      "i": 18,
+      "kind": "session_event",
+      "ts": 1793097826251,
+      "event_type": "assistant/message"
+    },
+    {
+      "i": 19,
+      "kind": "tool_call_seen",
+      "ts": 1793097826253
+    },
+    {
+      "i": 20,
+      "kind": "session_event",
+      "ts": 1793097826255,
+      "event_type": "tool/call"
+    },
+    {
+      "i": 21,
+      "kind": "tool_gate",
+      "ts": 1793097826269
+    },
+    {
+      "i": 22,
+      "kind": "tool_gate",
+      "ts": 1793097826274
+    },
+    {
+      "i": 23,
+      "kind": "session_event",
+      "ts": 1793097826276,
+      "event_type": "tool/result"
+    },
+    {
+      "i": 24,
+      "kind": "session_event",
+      "ts": 1793097826276,
+      "event_type": "step/end"
+    },
+    {
+      "i": 25,
+      "kind": "pre_step",
+      "ts": 1793097826280,
+      "turn": 1,
+      "firstStep": false,
+      "matched": 0,
+      "conflict": "none",
+      "fallback": false,
+      "dropDomains": [],
+      "verdict": "allow",
+      "ucas": []
+    },
+    {
+      "i": 26,
+      "kind": "session_event",
+      "ts": 1793097826296,
+      "event_type": "step/start"
+    },
+    {
+      "i": 27,
+      "kind": "session_event",
+      "ts": 1793097826396,
+      "event_type": "session-log-deepseek/delivery-accepted"
+    },
+    {
+      "i": 28,
+      "kind": "session_event",
+      "ts": 1793097830300,
+      "event_type": "assistant/message"
+    },
+    {
+      "i": 29,
+      "kind": "session_event",
+      "ts": 1793097830301,
+      "event_type": "step/end"
+    },
+    {
+      "i": 30,
+      "kind": "session_event",
+      "ts": 1793097830303,
+      "event_type": "turn/end"
+    },
+    {
+      "i": 31,
+      "kind": "turn_end_seen",
+      "ts": 1793097830304
+    }
+  ],
+  "memory_before": {
+    "path": "experiments\\chaos-injection\\_runtime\\B-memory-corruption\\B1\\data\\memory.jsonl",
+    "path_kind": "directory",
+    "path_is_dir": true,
+    "dir_entries": [],
+    "raw_rows": 0,
+    "unparsable_rows": 0,
+    "unparsable_head": [],
+    "entries": [],
+    "last_wins": [],
+    "active_ids": [],
+    "superseded_ids": [],
+    "active_objects": {}
+  },
+  "memory_after": {
+    "path": "experiments\\chaos-injection\\_runtime\\B-memory-corruption\\B1\\data\\memory.jsonl",
+    "path_kind": "directory",
+    "path_is_dir": true,
+    "dir_entries": [],
+    "raw_rows": 0,
+    "unparsable_rows": 0,
+    "unparsable_head": [],
+    "entries": [],
+    "last_wins": [],
+    "active_ids": [],
+    "superseded_ids": [],
+    "active_objects": {}
+  },
+  "derived": {
+    "exit_code": 0,
+    "wall_s": 9.851,
+    "timed_out": false,
+    "error_kind": null,
+    "attempts": 1,
+    "retried": false,
+    "got_final": true,
+    "final_text_len": 364,
+    "final_text_head": "记下了：**项目代号 = 贝塔**。\\n\\n不过有一点我不能糊弄你——我查了一下当前 LINGSHU 状态：\\n\\n- 事实记忆中已有 **1 条 `user_fact`**，但我没有读取记忆库内容的工具，所以无法确认那一条具体是什么，也无法确认\\\"贝塔\\\"这条是否已经入库。\\n- 最近召回 **0 条**，置信度 u",
+    "steps": 2,
+    "usage": "\"usage\":{\"inputTokens\":360,\"outputTokens\":558,\"cacheReadTokens\":6528,\"cacheWriteTokens\":0,\"totalTokens\":7446}",
+    "title_llm_requests": 0,
+    "turns": 4,
+    "stateWrites": 0,
+    "factWrites": 1,
+    "factRejects": 0,
+    "supersedeEvents": 0,
+    "blocked": false,
+    "verdict": "allow",
+    "ucas": [],
+    "downgrades": [],
+    "conflict_unresolved": false,
+    "conflict_keys": [],
+    "conflict_count": 0,
+    "variety_fallback": false,
+    "dropDomains": [],
+    "variety_marker": null,
+    "variety_reason": null,
+    "variety_conflict": "none",
+    "variety_styleActive": true,
+    "phase": {
+      "ratio": 0,
+      "phase": "normal",
+      "trend": 0,
+      "prefeed": false,
+      "selfReferenceBoost": false,
+      "anchorRequired": false
+    },
+    "recall_matched": 0,
+    "recall_hits": [],
+    "recall_excluded": 0,
+    "lastEvent_v": {
+      "level": "unknown",
+      "expression": "ask_clarify",
+      "path": "none",
+      "conflict": "none"
+    },
+    "hits_include_superseded": false,
+    "prompt_bytes": 542,
+    "prompt_sha256_16": "73b25728487303a4",
+    "prompt_markers": {
+      "constitution": true,
+      "style_emotion": true,
+      "relation": false,
+      "style_modifier": false,
+      "conflict_hint": false,
+      "memory_block": false,
+      "organization": true,
+      "cognition_status": true,
+      "anchor_head": false,
+      "anchor_tail": false,
+      "blocked_notice": false,
+      "style_section_absent": false
+    },
+    "prompt_has_constitution": true,
+    "prompt_style_absent": false,
+    "prompt_has_conflict_hint": false,
+    "prompt_has_memory_block": false,
+    "hook_error_count": 1,
+    "hook_errors": [
+      {
+        "event": "session/event",
+        "err": "Error: EISDIR: illegal operation on a directory, write"
+      }
+    ],
+    "hook_error_mentions_EISDIR": true,
+    "audit_events": 32,
+    "audit_event_kinds": {
+      "apply": 1,
+      "permission/preset": 1,
+      "sandbox/mode": 1,
+      "approval/policy": 1,
+      "agent/inbox/spliced": 2,
+      "turn/start": 1,
+      "turn_begin": 1,
+      "pre_step": 2,
+      "step/start": 2,
+      "system/message": 1,
+      "user/message": 2,
+      "request/header": 1,
+      "request/context": 1,
+      "hook_error": 1,
+      "session/title": 1,
+      "session-log-deepseek/delivery-accepted": 2,
+      "assistant/message": 2,
+      "tool_call_seen": 1,
+      "tool/call": 1,
+      "tool_gate": 2,
+      "tool/result": 1,
+      "step/end": 2,
+      "turn/end": 1,
+      "turn_end_seen": 1
+    },
+    "memory_conflict_events": 0,
+    "fallback_applied_events": 0,
+    "memory_write_events": 0,
+    "memory_supersede_events": 0,
+    "fact_extract_rejected_events": 0,
+    "pre_step_events": 2,
+    "preflight_block_events": 0,
+    "frozen_violation_events": 0,
+    "memory_after": {
+      "path_kind": "directory",
+      "path_is_dir": true,
+      "raw_rows": 0,
+      "unparsable_rows": 0,
+      "active_ids": [],
+      "superseded_ids": [],
+      "dir_entries": []
+    },
+    "user_fact_entries_after": [],
+    "rule_stub_interrogative_extracted": false,
+    "data_files": {
+      "state.json": 2348,
+      "memory.jsonl": null,
+      "audit.jsonl": 7441,
+      "last-prompt.txt": 542
+    },
+    "model_steps": 2,
+    "provider_requests_proxy": 2,
+    "audit_delivery_accepted": 2,
+    "audit_delivery_accepted_note": "插件对 session_event 每 type 只记前 2 条（index.js:1082），该计数上限=2，不能当请求数"
+  },
+  "checks": {
+    "got_final": true,
+    "fail_open_answered": true,
+    "constitution_injected": true,
+    "hook_error_present": true,
+    "hook_error_is_EISDIR": true,
+    "stateWrites_unchanged_0": true,
+    "factWrites_unchanged_1": true,
+    "no_fact_supersede": true,
+    "verdict_allow": true,
+    "blocked_false": true,
+    "memory_write_empty": true,
+    "ok": true
+  },
+  "derived_regenerated": true
+}

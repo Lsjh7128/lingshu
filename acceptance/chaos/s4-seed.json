@@ -1,0 +1,70 @@
+{
+  "kind": "chaos_seed_conflict",
+  "synthetic": true,
+  "note": "合成预置（memorywriter 写入，supersede=false），不是模型证据；只用于 S4 冲突判定/降维的宿主观测",
+  "data_dir": "<REPO_ROOT>\\.chaos-data-s4",
+  "memory_file": "<REPO_ROOT>\\.chaos-data-s4\\memory.jsonl",
+  "state_file": "<REPO_ROOT>\\.chaos-data-s4\\state.json",
+  "dry_run": false,
+  "task": {
+    "subject": "项目代号",
+    "relation": "是",
+    "objects": [
+      "阿尔法",
+      "贝塔"
+    ]
+  },
+  "memorywriter": {
+    "supersede_opt": false,
+    "request_count": 2,
+    "written": {
+      "written": 2,
+      "ids": [
+        "mem_001",
+        "mem_002"
+      ],
+      "rejected": [],
+      "superseded": []
+    }
+  },
+  "state": {
+    "turns": 3,
+    "seeded_turns": 3,
+    "stage_next_turn": "warm"
+  },
+  "seeded": [
+    {
+      "id": "mem_001",
+      "subject": "项目代号",
+      "relation": "是",
+      "object": "阿尔法",
+      "status": "active",
+      "type": "semantic",
+      "origin": "chaos_setup",
+      "sourceQuote": "我的项目代号是阿尔法。",
+      "sourceTrust": "user_explicit",
+      "confidence": 0.9
+    },
+    {
+      "id": "mem_002",
+      "subject": "项目代号",
+      "relation": "是",
+      "object": "贝塔",
+      "status": "active",
+      "type": "semantic",
+      "origin": "chaos_setup",
+      "sourceQuote": "我的项目代号是贝塔。",
+      "sourceTrust": "user_explicit",
+      "confidence": 0.9
+    }
+  ],
+  "checks": {
+    "written_two": true,
+    "no_rejected": true,
+    "two_active": true,
+    "same_key": true,
+    "distinct_objects": true,
+    "turns_preset": true
+  },
+  "ok": true
+}

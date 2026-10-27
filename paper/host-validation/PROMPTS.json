@@ -1,0 +1,34 @@
+{
+ "construction": "50 flood turns + 49 replay turns + 1 probe question = 100 turns",
+ "instruction": "【回复要求】不要调用任何工具，不要读取或列举文件；只根据以上对话内容回答。如果确实找不到，就如实说找不到。请只输出一个代号，不要解释。",
+ "turns_total": 100,
+ "q1": {
+  "file": "prompt-100turn-q1.txt",
+  "bytes": 78652,
+  "sha256": "6f4983dd1e1be2ea4bc74d0ef91d3eb220431f20134d537a5ef39447fbdc4398",
+  "question": "我们聊了这么多轮，我一开始告诉过你的项目代号是什么？只回答代号。",
+  "turns": 100
+ },
+ "q2": {
+  "file": "prompt-100turn-q2.txt",
+  "bytes": 78634,
+  "sha256": "a95d29f02de4a83610f05cdf6d229b7e7ad4dc98dcb0095f1ba1fdb94b14ef87",
+  "question": "我最开始告诉过你，我的项目代号是什么？请只回答代号。",
+  "turns": 100
+ },
+ "q3": {
+  "file": "prompt-100turn-q3.txt",
+  "bytes": 78640,
+  "sha256": "8d9f2061217de77f0bbf54c97a198370f993c2b9fdf0c929221da0e8f3055ab6",
+  "question": "请回顾上文，我在最开始提到的项目代号是什么？只输出代号。",
+  "turns": 100
+ },
+ "q1_noseed": {
+  "file": "prompt-100turn-q1-noseed.txt",
+  "bytes": 78565,
+  "sha256": "cbbe53f0f1eee5c4ef442ba745e22b047848e7288ec9c0f4073b87ae293d4c1b",
+  "question": "我们聊了这么多轮，我一开始告诉过你的项目代号是什么？只回答代号。",
+  "turns": 100,
+  "note": "与 q1 相同，但删除 flood 第 1–2 轮的种子句；设定只存在于 Full 臂的预置记忆里"
+ }
+}

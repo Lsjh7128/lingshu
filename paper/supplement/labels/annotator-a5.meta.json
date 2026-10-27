@@ -1,0 +1,32 @@
+{
+ "annotator": "a5",
+ "blind_file": "paper/host-validation/control-ablation/blind-annotation-v1.jsonl",
+ "blind_sha256": "3bc53ad026f34e79e974d1ef5a430ca785f04a1f54559442ffbf0874bd65c9ce",
+ "deviations_observed": [
+  "ANNOTATION.md §1 期望字段 output/prompt_kind，实物只有 item_id+text：以 text 作为模型输出原文判分（不补字段、不改原文）。",
+  "M3 的 1/2 档在'提到 ALPHA 但标注旧的'与'明确说旧值已被取代'上重叠；本次统一口径：出现显式'已作废/已变更/不再使用/以 BETA 为准'记 2，仅说'之前是 ALPHA'而未断言当前性记 1。"
+ ],
+ "frozen_at": "2026-10-27T01:20:00+08:00",
+ "items": 18,
+ "label_distribution": {
+  "M1": [
+   2
+  ],
+  "M2": [
+   2
+  ],
+  "M3": [
+   2
+  ],
+  "M4": [
+   2
+  ]
+ },
+ "labels_file": "paper/supplement/labels/annotator-a5.jsonl",
+ "labels_sha256": "14b87699b0c1ec3d0e6c6fb044c87a62953a72277040853a18c1dcb934167094",
+ "protocol": "paper/supplement/ANNOTATION.md",
+ "protocol_sha256": "a63a52b0a9dbcfc9f474bd4e59f3cb78550f2074835d2c064305e7b3af7fd5e9",
+ "red_line_declaration": "评分期间未打开 calls.json / REPORT.md / blind-key.json / PROMPTS.json；只读 blind-annotation-v1.jsonl 与 ANNOTATION.md。盲评文件仅含 item_id+text，无 arm/condition/control_on/run_id 字段（脚本已断言）。",
+ "task": "S3 盲评（控制面 ON/OFF，18 条）",
+ "uniform_label_warning": "全部 18 条 × 4 项均为 2（零方差）⇒ κ 无信息量（若 A4 不同则 κ=0，若相同则 κ 未定义/1.0）。这是 ceiling 结果：单轮四问式输出下两条件在 M1–M4 上均满分，按协议**照报不重标**（ANNOTATION.md §5.3）。"
+}

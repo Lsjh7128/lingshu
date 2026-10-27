@@ -1,0 +1,33 @@
+\section{Conclusion}\label{sec:conclusion}
+
+We described \system{}, a cognition layer that treats prompt assembly as a
+control surface. The contribution is the shape of the artefact rather than a new
+mechanism: a contract that executes and fails loudly (892 Python assertions
+across 14 files, 396 plugin-side assertions), failure semantics in which exactly
+one component is fail-closed, and an evaluation discipline in which every
+parameter's provenance is explicit and the instrument is frozen. The mechanisms
+themselves are adapted from established work---ACT-R base-level activation, STPA
+unsafe control actions, Ashby's requisite variety, PID-style anti-windup---and
+we present them as adaptations, not inventions.
+
+The evidence we present is structural rather than statistical. The contract
+executes and fails loudly; exactly one node can stop a turn, and every block it
+issues is attributable to a named unsafe control action; downgrades are recorded
+rather than silent. Where a structural comparison is possible, the control plane
+changes the outcome at the assembly boundary: a superseded fact is suppressed
+instead of accumulating, and a static rule patch lifts interception of twenty
+mutated payloads from 3/20 to 20/20. The same instrument also bounds the claim:
+held-out paraphrases stay at 0/40, so the gate is a lexical and structural
+control, not a semantic guarantee. Establishing effect sizes at traffic scale is
+the next measurement; the frozen instrument and the open replay harness exist to
+make that measurement possible, not to substitute for it.
+
+\paragraph{Future work.} The case study makes the missing piece concrete: the
+patch loop above was written by hand, and its 100\% is in-sample. The natural next
+step is \emph{automated adversarial co-evolution}---a laboratory loop in which a
+red team proposes mutations and the rule layer proposes patches, with the held-out
+set and the benign control as the only acceptance gates. We deliberately keep
+this out of the product architecture: the shipped control plane remains a static
+VSM/STPA surface, and any co-evolution machinery must live in the evaluation
+laboratory, with frozen instruments and a human review step. Closing that loop,
+and measuring its false-positive cost, is the core direction of future work.

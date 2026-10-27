@@ -1,0 +1,122 @@
+% ============================================================================
+% 08-limitations.tex - Limitations (target 450--550 words)
+% The four frozen research directions appear ONLY here (paper rule).
+% Framing-only terms (VSM, rate-distortion) may appear here as explicit
+% non-implementations; they must not appear as implemented mechanisms.
+% ============================================================================
+
+\section{Limitations}\label{sec:limitations}
+
+\paragraph{Evidence scale, stated once.} Five limits bound every claim here, and
+we state them once rather than scattering them. (i)~\emph{Parameters}: all have
+provenance \texttt{guess}; the count of \texttt{measured} parameters is zero. The
+phase-shift ratios ($0.70$/$0.85$), the trend threshold ($0.02$), the integral
+gains, the ACT-R constants and the weight thresholds are design defaults, so no
+threshold may be called tuned, validated or optimal. (ii)~\emph{Real traffic}:
+eight real turns, five with a ratio observation, all at ratio $\approx 0$; the
+calibration protocol's intake---thirty ratio-observed turns, ten boundary
+samples, twenty result labels---is unmet. (iii)~\emph{Small samples}: the
+external-baseline pilot is five rounds per cell on one host, one model route and
+one day; the host pilot is ten cells, one run each; the mechanism supplement uses
+twelve probes per class; the patch case study uses twenty payloads; each
+held-out corpus has twenty items.
+(iv)~\emph{Effect size}: apart from one pre-registered sign test on the ACT-R
+class ($12/12$, $p=2.4\times10^{-4}$), no confidence intervals or $p$-values are
+reported, and no forgetting, hallucination or end-to-end interception rate is
+measured; proxies are labelled as proxies. The claim is reachability, not effect
+size. (v)~\emph{Generalisation}: one host, one model route, tokens estimated from
+characters; none of this extrapolates to another host, language or tokenizer.
+
+\paragraph{External-baseline and patch-loop scope.} The three-subject comparison
+(Section~\ref{sec:exp:baselines}) inherits the small-sample limit above, and its
+subjects do not see the same input shape: the no-plugin host receives the raw
+four-turn transcript, while the memory systems receive retrieved memories. The
+Mem0 arm's out-of-the-box \texttt{add} path is additive, so the superseded value
+is retained in the store unless a deletion is issued explicitly; the limits of
+the comparison environment are stated separately below. The
+interceptions we report for \system{} are \emph{structural} admission decisions:
+the gate stops injection and records it, but the host still delivers the user
+message, so the model may read the attack text. The pilot also exposed four
+product findings that bound its readings: the fact extractor does not recognise
+the natural correction phrasing (F-A) and stores the final question as a fact
+(F-B); the tool gateway counts schema errors as blocks and injects hints into
+later turns (F-C); and the first model request of a turn uses the previous
+turn's injection snapshot, so a one-turn-stale memory can still reach the model
+(F-D). The last one makes the S1 model-level answers non-interpretable and they
+are marked n/i; the ledger-level supersession and a warm diagnostic are reported
+separately. The red-team case study (Section~\ref{sec:exp:case-redteam}) is
+in-sample by construction---the twenty payloads are the patch set---and the forty
+held-out paraphrases stay at 0/40 because the patch is plugin-side while the
+held-out evaluation is engine-side. The patch is a laboratory fork, not a product
+change; its false-positive cost on benign traffic is not measured; and the
+product architecture, including the absence of any adaptation module, is
+unchanged.
+
+\paragraph{Synthetic data and mock assertions.} The replay set is entirely
+synthetic and permits a synthetic share of one, which disqualifies it for
+deployment decisions. Plugin evidence is mock-host assertions
+($188 + 148 + 45 + 15 = 396$) plus the ten-cell pilot above, not sustained
+traffic. The trigger vocabularies are dominated by two languages, and token usage
+is estimated from characters rather than produced by a tokenizer.
+
+\paragraph{Chaos injection scope.} The chaos faults are synthetic single-shot
+injections ($n=1$ per fault), not a sample of production failures. The
+never-answering case is cut by an outer 150\,s window rather than a measured
+client timeout; the warm state is pre-seeded; the context window is a laboratory
+override (\texttt{LINGSHU\_CONTEXT\_WINDOW}) with anchors at section positions
+rather than the absolute request head and tail; and one campaign used three
+headless calls but fifteen provider requests because the agent loop expands a
+call into several steps. Raw transcripts and per-field evidence files are kept,
+and every claim in Section~\ref{sec:exp:chaos} is tied to a field rather than to a
+summary sentence.
+
+\paragraph{External-baseline environment limits.} The official \texttt{mem0ai}
+2.2.1 library was run with a local non-neural hashed-bigram embedder (no
+embedding API was available), and its default configuration produced empty
+recall on cross-lingual queries. These are limits of our comparison environment,
+not claims about Mem0.
+
+\paragraph{Ablation power.} The pre-registered three-arm ablation has been
+executed (zero-model, deterministic). Its original design supports only coarse
+conclusions: the baseline--system retention difference is definitional, and
+twelve probes detect only differences of about 0.5 or larger. A supplement
+expands the ACT-R probes to twelve (Section~\ref{sec:exp:mech}), where the effect
+becomes significant (12/12, $p=2.4\times10^{-4}$), while two mechanism arms
+remain inseparable from the gate by construction. The gate itself points the
+other way: zero of the forty held-out paraphrases (two corpora of twenty) are
+intercepted (0/40, Section~\ref{sec:exp:heldout}), so lexical coverage is a
+boundary, not a defence; the patch case study raises in-sample interception to
+20/20 without moving this number.
+
+\paragraph{Implementation debt.} Several mechanisms are implemented and unit
+tested but not wired: impasse-driven subgoaling has no caller; the reduction path
+has no conflict detector, so its trigger is always \texttt{none}; UCA-03 is
+unreachable (refusal is never set); dynamic-weight eviction is never exercised
+(the replay budget is never exceeded); the saturation-to-gate link is
+caller-supplied. The assembled prompt contains no user text, so user-turn
+jailbreaks cannot be caught engine-side; ACT-R implements base-level activation
+only.
+
+\paragraph{Interpretive framings are not implementations.} Two academic lenses
+appear as \emph{framing-only}: the Viable System Model and a rate-distortion
+analogy. Neither has a code locus, parameter or dependency: VSM does not occur in
+the implementation and no rate--distortion functional is computed. They position
+the work but cannot be cited as evidence.
+
+\paragraph{Frozen research directions.} Four directions are explicitly
+\emph{frozen}, \emph{not implemented}, and carry \emph{no engineering evidence}:
+(i) action closure (closed-loop tool invocation with side-effect rollback);
+(ii) adaptive evolution (meta-learning that rewrites its own search targets);
+(iii) collective mind (a multi-agent blackboard); and (iv) multimodal
+perception. No prototype, dependency or configuration switch exists
+for any of them. Their absence bounds our claims: the control plane
+governs prompt assembly, not tool execution, cross-agent coordination or
+non-textual input.
+
+\paragraph{Safety scope.} The fail-closed guarantee is behavioural and covers
+injection only. We implement no independent crisis-safety pre-layer;
+refusal depends on the host safety layer and a prompt-level constitution. We
+therefore make no end-to-end safety claim: the structural comparisons of
+Section~\ref{sec:exp:baselines} measure admission decisions (gate verdicts and
+audit events) plus a small model-side pilot, not a safety rate that would
+transfer to other hosts, models or attack distributions.

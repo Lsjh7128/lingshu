@@ -1,0 +1,6 @@
+{
+ "header": "[最近三轮对话（滑动窗口 W=3）]",
+ "header_end": "[本轮用户消息]",
+ "user_label": "用户：",
+ "assistant_label": "助手："
+}

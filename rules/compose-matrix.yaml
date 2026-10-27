@@ -1,0 +1,89 @@
+# rules/compose-matrix.yaml  （frozen —— 黑名单项，只能读）
+# 合成矩阵：五域分类、域内排序、互斥表、拼装顺序。
+# 改动必须走 ADR，且不得由学习系统提出。
+
+meta:
+  version: "compose-matrix-3.1"
+  frozen: true
+
+domains:
+  safety:        {priority: 0, unique: true}
+  fact:          {priority: 1}
+  organization:  {priority: 2}
+  style:         {priority: 3}
+  retrieval:     {priority: 4}
+
+intraDomainOrder:
+  fact:         [metacog, memory, user_statement]
+  organization: [goal, narrative, user_emotion]
+  style:        [tone_profile, persona, emotion, relation]
+  retrieval:    [metacog, user_emotion_whitelist, memory_default]
+
+compositionRules:
+  - id: tone_over_persona
+    rule: "语气配置优先；人格只提供默认值；语气只收不放"
+  - id: emotion_on_persona
+    rule: "情感偏移 = 人格派生 × (1 + deviation × 0.3)，幅度上限 ±15%"
+  - id: emotion_times_relation
+    rule: "情感 × 关系 modifier，结果钳制 [0.8, 1.2]"
+  - id: hedge_over_tone
+    rule: "元认知 hedge 优先；tone_hint 只能在 hedge 允许范围内调整措辞"
+  - id: blocked_suppresses_narrative
+    rule: "目标受阻时叙事不触发；用户显式要求回顾时例外"
+
+mutexTable:                        # 冲突时丢弃谁
+  - id: 1
+    conflict: [metacog.refuse_claim, emotion.positive]
+    drop: emotion
+  - id: 2
+    conflict: [goal.blocked, narrative.trigger]
+    drop: narrative
+    exception: "用户显式要求回顾"
+  - id: 3
+    conflict: [relation.unresolved_conflict, emotion.positive_high_arousal]
+    drop: "emotion → 降为中性"
+  - id: 4
+    conflict: [user_emotion.refuse_help, user_emotion.S3_assist]
+    drop: assist
+  - id: 5
+    conflict: [metacog.refuse_claim, user_emotion.counter_congruent_whitelist]
+    drop: whitelist
+  - id: 6
+    conflict: [goal.blocked, user_emotion.counter_congruent_whitelist]
+    drop: whitelist
+  - id: 7
+    conflict: [constitution.reject, retrieval.strategy]
+    drop: retrieval
+  - id: 8                        # v3.0 新增：原表遗漏
+    conflict: [constitution.reject, style.domain]
+    drop: style
+  - id: 9                        # v5.3 新增（ADR-014，本项改动的唯一授权记录）：安全拦截 × 风格域 → 柔性缓冲
+    conflict: [constitution.reject, style.domain]
+    action: soft_buffer          # 不丢弃 style；改为受约束的 warning/confused 表达
+    notice: "Safe_Redirect"
+    emotion: [警觉, 困惑]
+    condition: "safety.severity == soft 且 control.immersiveEnabled == true"
+    # 第 8 条原样保留（hard reject 仍 drop style）；第 9 条只在 soft 时生效。
+    # 实现语义见 ADR-014 §4.1：风格强度 ≤ control.softBufferMaxIntensity，
+    # relation_modifier 钳制 [0.8, 1.0]，dropped 不记录 style。
+
+assemblyOrder:                     # 顺序不可改
+  - constitution_principles
+  - fact_domain
+  - safety_domain
+  - organization_domain
+  - style_domain
+  - user_current_message
+
+budget:
+  totalTokenRatioMax: 0.15
+  perDomain: {fact: 0.06, organization: 0.03, style: 0.04, safety: 0.02}
+  truncation: "drop style tail first, never drop safety"
+
+onNoMutexRule:
+  policy: drop_lower_priority
+  recordReason: no_mutex_rule
+
+onComposeFailure:
+  policy: "degrade to constitution + user message only"
+  mode: fail-open

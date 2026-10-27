@@ -1,0 +1,26 @@
+{
+ "items_a": 18,
+ "items_b": 18,
+ "items_common": 18,
+ "items_only_one_side": [],
+ "dimensions": {
+  "M1": {"n": 18, "observed_agreement": 1.0, "kappa_weighted": null, "kappa_undefined": true,
+         "note": "zero variance (all ratings in category 2); kappa not estimable"},
+  "M2": {"n": 18, "observed_agreement": 1.0, "kappa_weighted": null, "kappa_undefined": true,
+         "note": "zero variance (all ratings in category 2); kappa not estimable"},
+  "M3": {"n": 18, "observed_agreement": 1.0, "kappa_weighted": null, "kappa_undefined": true,
+         "note": "zero variance (all ratings in category 2); kappa not estimable"},
+  "M4": {"n": 18, "observed_agreement": 1.0, "kappa_weighted": null, "kappa_undefined": true,
+         "note": "zero variance (all ratings in category 2); kappa not estimable"},
+  "label": {"n": 0}
+ },
+ "min_kappa": null,
+ "verdict": "ceiling_not_estimable",
+ "verdict_note": "all dimensions have zero variance; kappa is undefined. Report observed agreement, not kappa.",
+ "inputs": {
+  "a": "paper/supplement/labels/annotator-a4.jsonl",
+  "b": "paper/supplement/labels/annotator-a5.jsonl"
+ },
+ "computed_at": "2026-10-27T01:10:00+08:00",
+ "tool": "paper/supplement/cohen_kappa.py"
+}

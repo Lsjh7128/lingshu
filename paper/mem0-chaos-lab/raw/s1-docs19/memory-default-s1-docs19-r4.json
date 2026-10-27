@@ -1,0 +1,303 @@
+{
+ "run": "s1-docs19-default-r4",
+ "scenario": "s1",
+ "group": "docs19",
+ "variant": "default",
+ "round": 4,
+ "tag": null,
+ "u3_text": "我改主意了，我的项目代号是贝塔，之前那个阿尔法作废。",
+ "started_at": "2026-10-27T11:13:32.581401+00:00",
+ "status": "ok",
+ "error": null,
+ "user_id": "lingshu-lab-user",
+ "config": {
+  "mem0_version": "2.2.1",
+  "llm": {
+   "provider": "deepseek",
+   "model": "deepseek-chat",
+   "base_url": "https://api.deepseek.com/v1"
+  },
+  "embedder": {
+   "provider": "local_hashed_bigram",
+   "dims": 256,
+   "note": "local deterministic hashed character-bigram embedder (not neural)"
+  },
+  "vector_store": {
+   "provider": "qdrant",
+   "mode": "in-memory (:memory:)",
+   "collection": "mem0_b49df59a286b"
+  },
+  "custom_instructions": null
+ },
+ "adds": [
+  {
+   "step": "U1",
+   "input": "记住一件事：我的项目代号是阿尔法。",
+   "duration_s": 3.791,
+   "result": {
+    "results": [
+     {
+      "id": "15bd96cf-d6ba-495c-94df-3484a67f327c",
+      "memory": "User's project code name is Alpha (阿尔法)",
+      "event": "ADD"
+     }
+    ]
+   },
+   "store_after": [
+    {
+     "id": "15bd96cf-d6ba-495c-94df-3484a67f327c",
+     "memory": "User's project code name is Alpha (阿尔法)"
+    }
+   ]
+  },
+  {
+   "step": "U2",
+   "input": "顺便记住：我平时喝美式咖啡。",
+   "duration_s": 0.97,
+   "result": {
+    "results": [
+     {
+      "id": "062b7f5b-f41b-4f3f-ace7-144d4714a87d",
+      "memory": "User usually drinks Americano coffee (美式咖啡)",
+      "event": "ADD"
+     }
+    ]
+   },
+   "store_after": [
+    {
+     "id": "062b7f5b-f41b-4f3f-ace7-144d4714a87d",
+     "memory": "User usually drinks Americano coffee (美式咖啡)"
+    },
+    {
+     "id": "15bd96cf-d6ba-495c-94df-3484a67f327c",
+     "memory": "User's project code name is Alpha (阿尔法)"
+    }
+   ]
+  },
+  {
+   "step": "U3",
+   "input": "我改主意了，我的项目代号是贝塔，之前那个阿尔法作废。",
+   "duration_s": 1.313,
+   "result": {
+    "results": [
+     {
+      "id": "ade0c828-4f3e-411d-82f8-e088f1ce824d",
+      "memory": "User changed their project code name from Alpha (阿尔法) to Beta (贝塔) around October 27, 2026, and declared the previous Alpha code name void",
+      "event": "ADD"
+     }
+    ]
+   },
+   "store_after": [
+    {
+     "id": "062b7f5b-f41b-4f3f-ace7-144d4714a87d",
+     "memory": "User usually drinks Americano coffee (美式咖啡)"
+    },
+    {
+     "id": "15bd96cf-d6ba-495c-94df-3484a67f327c",
+     "memory": "User's project code name is Alpha (阿尔法)"
+    },
+    {
+     "id": "ade0c828-4f3e-411d-82f8-e088f1ce824d",
+     "memory": "User changed their project code name from Alpha (阿尔法) to Beta (贝塔) around October 27, 2026, and declared the previous Alpha code name void"
+    }
+   ]
+  }
+ ],
+ "store_final": [
+  {
+   "id": "062b7f5b-f41b-4f3f-ace7-144d4714a87d",
+   "memory": "User usually drinks Americano coffee (美式咖啡)",
+   "hash": "a9df8b73c693a33f463e55f0896f559f",
+   "metadata": null,
+   "created_at": "2026-10-27T11:13:37.351783+00:00",
+   "updated_at": "2026-10-27T11:13:37.351783+00:00",
+   "user_id": "lingshu-lab-user",
+   "attributed_to": "user"
+  },
+  {
+   "id": "15bd96cf-d6ba-495c-94df-3484a67f327c",
+   "memory": "User's project code name is Alpha (阿尔法)",
+   "hash": "81d369f32b3999540198f6afa2f25e4d",
+   "metadata": null,
+   "created_at": "2026-10-27T11:13:36.379655+00:00",
+   "updated_at": "2026-10-27T11:13:36.379655+00:00",
+   "user_id": "lingshu-lab-user",
+   "attributed_to": "user"
+  },
+  {
+   "id": "ade0c828-4f3e-411d-82f8-e088f1ce824d",
+   "memory": "User changed their project code name from Alpha (阿尔法) to Beta (贝塔) around October 27, 2026, and declared the previous Alpha code name void",
+   "hash": "aa11cc0f77a11afcfb93046dae98cf24",
+   "metadata": null,
+   "created_at": "2026-10-27T11:13:38.664448+00:00",
+   "updated_at": "2026-10-27T11:13:38.664448+00:00",
+   "user_id": "lingshu-lab-user",
+   "attributed_to": "user"
+  }
+ ],
+ "history": {
+  "062b7f5b-f41b-4f3f-ace7-144d4714a87d": [
+   {
+    "id": "97262525-e57a-470f-bbaa-a97a4514886b",
+    "memory_id": "062b7f5b-f41b-4f3f-ace7-144d4714a87d",
+    "old_memory": null,
+    "new_memory": "User usually drinks Americano coffee (美式咖啡)",
+    "event": "ADD",
+    "created_at": "2026-10-27T11:13:37.351783+00:00",
+    "updated_at": null,
+    "is_deleted": false,
+    "actor_id": null,
+    "role": null
+   }
+  ],
+  "15bd96cf-d6ba-495c-94df-3484a67f327c": [
+   {
+    "id": "8cd072f8-22a8-4fa9-bc8c-e7bb12e0fec9",
+    "memory_id": "15bd96cf-d6ba-495c-94df-3484a67f327c",
+    "old_memory": null,
+    "new_memory": "User's project code name is Alpha (阿尔法)",
+    "event": "ADD",
+    "created_at": "2026-10-27T11:13:36.379655+00:00",
+    "updated_at": null,
+    "is_deleted": false,
+    "actor_id": null,
+    "role": null
+   }
+  ],
+  "ade0c828-4f3e-411d-82f8-e088f1ce824d": [
+   {
+    "id": "3b5018f2-dee4-42f2-91cb-99feb35c1822",
+    "memory_id": "ade0c828-4f3e-411d-82f8-e088f1ce824d",
+    "old_memory": null,
+    "new_memory": "User changed their project code name from Alpha (阿尔法) to Beta (贝塔) around October 27, 2026, and declared the previous Alpha code name void",
+    "event": "ADD",
+    "created_at": "2026-10-27T11:13:38.664448+00:00",
+    "updated_at": null,
+    "is_deleted": false,
+    "actor_id": null,
+    "role": null
+   }
+  ]
+ },
+ "search": {
+  "query": "我的项目代号到底是什么？只回答代号，不要解释。",
+  "primary": {
+   "threshold": 0.1,
+   "top_k": 10,
+   "duration_ms": 0.9,
+   "results": []
+  },
+  "unthresholded": {
+   "threshold": 0.0,
+   "top_k": 10,
+   "duration_ms": 0.7,
+   "results": [
+    {
+     "id": "062b7f5b-f41b-4f3f-ace7-144d4714a87d",
+     "memory": "User usually drinks Americano coffee (美式咖啡)",
+     "hash": "a9df8b73c693a33f463e55f0896f559f",
+     "metadata": null,
+     "score": 0.06311748052510259,
+     "created_at": "2026-10-27T11:13:37.351783+00:00",
+     "updated_at": "2026-10-27T11:13:37.351783+00:00",
+     "user_id": "lingshu-lab-user",
+     "attributed_to": "user",
+     "score_details": {
+      "semantic_score": 0.06311748052510259,
+      "bm25_score": 0.0,
+      "entity_boost": 0.0,
+      "raw_score": 0.06311748052510259,
+      "max_possible_score": 1.0,
+      "final_score": 0.06311748052510259,
+      "threshold": 0.0
+     }
+    },
+    {
+     "id": "15bd96cf-d6ba-495c-94df-3484a67f327c",
+     "memory": "User's project code name is Alpha (阿尔法)",
+     "hash": "81d369f32b3999540198f6afa2f25e4d",
+     "metadata": null,
+     "score": 0.0,
+     "created_at": "2026-10-27T11:13:36.379655+00:00",
+     "updated_at": "2026-10-27T11:13:36.379655+00:00",
+     "user_id": "lingshu-lab-user",
+     "attributed_to": "user",
+     "score_details": {
+      "semantic_score": 0.0,
+      "bm25_score": 0.0,
+      "entity_boost": 0.0,
+      "raw_score": 0.0,
+      "max_possible_score": 1.0,
+      "final_score": 0.0,
+      "threshold": 0.0
+     }
+    }
+   ]
+  }
+ },
+ "answer": {
+  "messages": [
+   {
+    "role": "system",
+    "content": "你是一个助手。下面会给你从记忆中检索到的内容，以及用户的问题。请基于这些内容作答。"
+   },
+   {
+    "role": "user",
+    "content": "【检索到的记忆】\n（无召回）\n\n【用户的问题】\n我的项目代号到底是什么？只回答代号，不要解释。"
+   }
+  ],
+  "raw": "根据目前检索到的内容，我无法确定你的项目代号。",
+  "duration_ms": 845.6
+ },
+ "answer_recall0": {
+  "messages": [
+   {
+    "role": "system",
+    "content": "你是一个助手。下面会给你从记忆中检索到的内容，以及用户的问题。请基于这些内容作答。"
+   },
+   {
+    "role": "user",
+    "content": "【检索到的记忆】\n- User usually drinks Americano coffee (美式咖啡)\n- User's project code name is Alpha (阿尔法)\n\n【用户的问题】\n我的项目代号到底是什么？只回答代号，不要解释。"
+   }
+  ],
+  "raw": "阿尔法",
+  "duration_ms": 856.7,
+  "reused_from_primary": false
+ },
+ "metrics": {
+  "answer_raw": "根据目前检索到的内容，我无法确定你的项目代号。",
+  "answer_len": 23,
+  "recall_ids": [],
+  "recall_texts": [],
+  "recall_scores": [],
+  "hit": 0,
+  "leak": 0,
+  "intercept": 1,
+  "alpha_in_recall": 0,
+  "judge_note": "machine rule only; raw answer kept for human re-review (PROTOCOL §1)"
+ },
+ "metrics_recall0": {
+  "answer_raw": "阿尔法",
+  "answer_len": 3,
+  "recall_ids": [
+   "062b7f5b-f41b-4f3f-ace7-144d4714a87d",
+   "15bd96cf-d6ba-495c-94df-3484a67f327c"
+  ],
+  "recall_texts": [
+   "User usually drinks Americano coffee (美式咖啡)",
+   "User's project code name is Alpha (阿尔法)"
+  ],
+  "recall_scores": [
+   0.06311748052510259,
+   0.0
+  ],
+  "hit": 0,
+  "leak": 1,
+  "intercept": 0,
+  "alpha_in_recall": 1,
+  "judge_note": "machine rule only; raw answer kept for human re-review (PROTOCOL §1)"
+ },
+ "vector_store_dim": 256,
+ "duration_s": 7.794,
+ "ended_at": "2026-10-27T11:13:40.375497+00:00"
+}

@@ -1,0 +1,391 @@
+{
+  "scenario": "A-model-failure",
+  "mode": "500",
+  "injected": {
+    "env": {
+      "DEEPSEEK_BASE_URL": "http://127.0.0.1:62805"
+    },
+    "mock_port": 62805
+  },
+  "run": {
+    "profile": "lingshu-lab-headless",
+    "exit_code": 1,
+    "timed_out": false,
+    "timeout_s": 60.0,
+    "error_kind": null,
+    "wall_s": 17.986,
+    "stdout_bytes": 432,
+    "stderr_head": "dsh: SERVER: mock upstream 500\n",
+    "final_count": 1,
+    "final": "",
+    "usage": null,
+    "steps": 1,
+    "error_lines": [],
+    "stdout_head": "{\"type\":\"session\",\"sessionId\":\"session-b437401a-27cc-4539-a131-0cb4ceeba38d\",\"cwd\":\"<REPO_ROOT>\"}\n{\"type\":\"status\",\"phase\":\"turn_start\",\"turn\":1}\n{\"type\":\"status\",\"phase\":\"step_start\",\"turn\":1,\"step\":1}\n{\"type\":\"status\",\"phase\":\"step_end\",\"turn\":1,\"step\":1}\n{\"type\":\"status\",\"phase\":\"turn_end\",\"turn\":1,\"reason\":{\"kind\":\"error\",\"error\":{\"message\":\"mock upstream 500\",\"code\":\"SERVER\",\"status\":500}}}\n{\"type\":\"final\",\"text\":\"\"}\n"
+  },
+  "mock_requests": [
+    {
+      "t": 1793097062.688,
+      "path": "/v1/messages",
+      "mode": "500",
+      "bytes": 60000,
+      "stream": true
+    },
+    {
+      "t": 1793097062.688,
+      "path": "/v1/messages",
+      "mode": "500",
+      "bytes": 35694,
+      "stream": true
+    },
+    {
+      "t": 1793097063.241,
+      "path": "/v1/messages",
+      "mode": "500",
+      "bytes": 60817,
+      "stream": true
+    },
+    {
+      "t": 1793097064.197,
+      "path": "/v1/messages",
+      "mode": "500",
+      "bytes": 61634,
+      "stream": true
+    },
+    {
+      "t": 1793097066.116,
+      "path": "/v1/messages",
+      "mode": "500",
+      "bytes": 62452,
+      "stream": true
+    },
+    {
+      "t": 1793097070.366,
+      "path": "/v1/messages",
+      "mode": "500",
+      "bytes": 63269,
+      "stream": true
+    },
+    {
+      "t": 1793097077.873,
+      "path": "/v1/messages",
+      "mode": "500",
+      "bytes": 64086,
+      "stream": true
+    }
+  ],
+  "mock_request_count": 7,
+  "plugin_state": {
+    "files": {
+      "state.json": 2036,
+      "memory.jsonl": null,
+      "audit.jsonl": 5839,
+      "last-prompt.txt": 152
+    },
+    "state": {
+      "sessions": 0,
+      "turns": 1,
+      "dev": {
+        "valence": 0,
+        "arousal": 0,
+        "dominance": 0
+      },
+      "emotionActive": false,
+      "lastEvent": {
+        "at": 1793097062561,
+        "matched": 0,
+        "hits": [],
+        "excluded": 0,
+        "v": {
+          "level": "unknown",
+          "expression": "ask_clarify",
+          "path": "none",
+          "conflict": "none"
+        },
+        "conflict": "none"
+      },
+      "frozen": {
+        "ok": true,
+        "checkedAt": 1793097062091,
+        "mismatched": [],
+        "checked": 0,
+        "key": "ac28d99ffdf1"
+      },
+      "coldStartSuppressed": 1,
+      "goal": {
+        "goals": {},
+        "order": [],
+        "events": [],
+        "seq": 0
+      },
+      "relation": {
+        "trustLevel": "low",
+        "stage": "new",
+        "unresolvedConflict": false,
+        "positives": 0,
+        "commitments": [],
+        "lastEvent": null
+      },
+      "stateWrites": 0,
+      "factWrites": 0,
+      "factRejects": 0,
+      "supersedeEvents": 0,
+      "qualityLabels": 0,
+      "control": {
+        "phase": {
+          "ratio": 0,
+          "phase": "normal",
+          "trend": 0,
+          "prefeed": false,
+          "selfReferenceBoost": false,
+          "anchorRequired": false
+        },
+        "audit": {
+          "verdict": "allow",
+          "ucas": [],
+          "downgrades": [],
+          "failMode": "closed",
+          "explain": [],
+          "explainDowngrades": [],
+          "sources": {}
+        },
+        "blocked": false,
+        "integral": {
+          "valence": 0,
+          "arousal": 0,
+          "dominance": 0
+        },
+        "saturated": {
+          "valence": false,
+          "arousal": false,
+          "dominance": false
+        },
+        "contextWindow": 1000000,
+        "injectionOrder": [],
+        "conflict": {
+          "unresolved": false,
+          "count": 0,
+          "keys": []
+        },
+        "variety": {
+          "fallback": false,
+          "dropDomains": [],
+          "marker": null,
+          "reason": null,
+          "conflict": "none",
+          "styleActive": false
+        }
+      },
+      "tools": {
+        "gateBlockedUntilClarify": false,
+        "hintActive": false,
+        "pending": null,
+        "last": null,
+        "stats": {
+          "calls": 0,
+          "allowed": 0,
+          "blocked": 0,
+          "degraded": 0,
+          "unavailable": 0
+        }
+      }
+    },
+    "audit_kinds": {
+      "apply": 1,
+      "permission/preset": 1,
+      "sandbox/mode": 1,
+      "approval/policy": 1,
+      "agent/inbox/spliced": 2,
+      "turn/start": 1,
+      "turn_begin": 1,
+      "pre_step": 1,
+      "step/start": 1,
+      "system/message": 1,
+      "user/message": 2,
+      "request/header": 1,
+      "request/context": 1,
+      "session/title": 1,
+      "session/title-llm-request": 1,
+      "assistant/attempt": 2,
+      "llm/retry": 2,
+      "llm/retry-started": 2,
+      "step/end": 1,
+      "turn/end": 1,
+      "turn_end_seen": 1
+    },
+    "audit_events": 26,
+    "audit_tail": [
+      {
+        "ts": 1793097062695,
+        "kind": "session_event",
+        "type": "llm/retry",
+        "aKeys": [
+          "log",
+          "surfaceManager",
+          "header",
+          "inheritedEventCount",
+          "firstLiveSeq",
+          "firstLifecycleSeq"
+        ],
+        "bKeys": [
+          "type",
+          "seq",
+          "time",
+          "data"
+        ],
+        "cType": "undefined"
+      },
+      {
+        "ts": 1793097063229,
+        "kind": "session_event",
+        "type": "llm/retry-started",
+        "aKeys": [
+          "log",
+          "surfaceManager",
+          "header",
+          "inheritedEventCount",
+          "firstLiveSeq",
+          "firstLifecycleSeq"
+        ],
+        "bKeys": [
+          "type",
+          "seq",
+          "time",
+          "data"
+        ],
+        "cType": "undefined"
+      },
+      {
+        "ts": 1793097063242,
+        "kind": "session_event",
+        "type": "assistant/attempt",
+        "aKeys": [
+          "log",
+          "surfaceManager",
+          "header",
+          "inheritedEventCount",
+          "firstLiveSeq",
+          "firstLifecycleSeq"
+        ],
+        "bKeys": [
+          "type",
+          "seq",
+          "time",
+          "data"
+        ],
+        "cType": "undefined"
+      },
+      {
+        "ts": 1793097063243,
+        "kind": "session_event",
+        "type": "llm/retry",
+        "aKeys": [
+          "log",
+          "surfaceManager",
+          "header",
+          "inheritedEventCount",
+          "firstLiveSeq",
+          "firstLifecycleSeq"
+        ],
+        "bKeys": [
+          "type",
+          "seq",
+          "time",
+          "data"
+        ],
+        "cType": "undefined"
+      },
+      {
+        "ts": 1793097064187,
+        "kind": "session_event",
+        "type": "llm/retry-started",
+        "aKeys": [
+          "log",
+          "surfaceManager",
+          "header",
+          "inheritedEventCount",
+          "firstLiveSeq",
+          "firstLifecycleSeq"
+        ],
+        "bKeys": [
+          "type",
+          "seq",
+          "time",
+          "data"
+        ],
+        "cType": "undefined"
+      },
+      {
+        "ts": 1793097077875,
+        "kind": "session_event",
+        "type": "step/end",
+        "aKeys": [
+          "log",
+          "surfaceManager",
+          "header",
+          "inheritedEventCount",
+          "firstLiveSeq",
+          "firstLifecycleSeq"
+        ],
+        "bKeys": [
+          "type",
+          "seq",
+          "time",
+          "data"
+        ],
+        "cType": "undefined"
+      },
+      {
+        "ts": 1793097077876,
+        "kind": "session_event",
+        "type": "turn/end",
+        "aKeys": [
+          "log",
+          "surfaceManager",
+          "header",
+          "inheritedEventCount",
+          "firstLiveSeq",
+          "firstLifecycleSeq"
+        ],
+        "bKeys": [
+          "type",
+          "seq",
+          "time",
+          "data"
+        ],
+        "cType": "undefined"
+      },
+      {
+        "ts": 1793097077877,
+        "kind": "turn_end_seen",
+        "turns": 1
+      }
+    ],
+    "memory_rows": 0,
+    "prompt_bytes": 152,
+    "prompt_head": "〖宪法 · 只读〗安全>诚实>用户当前利益>有用性>风格。记忆不等于当前陈述；情感不参与事实；关系不软化拒绝。",
+    "prompt_tail": "〖宪法 · 只读〗安全>诚实>用户当前利益>有用性>风格。记忆不等于当前陈述；情感不参与事实；关系不软化拒绝。",
+    "prompt_sha256_16": "f4c8ab2db5cb63ac"
+  },
+  "derived": {
+    "exit_code": 1,
+    "wall_s": 17.986,
+    "timed_out": false,
+    "final_text_len": 0,
+    "final_text_head": "",
+    "got_final": true,
+    "mock_hit": true,
+    "empty_reply_passed_through": false,
+    "fabricated_reply_passed_through": false,
+    "plugin_blocked": false,
+    "hook_error_count": 0,
+    "injection_events": {
+      "pre_step": 1
+    },
+    "model_call_events": {
+      "request/header": 1,
+      "request/context": 1,
+      "session/title-llm-request": 1
+    }
+  }
+}

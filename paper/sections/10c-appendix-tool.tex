@@ -1,0 +1,127 @@
+% =====================================================================
+% 10c-appendix-tool.tex -- T-UCA full table, fields, reproduction
+% SOURCE OF TRUTH: docs/24 (tool-gateway UCA contract, v1.1: T-UCA-01..16,
+% policy_version "t-uca-1.1"; audit field for tool-side ids is `ucas`).
+% PENDING NUMBERS (fill only from a5 real outputs): N/M/K/A/X in 06e.
+% =====================================================================
+
+\subsection{Tool-Call Unsafe Control Actions ({T-UCA})}\label{app:tuca}
+
+This appendix mirrors the tool-side matrix that the implementation encodes. The
+matrix is defined once, in the project's tool-gateway contract
+(\texttt{docs/24}), and is implemented twice---as \texttt{engine/tool\_gateway.py}
+(pure functions, zero dependencies) and as
+\texttt{plugin/dsh-lingshu/tool-gateway.js} (same semantics)---with both rule
+tables machine-synchronised from the contract's rule array, so that each
+identifier, verdict and hint text agrees row by row. The namespace is disjoint
+from the injection-side UCA-01--08; the two are related only by ordering:
+injection pre-flight runs before the model call, the tool gate runs after a call
+is emitted and before execution. The contract's policy version is
+\texttt{t-uca-1.1}, and the field carrying tool-side identifiers in the audit
+event is named \texttt{ucas} (same spelling as the injection-side field, but a
+different event type: \texttt{tool\_gate.ucas} may contain only
+\texttt{T-UCA-xx}, \texttt{audit.ucas} only \texttt{UCA-0x}).
+
+\begin{table*}[t]
+\centering
+\caption{Tool-side unsafe control actions (\texttt{docs/24} v1.1, policy
+\texttt{t-uca-1.1}). Sixteen rules: thirteen block, three degrade (a degrade
+falls back to block when no approval channel exists). No rule returns
+\emph{allow}; allow is the default policy for read-only calls that match no rule.
+The \emph{group} column follows the contract's grouping and is not a runtime
+field.}
+\label{tab:tuca}
+\small
+\begin{tabular}{llp{4.0cm}lp{1.7cm}l}
+\toprule
+ID & Group & Trigger (contract summary) & State inputs & Verdict & Test case \\
+\midrule
+T-UCA-01 & state        & mutating call while variety fallback or unresolved conflict is active & variety, conflict & block & \texttt{test\_tuca\_01} \\
+T-UCA-02 & data         & credential or secret material in arguments or target & capabilities & block & \texttt{test\_tuca\_02} \\
+T-UCA-03 & mutation     & destructive delete/overwrite without exact matching confirmation & --- & block & \texttt{test\_tuca\_03} \\
+T-UCA-04 & mutation     & write to frozen/protected path (incl.\ \texttt{engine/}, \texttt{plugin/} sources) & frozen\_ok & block & \texttt{test\_tuca\_04} \\
+T-UCA-05 & network/exec & network egress outside the (default empty) allowlist & capabilities & block & \texttt{test\_tuca\_05} \\
+T-UCA-06 & network/exec & arbitrary code execution (capability or execution-shaped args) & capabilities & block & \texttt{test\_tuca\_06} \\
+T-UCA-07 & shape        & oversized, deeply nested or multi-encoded payload & --- & block & \texttt{test\_tuca\_07} \\
+T-UCA-08 & shape        & unregistered tool or incomplete registry entry & tool\_registry & block & \texttt{test\_tuca\_08} \\
+T-UCA-09 & shape        & schema violation, delimiter/control-character injection, homoglyph tool name & tool\_registry & block & \texttt{test\_tuca\_09} \\
+T-UCA-10 & state        & mutating call while context phase is critical & phase & degrade$\rightarrow$block & \texttt{test\_tuca\_10} \\
+T-UCA-11 & audit        & incomplete audit context (missing session/turn/call id) & audit\_context & block & \texttt{test\_tuca\_11} \\
+T-UCA-12 & shape        & capability neither declared nor granted & capabilities & block & \texttt{test\_tuca\_12} \\
+T-UCA-13 & state        & saturated affective baseline with irreversible write, unconfirmed & saturated & degrade$\rightarrow$block & \texttt{test\_tuca\_13} \\
+T-UCA-14 & mutation     & frozen-region check failed and call is mutating & frozen\_ok & block & \texttt{test\_tuca\_14} \\
+T-UCA-15 & mutation     & path escapes the workspace (\texttt{..}, absolute, drive, UNC, null byte) & --- & block & \texttt{test\_tuca\_15} \\
+T-UCA-16 & state        & destructive call while context phase is shift & phase & degrade$\rightarrow$block & \texttt{test\_tuca\_16} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\paragraph{Default policy and evaluation order.} Unknown, unregistered or
+undecidable calls are blocked (fail-closed); read-only calls that match no rule
+are allowed and logged; a mutating call whose phase is unknown is blocked; a
+parse failure is blocked with an explicit \texttt{parse\_error} reason rather
+than inferred intent. When several rules match, the verdict takes the highest
+severity (block over degrade over allow) and \emph{all} matched identifiers are
+recorded in \texttt{ucas} without truncation. Evaluation order puts static checks
+first, then the state-dependent rules, and the audit rule last:
+\texttt{T-UCA-01, 02, 03, 04, 05, 06, 07, 08, 09, 12, 14, 15, 10, 13, 16, 11}.
+A \texttt{degrade} means the original call is not executed: the caller returns a
+strong hint, sets \texttt{requires\_confirmation}, and requires an explicit human
+confirmation through the host approval seam; a degrade with no approval channel
+is treated as a block (\texttt{degraded\_to}). The gate never executes a payload
+and never rewrites arguments; it classifies, consults state, and returns a
+verdict.
+
+\paragraph{State inputs and tool classes.} The gate consumes only state that
+already exists in the system: \texttt{variety\_fallback} and
+\texttt{unresolvedConflict} (from the conflict and variety machinery),
+\texttt{phase} (from the preemptive monitor), \texttt{saturated} (from the
+integral baseline), \texttt{frozen\_ok} (from the frozen-region check),
+\texttt{capabilities} (declared versus granted), \texttt{audit\_context}, and the
+tool registry. Tool classes are closed and static---\texttt{read}, \texttt{write},
+\texttt{destructive}, \texttt{exec}, \texttt{network}---with \texttt{write},
+\texttt{destructive}, \texttt{exec} and \texttt{network} treated as mutating and
+\texttt{read} as read-only; a payload cannot declare its own class. Finer
+semantics (for example which arguments name a path) live in the registry's
+capability declarations rather than in the class enum.
+
+\paragraph{Audit fields.} Each verdict produces one \texttt{tool\_gate} event:
+\texttt{schema}, \texttt{policy\_version}, \texttt{call\_id},
+\texttt{session\_id}, \texttt{turn\_id}, \texttt{tool}, \texttt{tool\_class},
+\texttt{verdict}, \texttt{allowed}, \texttt{ucas}, \texttt{degraded\_to},
+\texttt{requires\_confirmation}, \texttt{reason}, a nested
+\texttt{audit} block (\texttt{args\_digest}, \texttt{args\_keys},
+\texttt{args\_bytes}, \texttt{args\_preview}, \texttt{phase},
+\texttt{variety\_fallback}, \texttt{frozen\_ok}, \texttt{saturated}), and a
+\texttt{snapshot} of the target (path, modification time, hash) used to check
+that the object judged is the object executed. Argument digests and key lists
+are recorded instead of raw secret-bearing arguments. In the host plugin the
+same event drives a clarification flag that surfaces as a strong hint on the next
+turn.
+
+\paragraph{Reproduction.} \texttt{python tests/test\_tool\_gateway.py} exercises
+dangerous, benign, state-gated and cross-language cases (as run for this draft:
+79 passing assertions, 20/20 dangerous blocked, 0/8 benign blocked, 20/20
+cross-language agreement);
+\texttt{node plugin/dsh-lingshu/tool-gateway-sim.mjs --assert} checks the rules
+individually in JavaScript (65 checks);
+\texttt{python tools/run\_actuator\_demo.py} drives the reference loop and emits
+the JSON cited in Section~\ref{sec:actuator}. The frozen blind held-out set is
+\texttt{paper/ablation/tool/heldout-tool-calls-v1.jsonl} (ten calls, two per
+family; SHA-256
+\texttt{f68fc1b3f19fc37e43b9856096d29b9a55de7dee9bf664a9b9a9592e070576d4}); it
+is evaluated by a party other than its author, under two regimes (arguments
+only, and arguments with context), because the conflict family depends on
+context.
+
+\paragraph{Boundaries recorded with the matrix.} The host exposes no
+pre-dispatch hook, so plugin-side blocking is limited to tools routed through
+\texttt{guardTool}; engine-side pre-blocking is a reference loop, not a product
+enforcement point. Tools executed outside the gateway are not gated. The gate is
+a static checker, so parsing is its own attack surface, and its false-positive
+rate is uncalibrated in the absence of real traffic. The contract also records
+known false-positive surfaces (confirmation fatigue for writes during the
+critical phase, legitimate maintenance of protected paths, documents that merely
+discuss credential formats, and large legitimate imports). These are repeated
+here because a matrix in an appendix is exactly where a reader is most likely to
+mistake a rule table for an enforcement guarantee.

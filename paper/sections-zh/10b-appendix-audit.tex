@@ -1,0 +1,67 @@
+% 10b-appendix-audit.tex 中文对照版（译自 sections/10b-appendix-audit.tex；不加 \label）
+\subsection{测试严谨性与反作弊审计}
+
+本附录记录第~\ref{sec:engineering} 节所引测试证据是如何产生的。以下所有数字来自同一份 2026-10-27 的审计包：两份审查报告（变异测试；断言强度与覆盖率）、一份汇总的严谨性报告，以及两份机读结果文件，全部存档于 \texttt{acceptance/audit/} 下。这里没有任何内容凭记忆重建：每个数字都是存档 JSON 的字段或报告中的表格。
+
+\begin{table*}[t]
+\centering
+\caption{变异矩阵。只有断言失败才计为杀死；仅因崩溃而杀死的计为排除（观测到 0 例）。补测后仍存活的变异体是等价变异体，不是测试弱点。规则文件变异体由跨文件一致性断言捕获，而非行为断言。}
+\small
+\begin{tabular}{lrrrrl}
+\toprule
+区域 & 变异体 & 杀死 & 比率 & 存活者 & 补测后 \\
+\midrule
+\texttt{plugin/control.js}      & 16 & 15 & 93.8\% & 1 个等价变异体 & 15/15 非等价 \\
+\texttt{plugin/memorywriter.js} &  5 &  3 & 60.0\% & 2 个真实盲点 & 5/5 \\
+\texttt{plugin/index.js}        &  8 &  6 & 75.0\% & 2 个真实盲点 & 8/8 \\
+\texttt{engine/control.py}      & 11 & 10 & 90.9\% & 1 个等价变异体 & 10/10 非等价 \\
+\texttt{rules/decay-params.yaml}&  4 &  4 & 100\%  & 0 & 4/4 \\
+\midrule
+合计                           & 44 & 38 & 86.4\% & 4 个真实 + 2 个等价 & 42/44（95.5\%）；42/42 非等价 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\caption{覆盖率与异常路径。面板 (a)：按组统计的 Python 行/分支覆盖，由 PEP~669 \texttt{sys.monitoring} tracer 实测。面板 (b)：由 V8 数据测得的 JavaScript 覆盖；block 列是分支覆盖的近似，不是真正的分支覆盖。面板 (c)：断言强度分级与严格口径的异常路径占比。覆盖率按实测报告，且不被用来声称死代码不存在。}
+\small
+\textbf{(a) Python 覆盖率}\\[2pt]
+\begin{tabular}{lrrrrrrr}
+\toprule
+组 & 执行文件 & 执行行 & 已覆盖 & 行 \% & 分支 & 已覆盖 & 分支 \% \\
+\midrule
+\texttt{engine/}        & 20/20 & 2{,}319 & 2{,}086 & 89.95 & 648  & 523  & 80.71 \\
+\texttt{tools/}         & 3/26  & 8{,}023 & 2{,}641 & 32.92 & 1{,}794 & 527 & 29.38 \\
+\texttt{integrations/}  & 1/1   &    99 &    56 & 56.57 & 18   & 12   & 66.67 \\
+合计                   & 47    & 10{,}441 & 4{,}783 & 45.81 & 2{,}460 & 1{,}062 & 43.17 \\
+\bottomrule
+\end{tabular}\\[6pt]
+\textbf{(b) JavaScript 覆盖率（block 列是近似值）}\\[2pt]
+\begin{tabular}{lrrrr}
+\toprule
+文件 & 执行行 & 已覆盖 & 行 \% & Block/branch \% \\
+\midrule
+\texttt{control.js}      &   360 &   341 & 94.72 & 74.81 \\
+\texttt{goalrelation.js} &   181 &   163 & 90.06 & 71.53 \\
+\texttt{index.js}        & 1{,}066 & 1{,}018 & 95.50 & 64.00 \\
+\texttt{memorywriter.js} &   182 &   179 & 98.35 & 56.19 \\
+合计                    & 1{,}789 & 1{,}701 & 95.08 & 66.22 \\
+\bottomrule
+\end{tabular}\\[6pt]
+\textbf{(c) 断言强度与异常路径}\\[2pt]
+\begin{tabular}{lrrrr}
+\toprule
+指标 & Python & JavaScript & 样本 & 说明 \\
+\midrule
+抽样断言            & 165 &  73 & 238 & 固定种子；同义反复 = 0 \\
+强 / 弱（样本）     & 125 / 40 & 54 / 19 & 238 & 179 强（75.2\%）、59 弱 \\
+完整启发式扫描      & 597 强、227 弱、1 同义反复 & 278 强、89 弱 & 1{,}192 & 弱或同义反复占 26.6\% \\
+严格异常路径占比    & 199/825 = 24.1\% & 82/367 = 22.3\% & -- & 放宽上界 43.3\% / 54.2\% \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\paragraph{表格没有显示的东西。} 有三条告诫必须与数字同放。第一，在被测配置下 \texttt{engine/control.py} 没有被执行的行（$141/141$ 行、$56/56$ 分支），但这不能确立死代码不存在：两个等价变异体存活恰恰是因为某个分支不可达，而“不可达”正是覆盖率数字无法与“未被测试的分支”区分开的东西。第二，全仓库 Python 数字 $45.81\%$ 被 \texttt{tools/}（$32.92\%$；26 个文件中执行了 3 个）拉低，而 \texttt{tools/} 覆盖率本身也是下界，因为以子进程方式调用的工具会被记录为未执行。第三，仓库没有版本控制历史，因此审计可以证明当前状态，但无法证明此前没有任何断言被弱化。
+
+\paragraph{复现。} 随附文件为 \texttt{acceptance/audit/mutation-results-2026-10-27.json}（逐变异体结果、存活者分析与前后 SHA-256 清单）与 \texttt{acceptance/audit/coverage-summary-2026-10-27.json}（逐文件行/分支数据），可读报告与它们放在一起。完整套件：十四个 Python 测试文件（892 条断言）与四个 JavaScript 套件（396 条断言）。变异复跑使用仓库的完整副本；变异驱动、逐轮原始输出与独立复跑日志存档于审计包中并可向作者索取，因为它们位于仓库之外，这样任何由审阅者运行产生的工件都无法改动提交树。在 Windows 上，有三个 Python 测试文件需要临时目录 shim，因为沙箱阻止 \texttt{tempfile.mkdtemp()}；该 shim 只替换临时目录创建，不改变任何断言、也不改变任何一行实现代码。

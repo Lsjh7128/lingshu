@@ -1,0 +1,97 @@
+# rules/learning-params.yaml
+# 学习机制：L0 度量 → L1 参数 → L2 权重 → L3 提示词（L4 架构不动）
+# 屏障：本文件中的 objective / constraints / replay / gray 属于"考卷"，frozen。
+
+meta:
+  version: "learning-params-1.0"
+  updated: "2026-10-25"
+
+learning:
+  enabled: false                   # 完成后手动开启
+  levels:
+    L0: {enabled: true, readOnly: true}
+    L1: {enabled: false, method: "grid+bayes", autoApply: false}
+    L2: {enabled: false, mode: proposal_only}
+    L3: {enabled: false, mode: proposal_only}
+    L4: {enabled: false, forever: true}
+
+  objective:                       # frozen
+    expression: "recall@3 - 0.3*token_ratio - 0.5*false_inject_rate"
+    note: "单指标必被 Goodhart 化；必须含对抗项。"
+
+  constraints:                     # frozen
+    supersede_acc_min: 0.95
+    latency_p95_max_ms: 150
+    token_ratio_max: 0.15
+    no_hallucination_rate: 0            # 硬红线
+    refusal_regression_pass: 1.0        # 硬红线
+
+  searchSpace:
+    "decay.tau.episodic": [3d, 14d]
+    "decay.tau.semantic": [14d, 60d]
+    "retrieval.topK": [2, 5]
+    "edge.minWeight": [0.2, 0.6]
+    "edge.diffusionDiscount": [0.6, 0.9]
+    "MEM-ARCHIVE-THRESHOLD": [0.10, 0.25]
+    provenance: guess
+
+  proposal:                        # frozen（门禁部分）
+    queueMax: 50
+    ttlDays: 30
+    requireEvidence: true
+    requireRollbackPlan: true
+    forbiddenTargets:
+      - "evaluation.*"
+      - "replay-set.*"
+      - "guardrail.*"
+      - "constitution.*"
+      - "compose-matrix.*"
+
+  gray:                            # frozen
+    steps: [0.1, 0.5, 1.0]
+    minSamplesPerStep: 200
+    autoRollback: true
+    requireReplayBaseline: true    # 无回放基线 → 拒绝灰度
+    requireNoSyntheticOnly: true   # 全合成 → 拒绝上线判定
+
+  replay:
+    setVersion: "v1"
+    syntheticShareMax: 1.0         # v1 允许全合成；接真实数据后降到 0.5
+    seed: 20261025
+    idempotent: true
+    noMainModel: true              # 回放不调主模型
+
+  # W4/W4.5 实测结论（2026-10-25）。spread 来自 tools/search_params.py。
+  # 规则：spread 低于噪声量级的参数不得进入自动搜索，只能人工判断。
+  identifiability:
+    checked_at: "2026-10-25"
+    dataset: "v1（200 turn / 10 族）"
+    spread:
+      "retrieval.topK": 0.3302
+      "decay.tau.semantic": 0.1379
+      "potency.archiveThreshold": 0.1108
+      "edge.minWeight": 0.0925
+      "edge.diffusionDiscount": 0.0370
+      "decay.tau.episodic": 0.0278
+    allIdentifiable: true
+    note: "tau.episodic 的 0.0278 已接近噪声；要可靠搜它，回放集需显著扩容。"
+
+  corrections:
+    sources: [user_click_wrong, metacog_overconfidence, user_repetition, persona_clamp]
+    kinds: [wrong, should_not_recall, should_have_recalled, clamp, reject]
+    weakSignalMinRepeats: 2        # should_have_recalled 需 ≥2 次才确认
+
+guardrails:                        # frozen：跌破动作与阈值不可由学习系统修改
+  G1: {metric: supersede_error_rate, threshold: 0.05, action: rollback, window: 2, level: quality}
+  G2: {metric: user_correction_rate, threshold: 0.15, action: rollback, window: 2, level: quality}
+  G3: {metric: token_ratio, threshold: 0.15, action: truncate, window: 1, level: resource}
+  G4: {metric: retrieval_latency_p95_ms, threshold: 150, action: degrade, window: 1, level: resource}
+  G5: {metric: hallucination_on_no_hit, threshold: 0.0, action: rollback_immediate, window: 1, level: hard}
+  G6: {metric: refusal_regression_pass, threshold: 1.0, action: block_release, window: 1, level: hard}
+  # v3.4 新增：原 6 条没有一条能发现"召回整体变差"，实测 topK 3→1 时 G1–G6 全通过
+  G7: {metric: recall_delta, threshold: -0.02, action: rollback, window: 2, level: quality}
+  onMissing:
+    hard: block            # fail-closed：无法验证 = 不能发布
+    quality: skip          # 回放环境测不出，记录 guardrail_missing
+    resource: skip
+    productionStrict: true # 生产模式一律 block

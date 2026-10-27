@@ -1,0 +1,110 @@
+{
+ "S3-001": {
+  "cell_id": "on-p1-r3",
+  "condition": "ON",
+  "prompt": "p1",
+  "rep": 3
+ },
+ "S3-002": {
+  "cell_id": "off-p1-r2",
+  "condition": "OFF",
+  "prompt": "p1",
+  "rep": 2
+ },
+ "S3-003": {
+  "cell_id": "off-p3-r1",
+  "condition": "OFF",
+  "prompt": "p3",
+  "rep": 1
+ },
+ "S3-004": {
+  "cell_id": "on-p3-r2",
+  "condition": "ON",
+  "prompt": "p3",
+  "rep": 2
+ },
+ "S3-005": {
+  "cell_id": "on-p2-r3",
+  "condition": "ON",
+  "prompt": "p2",
+  "rep": 3
+ },
+ "S3-006": {
+  "cell_id": "off-p1-r3",
+  "condition": "OFF",
+  "prompt": "p1",
+  "rep": 3
+ },
+ "S3-007": {
+  "cell_id": "off-p2-r2",
+  "condition": "OFF",
+  "prompt": "p2",
+  "rep": 2
+ },
+ "S3-008": {
+  "cell_id": "on-p3-r3",
+  "condition": "ON",
+  "prompt": "p3",
+  "rep": 3
+ },
+ "S3-009": {
+  "cell_id": "on-p1-r1",
+  "condition": "ON",
+  "prompt": "p1",
+  "rep": 1
+ },
+ "S3-010": {
+  "cell_id": "off-p2-r1",
+  "condition": "OFF",
+  "prompt": "p2",
+  "rep": 1
+ },
+ "S3-011": {
+  "cell_id": "off-p3-r2",
+  "condition": "OFF",
+  "prompt": "p3",
+  "rep": 2
+ },
+ "S3-012": {
+  "cell_id": "on-p3-r1",
+  "condition": "ON",
+  "prompt": "p3",
+  "rep": 1
+ },
+ "S3-013": {
+  "cell_id": "off-p2-r3",
+  "condition": "OFF",
+  "prompt": "p2",
+  "rep": 3
+ },
+ "S3-014": {
+  "cell_id": "off-p1-r1",
+  "condition": "OFF",
+  "prompt": "p1",
+  "rep": 1
+ },
+ "S3-015": {
+  "cell_id": "on-p2-r1",
+  "condition": "ON",
+  "prompt": "p2",
+  "rep": 1
+ },
+ "S3-016": {
+  "cell_id": "off-p3-r3",
+  "condition": "OFF",
+  "prompt": "p3",
+  "rep": 3
+ },
+ "S3-017": {
+  "cell_id": "on-p1-r2",
+  "condition": "ON",
+  "prompt": "p1",
+  "rep": 2
+ },
+ "S3-018": {
+  "cell_id": "on-p2-r2",
+  "condition": "ON",
+  "prompt": "p2",
+  "rep": 2
+ }
+}
