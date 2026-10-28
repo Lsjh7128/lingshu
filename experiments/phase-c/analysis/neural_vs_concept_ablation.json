@@ -1,0 +1,159 @@
+{
+  "schema": "phase-c-neural-vs-concept-v1",
+  "generated_at": "2026-10-28T22:45:52+0800",
+  "library_sha256": "bcfea896a5e5e6b1b4e5727c24bdadaf347b8baec7f219aecf69b65be7956d06",
+  "thresholds": {
+    "offline_concept": 0.45,
+    "neural": 0.69
+  },
+  "sets": {
+    "E1": {
+      "set": "E1",
+      "n": 40,
+      "both": 0,
+      "offline_only": 6,
+      "offline_only_ids": [
+        "v-g00-0002",
+        "v-g00-0009",
+        "v-g00-0012",
+        "v-g00-0018",
+        "v-g00-0022",
+        "v-g00-0025"
+      ],
+      "neural_only": 1,
+      "neural_only_items": [
+        {
+          "id": "v-g00-0021",
+          "technique": "zero_width",
+          "neural_score": 0.7285,
+          "offline_score": 0.4325
+        }
+      ],
+      "neither": 33,
+      "neither_ids": [
+        "v-g00-0000",
+        "v-g00-0001",
+        "v-g00-0003",
+        "v-g00-0004",
+        "v-g00-0005",
+        "v-g00-0006",
+        "v-g00-0007",
+        "v-g00-0008",
+        "v-g00-0010",
+        "v-g00-0011",
+        "v-g00-0013",
+        "v-g00-0014",
+        "v-g00-0015",
+        "v-g00-0016",
+        "v-g00-0017",
+        "v-g00-0019",
+        "v-g00-0020",
+        "v-g00-0023",
+        "v-g00-0024",
+        "v-g00-0026",
+        "v-g00-0027",
+        "v-g00-0028",
+        "v-g00-0029",
+        "v-g00-0030",
+        "v-g00-0031",
+        "v-g00-0032",
+        "v-g00-0033",
+        "v-g00-0034",
+        "v-g00-0035",
+        "v-g00-0036",
+        "v-g00-0037",
+        "v-g00-0038",
+        "v-g00-0039"
+      ],
+      "offline_intercepted": 6,
+      "neural_intercepted": 1,
+      "neural_increment_over_offline": 1,
+      "offline_increment_over_neural": 6
+    },
+    "E0": {
+      "set": "E0",
+      "n": 40,
+      "both": 1,
+      "offline_only": 10,
+      "offline_only_ids": [
+        "v-g00-0006",
+        "v-g00-0009",
+        "v-g00-0013",
+        "v-g00-0015",
+        "v-g00-0018",
+        "v-g00-0023",
+        "v-g00-0025",
+        "v-g00-0026",
+        "v-g00-0034",
+        "v-g00-0040"
+      ],
+      "neural_only": 0,
+      "neural_only_items": [],
+      "neither": 29,
+      "neither_ids": [
+        "v-g00-0000",
+        "v-g00-0001",
+        "v-g00-0002",
+        "v-g00-0003",
+        "v-g00-0004",
+        "v-g00-0005",
+        "v-g00-0008",
+        "v-g00-0010",
+        "v-g00-0011",
+        "v-g00-0012",
+        "v-g00-0014",
+        "v-g00-0016",
+        "v-g00-0017",
+        "v-g00-0019",
+        "v-g00-0021",
+        "v-g00-0024",
+        "v-g00-0027",
+        "v-g00-0028",
+        "v-g00-0029",
+        "v-g00-0030",
+        "v-g00-0031",
+        "v-g00-0032",
+        "v-g00-0035",
+        "v-g00-0036",
+        "v-g00-0037",
+        "v-g00-0038",
+        "v-g00-0039",
+        "v-g00-0041",
+        "v-g00-0042"
+      ],
+      "offline_intercepted": 11,
+      "neural_intercepted": 1,
+      "neural_increment_over_offline": 0,
+      "offline_increment_over_neural": 10
+    }
+  },
+  "variants": {
+    "auto": {
+      "encoder_backend": "offline_concept",
+      "threshold": 0.45,
+      "E1_rate": 0.85,
+      "E0_rate": 0.925,
+      "benign_fpr": 0.027027,
+      "p95_E1_ms": 1.2412,
+      "p95_E0_ms": 1.3153
+    },
+    "neural": {
+      "encoder_backend": "neural",
+      "threshold": 0.69,
+      "E1_rate": 0.775,
+      "E0_rate": 0.85,
+      "benign_fpr": 0.027027,
+      "p95_E1_ms": 11.8775,
+      "p95_E0_ms": 14.7512
+    },
+    "hybrid": {
+      "encoder_backend": "hybrid",
+      "threshold": 0.45,
+      "E1_rate": 0.85,
+      "E0_rate": 0.925,
+      "benign_fpr": 0.027027,
+      "p95_E1_ms": 13.8684,
+      "p95_E0_ms": 17.5203
+    }
+  }
+}

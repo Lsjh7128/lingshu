@@ -1,24 +1,167 @@
 {
-  "schema": "phase-c-figure-data-v1",
-  "source_file": "experiments/phase-c/results/run-semantic.json",
-  "source_schema": "phase-c-run-semantic-v1",
-  "generated_at": "2026-10-28T19:43:40+08:00",
+  "schema": "phase-c-figure-data-v2",
+  "source_files": {
+    "official": "experiments/phase-c/results/run-semantic.json",
+    "neural": "experiments/phase-c/results/run-semantic-neural.json",
+    "hybrid": "experiments/phase-c/results/run-semantic-hybrid.json",
+    "ablation": "experiments/phase-c/analysis/neural_vs_concept_ablation.json"
+  },
+  "source_schemas": {
+    "run": "phase-c-run-semantic-v1",
+    "ablation": "phase-c-neural-vs-concept-v1"
+  },
+  "generated_at": "2026-10-28T23:01:12+08:00",
   "run": {
-    "run_id": "run-semantic-20261028-193207",
-    "run_label": "run-semantic-20261028-193207",
+    "run_id": "run-semantic-20261028-224516",
+    "run_label": "run-semantic-20261028-224516",
     "run_id_source": "run-semantic.json:run_id",
-    "source_generated_at": "2026-10-28T19:32:07+0800",
+    "source_generated_at": "2026-10-28T22:45:16+0800",
     "branch": "feat/phase-c-semantic-guard",
     "generated_by": "tools/phase_c_eval.py"
   },
   "encoder": {
-    "backend": "offline_concept",
+    "backend_requested": "auto",
+    "backend_effective": "offline_concept",
     "is_neural": false,
+    "uses_neural_backend": false,
+    "model_id": "paraphrase-multilingual-MiniLM-L12-v2",
+    "model_sha256": "66fc00f5f29afcaff34092e1bdd20008ca3918265a82fb9695a551e510cc4ebc",
+    "embedding_dim": 384,
+    "formula_version": "neural-multilingual-v1",
     "intent_count": 9,
     "threshold": 0.45,
     "threshold_calibrated_on": "D_dev",
-    "intent_library_sha256": "29ed8e3e09560c96c1395c7df47d2213287f0449bc585fea5b184d1fe4d73b46",
-    "naming_note": "the report/paper must call this an 'intent-concept encoder (offline, non-neural)' when is_neural is false; never 'all-MiniLM-L6-v2' or 'neural sentence embedding' (contract 0.4)"
+    "thresholds_by_backend": {
+      "offline_concept": 0.45,
+      "neural": 0.69
+    },
+    "intent_library_sha256": "bcfea896a5e5e6b1b4e5727c24bdadaf347b8baec7f219aecf69b65be7956d06",
+    "is_neural_flag_note": "is_neural marks the primary decision path; the hybrid backend still runs neural inference (see uses_neural_backend)"
+  },
+  "encoder_variants": {
+    "C-offline": {
+      "label": "C-offline",
+      "run_id": "run-semantic-20261028-224516",
+      "generated_at": "2026-10-28T22:45:16+0800",
+      "source_file": "experiments/phase-c/results/run-semantic.json",
+      "backend_requested": "auto",
+      "backend_effective": "offline_concept",
+      "is_neural": false,
+      "uses_neural_backend": false,
+      "model_id": "paraphrase-multilingual-MiniLM-L12-v2",
+      "model_sha256": "66fc00f5f29afcaff34092e1bdd20008ca3918265a82fb9695a551e510cc4ebc",
+      "embedding_dim": 384,
+      "formula_version": "neural-multilingual-v1",
+      "intent_count": 9,
+      "threshold": 0.45,
+      "threshold_calibrated_on": "D_dev",
+      "thresholds_by_backend": {
+        "offline_concept": 0.45,
+        "neural": 0.69
+      },
+      "intent_library_sha256": "bcfea896a5e5e6b1b4e5727c24bdadaf347b8baec7f219aecf69b65be7956d06",
+      "rates": {
+        "E1": 0.85,
+        "E0": 0.925
+      },
+      "p95_ms": {
+        "E1": 1.2412,
+        "E0": 1.3153
+      },
+      "benign_fpr": 0.027027,
+      "latency_budget": {
+        "limit_ms": 100.0,
+        "worst_p95_ms": 1.3153,
+        "pass": true,
+        "note": "单机 numpy 实测（无并发/无网络），不代表生产端到端延迟"
+      },
+      "delta_C_minus_B": {
+        "E1": 0.075,
+        "E0": 0.1
+      }
+    },
+    "C-neural": {
+      "label": "C-neural",
+      "run_id": "run-semantic-20261028-224522",
+      "generated_at": "2026-10-28T22:45:22+0800",
+      "source_file": "experiments/phase-c/results/run-semantic-neural.json",
+      "backend_requested": "neural",
+      "backend_effective": "neural",
+      "is_neural": true,
+      "uses_neural_backend": true,
+      "model_id": "paraphrase-multilingual-MiniLM-L12-v2",
+      "model_sha256": "66fc00f5f29afcaff34092e1bdd20008ca3918265a82fb9695a551e510cc4ebc",
+      "embedding_dim": 384,
+      "formula_version": "neural-multilingual-v1",
+      "intent_count": 9,
+      "threshold": 0.69,
+      "threshold_calibrated_on": "D_dev",
+      "thresholds_by_backend": {
+        "offline_concept": 0.45,
+        "neural": 0.69
+      },
+      "intent_library_sha256": "bcfea896a5e5e6b1b4e5727c24bdadaf347b8baec7f219aecf69b65be7956d06",
+      "rates": {
+        "E1": 0.775,
+        "E0": 0.85
+      },
+      "p95_ms": {
+        "E1": 11.8775,
+        "E0": 14.7512
+      },
+      "benign_fpr": 0.027027,
+      "latency_budget": {
+        "limit_ms": 100.0,
+        "worst_p95_ms": 14.7512,
+        "pass": true,
+        "note": "单机 numpy 实测（无并发/无网络），不代表生产端到端延迟"
+      },
+      "delta_C_minus_B": {
+        "E1": 0.0,
+        "E0": 0.025
+      }
+    },
+    "C-hybrid": {
+      "label": "C-hybrid",
+      "run_id": "run-semantic-20261028-224523",
+      "generated_at": "2026-10-28T22:45:23+0800",
+      "source_file": "experiments/phase-c/results/run-semantic-hybrid.json",
+      "backend_requested": "hybrid",
+      "backend_effective": "hybrid",
+      "is_neural": false,
+      "uses_neural_backend": true,
+      "model_id": "paraphrase-multilingual-MiniLM-L12-v2",
+      "model_sha256": "66fc00f5f29afcaff34092e1bdd20008ca3918265a82fb9695a551e510cc4ebc",
+      "embedding_dim": 384,
+      "formula_version": "neural-multilingual-v1",
+      "intent_count": 9,
+      "threshold": 0.45,
+      "threshold_calibrated_on": "D_dev",
+      "thresholds_by_backend": {
+        "offline_concept": 0.45,
+        "neural": 0.69
+      },
+      "intent_library_sha256": "bcfea896a5e5e6b1b4e5727c24bdadaf347b8baec7f219aecf69b65be7956d06",
+      "rates": {
+        "E1": 0.85,
+        "E0": 0.925
+      },
+      "p95_ms": {
+        "E1": 13.8684,
+        "E0": 17.5203
+      },
+      "benign_fpr": 0.027027,
+      "latency_budget": {
+        "limit_ms": 100.0,
+        "worst_p95_ms": 17.5203,
+        "pass": true,
+        "note": "单机 numpy 实测（无并发/无网络），不代表生产端到端延迟"
+      },
+      "delta_C_minus_B": {
+        "E1": 0.075,
+        "E0": 0.1
+      }
+    }
   },
   "eval_sets": {
     "E1": {
@@ -38,29 +181,45 @@
       "path": "experiments\\phase-b\\corpora\\benign.jsonl"
     }
   },
+  "systems": [
+    "A",
+    "B",
+    "C-offline",
+    "C-neural",
+    "C-hybrid"
+  ],
   "figures": {
     "comparison": {
       "pdf": "experiments/phase-c/figures/phase_c_comparison.pdf",
       "png": "experiments/phase-c/figures/phase_c_comparison.png",
       "page_pt": [
         504.0,
-        416.0
+        484.0
       ],
-      "description_en": "2x2 panels: grouped bars of interception rate for A/B/C x E1/E0; the M subset (explicit cross-lingual red lines that must be intercepted); p95 latency (ms) with the 100 ms budget line; benign FPR. A one-line note gives the E1 rates excluding the two benign-creation items (n=38)."
+      "description_en": "five systems (A, B, C-offline, C-neural, C-hybrid) x (E1, E0) interception rates, the M subset, benign FPR and p95 latency with the 100 ms budget line; one-line note gives the E1 rates excluding the two benign-creation items (n=38)"
+    },
+    "ablation": {
+      "pdf": "experiments/phase-c/figures/phase_c_ablation.pdf",
+      "png": "experiments/phase-c/figures/phase_c_ablation.png",
+      "page_pt": [
+        504.0,
+        340.0
+      ],
+      "description_en": "2x2 contingency (both / offline_only / neural_only / neither) of semantic-layer decisions on E1 and E0, visualising the zero neural increment over the intent-concept layer"
     },
     "radar": {
       "pdf": "experiments/phase-c/figures/phase_c_radar.pdf",
       "png": "experiments/phase-c/figures/phase_c_radar.png",
       "page_pt": [
         504.0,
-        452.0
+        470.0
       ],
-      "description_en": "radar over interception rate / 1-FPR / speed / intent coverage / explainability; axes 3-5 max-normalised"
+      "description_en": "radar over interception rate / 1-FPR / speed / intent coverage / explainability; solid A/B/C-offline, dashed C-neural ablation; axes 3-5 max-normalised"
     }
   },
   "comparison": {
-    "caption_zh": "Phase C 三系统对比（run_id run-semantic-20261028-193207）。左上：三系统（A 词法闸门 / B Phase B 自愈补丁 / C 语义升维）在 E1（H0 指定零日集）与 E0（新 seed 新鲜 held-out）上的拦截率，双色表示评估集，绿色虚线为 H0 的 >0.90（E1）目标；右上：M 子集（显式跨语红线，按判定口径必须拦）——C 在 E1 拦 3/3、E0 拦 4/5，而 A、B 在 E1 为 0/3 与 0/3；E1 剔除 2 条良性创作（n=38）后的应拦口径为 A 0.395、B 0.816、C 0.895；左下：完整判定（词法+语义）的 p95 延迟（ms），红色虚线为 100 ms 硬预算（契约 §1.2）；右下：良性语料（74 条）上的误伤率 FPR。数据来源：experiments/phase-c/results/run-semantic.json 的 systems.{A,B,C}.{E1,E0}.rate、.latency.p95_ms、systems.{A,B,C}.benign.fpr、systems.{A,B,C}.E1.eligible_excluding_benign 与 systems.{A,B,C}.adjudicated；未做平滑、插值与手填。雷达图轴 = 拦截率（E1）/ 1-FPR / 速度（1/p95）/ 覆盖意图数 / 可解释性；后三轴按跨系统最大值归一化，原始值见图下方表。编码器为离线意图概念向量（offline intent-concept, non-neural），阈值 0.45 只在 D_dev 上校准；E1/E0 均为 held-out 变体而非 OOD。延迟为单机 numpy 实测，不代表生产端到端延迟。",
-    "caption_en": "Phase C three-system comparison (run_id run-semantic-20261028-193207). Top-left: interception rates of the three systems (A lexical gate; B Phase B evolved patch; C semantic guard) on two held-out variant sets, E1 (H0 zero-day set) and E0 (fresh held-out, new seed), as grouped bars; the two shades encode the evaluation set and the green dashed line is the H0 target of >0.90 on E1. Top-right: the M subset (explicit cross-lingual red lines that must be intercepted) -- C intercepts 3/3 on E1 and 4/5 on E0, while A and B intercept 0/3 and 0/3 on E1; excluding the 2 benign-creation items (n=38), the E1 rates are A 0.395, B 0.816, C 0.895; Bottom-left: p95 latency (ms) of the complete judgment (lexical + semantic) with the 100 ms hard budget as a red dashed line (contract 1.2); bottom-right: benign false-positive rate (FPR) on the benign corpus. Sources: run-semantic.json fields systems.{A,B,C}.{E1,E0}.rate, .latency.p95_ms, systems.{A,B,C}.benign.fpr, systems.{A,B,C}.E1.eligible_excluding_benign and systems.{A,B,C}.adjudicated; no smoothing, interpolation or hand-filled values. Radar axes: interception rate (E1) / 1-FPR / speed (1/p95) / intent coverage / explainability; the last three are max-normalised across A/B/C and raw values appear in the table below the radar. The encoder is an offline intent-concept encoder (non-neural) with threshold 0.45 calibrated on D_dev only; E1/E0 are held-out variants, not OOD data. Latency is a single-machine numpy measurement, not production end-to-end latency.",
+    "caption_zh": "Phase C 五系统对比（官方 run_id run-semantic-20261028-224516）。上：A 词法闸门 / B Phase B 自愈补丁 / C-offline（intent-concept，主口径）/ C-neural（paraphrase-multilingual-MiniLM-L12-v2，ONNX int8，消融）/ C-hybrid（offline OR neural）在 E1（H0 零日集）与 E0（新 seed held-out）上的拦截率；双色表示评估集，绿色虚线为 H0 的 >0.90（E1）目标；蓝色注记为 C-B 净增量（E1/E0）：C-off +0.075/+0.100 | C-neu +0.000/+0.025 | C-hyb +0.075/+0.100。中左：M 子集（必须拦的显式跨语红线）：C-off 3/3, C-neu 0/3, C-hyb 3/3；中右：良性 FPR（全部 2/74 = 0.027）。下：一次完整判定的 p95 延迟（红色虚线为 100 ms 预算）：C-offline 1.24 / C-neural 11.88 / C-hybrid 13.87 ms。数据来源：run-semantic{,-neural,-hybrid}.json 的 systems.*.{E1,E0}.rate、.latency.p95_ms、systems.*.benign.fpr、systems.*.{E1,E0}.adjudicated、systems.*.E1.eligible_excluding_benign 与 delta；未平滑、插值或手填。阈值分别在 D_dev 上校准（concept 0.45 / neural 0.69）。E1/E0 是 held-out 变体而非 OOD；延迟为单机 CPU 实测（神经变体含 ONNX int8 推理）。",
+    "caption_en": "Phase C five-system comparison (official run_id run-semantic-20261028-224516). Top: interception rates of A (lexical gate), B (B + Phase B evolved patch), C-offline (intent-concept, primary), C-neural (paraphrase-multilingual-MiniLM-L12-v2, ONNX int8, ablation) and C-hybrid (offline OR neural) on E1 (H0 zero-day set) and E0 (fresh held-out); the two shades encode the evaluation set and the green dashed line is the H0 target of >0.90 on E1; blue text gives the C-B net increment (E1/E0): C-off +0.075/+0.100 | C-neu +0.000/+0.025 | C-hyb +0.075/+0.100. Middle-left: the M subset (must-intercept explicit cross-lingual red lines): C-off 3/3, C-neu 0/3, C-hyb 3/3; middle-right: benign FPR (all 2/74 = 0.027). Bottom: p95 latency of a complete judgment (red dashed line = 100 ms budget): C-offline 1.24 / C-neural 11.88 / C-hybrid 13.87 ms. Sources: run-semantic{,-neural,-hybrid}.json fields systems.*.{E1,E0}.rate, .latency.p95_ms, systems.*.benign.fpr, systems.*.{E1,E0}.adjudicated, systems.*.E1.eligible_excluding_benign and delta; no smoothing, interpolation or hand-filled values. Thresholds are calibrated on D_dev only (concept 0.45 / neural 0.69). E1/E0 are held-out variants, not OOD data; latency is a single-machine CPU measurement (the neural variants include ONNX int8 inference).",
     "bars": [
       {
         "system": "A",
@@ -72,7 +231,8 @@
         "source_count_fields": [
           "systems.A.E1.intercepted",
           "systems.A.E1.n"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "A",
@@ -84,7 +244,8 @@
         "source_count_fields": [
           "systems.A.E0.intercepted",
           "systems.A.E0.n"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "B",
@@ -96,7 +257,8 @@
         "source_count_fields": [
           "systems.B.E1.intercepted",
           "systems.B.E1.n"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "B",
@@ -108,10 +270,11 @@
         "source_count_fields": [
           "systems.B.E0.intercepted",
           "systems.B.E0.n"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
-        "system": "C",
+        "system": "C-offline",
         "eval_set": "E1",
         "rate": 0.85,
         "intercepted": 34,
@@ -120,10 +283,11 @@
         "source_count_fields": [
           "systems.C.E1.intercepted",
           "systems.C.E1.n"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
-        "system": "C",
+        "system": "C-offline",
         "eval_set": "E0",
         "rate": 0.925,
         "intercepted": 37,
@@ -132,69 +296,172 @@
         "source_count_fields": [
           "systems.C.E0.intercepted",
           "systems.C.E0.n"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
+      },
+      {
+        "system": "C-neural",
+        "eval_set": "E1",
+        "rate": 0.775,
+        "intercepted": 31,
+        "n": 40,
+        "source_field": "systems.C.E1.rate",
+        "source_count_fields": [
+          "systems.C.E1.intercepted",
+          "systems.C.E1.n"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-neural.json"
+      },
+      {
+        "system": "C-neural",
+        "eval_set": "E0",
+        "rate": 0.85,
+        "intercepted": 34,
+        "n": 40,
+        "source_field": "systems.C.E0.rate",
+        "source_count_fields": [
+          "systems.C.E0.intercepted",
+          "systems.C.E0.n"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-neural.json"
+      },
+      {
+        "system": "C-hybrid",
+        "eval_set": "E1",
+        "rate": 0.85,
+        "intercepted": 34,
+        "n": 40,
+        "source_field": "systems.C.E1.rate",
+        "source_count_fields": [
+          "systems.C.E1.intercepted",
+          "systems.C.E1.n"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-hybrid.json"
+      },
+      {
+        "system": "C-hybrid",
+        "eval_set": "E0",
+        "rate": 0.925,
+        "intercepted": 37,
+        "n": 40,
+        "source_field": "systems.C.E0.rate",
+        "source_count_fields": [
+          "systems.C.E0.intercepted",
+          "systems.C.E0.n"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-hybrid.json"
       }
     ],
     "latency": [
       {
         "system": "A",
         "eval_set": "E1",
-        "p50_ms": 0.0131,
-        "p95_ms": 0.0228,
-        "mean_ms": 0.0144,
-        "max_ms": 0.0416,
+        "p50_ms": 0.0136,
+        "p95_ms": 0.0223,
+        "mean_ms": 0.0145,
+        "max_ms": 0.0369,
         "n": 40,
-        "source_field": "systems.A.E1.latency.p95_ms"
+        "source_field": "systems.A.E1.latency.p95_ms",
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "A",
         "eval_set": "E0",
-        "p50_ms": 0.0123,
-        "p95_ms": 0.0207,
-        "mean_ms": 0.0134,
-        "max_ms": 0.022,
+        "p50_ms": 0.0128,
+        "p95_ms": 0.0228,
+        "mean_ms": 0.0143,
+        "max_ms": 0.0245,
         "n": 40,
-        "source_field": "systems.A.E0.latency.p95_ms"
+        "source_field": "systems.A.E0.latency.p95_ms",
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "B",
         "eval_set": "E1",
-        "p50_ms": 0.049,
-        "p95_ms": 0.2479,
-        "mean_ms": 0.1511,
-        "max_ms": 2.3417,
+        "p50_ms": 0.051,
+        "p95_ms": 0.2595,
+        "mean_ms": 0.1428,
+        "max_ms": 2.6994,
         "n": 40,
-        "source_field": "systems.B.E1.latency.p95_ms"
+        "source_field": "systems.B.E1.latency.p95_ms",
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "B",
         "eval_set": "E0",
-        "p50_ms": 0.0449,
-        "p95_ms": 0.1084,
-        "mean_ms": 0.0551,
-        "max_ms": 0.1302,
+        "p50_ms": 0.0488,
+        "p95_ms": 0.1108,
+        "mean_ms": 0.0563,
+        "max_ms": 0.1323,
         "n": 40,
-        "source_field": "systems.B.E0.latency.p95_ms"
+        "source_field": "systems.B.E0.latency.p95_ms",
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
-        "system": "C",
+        "system": "C-offline",
         "eval_set": "E1",
-        "p50_ms": 1.185,
-        "p95_ms": 2.7241,
-        "mean_ms": 1.8989,
-        "max_ms": 20.5733,
+        "p50_ms": 1.0905,
+        "p95_ms": 1.2412,
+        "mean_ms": 1.0853,
+        "max_ms": 1.38,
         "n": 40,
-        "source_field": "systems.C.E1.latency.p95_ms"
+        "source_field": "systems.C.E1.latency.p95_ms",
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
-        "system": "C",
+        "system": "C-offline",
         "eval_set": "E0",
-        "p50_ms": 1.1004,
-        "p95_ms": 1.2755,
-        "mean_ms": 1.1194,
-        "max_ms": 1.4106,
+        "p50_ms": 1.0772,
+        "p95_ms": 1.3153,
+        "mean_ms": 1.1001,
+        "max_ms": 1.5744,
         "n": 40,
-        "source_field": "systems.C.E0.latency.p95_ms"
+        "source_field": "systems.C.E0.latency.p95_ms",
+        "source_file": "experiments/phase-c/results/run-semantic.json"
+      },
+      {
+        "system": "C-neural",
+        "eval_set": "E1",
+        "p50_ms": 6.4692,
+        "p95_ms": 11.8775,
+        "mean_ms": 6.7488,
+        "max_ms": 20.5819,
+        "n": 40,
+        "source_field": "systems.C.E1.latency.p95_ms",
+        "source_file": "experiments/phase-c/results/run-semantic-neural.json"
+      },
+      {
+        "system": "C-neural",
+        "eval_set": "E0",
+        "p50_ms": 6.7519,
+        "p95_ms": 14.7512,
+        "mean_ms": 7.6015,
+        "max_ms": 24.4571,
+        "n": 40,
+        "source_field": "systems.C.E0.latency.p95_ms",
+        "source_file": "experiments/phase-c/results/run-semantic-neural.json"
+      },
+      {
+        "system": "C-hybrid",
+        "eval_set": "E1",
+        "p50_ms": 8.3885,
+        "p95_ms": 13.8684,
+        "mean_ms": 32.9719,
+        "max_ms": 1003.8431,
+        "n": 40,
+        "source_field": "systems.C.E1.latency.p95_ms",
+        "source_file": "experiments/phase-c/results/run-semantic-hybrid.json"
+      },
+      {
+        "system": "C-hybrid",
+        "eval_set": "E0",
+        "p50_ms": 7.5713,
+        "p95_ms": 17.5203,
+        "mean_ms": 8.6896,
+        "max_ms": 21.9989,
+        "n": 40,
+        "source_field": "systems.C.E0.latency.p95_ms",
+        "source_file": "experiments/phase-c/results/run-semantic-hybrid.json"
       }
     ],
     "fpr": [
@@ -207,7 +474,8 @@
         "source_count_fields": [
           "systems.A.benign.fp_count",
           "systems.A.benign.n"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "B",
@@ -218,10 +486,11 @@
         "source_count_fields": [
           "systems.B.benign.fp_count",
           "systems.B.benign.n"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
-        "system": "C",
+        "system": "C-offline",
         "fpr": 0.027027,
         "fp_count": 2,
         "n": 74,
@@ -229,7 +498,32 @@
         "source_count_fields": [
           "systems.C.benign.fp_count",
           "systems.C.benign.n"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
+      },
+      {
+        "system": "C-neural",
+        "fpr": 0.027027,
+        "fp_count": 2,
+        "n": 74,
+        "source_field": "systems.C.benign.fpr",
+        "source_count_fields": [
+          "systems.C.benign.fp_count",
+          "systems.C.benign.n"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-neural.json"
+      },
+      {
+        "system": "C-hybrid",
+        "fpr": 0.027027,
+        "fp_count": 2,
+        "n": 74,
+        "source_field": "systems.C.benign.fpr",
+        "source_count_fields": [
+          "systems.C.benign.fp_count",
+          "systems.C.benign.n"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-hybrid.json"
       }
     ],
     "adjudicated": [
@@ -245,7 +539,8 @@
         "source_count_fields": [
           "systems.A.E1.adjudicated.M.n",
           "systems.A.E1.adjudicated.M.intercepted"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "A",
@@ -259,7 +554,8 @@
         "source_count_fields": [
           "systems.A.E1.adjudicated.R.n",
           "systems.A.E1.adjudicated.R.intercepted"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "A",
@@ -273,7 +569,8 @@
         "source_count_fields": [
           "systems.A.E1.adjudicated.B.n",
           "systems.A.E1.adjudicated.B.intercepted"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "A",
@@ -287,7 +584,8 @@
         "source_count_fields": [
           "systems.A.E0.adjudicated.M.n",
           "systems.A.E0.adjudicated.M.intercepted"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "A",
@@ -301,7 +599,8 @@
         "source_count_fields": [
           "systems.A.E0.adjudicated.R.n",
           "systems.A.E0.adjudicated.R.intercepted"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "B",
@@ -315,7 +614,8 @@
         "source_count_fields": [
           "systems.B.E1.adjudicated.M.n",
           "systems.B.E1.adjudicated.M.intercepted"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "B",
@@ -329,7 +629,8 @@
         "source_count_fields": [
           "systems.B.E1.adjudicated.R.n",
           "systems.B.E1.adjudicated.R.intercepted"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "B",
@@ -343,7 +644,8 @@
         "source_count_fields": [
           "systems.B.E1.adjudicated.B.n",
           "systems.B.E1.adjudicated.B.intercepted"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "B",
@@ -357,7 +659,8 @@
         "source_count_fields": [
           "systems.B.E0.adjudicated.M.n",
           "systems.B.E0.adjudicated.M.intercepted"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "B",
@@ -371,10 +674,11 @@
         "source_count_fields": [
           "systems.B.E0.adjudicated.R.n",
           "systems.B.E0.adjudicated.R.intercepted"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
-        "system": "C",
+        "system": "C-offline",
         "eval_set": "E1",
         "subset": "M",
         "n": 3,
@@ -385,10 +689,11 @@
         "source_count_fields": [
           "systems.C.E1.adjudicated.M.n",
           "systems.C.E1.adjudicated.M.intercepted"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
-        "system": "C",
+        "system": "C-offline",
         "eval_set": "E1",
         "subset": "R",
         "n": 4,
@@ -399,10 +704,11 @@
         "source_count_fields": [
           "systems.C.E1.adjudicated.R.n",
           "systems.C.E1.adjudicated.R.intercepted"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
-        "system": "C",
+        "system": "C-offline",
         "eval_set": "E1",
         "subset": "B",
         "n": 2,
@@ -413,10 +719,11 @@
         "source_count_fields": [
           "systems.C.E1.adjudicated.B.n",
           "systems.C.E1.adjudicated.B.intercepted"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
-        "system": "C",
+        "system": "C-offline",
         "eval_set": "E0",
         "subset": "M",
         "n": 5,
@@ -427,10 +734,11 @@
         "source_count_fields": [
           "systems.C.E0.adjudicated.M.n",
           "systems.C.E0.adjudicated.M.intercepted"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
-        "system": "C",
+        "system": "C-offline",
         "eval_set": "E0",
         "subset": "R",
         "n": 2,
@@ -441,7 +749,158 @@
         "source_count_fields": [
           "systems.C.E0.adjudicated.R.n",
           "systems.C.E0.adjudicated.R.intercepted"
-        ]
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic.json"
+      },
+      {
+        "system": "C-neural",
+        "eval_set": "E1",
+        "subset": "M",
+        "n": 3,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": null,
+        "source_field": "systems.C.E1.adjudicated.M.intercepted",
+        "source_count_fields": [
+          "systems.C.E1.adjudicated.M.n",
+          "systems.C.E1.adjudicated.M.intercepted"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-neural.json"
+      },
+      {
+        "system": "C-neural",
+        "eval_set": "E1",
+        "subset": "R",
+        "n": 4,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": null,
+        "source_field": "systems.C.E1.adjudicated.R.intercepted",
+        "source_count_fields": [
+          "systems.C.E1.adjudicated.R.n",
+          "systems.C.E1.adjudicated.R.intercepted"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-neural.json"
+      },
+      {
+        "system": "C-neural",
+        "eval_set": "E1",
+        "subset": "B",
+        "n": 2,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": 0,
+        "source_field": "systems.C.E1.adjudicated.B.intercepted",
+        "source_count_fields": [
+          "systems.C.E1.adjudicated.B.n",
+          "systems.C.E1.adjudicated.B.intercepted"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-neural.json"
+      },
+      {
+        "system": "C-neural",
+        "eval_set": "E0",
+        "subset": "M",
+        "n": 5,
+        "intercepted": 1,
+        "rate": 0.2,
+        "false_positive_count": null,
+        "source_field": "systems.C.E0.adjudicated.M.intercepted",
+        "source_count_fields": [
+          "systems.C.E0.adjudicated.M.n",
+          "systems.C.E0.adjudicated.M.intercepted"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-neural.json"
+      },
+      {
+        "system": "C-neural",
+        "eval_set": "E0",
+        "subset": "R",
+        "n": 2,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": null,
+        "source_field": "systems.C.E0.adjudicated.R.intercepted",
+        "source_count_fields": [
+          "systems.C.E0.adjudicated.R.n",
+          "systems.C.E0.adjudicated.R.intercepted"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-neural.json"
+      },
+      {
+        "system": "C-hybrid",
+        "eval_set": "E1",
+        "subset": "M",
+        "n": 3,
+        "intercepted": 3,
+        "rate": 1.0,
+        "false_positive_count": null,
+        "source_field": "systems.C.E1.adjudicated.M.intercepted",
+        "source_count_fields": [
+          "systems.C.E1.adjudicated.M.n",
+          "systems.C.E1.adjudicated.M.intercepted"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-hybrid.json"
+      },
+      {
+        "system": "C-hybrid",
+        "eval_set": "E1",
+        "subset": "R",
+        "n": 4,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": null,
+        "source_field": "systems.C.E1.adjudicated.R.intercepted",
+        "source_count_fields": [
+          "systems.C.E1.adjudicated.R.n",
+          "systems.C.E1.adjudicated.R.intercepted"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-hybrid.json"
+      },
+      {
+        "system": "C-hybrid",
+        "eval_set": "E1",
+        "subset": "B",
+        "n": 2,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": 0,
+        "source_field": "systems.C.E1.adjudicated.B.intercepted",
+        "source_count_fields": [
+          "systems.C.E1.adjudicated.B.n",
+          "systems.C.E1.adjudicated.B.intercepted"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-hybrid.json"
+      },
+      {
+        "system": "C-hybrid",
+        "eval_set": "E0",
+        "subset": "M",
+        "n": 5,
+        "intercepted": 4,
+        "rate": 0.8,
+        "false_positive_count": null,
+        "source_field": "systems.C.E0.adjudicated.M.intercepted",
+        "source_count_fields": [
+          "systems.C.E0.adjudicated.M.n",
+          "systems.C.E0.adjudicated.M.intercepted"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-hybrid.json"
+      },
+      {
+        "system": "C-hybrid",
+        "eval_set": "E0",
+        "subset": "R",
+        "n": 2,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": null,
+        "source_field": "systems.C.E0.adjudicated.R.intercepted",
+        "source_count_fields": [
+          "systems.C.E0.adjudicated.R.n",
+          "systems.C.E0.adjudicated.R.intercepted"
+        ],
+        "source_file": "experiments/phase-c/results/run-semantic-hybrid.json"
       }
     ],
     "eligible_excluding_benign": [
@@ -453,7 +912,8 @@
         "rate": 0.394737,
         "excluded_benign_creations": 2,
         "source_field": "systems.A.E1.eligible_excluding_benign.rate",
-        "note": "分母排除 B 类（良性创作）；E1 的 40 条中排除 2 条"
+        "note": "分母排除 B 类（良性创作）；E1 的 40 条中排除 2 条",
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "A",
@@ -463,7 +923,8 @@
         "intercepted": null,
         "excluded_benign_creations": null,
         "source_field": "systems.A.E0.eligible_excluding_benign",
-        "note": "null in run-semantic.json: this set contains no benign-creation (B) items, so nothing is excluded"
+        "note": "null in run-semantic.json: this set contains no benign-creation (B) items, so nothing is excluded",
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "B",
@@ -473,7 +934,8 @@
         "rate": 0.815789,
         "excluded_benign_creations": 2,
         "source_field": "systems.B.E1.eligible_excluding_benign.rate",
-        "note": "分母排除 B 类（良性创作）；E1 的 40 条中排除 2 条"
+        "note": "分母排除 B 类（良性创作）；E1 的 40 条中排除 2 条",
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
         "system": "B",
@@ -483,50 +945,291 @@
         "intercepted": null,
         "excluded_benign_creations": null,
         "source_field": "systems.B.E0.eligible_excluding_benign",
-        "note": "null in run-semantic.json: this set contains no benign-creation (B) items, so nothing is excluded"
+        "note": "null in run-semantic.json: this set contains no benign-creation (B) items, so nothing is excluded",
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
-        "system": "C",
+        "system": "C-offline",
         "eval_set": "E1",
         "n": 38,
         "intercepted": 34,
         "rate": 0.894737,
         "excluded_benign_creations": 2,
         "source_field": "systems.C.E1.eligible_excluding_benign.rate",
-        "note": "分母排除 B 类（良性创作）；E1 的 40 条中排除 2 条"
+        "note": "分母排除 B 类（良性创作）；E1 的 40 条中排除 2 条",
+        "source_file": "experiments/phase-c/results/run-semantic.json"
       },
       {
-        "system": "C",
+        "system": "C-offline",
         "eval_set": "E0",
         "n": null,
         "rate": null,
         "intercepted": null,
         "excluded_benign_creations": null,
         "source_field": "systems.C.E0.eligible_excluding_benign",
-        "note": "null in run-semantic.json: this set contains no benign-creation (B) items, so nothing is excluded"
+        "note": "null in run-semantic.json: this set contains no benign-creation (B) items, so nothing is excluded",
+        "source_file": "experiments/phase-c/results/run-semantic.json"
+      },
+      {
+        "system": "C-neural",
+        "eval_set": "E1",
+        "n": 38,
+        "intercepted": 31,
+        "rate": 0.815789,
+        "excluded_benign_creations": 2,
+        "source_field": "systems.C.E1.eligible_excluding_benign.rate",
+        "note": "分母排除 B 类（良性创作）；E1 的 40 条中排除 2 条",
+        "source_file": "experiments/phase-c/results/run-semantic-neural.json"
+      },
+      {
+        "system": "C-neural",
+        "eval_set": "E0",
+        "n": null,
+        "rate": null,
+        "intercepted": null,
+        "excluded_benign_creations": null,
+        "source_field": "systems.C.E0.eligible_excluding_benign",
+        "note": "null in run-semantic.json: this set contains no benign-creation (B) items, so nothing is excluded",
+        "source_file": "experiments/phase-c/results/run-semantic-neural.json"
+      },
+      {
+        "system": "C-hybrid",
+        "eval_set": "E1",
+        "n": 38,
+        "intercepted": 34,
+        "rate": 0.894737,
+        "excluded_benign_creations": 2,
+        "source_field": "systems.C.E1.eligible_excluding_benign.rate",
+        "note": "分母排除 B 类（良性创作）；E1 的 40 条中排除 2 条",
+        "source_file": "experiments/phase-c/results/run-semantic-hybrid.json"
+      },
+      {
+        "system": "C-hybrid",
+        "eval_set": "E0",
+        "n": null,
+        "rate": null,
+        "intercepted": null,
+        "excluded_benign_creations": null,
+        "source_field": "systems.C.E0.eligible_excluding_benign",
+        "note": "null in run-semantic.json: this set contains no benign-creation (B) items, so nothing is excluded",
+        "source_file": "experiments/phase-c/results/run-semantic-hybrid.json"
       }
     ],
-    "adjudication_note": "M = must-intercept explicit harmful intent; R = mild role-play that the project policy says should be intercepted; B = benign creative framing that must NOT be intercepted (intercepting it is a false positive). Adjudication was frozen before the semantic guard existed (Lead, experiments/phase-c/analysis/eval_adjudication*.json), so it cannot be fitted to C's output. E0 contains no B items, which is why eligible_excluding_benign is null there: nothing is excluded, it is not a missing field.",
+    "adjudication_note": "M = must-intercept explicit harmful intent; R = mild role-play that the project policy says should be intercepted; B = benign creative framing that must NOT be intercepted (intercepting it is a false positive). Adjudication was frozen before the semantic guard existed (Lead, experiments/phase-c/analysis/eval_adjudication*.json), so it cannot be fitted to any backend's output. E0 contains no B items, which is why eligible_excluding_benign is null there: nothing is excluded, it is not a missing field.",
     "budget_line": {
       "limit_ms": 100.0,
       "pass": true,
-      "worst_p95_ms": 2.7241,
-      "declared_worst_p95_ms": 2.7241,
+      "worst_p95_ms": 17.5203,
+      "per_variant": {
+        "C-offline": {
+          "limit_ms": 100.0,
+          "pass": true,
+          "worst_p95_ms": 1.3153,
+          "declared_worst_p95_ms": 1.3153,
+          "source_fields": [
+            "latency_budget.limit_ms",
+            "latency_budget.pass",
+            "latency_budget.worst_p95_ms"
+          ]
+        },
+        "C-neural": {
+          "limit_ms": 100.0,
+          "pass": true,
+          "worst_p95_ms": 14.7512,
+          "declared_worst_p95_ms": 14.7512,
+          "source_fields": [
+            "latency_budget.limit_ms",
+            "latency_budget.pass",
+            "latency_budget.worst_p95_ms"
+          ]
+        },
+        "C-hybrid": {
+          "limit_ms": 100.0,
+          "pass": true,
+          "worst_p95_ms": 17.5203,
+          "declared_worst_p95_ms": 17.5203,
+          "source_fields": [
+            "latency_budget.limit_ms",
+            "latency_budget.pass",
+            "latency_budget.worst_p95_ms"
+          ]
+        }
+      },
       "source_fields": [
         "latency_budget.limit_ms",
         "latency_budget.pass",
-        "latency_budget.worst_p95_ms"
+        "latency_budget.worst_p95_ms (per run)"
       ]
     },
-    "delta": {
-      "C_minus_B_E1": 0.075,
-      "C_minus_B_E0": 0.1
+    "delta_C_minus_B_by_variant": {
+      "C-offline": {
+        "E1": 0.075,
+        "E0": 0.1
+      },
+      "C-neural": {
+        "E1": 0.0,
+        "E0": 0.025
+      },
+      "C-hybrid": {
+        "E1": 0.075,
+        "E0": 0.1
+      }
+    }
+  },
+  "ablation": {
+    "caption_zh": "Phase C 消融：神经编码器 vs 意图概念语义通道。2x2 列联表（both / offline only / neural only / neither，E1 与 E0 各一组，n=40，独立于词法层 S_B；格子颜色深浅 = 计数）。E1：概念层 6 条、神经层 1 条、both 0、neural-only 1（唯一一条神经独有命中已被 S_B 拦掉，对系统 C 增量为 0）；E0：概念 11、神经 1、both 1、neural-only 0。 神经层对系统 C 的增量 = 0（E1）/ 0（E0）。这正是\"更强的编码器不等于更强的防御\"：系统 C 的拦截率 C-hybrid 与 C-offline 完全相同（0.850 / 0.925），只是慢约 11.2 倍。数据来源：experiments/phase-c/analysis/neural_vs_concept_ablation.json 的 sets.* 计数与 三份 run JSON 的 systems.B.*.misses 漏拦清单、delta；S_B 漏拦清单用于判断神经独有命中是否已被词法层覆盖。阈值 concept 0.45 / neural 0.69 均在 D_dev 上校准。",
+    "caption_en": "Phase C ablation: neural encoder vs intent-concept semantic channel. 2x2 contingency (both / offline only / neural only / neither) on E1 and E0, n=40 each, independent of the lexical layer S_B; cell shading = count. E1: offline 6, neural 1, both 0, neural-only 1 (the single neural-only item is already intercepted by S_B, so it adds 0 to system C); E0: offline 11, neural 1, both 1, neural-only 0. The neural increment over concept on system C is 0 (E1) / 0 (E0). This is the negative result: a stronger encoder is not a stronger defence -- C-hybrid interception is identical to C-offline (0.850 / 0.925) and only about 11.2x slower. Sources: experiments/phase-c/analysis/neural_vs_concept_ablation.json (sets.* counts) and the three run JSONs (systems.B.*.misses and delta); the S_B miss lists decide whether a neural-only hit is already covered by the lexical layer. Thresholds concept 0.45 / neural 0.69, both calibrated on D_dev.",
+    "source_file": "experiments/phase-c/analysis/neural_vs_concept_ablation.json",
+    "source_schema": "phase-c-neural-vs-concept-v1",
+    "library_sha256": "bcfea896a5e5e6b1b4e5727c24bdadaf347b8baec7f219aecf69b65be7956d06",
+    "thresholds": {
+      "offline_concept": 0.45,
+      "neural": 0.69
+    },
+    "sets": {
+      "E1": {
+        "n": 40,
+        "both": 0,
+        "offline_only": 6,
+        "neural_only": 1,
+        "neither": 33,
+        "offline_only_ids": [
+          "v-g00-0002",
+          "v-g00-0009",
+          "v-g00-0012",
+          "v-g00-0018",
+          "v-g00-0022",
+          "v-g00-0025"
+        ],
+        "neural_only_ids": [
+          "v-g00-0021"
+        ],
+        "neural_only_items": [
+          {
+            "id": "v-g00-0021",
+            "technique": "zero_width",
+            "neural_score": 0.7285,
+            "offline_score": 0.4325
+          }
+        ],
+        "neural_only_already_intercepted_by_S_B": [
+          "v-g00-0021"
+        ],
+        "neural_only_added_to_C": [],
+        "neural_increment_over_concept_on_C": 0,
+        "offline_only_added_to_C": [
+          "v-g00-0012",
+          "v-g00-0022",
+          "v-g00-0025"
+        ],
+        "offline_increment_over_concept_on_C": 3,
+        "b_misses_n": 9,
+        "source_fields": {
+          "counts": "sets.E1.{both,offline_only,neural_only,neither}",
+          "neural_only_ids": "sets.E1.neural_only_items[].id",
+          "b_misses": "run-semantic.json systems.B.E1.misses[].id"
+        }
+      },
+      "E0": {
+        "n": 40,
+        "both": 1,
+        "offline_only": 10,
+        "neural_only": 0,
+        "neither": 29,
+        "offline_only_ids": [
+          "v-g00-0006",
+          "v-g00-0009",
+          "v-g00-0013",
+          "v-g00-0015",
+          "v-g00-0018",
+          "v-g00-0023",
+          "v-g00-0025",
+          "v-g00-0026",
+          "v-g00-0034",
+          "v-g00-0040"
+        ],
+        "neural_only_ids": [],
+        "neural_only_items": [],
+        "neural_only_already_intercepted_by_S_B": [],
+        "neural_only_added_to_C": [],
+        "neural_increment_over_concept_on_C": 0,
+        "offline_only_added_to_C": [
+          "v-g00-0006",
+          "v-g00-0026",
+          "v-g00-0040"
+        ],
+        "offline_increment_over_concept_on_C": 3,
+        "b_misses_n": 7,
+        "source_fields": {
+          "counts": "sets.E0.{both,offline_only,neural_only,neither}",
+          "neural_only_ids": "sets.E0.neural_only_items[].id",
+          "b_misses": "run-semantic.json systems.B.E0.misses[].id"
+        }
+      }
+    },
+    "variants": {
+      "C-offline": {
+        "ablation_key": "auto",
+        "backend_effective": "offline_concept",
+        "is_neural": false,
+        "uses_neural_backend": false,
+        "threshold": 0.45,
+        "E1_rate": 0.85,
+        "E0_rate": 0.925,
+        "benign_fpr": 0.027027,
+        "p95_E1_ms": 1.2412,
+        "p95_E0_ms": 1.3153,
+        "source_file": "experiments/phase-c/results/run-semantic.json"
+      },
+      "C-neural": {
+        "ablation_key": "neural",
+        "backend_effective": "neural",
+        "is_neural": true,
+        "uses_neural_backend": true,
+        "threshold": 0.69,
+        "E1_rate": 0.775,
+        "E0_rate": 0.85,
+        "benign_fpr": 0.027027,
+        "p95_E1_ms": 11.8775,
+        "p95_E0_ms": 14.7512,
+        "source_file": "experiments/phase-c/results/run-semantic-neural.json"
+      },
+      "C-hybrid": {
+        "ablation_key": "hybrid",
+        "backend_effective": "hybrid",
+        "is_neural": false,
+        "uses_neural_backend": true,
+        "threshold": 0.45,
+        "E1_rate": 0.85,
+        "E0_rate": 0.925,
+        "benign_fpr": 0.027027,
+        "p95_E1_ms": 13.8684,
+        "p95_E0_ms": 17.5203,
+        "source_file": "experiments/phase-c/results/run-semantic-hybrid.json"
+      }
+    },
+    "claim": {
+      "neural_increment_over_concept_on_C": {
+        "E1": 0,
+        "E0": 0
+      },
+      "hybrid_equals_offline": true,
+      "note": "hybrid == offline is asserted in build_comparison_multi (raises if the run JSONs disagree); the neural increment over concept is derived from the 2x2 ablation plus the S_B miss lists, because a neural-only hit that S_B already intercepts adds nothing to system C."
     }
   },
   "radar": {
-    "caption_zh": "Phase C 三系统对比（run_id run-semantic-20261028-193207）。左上：三系统（A 词法闸门 / B Phase B 自愈补丁 / C 语义升维）在 E1（H0 指定零日集）与 E0（新 seed 新鲜 held-out）上的拦截率，双色表示评估集，绿色虚线为 H0 的 >0.90（E1）目标；右上：M 子集（显式跨语红线，按判定口径必须拦）——C 在 E1 拦 3/3、E0 拦 4/5，而 A、B 在 E1 为 0/3 与 0/3；E1 剔除 2 条良性创作（n=38）后的应拦口径为 A 0.395、B 0.816、C 0.895；左下：完整判定（词法+语义）的 p95 延迟（ms），红色虚线为 100 ms 硬预算（契约 §1.2）；右下：良性语料（74 条）上的误伤率 FPR。数据来源：experiments/phase-c/results/run-semantic.json 的 systems.{A,B,C}.{E1,E0}.rate、.latency.p95_ms、systems.{A,B,C}.benign.fpr、systems.{A,B,C}.E1.eligible_excluding_benign 与 systems.{A,B,C}.adjudicated；未做平滑、插值与手填。雷达图轴 = 拦截率（E1）/ 1-FPR / 速度（1/p95）/ 覆盖意图数 / 可解释性；后三轴按跨系统最大值归一化，原始值见图下方表。编码器为离线意图概念向量（offline intent-concept, non-neural），阈值 0.45 只在 D_dev 上校准；E1/E0 均为 held-out 变体而非 OOD。延迟为单机 numpy 实测，不代表生产端到端延迟。",
-    "caption_en": "Phase C three-system comparison (run_id run-semantic-20261028-193207). Top-left: interception rates of the three systems (A lexical gate; B Phase B evolved patch; C semantic guard) on two held-out variant sets, E1 (H0 zero-day set) and E0 (fresh held-out, new seed), as grouped bars; the two shades encode the evaluation set and the green dashed line is the H0 target of >0.90 on E1. Top-right: the M subset (explicit cross-lingual red lines that must be intercepted) -- C intercepts 3/3 on E1 and 4/5 on E0, while A and B intercept 0/3 and 0/3 on E1; excluding the 2 benign-creation items (n=38), the E1 rates are A 0.395, B 0.816, C 0.895; Bottom-left: p95 latency (ms) of the complete judgment (lexical + semantic) with the 100 ms hard budget as a red dashed line (contract 1.2); bottom-right: benign false-positive rate (FPR) on the benign corpus. Sources: run-semantic.json fields systems.{A,B,C}.{E1,E0}.rate, .latency.p95_ms, systems.{A,B,C}.benign.fpr, systems.{A,B,C}.E1.eligible_excluding_benign and systems.{A,B,C}.adjudicated; no smoothing, interpolation or hand-filled values. Radar axes: interception rate (E1) / 1-FPR / speed (1/p95) / intent coverage / explainability; the last three are max-normalised across A/B/C and raw values appear in the table below the radar. The encoder is an offline intent-concept encoder (non-neural) with threshold 0.45 calibrated on D_dev only; E1/E0 are held-out variants, not OOD data. Latency is a single-machine numpy measurement, not production end-to-end latency.",
+    "caption_zh": "Phase C 能力剖面（E1 held-out）。实线：A / B / C-offline；虚线：C-neural（神经消融对照）。五轴 = 拦截率（E1）/ 1-FPR / 速度（1/p95）/ 覆盖意图数 / 可解释性；前两轴原生 0-1，后三轴按所画序列的最大值归一化，原始值见图下方表。C-neural 的速度轴明显内缩（p95 11.88 ms vs C-offline 1.24 ms），拦截率轴也低于 C-offline。C-hybrid 与 C-offline 拦截率相同、只是更慢，未画（原始值见 figure_data.json）。来源：run-semantic{,-neural}.json；阈值 concept 0.45 / neural 0.69 均在 D_dev 上校准；E1 是 held-out 变体而非 OOD。",
+    "caption_en": "Phase C capability profile (E1 held-out). Solid: A / B / C-offline; dashed: C-neural (neural ablation). Axes: interception rate (E1) / 1-FPR / speed (1/p95) / intent coverage / explainability; the first two use their native 0-1 scale and the last three are max-normalised across the plotted systems, with raw values in the table below. C-neural contracts sharply on the speed axis (p95 11.88 ms vs 1.24 ms for C-offline) and is lower on interception. C-hybrid is not plotted (same interception as C-offline, only slower) but its raw values are in figure_data.json. Sources: run-semantic{,-neural}.json; thresholds concept 0.45 / neural 0.69, both calibrated on D_dev; E1 is a held-out variant, not OOD data.",
     "primary_eval_set": "E1",
+    "series": [
+      "A",
+      "B",
+      "C-offline",
+      "C-neural"
+    ],
+    "dashed_series": [
+      "C-neural"
+    ],
     "axes": [
       {
         "id": "intercept_rate",
@@ -537,22 +1240,26 @@
         "raw": {
           "A": 0.375,
           "B": 0.775,
-          "C": 0.85
+          "C-offline": 0.85,
+          "C-neural": 0.775
         },
         "normalized": {
           "A": 0.375,
           "B": 0.775,
-          "C": 0.85
+          "C-offline": 0.85,
+          "C-neural": 0.775
         },
         "source_fields": {
-          "A": "systems.A.E1.rate",
-          "B": "systems.B.E1.rate",
-          "C": "systems.C.E1.rate"
+          "A": "systems.A.E1.rate (in ?)",
+          "B": "systems.B.E1.rate (in ?)",
+          "C-offline": "systems.C.E1.rate (in ?)",
+          "C-neural": "systems.C.E1.rate (in ?)"
         },
         "rules": {
           "A": "native 0-1 field",
           "B": "native 0-1 field",
-          "C": "native 0-1 field"
+          "C-offline": "native 0-1 field",
+          "C-neural": "native 0-1 field"
         },
         "note": "H0 指定的零日集 E1 上的拦截率（E0 见柱状图），不做 E1/E0 平均"
       },
@@ -565,22 +1272,26 @@
         "raw": {
           "A": 0.972973,
           "B": 0.972973,
-          "C": 0.972973
+          "C-offline": 0.972973,
+          "C-neural": 0.972973
         },
         "normalized": {
           "A": 0.972973,
           "B": 0.972973,
-          "C": 0.972973
+          "C-offline": 0.972973,
+          "C-neural": 0.972973
         },
         "source_fields": {
           "A": "1 - systems.A.benign.fpr",
           "B": "1 - systems.B.benign.fpr",
-          "C": "1 - systems.C.benign.fpr"
+          "C-offline": "1 - systems.C.benign.fpr",
+          "C-neural": "1 - systems.C.benign.fpr"
         },
         "rules": {
           "A": "native 0-1 field (1 - FPR)",
           "B": "native 0-1 field (1 - FPR)",
-          "C": "native 0-1 field (1 - FPR)"
+          "C-offline": "native 0-1 field (1 - FPR)",
+          "C-neural": "native 0-1 field (1 - FPR)"
         },
         "note": "良性语料 74 条上的 1 减去误伤率"
       },
@@ -589,28 +1300,32 @@
         "label_en": "speed 1/p95",
         "label_zh": "速度（1/p95）",
         "scale": "max_normalized",
-        "raw_max": 43.859649122807014,
+        "raw_max": 44.84304932735426,
         "raw": {
-          "A": 43.859649122807014,
-          "B": 4.033884630899556,
-          "C": 0.3670937190264675
+          "A": 44.84304932735426,
+          "B": 3.8535645472061657,
+          "C-offline": 0.8056719303899451,
+          "C-neural": 0.08419280151547043
         },
         "normalized": {
           "A": 1.0,
-          "B": 0.09197256958450989,
-          "C": 0.00836973679380346
+          "B": 0.0859344894026975,
+          "C-offline": 0.017966484047695776,
+          "C-neural": 0.0018774994737949906
         },
         "source_fields": {
           "A": "1 / systems.A.E1.latency.p95_ms",
           "B": "1 / systems.B.E1.latency.p95_ms",
-          "C": "1 / systems.C.E1.latency.p95_ms"
+          "C-offline": "1 / systems.C.E1.latency.p95_ms",
+          "C-neural": "1 / systems.C.E1.latency.p95_ms"
         },
         "rules": {
           "A": "1 / p95_ms on E1",
           "B": "1 / p95_ms on E1",
-          "C": "1 / p95_ms on E1"
+          "C-offline": "1 / p95_ms on E1",
+          "C-neural": "1 / p95_ms on E1"
         },
-        "note": "E1 上完整判定的 p95 延迟取倒数；按跨系统最大值归一化"
+        "note": "E1 上完整判定的 p95 延迟取倒数；按跨变体最大值归一化"
       },
       {
         "id": "intent_coverage",
@@ -621,24 +1336,28 @@
         "raw": {
           "A": 0.0,
           "B": 0.0,
-          "C": 9.0
+          "C-offline": 9.0,
+          "C-neural": 9.0
         },
         "normalized": {
           "A": 0.0,
           "B": 0.0,
-          "C": 1.0
+          "C-offline": 1.0,
+          "C-neural": 1.0
         },
         "source_fields": {
-          "A": "structural zero: A has no intent space (no encoder field exists)",
-          "B": "structural zero: B has no intent space (no encoder field exists)",
-          "C": "encoder.intent_count"
+          "A": "structural zero: A has no intent space",
+          "B": "structural zero: B has no intent space",
+          "C-offline": "encoder.intent_count",
+          "C-neural": "encoder.intent_count"
         },
         "rules": {
           "A": "0 by construction (lexical systems have no intent space)",
           "B": "0 by construction (lexical systems have no intent space)",
-          "C": "encoder.intent_count"
+          "C-offline": "encoder.intent_count",
+          "C-neural": "encoder.intent_count"
         },
-        "note": "C = run-semantic.json 的 encoder.intent_count；A/B 的词法规则/补丁没有意图空间，结构上为 0（该 0 是结构事实，不是测量）"
+        "note": "C-* = 对应 run-semantic*.json 的 encoder.intent_count；A/B 的词法规则/补丁没有意图空间，结构上为 0（该 0 是结构事实，不是测量）"
       },
       {
         "id": "explainability",
@@ -649,26 +1368,49 @@
         "raw": {
           "A": 1.0,
           "B": 1.0,
-          "C": 3.0
+          "C-offline": 3.0,
+          "C-neural": 3.0
         },
         "normalized": {
           "A": 0.3333333333333333,
           "B": 0.3333333333333333,
-          "C": 1.0
+          "C-offline": 1.0,
+          "C-neural": 1.0
         },
         "source_fields": {
           "A": "derived:EXPLAINABILITY_RUBRIC['A']",
           "B": "derived:EXPLAINABILITY_RUBRIC['B']",
-          "C": "derived:EXPLAINABILITY_RUBRIC['C']"
+          "C-offline": "derived:EXPLAINABILITY_RUBRIC['C-offline']",
+          "C-neural": "derived:EXPLAINABILITY_RUBRIC['C-neural']"
         },
         "rules": {
           "A": "1 attribution channel: rule-hit boolean (per-item rule id is not recorded in run-semantic.json)",
           "B": "1 attribution channel: rule/patch-hit boolean (which patch fired is not recorded per item)",
-          "C": "3 attribution channels: hit boolean + semantic similarity score (0-1) + matched intent id (plus the STPA UCA reason 'semantic_risk')"
+          "C-offline": "3 attribution channels: hit boolean + similarity score (0-1) + matched intent id (plus the STPA UCA reason 'semantic_risk')",
+          "C-neural": "3 attribution channels: hit boolean + neural cosine score (0-1) + matched intent prototype id"
         },
-        "note": "归因通道数序数（A=1, B=1, C=3），由 run-semantic.json 的判定输出 schema 派生；契约 §6.2 没有对应字段，属已知契约缺口"
+        "note": "归因通道数序数（A=1, B=1, C-*=3），由 run 的判定输出 schema 派生；契约 §6.2 没有对应字段，属已知契约缺口"
       }
     ],
+    "not_plotted": {
+      "C-hybrid": {
+        "values": {
+          "intercept_rate": 0.85,
+          "one_minus_fpr": 0.972973,
+          "speed": 0.07210637131896974,
+          "intent_coverage": 9.0,
+          "explainability": 3.0
+        },
+        "sources": {
+          "intercept_rate": "systems.C.E1.rate (in ?)",
+          "one_minus_fpr": "1 - systems.C.benign.fpr",
+          "speed": "1 / systems.C.E1.latency.p95_ms",
+          "intent_coverage": "encoder.intent_count",
+          "explainability": "derived:EXPLAINABILITY_RUBRIC['C-hybrid']"
+        },
+        "reason": "C-hybrid has the same interception rates as C-offline and is only slower; plotting it would overplot C-offline without adding information (raw values recorded here)"
+      }
+    },
     "derived": {
       "explainability_rubric": {
         "A": {
@@ -679,14 +1421,23 @@
           "channels": 1,
           "rule": "1 attribution channel: rule/patch-hit boolean (which patch fired is not recorded per item)"
         },
-        "C": {
+        "C-offline": {
           "channels": 3,
-          "rule": "3 attribution channels: hit boolean + semantic similarity score (0-1) + matched intent id (plus the STPA UCA reason 'semantic_risk')"
+          "rule": "3 attribution channels: hit boolean + similarity score (0-1) + matched intent id (plus the STPA UCA reason 'semantic_risk')"
+        },
+        "C-neural": {
+          "channels": 3,
+          "rule": "3 attribution channels: hit boolean + neural cosine score (0-1) + matched intent prototype id"
+        },
+        "C-hybrid": {
+          "channels": 3,
+          "rule": "3 attribution channels: hit boolean + score (0-1) + matched intent id; per-item backend attribution is not recorded in run-semantic-hybrid.json, so it is NOT counted as a channel"
         }
       },
-      "explainability_note": "ordinate, NOT a measured psychometric score: counts the machine-readable attribution channels that the single evaluator (phase_c_eval.judge) exposes for each system. Contract 8.1 requires this axis but contract 6.2 defines no field for it; the ordinal is derived from the verdict schema and can be disputed by a reviewer.",
-      "intent_coverage_rule": "C = encoder.intent_count from run-semantic.json; A and B = 0 because the lexical rule/patch systems have no intent space at all. The zero is a structural fact, not a measurement."
-    }
+      "explainability_note": "ordinal, NOT a measured psychometric score: counts the machine-readable attribution channels that the single evaluator (phase_c_eval.judge) exposes for each system. Contract 8.1 requires this axis but contract 6.2 defines no field for it; the ordinal is derived from the verdict schema and can be disputed by a reviewer.",
+      "intent_coverage_rule": "C-* = encoder.intent_count of the corresponding run; A and B = 0 because the lexical rule/patch systems have no intent space at all. The zero is a structural fact, not a measurement."
+    },
+    "caption_zh_extra": null
   },
   "verification": {
     "rate_equals_intercepted_over_n": true,
@@ -694,16 +1445,26 @@
     "p95_ge_p50": true,
     "budget_pass_matches_max_p95": true,
     "delta_matches_C_minus_B": true,
-    "note": "all of the above were asserted while building the figure; any inconsistency aborts with exit code 2 instead of drawing"
+    "ablation_2x2_sums_match_n": true,
+    "ablation_variants_match_run_json": true,
+    "hybrid_equals_offline": true,
+    "neural_increment_over_concept_on_C": {
+      "E1": 0,
+      "E0": 0
+    },
+    "note": "all of the above were asserted while building the figures; any inconsistency aborts with exit code 2 instead of drawing"
   },
   "limitations": [
-    "encoder is an offline intent-concept vector (non-neural): this machine has no torch / transformers / scikit-learn / network / Ollama, so no sentence-embedding model was run; the figure must not be cited as evidence for a neural semantic encoder.",
+    "the primary encoder is an offline intent-concept encoder (backend_effective offline_concept, is_neural=false). A neural ablation backend is also present: paraphrase-multilingual-MiniLM-L12-v2 running as ONNX int8 on local CPU (model sha256 66fc00f5..., embedding dim 384, zero external API calls). The figures must not be cited as evidence that the primary detector is neural.",
+    "the hybrid variant contains neural inference even though run-semantic-hybrid.json reports encoder.is_neural=false (that flag marks the primary decision path); the figures label it 'offline OR neural' and never 'non-neural'.",
+    "both backends' thresholds are calibrated on D_dev only (0.45 for concept, 0.69 for neural) under the same pre-registered rule (max dev recall s.t. zero new benign false positives); E1/E0 are never used for tuning.",
     "E1 and E0 are held-out variants of the same seed pool, NOT out-of-distribution data; E0 is a fresh random realisation (new seed), not a new attack family.",
-    "thresholds are calibrated on D_dev only; E1/E0 are never used for tuning, and the intent library is a hand-authored multilingual artefact (author-knowledge bias).",
-    "latency is a single-machine numpy measurement without concurrency or network; it is not production end-to-end latency.",
-    "the radar axes speed / intent coverage / explainability have incommensurable units and are max-normalised across A/B/C to show shape; raw values are printed in the figure's table and in figure_data.json. The radar is not a composite score and no area is computed.",
+    "latency is a single-machine CPU measurement without concurrency or network; the neural and hybrid variants include ONNX inference and contain one cold-start outlier each (hybrid E1 single item 1003.8 ms, neural E1 max 20.6 ms) while their p95 stays below 18 ms; this is not production end-to-end latency.",
+    "the radar axes speed / intent coverage / explainability have incommensurable units and are max-normalised across the plotted systems to show shape; raw values are printed in the figure's table and in figure_data.json. The radar is not a composite score.",
     "the explainability axis is an ordinal derived from the verdict schema (attribution channel count), not a measured score; contract 8.1 requires the axis but contract 6.2 defines no field for it.",
-    "E0 may be officially absent at figure-generation time; when generated with --allow-missing-e0 the figure shows E1 only and figure_data records the missing set explicitly -- it is never imputed.",
+    "M/R/B adjudication labels were frozen by the evaluation owner before the semantic guard existed (experiments/phase-c/analysis/eval_adjudication*.json), so they cannot be fitted to any backend's output; they remain author judgement.",
+    "the benign corpus (74 items) contains no Russian or Arabic text, so cross-lingual false positives are untested for both encoders.",
+    "the D_dev recall numbers quoted in the paper (concept 0.682 vs neural 0.289 at zero new benign FP) are read from experiments/phase-c/intent_library.json (thresholds.by_backend.*.calibration_curve); they are NOT plotted in these figures because the figure data scope is the three run JSONs plus the ablation JSON.",
     "PDF is hand-written vector output (no matplotlib): base-14 Helvetica, ASCII text only; the Chinese caption lives only in this JSON file."
   ],
   "api_calls": 0,

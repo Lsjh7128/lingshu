@@ -1,0 +1,164 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 504 340] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 4016 >>
+stream
+0.1 0.1 0.1 rg
+BT /F2 12 Tf 1 0 0 1 78.618 318 Tm (Phase C ablation: neural vs intent-concept semantic channel) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 22.232 304 Tm (2x2 contingency of semantic-layer decisions \(independent of the lexical layer S_B\); cell numbers are item counts, shading = count) Tj ET
+0.1 0.1 0.1 rg
+BT /F2 9 Tf 1 0 0 1 179.867 276 Tm (E1 \(n=40\)) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 158.548 268 Tm (neural hit) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 204.552 268 Tm (neural miss) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 111.984 228 Tm (offline hit) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 103.992 178 Tm (offline miss) Tj ET
+150 206 50 50 re
+1 1 1 rg
+0.2 0.2 0.2 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F2 11 Tf 1 0 0 1 171.942 233 Tm (0) Tj ET
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 167.216 220 Tm (both) Tj ET
+200 206 50 50 re
+0.8691 0.8691 0.8691 rg
+0.2 0.2 0.2 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F2 11 Tf 1 0 0 1 221.942 233 Tm (6) Tj ET
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 205.88 220 Tm (offline only) Tj ET
+150 156 50 50 re
+0.9782 0.9782 0.9782 rg
+0.2 0.2 0.2 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F2 11 Tf 1 0 0 1 171.942 183 Tm (1) Tj ET
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 155.436 170 Tm (neural only) Tj ET
+200 156 50 50 re
+0.28 0.28 0.28 rg
+0.2 0.2 0.2 RG
+0.8 w
+[] 0 d
+B
+1 1 1 rg
+BT /F2 11 Tf 1 0 0 1 218.884 183 Tm (33) Tj ET
+1 1 1 rg
+BT /F1 8 Tf 1 0 0 1 212.772 170 Tm (neither) Tj ET
+0.1 0.1 0.1 rg
+BT /F2 9 Tf 1 0 0 1 389.867 276 Tm (E0 \(n=40\)) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 368.548 268 Tm (neural hit) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 414.552 268 Tm (neural miss) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 321.984 228 Tm (offline hit) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 313.992 178 Tm (offline miss) Tj ET
+360 206 50 50 re
+0.9782 0.9782 0.9782 rg
+0.2 0.2 0.2 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F2 11 Tf 1 0 0 1 381.942 233 Tm (1) Tj ET
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 377.216 220 Tm (both) Tj ET
+410 206 50 50 re
+0.7818 0.7818 0.7818 rg
+0.2 0.2 0.2 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F2 11 Tf 1 0 0 1 428.884 233 Tm (10) Tj ET
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 415.88 220 Tm (offline only) Tj ET
+360 156 50 50 re
+1 1 1 rg
+0.2 0.2 0.2 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F2 11 Tf 1 0 0 1 381.942 183 Tm (0) Tj ET
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 365.436 170 Tm (neural only) Tj ET
+410 156 50 50 re
+0.3673 0.3673 0.3673 rg
+0.2 0.2 0.2 RG
+0.8 w
+[] 0 d
+B
+1 1 1 rg
+BT /F2 11 Tf 1 0 0 1 428.884 183 Tm (29) Tj ET
+1 1 1 rg
+BT /F1 8 Tf 1 0 0 1 422.772 170 Tm (neither) Tj ET
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 30 144 Tm (E1: offline semantic hits 6, neural hits 1, both 0, neural-only 1) Tj ET
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 30 132 Tm (     neural-only items not caught by S_B: 0 -> neural increment over concept on system C = 0) Tj ET
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 30 120 Tm (E0: offline semantic hits 11, neural hits 1, both 1, neural-only 0) Tj ET
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 30 108 Tm (     neural-only items not caught by S_B: 0 -> neural increment over concept on system C = 0) Tj ET
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 30 92 Tm (System C increment over S_B \(items, E1/E0\): C-off +3/+4 | C-neu +0/+1 | C-hyb +3/+4) Tj ET
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 30 80 Tm (     -> neural adds nothing beyond concept; C-hybrid equals C-offline, only slower.) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 30 64 Tm (Thresholds calibrated on D_dev only \(concept 0.45 / neural 0.69; max dev recall s.t. zero new benign FP\); n=40 per set.) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 30 52 Tm (Neural encoder: paraphrase-multilingual-MiniLM-L12-v2, ONNX int8, local CPU; zero external API calls.) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 30 40 Tm (model sha256 66fc00f5f29afcaf \(full hash in figure_data.json\).) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 6 Tf 1 0 0 1 8 14 Tm (source: run-semantic{,-neural,-hybrid}.json + neural_vs_concept_ablation.json | 2x2 counts: neural_vs_concept_ablation.json | neural increment derived with S_B miss lists) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+7 0 obj
+<< /Producer (LINGSHU Phase C A2 plot_phase_c.py) /Title (Phase C ablation: neural vs intent-concept semantic channel) /Subject (run run-semantic-20261028-224516) /CreationDate (D:20261028224516+08'00') >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000257 00000 n 
+0000004324 00000 n 
+0000004421 00000 n 
+0000004523 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R /Info 7 0 R >>
+startxref
+4744
+%%EOF

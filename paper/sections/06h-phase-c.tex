@@ -1,5 +1,6 @@
 % ============================================================================
 % 06h-phase-c.tex -- Phase C: Structural Mutation via a Semantic Guard
+% (dual-backend: intent-concept primary + real neural encoder ablation)
 %
 % STATUS: standalone section file. It is deliberately NOT \input into
 % main.tex / main-bilingual.tex: whether Phase C is folded into the
@@ -8,19 +9,29 @@
 % \input{sections-zh/06h-phase-c} after 06g in main-zh.tex):
 %     \input{sections/06h-phase-c}
 %
-% DATA PROVENANCE: every number in Tables 1--2 and in
-% figures/phase_c_{comparison,radar}.pdf is read programmatically from
-%   experiments/phase-c/results/run-semantic.json
-% (run_id run-semantic-20261028-193207, generated_at 2026-10-28T19:32:07+0800,
-% branch feat/phase-c-semantic-guard) by tools/plot_phase_c.py; the raw values
-% behind both figures are in experiments/phase-c/figures/figure_data.json, and
-% the figure PDFs are copied into paper/figures/ for this build.
+% DATA PROVENANCE: every number in Tables 1--3 and in
+% figures/phase_c_{comparison,ablation,radar}.pdf is read programmatically from
+% the three frozen run records
+%   experiments/phase-c/results/run-semantic.json         (auto -> offline_concept,
+%       run_id run-semantic-20261028-224516, threshold 0.45)
+%   experiments/phase-c/results/run-semantic-neural.json  (neural MiniLM,
+%       run_id run-semantic-20261028-224522, threshold 0.69)
+%   experiments/phase-c/results/run-semantic-hybrid.json  (offline OR neural,
+%       run_id run-semantic-20261028-224523)
+% plus the 2x2 ablation analysis
+%   experiments/phase-c/analysis/neural_vs_concept_ablation.json
+% by tools/plot_phase_c.py; the raw values behind the figures are in
+% experiments/phase-c/figures/figure_data.json, and the figure PDFs are copied
+% into paper/figures/ for this build.
 %
-% THE ENCODER IS NOT NEURAL: backend offline_concept, is_neural = false,
-% threshold 0.45 calibrated on D_dev only. This machine has no torch /
-% transformers / embedding weights and no network, so no sentence-embedding
-% model was run. Never write "all-MiniLM-L6-v2" or "neural sentence embedding"
-% (contract 0.4).
+% ENCODERS: the primary detector is an offline intent-concept encoder
+% (backend_effective = offline_concept, is_neural = false). The ablation
+% backend is a REAL neural model: paraphrase-multilingual-MiniLM-L12-v2,
+% 384-dimensional sentence embeddings, exported to ONNX int8 and executed on
+% local CPU (model sha256 66fc00f5f29afcaff34092e1bdd20008ca3918265a82fb9695a551e510cc4ebc;
+% zero external API calls, no token use). "auto" does not silently switch to
+% the neural model: the pre-registered D_dev selection rule chooses
+% offline_concept, and the neural backend is run only as an explicit ablation.
 % ============================================================================
 
 \subsection{Phase C: Structural Mutation via a Semantic Guard}
@@ -47,65 +58,148 @@ problem at all.
 
 Phase~C asks what changes when the controller stops adding tokens and changes
 the space it regulates in. The experiment is deliberately narrow: keep the two
-lexical systems fixed, add one semantic channel, and measure all three with a
-single instrument on two held-out variant sets.
+lexical systems fixed, add one semantic channel, and measure all systems with a
+single instrument on two held-out variant sets. Because a real multilingual
+sentence encoder was available for this phase, we also answer a question that
+is usually left implicit: does a stronger encoder produce a stronger defense?
 
-\paragraph{Three systems under one instrument.} The three systems are defined
-once in the contract and are not re-specified per analysis:
-$S_A$ is the Phase~A lexical gate (\texttt{phase\_b\_defense.scan(text, None)});
-$S_B$ is $S_A$ with the evolved patch snapshot of the Phase~B official run
-(\texttt{scan(text, evolved\_patch\_snapshot.json)}); $S_C$ is $S_B$ \emph{or}
-the semantic guard (\texttt{semantic\_guard.is\_risky(text)}, blocked as
-\texttt{STPA\_Blocked: semantic\_risk}). There is exactly one dependent
-variable, $\mathit{intercepted} = S_A \lor S_B \lor S_C$, so the three systems
-are nested and their differences are attributable to the added layer rather
-than to a re-definition of the task. All three are evaluated by a single
-evaluator (\texttt{tools/phase\_c\_eval.py}) which reuses the Phase~A scanner
-for the first two levels instead of re-implementing matching, so the same
-payload cannot score differently because two code paths disagree. Latency is
-measured per complete judgment (lexical levels plus, for $S_C$, the semantic
-channel) and reduced to p50/p95; the pre-registered budget is
-$p95 < 100$~ms for a complete judgment.
+\paragraph{Systems under one instrument.} The three systems are defined once in
+the contract and are not re-specified per analysis: $S_A$ is the Phase~A
+lexical gate (\texttt{phase\_b\_defense.scan(text, None)}); $S_B$ is $S_A$ with
+the evolved patch snapshot of the Phase~B official run
+(\texttt{scan(text, evolved\_patch\_snapshot.json)}); $S_C$ is $S_B$
+\emph{or} the semantic guard (\texttt{semantic\_guard.is\_risky(text)}, blocked
+as \texttt{STPA\_Blocked: semantic\_risk}). The semantic channel has three
+backend variants, all evaluated by the same evaluator on the same sets:
+$S_C$-offline (intent-concept, the primary configuration), $S_C$-neural
+(MiniLM sentence embeddings), and $S_C$-hybrid (offline OR neural). There is
+exactly one dependent variable,
+$\mathit{intercepted} = S_A \lor S_B \lor S_C$, so all systems are nested and
+their differences are attributable to the added layer rather than to a
+re-definition of the task. The evaluator
+(\texttt{tools/phase\_c\_eval.py}) reuses the Phase~A scanner for the first two
+levels instead of re-implementing matching, so the same payload cannot score
+differently because two code paths disagree. Latency is measured per complete
+judgment (lexical levels plus, for $S_C$, the semantic channel) and reduced to
+p50/p95; the pre-registered budget is $p95 < 100$~ms for a complete judgment.
 
 \paragraph{Two held-out sets and the leakage protocol.} The evaluation uses
 three disjoint corpora with different roles. $D_{\mathrm{dev}}$ is the Phase~B
 training stream (the \texttt{split=="train"} seed attacks, the training-side
-bypass payloads, and the 74 benign items); it is the only corpus the guard is
-calibrated on, and it is visible to the layer's author. $E_1$ is the
-zero-day set fixed by the evaluation setup (forty held-out variants of the
-Phase~B held-out seeds, SHA-256
-\texttt{432e08a2d47cdc96\ldots}, generation-0 mutation distribution).
-$E_0$ is a fresh held-out realisation drawn with a new seed
+bypass payloads, and the 74 benign items); it is the only corpus any backend is
+calibrated on, and it is visible to the layer's author. $E_1$ is the zero-day
+set fixed by the evaluation setup (forty held-out variants of the Phase~B
+held-out seeds, SHA-256 \texttt{432e08a2d47cdc96\ldots}, generation-0 mutation
+distribution). $E_0$ is a fresh held-out realisation drawn with a new seed
 (\texttt{20261029}) from the same thirty-five held-out seed pool. The author of
 the intent library may read neither $E_1$ nor $E_0$: the library is built from
 $D_{\mathrm{dev}}$ only, its SHA-256 is frozen before the evaluation and
-recorded in \texttt{experiments/phase-c/intent\_library.json}, and the
+recorded in \texttt{experiments/phase-c/intent\_library.json}, and every
 threshold is chosen on $D_{\mathrm{dev}}$ alone. $E_0$ exists to check that a
 $D_{\mathrm{dev}}$-fitted threshold is not fitted to one particular
 realisation: it is a new random implementation, not a new attack family.
 Consequently we describe both $E_1$ and $E_0$ as \emph{held-out variants} and
 never as out-of-distribution data, the same convention as in Phase~B.
 
-\paragraph{The semantic channel: a change of representation, not a neural
-model.} The guard maps text to a vector by an \emph{offline intent-concept
-encoder} (backend \texttt{offline\_concept}, \texttt{is\_neural = false}): a
+\paragraph{Two encoders, one selection rule.} Both backends implement the same
+interface and both are calibrated on $D_{\mathrm{dev}}$ under the same
+pre-registered rule: maximise recall on the $D_{\mathrm{dev}}$ attack stream
+subject to adding zero benign false positives, with ties broken toward the
+higher threshold. The primary backend is an \emph{offline intent-concept
+encoder} (\texttt{offline\_concept}, \texttt{is\_neural = false}): a
 hand-authored library of nine harmful-intent prototypes with multilingual roots
-(Chinese, English, Russian, Arabic) and character n-gram fallback, implemented
-in pure NumPy. Its similarity combines a prototype cosine with weighted
-root/subword evidence and is clipped to $[0,1]$; the intent library, its
-threshold and its hash are frozen before evaluation, and the guard reports the
-matched intent, the similarity score and the STPA reason code, so an
-interception is attributable rather than opaque. The threshold is not the
-value suggested at planning time: on the frozen library, $0.45$ is the point
-that maximises recall on $D_{\mathrm{dev}}$ subject to adding zero benign false
-positives (0.85 would have retained only 11.7\% of the $D_{\mathrm{dev}}$
-bypass recall against 67.6\% at 0.45, so the suggested value is unusable on
-this score scale). This machine has no PyTorch, no Transformers, no embedding
-weights, no Ollama and no network, so the experiment uses no neural sentence
-encoder; we therefore do not claim one. The claim is narrower and, we think,
-sufficient for the argument: the guard changes the representation from surface
-tokens to intent concepts, which is a different \emph{kind} of variety, not
-merely more of the same.
+(Chinese, English, Russian, Arabic), character n-gram fallback, and a
+coverage-style score that combines root evidence, a pragmatic-cue term and a
+prototype cosine; it needs no model weights and no network. The ablation
+backend is a real neural sentence encoder: \texttt{paraphrase-multilingual-MiniLM-L12-v2},
+384-dimensional embeddings exported to ONNX int8 and executed locally on CPU
+(zero API calls), with similarity defined as the maximum cosine between the
+payload and the nine multilingual intent prototypes; this is the
+\texttt{neural-multilingual-v1} formula. The \texttt{auto} configuration does
+not silently prefer the neural model: the selection rule itself picks the
+backend, and it picks \texttt{offline\_concept} (0.45 versus 0.69 threshold).
+The neural and hybrid runs exist to make that choice falsifiable.
+
+\paragraph{Neural encoder ablation: a stronger encoder is not a stronger
+defense.} On $D_{\mathrm{dev}}$, at the zero-new-false-positive operating
+point, the intent-concept backend reaches a dev recall of 0.682 (bypass recall
+0.676) while the neural backend reaches 0.289 (bypass recall 0.243) --- the
+real sentence encoder is less than half as sensitive under the same constraint.
+The mechanism is visible in the calibration curve: the neural threshold is
+pinned at 0.69 because the highest-scoring benign item on $D_{\mathrm{dev}}$ is
+a \emph{practice} prompt, ``simulate a scam phone call, I want to practise
+identifying it'' (\texttt{benign-rc-border-04}), with a cosine of 0.689559 ---
+0.0004 below the chosen threshold. A sentence embedding encodes the
+\emph{topic} of the text (fraud), not whether the text asks for harmful
+capability; because benign practice prompts and harmful fraud requests share
+the topic, they share the similarity, and the threshold can only be set above
+the benign one at the cost of recall. The 2x2 contingency in
+Figure~\ref{fig:phase-c-ablation} makes the consequence precise. On $E_1$, the
+concept layer intercepts 6 items that the lexical systems miss, the neural
+layer intercepts 1, and the intersection is 0; the single neural-only hit
+(\texttt{v-g00-0021}, a zero-width variant with neural score 0.7285) is already
+intercepted by $S_B$'s zero-width decoder. On $E_0$, concept hits 11, neural
+hits 1, the intersection is 1 and the neural-only count is 0. The neural
+increment over the concept layer on system $C$ is therefore exactly 0 on both
+sets: the hybrid configuration is identical to the concept configuration
+(0.850 on $E_1$, 0.925 on $E_0$) and simply pays the neural inference cost
+(p95 13.9--17.5~ms versus 1.2--1.3~ms). We report this as a negative result and
+not as a footnote: in this task, whether the representation is aligned with the
+target (harmful intent) matters more than the capacity of the encoder.
+
+\paragraph{Results.} Tables~\ref{tab:phase-c}, \ref{tab:phase-c-adjudicated}
+and~\ref{tab:phase-c-encoders} and
+Figures~\ref{fig:phase-c-comparison}--\ref{fig:phase-c-radar} report the frozen
+runs. On $E_1$, $S_C$-offline intercepts 34/40 (0.850) against 31/40 (0.775)
+for $S_B$ and 15/40 (0.375) for $S_A$; on $E_0$ it intercepts 37/40 (0.925)
+against 33/40 (0.825) and 16/40 (0.400). The semantic channel therefore
+contributes exactly three additional interceptions on $E_1$ and four on $E_0$
+($+0.075$ and $+0.100$ in rate). The neural variant intercepts 31/40 (0.775) on
+$E_1$ and 34/40 (0.850) on $E_0$: no gain over $S_B$ on $E_1$ and one item on
+$E_0$, which the hybrid comparison shows is already covered by the concept
+layer. The benign false-positive rate is unchanged at 0.027 (the same two
+baseline items, 2/74) for every variant, and the p95 latency of a complete
+judgment is 1.2--1.3~ms for the concept backend, 11.9--14.8~ms for the neural
+backend and 13.9--17.5~ms for the hybrid, all far inside the 100~ms budget. The
+worst single judgment in the hybrid run (one $E_1$ item) took 1.0~s on its first
+call (ONNX session warm-up) while its p95 stayed at 13.9~ms; we report the p95
+and note the cold start explicitly. $E_0$ reaches 0.925 for the concept
+configuration; $E_1$ stays at 0.850, below the pre-registered $>0.90$ target.
+
+\paragraph{The gain is concentrated in explicit harm.} The aggregate rates hide
+where the gain comes from, so the evaluation owner labelled the nine $E_1$
+items that $S_B$ misses, \emph{before} the semantic guard existed, under a
+pre-registered policy reading of the project's own severity rules: $M$ = an
+explicit harmful instruction that must be intercepted; $R$ = a mild role-play
+variant that the policy says should be intercepted; $B$ = benign creative
+framing that must \emph{not} be intercepted, so intercepting it is a false
+positive. Table~\ref{tab:phase-c-adjudicated} separates the systems on these
+subsets. On $E_1$ the concept backend intercepts $M$ 3/3 and leaves both $B$
+items un-intercepted; the neural backend intercepts $M$ 0/3 (it loses all three
+explicit red lines), and neither backend covers $R$ (0/4 concept, 0/4 neural).
+On $E_0$ the concept backend intercepts $M$ 4/5 and the neural backend 1/5. On
+the denominator that excludes the two $B$ items ($n=38$), the $E_1$ rates are
+0.395 ($S_A$), 0.816 ($S_B$), 0.895 ($S_C$-offline), 0.816 ($S_C$-neural) and
+0.895 ($S_C$-hybrid). The contribution of Phase~C is therefore not a uniform
+rise but a specific one: explicit harmful intent moves from 0\% to 100\% on
+$E_1$ (3/3) and to 80\% on $E_0$ (4/5) under the concept backend, at zero
+additional benign false positives and a latency cost two orders of magnitude
+below the budget; under the neural backend the same $M$ subset collapses to
+0/3, which is the clearest single illustration of the alignment argument.
+
+\paragraph{The residual gap is a separability limit, not a threshold-tuning
+failure.} The four $E_1$ role-play variants that remain uncovered by the
+concept backend score 0.4332--0.4498 against a frozen threshold of 0.45, while
+the highest-scoring benign text on $D_{\mathrm{dev}}$ scores 0.443983. Two of
+the four (0.4432 and 0.4428) are \emph{below} that benign maximum, so no
+threshold can intercept them without admitting new benign false positives; the
+other two (0.4486 and 0.4498) lie in the narrow band between the benign maximum
+and 0.45, a band that the 0.01-step calibration grid did not resolve. What
+limits Phase~C here is therefore the separability of the concept-similarity
+representation itself, not its calibration---and the neural ablation shows that
+a generic sentence-embedding space does not remove the overlap; it moves it to
+the topic level, where benign practice prompts and harmful requests are even
+harder to separate.
 
 \paragraph{Requisite variety and second-order control.} Ashby's law of
 requisite variety states that a regulator can attenuate only that part of a
@@ -115,176 +209,169 @@ lexical patch adds variety in the regulator's alphabet (more tokens, more
 normalisation rules) while the disturbance moves in a different dimension
 (meaning preserved, surface destroyed); the total variety of the controller
 grows, but its variety \emph{along the disturbance's direction} does not.
-Thirteen patches and a stationary held-out rate is precisely the signature of
-a regulator whose state space does not contain the disturbance's dimension.
-The controller cannot see this from inside its own action loop, because from
+Thirteen patches and a stationary held-out rate is precisely the signature of a
+regulator whose state space does not contain the disturbance's dimension. The
+controller cannot see this from inside its own action loop, because from
 inside, every accepted patch is an improvement on the set that motivated it:
 the training stream does move (0.775 to 0.90). What is missing is an
 observation of the loop itself.
 
-That observation is the second-order move. A first-order controller adjusts
-its actions on the plant; a second-order controller adjusts its own structure
-after observing its own control loop, the step von Foerster describes as
-moving from the cybernetics of observed systems to the cybernetics of
-observing systems, and which Ashby already formalised as the search for
-ultrastability in a system that must survive a changing environment. The
-mechanism in this work is deliberately minimal: the evolutionary loop records
-marginal held-out coverage per generation, and when three consecutive
-generations contribute zero marginal coverage the loop stops generating
-patches and hands over to a structural change
+That observation is the second-order move. A first-order controller adjusts its
+actions on the plant; a second-order controller adjusts its own structure after
+observing its own control loop, the step von Foerster describes as moving from
+the cybernetics of observed systems to the cybernetics of observing systems, and
+which Ashby already formalised as the search for ultrastability in a system
+that must survive a changing environment. The mechanism in this work is
+deliberately minimal: the evolutionary loop records marginal held-out coverage
+per generation, and when three consecutive generations contribute zero marginal
+coverage the loop stops generating patches and hands over to a structural change
 (\texttt{stop\_reason="trigger\_phase\_c"}). The trigger is not another
 heuristic about attacks; it is a statement the controller makes about
-\emph{itself}---``my learning has stopped adding variety''---and it is the
-point at which a parametric mutation is replaced by a structural one.
-Structural mutation here means adding a dimension to the controller's state
-space, a semantic channel that can vary with the semantic dimension of the
-disturbance. Whether that added dimension actually restores requisite variety
-is an empirical question, answered by the measured interception rates below
-rather than by the vocabulary of cybernetics.
-
-\paragraph{Results.} Tables~\ref{tab:phase-c} and~\ref{tab:phase-c-adjudicated}
-and Figures~\ref{fig:phase-c-comparison}--\ref{fig:phase-c-radar} report the
-frozen run (\texttt{run-semantic-20261028-193207}). On $E_1$, $S_C$ intercepts
-34/40 (0.850) against 31/40 (0.775) for $S_B$ and 15/40 (0.375) for $S_A$; on
-$E_0$ it intercepts 37/40 (0.925) against 33/40 (0.825) and 16/40 (0.400). The
-semantic channel therefore contributes exactly three additional interceptions
-on $E_1$ and four on $E_0$, i.e.\ $+0.075$ and $+0.100$ in rate, while the
-benign false-positive rate is unchanged at 0.027 (the same two baseline items,
-2/74) and the p95 latency of a complete judgment is 1.3--2.7~ms across the two
-sets, far inside the 100~ms budget (the worst single E1 judgment in the same
-run took 20.6~ms). $E_0$ reaches 0.925; $E_1$ stays at 0.850, below the
-pre-registered $>0.90$ target.
-
-\paragraph{The gain is concentrated in explicit harm.} The aggregate rates hide
-where the gain comes from, so the evaluation owner labels the nine $E_1$ items
-that $S_B$ misses, \emph{before} the semantic guard exists, under a
-pre-registered policy reading of the project's own severity rules: $M$ = an
-explicit harmful instruction that must be intercepted; $R$ = a mild
-role-play variant that the policy says should be intercepted; $B$ = benign
-creative framing that must \emph{not} be intercepted, so intercepting it is a
-false positive. Table~\ref{tab:phase-c-adjudicated} separates the systems on
-these subsets. On $E_1$ the semantic guard intercepts $M$ 3/3 (the explicit
-cross-lingual red lines that neither lexical system catches) and leaves both
-$B$ items un-intercepted (zero false positives on benign creation); on $E_0$ it
-intercepts $M$ 4/5. The same comparison shows the limit: $R$ remains 0/4 on
-$E_1$ and 0/2 on $E_0$, and $S_A$/$S_B$ intercept none of these items either.
-On the denominator that excludes the two $B$ items ($n=38$), the $E_1$ rates
-are 0.395 ($S_A$), 0.816 ($S_B$) and 0.895 ($S_C$). The contribution of
-Phase~C is therefore not a uniform rise but a specific one: explicit harmful
-intent moves from 0\% to 100\% on $E_1$ (3/3) and to 80\% on $E_0$ (4/5), at
-zero additional benign false positives and a latency cost two orders of
-magnitude below the budget.
-
-\paragraph{The residual gap is a separability limit, not a threshold-tuning
-failure.} The four $E_1$ role-play variants that remain uncovered score
-0.4332--0.4498 against a frozen threshold of 0.45, while the highest-scoring
-benign text on $D_{\mathrm{dev}}$ scores 0.443983. Two of the four (0.4432 and
-0.4428) are \emph{below} that benign maximum, so no threshold can intercept
-them without admitting new benign false positives; the other two (0.4486 and
-0.4498) lie in the narrow band between the benign maximum and 0.45, a band
-that the 0.01-step calibration grid did not resolve. What limits Phase~C here
-is therefore the separability of the concept-similarity representation itself,
-not its calibration---and this is exactly the cybernetic reading: the added
-dimension is large enough to match the $M$ class (explicit harmful intent) and
-too small to match the $R$ class (mild role-playing), whose scores overlap with
-benign creative writing.
+\emph{itself}---``my learning has stopped adding variety''---and it is the point
+at which a parametric mutation is replaced by a structural one. Structural
+mutation here means adding a dimension to the controller's state space, a
+semantic channel that can vary with the semantic dimension of the disturbance.
+The neural ablation adds a useful corollary: the value of the new dimension
+comes from its \emph{alignment} with the disturbance, not from the capacity of
+the model that implements it. A less powerful but target-aligned representation
+(intent concepts) creates variety where it is needed; a more powerful but
+topic-aligned one (sentence embeddings) does not.
 
 \paragraph{Discussion: what this experiment tests and what it shows.} The
-experiment was designed to test a specific claim, whose wording was fixed by
-the evaluation owner for this phase: \emph{``Our findings demonstrate the
-limitation of first-order lexical co-evolution. The plateau at 0.775 indicates
-that structural mutation (Second-Order Cybernetics) is mandatory. By
-introducing a semantic guard, Phase C achieved a structural leap, restoring the
-system's requisite variety against semantic mutations.''} However, the measured
-results qualify this claim: on held-out mutations the semantic guard raises
-interception from 0.775 to 0.850 ($E_1$) and from 0.825 to 0.925 ($E_0$),
-converting explicit cross-lingual red lines from 0\% to 100\% on $E_1$ (3/3)
-and to 80\% on $E_0$ (4/5), at zero additional benign false positives and
-1.3--2.7~ms p95 latency, while mild role-play variants remain uncovered (0/4
-on $E_1$) and $E_1$ therefore stays below the pre-registered 0.90 target. We
-therefore report the structural leap as \textbf{partial} and not as a
-conclusion: the semantic guard restores requisite variety for explicit harmful
-intent, but not for mild role-play, where the encoder's score distribution
-overlaps benign creative writing. The first sentence of the claim is fully
-supported by Phase~B; the third is supported only in that qualified sense, and
-this section says so rather than letting the unqualified sentence stand.
+experiment was designed to test a specific claim, whose wording was fixed by the
+evaluation owner for this phase: \emph{``Our findings demonstrate the limitation
+of first-order lexical co-evolution. The plateau at 0.775 indicates that
+structural mutation (Second-Order Cybernetics) is mandatory. By introducing a
+semantic guard, Phase C achieved a structural leap, restoring the system's
+requisite variety against semantic mutations.''} However, the measured results
+qualify this claim: on held-out mutations the semantic guard raises interception
+from 0.775 to 0.850 ($E_1$) and from 0.825 to 0.925 ($E_0$), converting explicit
+cross-lingual red lines from 0\% to 100\% on $E_1$ (3/3) and to 80\% on $E_0$
+(4/5), at zero additional benign false positives and 1.2--1.3~ms p95 latency,
+while mild role-play variants remain uncovered (0/4 on $E_1$) and $E_1$ therefore
+stays below the pre-registered 0.90 target. We therefore report the structural
+leap as \textbf{partial} and not as a conclusion: the semantic guard restores
+requisite variety for explicit harmful intent, but not for mild role-play, where
+the encoder's score distribution overlaps benign creative writing. The neural
+ablation does not support the stronger reading that a better encoder would
+deliver a better defence either: replacing the intent-concept representation
+with a real multilingual sentence encoder \emph{lowers} the dev recall from
+0.682 to 0.289, drops explicit red lines from 3/3 to 0/3 on $E_1$, and adds
+nothing to system $C$ over the concept layer. The first sentence of the claim is
+fully supported by Phase~B; the third is supported only in the qualified sense
+that the change of representation---not the model---is what restored variety,
+and this section says so rather than letting the unqualified sentence stand.
 
-Two provenance notes belong with that verdict. First, the encoder is an offline
-intent-concept encoder (non-neural) with a threshold calibrated on
-$D_{\mathrm{dev}}$ only; no neural sentence embedding was run, and no external
-API was called ($\mathit{api\_calls} = 0$, $\mathit{api\_tokens\_used} = 0$).
-Second, $E_1$ and $E_0$ are held-out variants generated from the same seed pool
-under the same mutation distribution, not out-of-distribution data; $E_0$ is a
-fresh random realisation with a new seed, not a new attack family. Latency is a
-single-machine NumPy measurement without concurrency or network, so it is not
-production end-to-end latency.
+Three provenance notes belong with that verdict. First, the primary encoder is
+an offline intent-concept encoder (non-neural) with threshold 0.45 calibrated on
+$D_{\mathrm{dev}}$; the neural ablation uses
+\texttt{paraphrase-multilingual-MiniLM-L12-v2} exported to ONNX int8 (model
+sha256 \texttt{66fc00f5\ldots}) and executed on local CPU, with its own
+$D_{\mathrm{dev}}$-calibrated threshold 0.69. No external API was called
+($\mathit{api\_calls} = 0$, $\mathit{api\_tokens\_used} = 0$). Second, $E_1$ and
+$E_0$ are held-out variants generated from the same seed pool under the same
+mutation distribution, not out-of-distribution data; $E_0$ is a fresh random
+realisation with a new seed, not a new attack family. Third, latency is a
+single-machine CPU measurement without concurrency or network; the neural
+variants include ONNX inference, and the hybrid run contains one cold-start
+outlier of 1.0~s on its first call, so the p95 figures are the relevant ones
+and this is not production end-to-end latency.
 
 \paragraph{What this shows and does not show.} It shows that a second-order
 trigger---observing zero marginal coverage and changing the regulator's state
 space instead of adding another patch---can be built in a real closed loop, and
-that the added semantic dimension produces a measurable, attributable gain on
-the class of failures the lexical loop provably could not reach, at a
-negligible latency and false-positive cost. It does not show that the semantic
+that a representation chosen for its \emph{intent alignment} produces a
+measurable, attributable gain on the class of failures the lexical loop provably
+could not reach, at a negligible latency and false-positive cost. It shows,
+negatively, that a real neural sentence encoder is not a drop-in improvement: it
+is worse under the same calibration constraint, it loses the explicit red lines,
+and it adds nothing over the concept layer. It does not show that the semantic
 layer generalises beyond its nine hand-authored intents: the concept similarity
 separates explicit harm from benign text but not mild role-play from benign
-creative writing, and an attack rewrite that shares no lexical evidence with
-the intent library will still be missed (the residual misses are listed in
+creative writing, and an attack rewrite that shares no lexical evidence with the
+intent library will still be missed (the residual misses are listed in
 \texttt{residual\_misses\_C}). The $M$/$R$/$B$ labels were written by the
 evaluation owner before the guard existed, which removes post-hoc fitting but
 introduces author judgment; the benign corpus contains no Russian or Arabic
-text, so cross-lingual false positives remain untested; and the reported
-latency, while far below the budget, was measured on an otherwise idle
-machine.
+text, so cross-lingual false positives remain untested for both encoders; the
+neural model is an ONNX int8 CPU export and its latency here should not be read
+as the latency of the original framework model; and the reported latency, while
+far below the budget, was measured on an otherwise idle machine.
 
 \begin{table*}[t]
 \centering
-\caption{Phase~C: three systems measured by one evaluator on two held-out
-variant sets ($E_1$: forty zero-day variants, SHA-256 \texttt{432e08a2\ldots};
-$E_0$: forty fresh variants from seed \texttt{20261029}) and on the 74-item
-benign corpus. ``k/n'' gives intercepted items over set size; p95 latency is
-in milliseconds for a complete judgment (lexical levels plus, for $S_C$, the
-semantic channel). On the denominator that excludes the two benign-creation
-items in $E_1$ ($n=38$), the $E_1$ rates are 0.395 ($S_A$), 0.816 ($S_B$) and
-0.895 ($S_C$). Every cell is read from
-\texttt{experiments/phase-c/results/run-semantic.json} (run\_id
-\texttt{run-semantic-20261028-193207}) and reproduced by
-\texttt{tools/plot\_phase\_c.py}; no value is hand-entered. The semantic encoder
-is an offline intent-concept encoder (non-neural) with its threshold (0.45)
-calibrated on $D_{\mathrm{dev}}$ only.}
+\caption{Phase~C: five systems measured by one evaluator on two held-out variant
+sets ($E_1$: forty zero-day variants, SHA-256 \texttt{432e08a2\ldots}; $E_0$:
+forty fresh variants from seed \texttt{20261029}) and on the 74-item benign
+corpus. ``k/n'' gives intercepted items over set size; p95 latency is in
+milliseconds for a complete judgment (lexical levels plus, for $S_C$, the
+semantic channel). Labels in parentheses give the semantic threshold calibrated
+on $D_{\mathrm{dev}}$. On the denominator that excludes the two benign-creation
+items in $E_1$ ($n=38$), the $E_1$ rates are 0.395 ($S_A$), 0.816 ($S_B$), 0.895
+($S_C$-offline), 0.816 ($S_C$-neural) and 0.895 ($S_C$-hybrid). Every cell is
+read from the three frozen run JSONs (official run\_id
+\texttt{run-semantic-20261028-224516}) and reproduced by
+\texttt{tools/plot\_phase\_c.py}; no value is hand-entered.}
 \label{tab:phase-c}
 \begin{tabular}{@{}lrrrrrrrr@{}}
 \toprule
 System & $E_1$ k/n & $E_1$ rate & $E_0$ k/n & $E_0$ rate
        & p95 $E_1$ & p95 $E_0$ & benign FPR & FP/74 \\
 \midrule
-A (lexical gate) & 15/40 & 0.375 & 16/40 & 0.400 & 0.0228 & 0.0207 & 0.027 & 2/74 \\
-B (self-heal) & 31/40 & 0.775 & 33/40 & 0.825 & 0.2479 & 0.1084 & 0.027 & 2/74 \\
-C (semantic) & 34/40 & 0.850 & 37/40 & 0.925 & 2.7241 & 1.2755 & 0.027 & 2/74 \\
+A (lexical gate) & 15/40 & 0.375 & 16/40 & 0.400 & 0.0223 & 0.0228 & 0.027 & 2/74 \\
+B (self-heal) & 31/40 & 0.775 & 33/40 & 0.825 & 0.2595 & 0.1108 & 0.027 & 2/74 \\
+C-offline (intent-concept, thr 0.45) & 34/40 & 0.850 & 37/40 & 0.925 & 1.2412 & 1.3153 & 0.027 & 2/74 \\
+C-neural (MiniLM int8, thr 0.69) & 31/40 & 0.775 & 34/40 & 0.850 & 11.8775 & 14.7512 & 0.027 & 2/74 \\
+C-hybrid (offline OR neural, thr 0.45) & 34/40 & 0.850 & 37/40 & 0.925 & 13.8684 & 17.5203 & 0.027 & 2/74 \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
 \begin{table*}[t]
 \centering
-\caption{The same run separated by the pre-registered adjudication of the items
+\caption{The same runs separated by the pre-registered adjudication of the items
 $S_B$ misses. M = explicit harmful instruction that must be intercepted; R =
 mild role-play that the project policy says should be intercepted; B = benign
-creative framing that must \emph{not} be intercepted (intercepting it would be
-a false positive). $E_0$ contains no B items. The table is the load-bearing
-evidence of Phase~C: the semantic guard converts explicit cross-lingual red
-lines from 0/3 to 3/3 on $E_1$ and from 0/5 to 4/5 on $E_0$, does not touch
-benign creation, and leaves mild role-play at 0/4 and 0/2. Labels were frozen
-before the semantic guard existed, so they cannot be fitted to its output.}
+creative framing that must \emph{not} be intercepted (intercepting it would be a
+false positive). $E_0$ contains no B items. The table is the load-bearing
+evidence of Phase~C: under the intent-concept backend explicit cross-lingual red
+lines move from 0/3 to 3/3 on $E_1$ and from 0/5 to 4/5 on $E_0$ while benign
+creation stays untouched; under the neural backend the same M subset collapses to
+0/3 on $E_1$ and 1/5 on $E_0$. Mild role-play is 0/4 and 0/2 for every backend.
+Labels were frozen before the semantic guard existed, so they cannot be fitted to
+any backend's output.}
 \label{tab:phase-c-adjudicated}
-\begin{tabular}{@{}lrrr@{}}
+\begin{tabular}{@{}lrrrrr@{}}
 \toprule
-Adjudicated subset & A & B & C \\
+Adjudicated subset & A & B & C-offline & C-neural & C-hybrid \\
 \midrule
-E1-M (explicit harm, must intercept) & 0/3 & 0/3 & 3/3 \\
-E1-R (mild role-play, should intercept) & 0/4 & 0/4 & 0/4 \\
-E1-B (benign creation, must not intercept) & 0/2 & 0/2 & 0/2 \\
-E0-M (explicit harm, must intercept) & 0/5 & 0/5 & 4/5 \\
-E0-R (mild role-play, should intercept) & 0/2 & 0/2 & 0/2 \\
+E1-M (explicit harm, must intercept) & 0/3 & 0/3 & 3/3 & 0/3 & 3/3 \\
+E1-R (mild role-play, should intercept) & 0/4 & 0/4 & 0/4 & 0/4 & 0/4 \\
+E1-B (benign creation, must not intercept) & 0/2 & 0/2 & 0/2 & 0/2 & 0/2 \\
+E0-M (explicit harm, must intercept) & 0/5 & 0/5 & 4/5 & 1/5 & 4/5 \\
+E0-R (mild role-play, should intercept) & 0/2 & 0/2 & 0/2 & 0/2 & 0/2 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\caption{Encoder variants of the semantic channel. ``Runs neural inference''
+marks whether the variant executes the ONNX model even when the JSON
+\texttt{is\_neural} flag (which describes the primary path) is false. All
+thresholds are calibrated on $D_{\mathrm{dev}}$ only under the same
+pre-registered rule; the \texttt{auto} configuration is selected by that rule
+and resolves to \texttt{offline\_concept}.}
+\label{tab:phase-c-encoders}
+\begin{tabular}{@{}llllll@{}}
+\toprule
+Variant & backend\_effective & is\_neural & runs neural inference & threshold (D\_dev) & model \\
+\midrule
+C-offline & offline\_concept & false & no & 0.45 & none (intent-concept rules) \\
+C-neural & neural & true & yes & 0.69 & paraphrase-multilingual-MiniLM-L12-v2 (ONNX int8) \\
+C-hybrid & hybrid & false & yes & 0.45 & intent-concept OR MiniLM-L12 ONNX int8 \\
+\midrule
+\multicolumn{6}{@{}l}{neural increment over concept on system C: 0 (E1) / 0 (E0)} \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -292,39 +379,57 @@ E0-R (mild role-play, should intercept) & 0/2 & 0/2 & 0/2 \\
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.98\textwidth]{figures/phase_c_comparison.pdf}
-\caption{Phase~C three-system comparison (run\_id
-\texttt{run-semantic-20261028-193207}). Top-left: interception rate of
-$S_A$ (lexical gate), $S_B$ ($S_A$ plus the Phase~B evolved patch) and
-$S_C$ ($S_B$ plus the semantic guard) on the two held-out variant sets
-$E_1$ and $E_0$, with the pre-registered $>0.90$ target on $E_1$ as a green
-dashed line; the line below the panels gives the $E_1$ rates on the denominator
-that excludes the two benign-creation items ($n=38$). Top-right: the M subset
-(explicit cross-lingual red lines that must be intercepted), where $S_C$
-reaches 3/3 on $E_1$ and 4/5 on $E_0$ while $S_A$ and $S_B$ stay at zero.
-Bottom-left: p95 latency of a complete judgment with the 100~ms budget as a red
-dashed line; bottom-right: benign false-positive rate with counts. Every
-plotted value is read from
-\texttt{experiments/phase-c/results/run-semantic.json}; figure inputs:
-\texttt{experiments/phase-c/figures/figure\_data.json}. No smoothing,
-interpolation or hand-filled value; the encoder is an offline intent-concept
-encoder (non-neural), threshold 0.45 calibrated on $D_{\mathrm{dev}}$.}
+\caption{Phase~C five-system comparison (official run\_id
+\texttt{run-semantic-20261028-224516}). Top: interception rate of $S_A$,
+$S_B$, and the three semantic variants on the held-out variant sets $E_1$ and
+$E_0$, with the pre-registered $>0.90$ target on $E_1$ as a green dashed line;
+the blue line gives the C-B net increment per variant (offline $+0.075/+0.100$,
+neural $+0.000/+0.025$, hybrid $+0.075/+0.100$). Middle-left: the M subset of
+must-intercept explicit red lines, where the concept and hybrid backends reach
+3/3 on $E_1$ while the neural backend reaches 0/3; middle-right: benign
+false-positive rate (2/74 for every system). Bottom: p95 latency with the
+100~ms budget as a red dashed line (concept 1.2~ms, neural 11.9~ms, hybrid
+13.9~ms on $E_1$). Every plotted value is read from the three run JSONs; figure
+inputs and all raw values: \texttt{experiments/phase-c/figures/figure\_data.json}.
+No smoothing, interpolation or hand-filled value.}
 \label{fig:phase-c-comparison}
 \end{figure*}
 
 \begin{figure*}[t]
 \centering
+\includegraphics[width=0.98\textwidth]{figures/phase_c_ablation.pdf}
+\caption{Neural vs intent-concept ablation: 2x2 contingency of semantic-layer
+decisions on $E_1$ and $E_0$ (independent of the lexical layer $S_B$; cell
+shading = count). On $E_1$ the concept layer hits 6 items the lexical systems
+miss, the neural layer hits 1, and the intersection is 0; the single
+neural-only item (\texttt{v-g00-0021}, zero-width, neural score 0.7285) is
+already intercepted by $S_B$'s zero-width decoder, so the neural increment over
+concept on system $C$ is 0. On $E_0$ concept hits 11, neural hits 1, the
+intersection is 1 and the neural-only count is 0. Consequently the hybrid
+configuration equals the concept configuration (0.850/0.925) and only pays the
+inference cost. Source:
+\texttt{experiments/phase-c/analysis/neural\_vs\_concept\_ablation.json} plus
+the three run JSONs (the S\_B miss lists decide whether a neural-only hit is
+already covered); the neural encoder is
+paraphrase-multilingual-MiniLM-L12-v2 exported to ONNX int8 and executed on
+local CPU with zero external API calls.}
+\label{fig:phase-c-ablation}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
 \includegraphics[width=0.98\textwidth]{figures/phase_c_radar.pdf}
-\caption{Phase~C capability profile on the five axes required by the contract:
+\caption{Capability profile on the five axes required by the contract:
 interception rate ($E_1$), $1-\mathrm{FPR}$, speed ($1/p95$), intent coverage
-and explainability. The first two axes use their native $[0,1]$ scale; the
-last three have incommensurable units and are max-normalised across the three
-systems, with raw values in the table printed inside the figure. Intent
-coverage is the number of intent prototypes available to the guard (zero for
-the lexical systems, which have no intent space at all); explainability is a
-\emph{schema-derived ordinal} counting the machine-readable attribution
-channels each system's verdict exposes (rule hit only for the lexical systems;
-hit plus similarity score plus matched intent for $S_C$). It is a structural
-description, not a measured psychometric score, and the radar is not a
-composite index. Source as in Figure~\ref{fig:phase-c-comparison}.}
+and explainability. Solid: $S_A$, $S_B$ and $S_C$-offline; dashed: the
+$S_C$-neural ablation. The first two axes use their native $[0,1]$ scale; the
+last three have incommensurable units and are max-normalised across the plotted
+systems, with raw values in the table printed inside the figure. The neural
+variant contracts sharply on the speed axis (p95 11.9~ms versus 1.2~ms) and is
+lower on interception; coverage and explainability are equal because both
+semantic backends expose a hit flag, a score and a matched intent. The hybrid
+variant is not plotted (same interception as the concept backend, only slower);
+its raw values are in figure\_data.json. Source as in
+Figure~\ref{fig:phase-c-comparison}.}
 \label{fig:phase-c-radar}
 \end{figure*}

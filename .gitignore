@@ -14,6 +14,9 @@ __pycache__/
 # 虚拟环境 / 第三方依赖（不发布 npm 包，不需要 node_modules）
 **/.venv/
 .venv/
+# Phase C 神经编码器专用隔离环境与本地模型权重（可由 requirements 重建，不入库）
+.venv-neural/
+.models/
 **/node_modules/
 node_modules/
 
@@ -103,3 +106,9 @@ console/profiles.local.json
 # 系统垃圾文件
 .DS_Store
 Thumbs.db
+
+# 沙盒 demo 隔离数据（demo.sh / demo.bat 运行时生成；可删，绝不入库）
+# 内含 DSH 会话、DSH 存储、LINGSHU state/memory/audit 与合成预置记忆（synthetic）
+.lingshu-demo-data/
+# npx 冷启动缓存（demo 只用本机已装 DSH，不会生成；防御性排除）
+demo/.runtime/

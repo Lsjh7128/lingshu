@@ -1,0 +1,53 @@
+# Phase C · 神经编码器环境的可复现清单（Python 3.12，Windows x64）
+
+本文件对应 `D:\LSJH\lingshu\.venv-neural`（已 gitignore，不随仓库发布）。
+系统运行时 Python（DSH 自带）**没有** onnxruntime，所以凡是走 `neural` 后端的
+Phase C 测试/评估都必须用这个 venv 的 python 执行。
+
+## 1. 建环境
+
+```powershell
+$py = "C:\Users\陈岩\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\python\python.exe"
+& $py -m venv D:\LSJH\lingshu\.venv-neural
+$vpy = "D:\LSJH\lingshu\.venv-neural\Scripts\python.exe"
+# pypi.org 在本机不可达，使用可达镜像（2026-10-28 实测）
+& $vpy -m pip install --index-url https://mirrors.aliyun.com/pypi/simple/ `
+    numpy tokenizers onnxruntime
+```
+
+实测版本（2026-10-28）：`numpy 2.5.4` / `tokenizers 0.23.3` / `onnxruntime 1.31.1`。
+
+## 2. 模型权重
+
+模型：`Xenova/paraphrase-multilingual-MiniLM-L12-v2`（sentence-transformers
+`paraphrase-multilingual-MiniLM-L12-v2` 的 ONNX 导出，**多语**，覆盖 zh/en/ru/ar）。
+`huggingface.co` 在本机被 hosts 指到 `127.0.0.1`（不可用），必须走 `hf-mirror.com`。
+
+```powershell
+$dir = "D:\LSJH\lingshu\.models\paraphrase-multilingual-MiniLM-L12-v2"
+$base = "https://hf-mirror.com/Xenova/paraphrase-multilingual-MiniLM-L12-v2/resolve/main"
+# 大文件（约 118MB，int8 量化）支持断点续传：-C -
+curl.exe -L -C - -o "$dir\onnx\model_quantized.onnx" "$base/onnx/model_quantized.onnx"
+foreach ($f in "tokenizer.json","tokenizer_config.json","config.json","special_tokens_map.json") {
+    curl.exe -L -o "$dir\$f" "$base/$f"
+}
+```
+
+实测下载速度约 107 KB/s（`cas-bridge.xethub.hf.co`），118MB 需 15–20 分钟。
+
+## 3. 自检
+
+```powershell
+& $vpy -X utf8 tests\test_semantic_guard.py           # 两个后端
+& $vpy -X utf8 tools\phase_c_eval.py --backend neural --out experiments\phase-c\results\run-semantic.json
+```
+
+## 4. 退回概念后端（无模型/无 onnxruntime 时）
+
+```powershell
+$env:LINGSHU_GUARD_BACKEND = "offline_concept"
+```
+
+`semantic_guard` 的 `auto` 后端在加载失败时会走 `offline_concept`，并把
+**实际生效的后端**写进每个判定结果与 `run-semantic.json#encoder.backend_effective`，
+不会静默换后端而不留痕。

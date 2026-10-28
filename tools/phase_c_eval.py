@@ -171,7 +171,8 @@ def _semantic():
             "系统 C 需要 tools/semantic_guard.py（A1 交付）。当前不可用：%r" % (exc,)) from exc
 
 
-def judge(system: str, item: dict, b_patch: dict | None) -> dict[str, Any]:
+def judge(system: str, item: dict, b_patch: dict | None,
+          backend: str | None = None) -> dict[str, Any]:
     text = item.get("text") or ""
     t0 = time.perf_counter()
     base = defense.scan(text, None)
@@ -194,10 +195,30 @@ def judge(system: str, item: dict, b_patch: dict | None) -> dict[str, Any]:
                 out["by"].append("phase_b")
     if system == "C":
         sg = _semantic()
-        sem = sg.is_risky(text)
+        if backend == "hybrid":
+            off = sg.is_risky(text, backend="offline_concept")
+            neu = sg.is_risky(text, backend="neural")
+            risky = bool(off.get("risky")) or bool(neu.get("risky"))
+            sem = {"risky": risky, "backend": "hybrid",
+                   "score": max(float(off.get("score") or 0.0),
+                                float(neu.get("score") or 0.0)),
+                   "intent": (off.get("intent") if off.get("risky") else neu.get("intent")),
+                   "offline": {"risky": bool(off.get("risky")),
+                               "score": float(off.get("score") or 0.0),
+                               "backend": off.get("backend")},
+                   "neural": {"risky": bool(neu.get("risky")),
+                              "score": float(neu.get("score") or 0.0),
+                              "backend": neu.get("backend")}}
+        else:
+            sem = (sg.is_risky(text) if backend is None
+                   else sg.is_risky(text, backend=backend))
         out["semantic"] = {"risky": bool(sem.get("risky")),
                            "score": float(sem.get("score") or 0.0),
-                           "intent": sem.get("intent")}
+                           "intent": sem.get("intent"),
+                           "backend": sem.get("backend")}
+        if backend == "hybrid":
+            out["semantic"]["offline"] = sem.get("offline")
+            out["semantic"]["neural"] = sem.get("neural")
         out["phase_c_semantic"] = bool(sem.get("risky"))
         if out["phase_c_semantic"]:
             out["intercepted"] = True
@@ -221,8 +242,9 @@ def _latency(values: list[float]) -> dict:
             "max_ms": round(vs[-1], 4), "mean_ms": round(statistics.fmean(vs), 4)}
 
 
-def evaluate_system(system: str, items: list[dict], b_patch: dict | None) -> dict:
-    per = [judge(system, it, b_patch) for it in items]
+def evaluate_system(system: str, items: list[dict], b_patch: dict | None,
+                    backend: str | None = None) -> dict:
+    per = [judge(system, it, b_patch, backend) for it in items]
     n = len(per)
     k = sum(1 for p in per if p["intercepted"])
     return {
@@ -263,7 +285,7 @@ def _breakdown(rows: list[dict]) -> dict:
     return agg
 
 
-def compare(systems: list[str]) -> dict:
+def compare(systems: list[str], backend: str | None = None) -> dict:
     sets = load_eval_sets()
     b_patch = load_b_patch()
     adj = load_adjudication()
@@ -271,13 +293,31 @@ def compare(systems: list[str]) -> dict:
     if "C" in systems:
         sg = _semantic()
         lib = sg.load_intent_library()
+        # 用一条探针确认"最终生效的后端"，避免 auto 静默退化后报告写错后端
+        if backend == "hybrid":
+            eff = "hybrid"
+        else:
+            probe = (sg.is_risky("probe", backend=backend) if backend is not None
+                     else sg.is_risky("probe"))
+            eff = str(probe.get("backend") or "unknown")
+        thresholds = lib.get("thresholds") or {}
+        by_backend = thresholds.get("by_backend") or {}
+        eff_thr = (by_backend.get(eff) or {})
         sg_meta = {
-            "backend": lib.get("meta", {}).get("encoder_backend", "offline_concept"),
-            "is_neural": bool(lib.get("meta", {}).get("encoder_is_neural", False)),
-            "intent_library_sha256": lib.get("meta", {}).get("library_sha256"),
+            "backend_requested": backend or "auto",
+            "backend_effective": eff,
+            "is_neural": eff == "neural",
+            "model_id": (lib.get("meta") or {}).get("model_id"),
+            "model_sha256": (lib.get("meta") or {}).get("model_sha256"),
+            "embedding_dim": (lib.get("meta") or {}).get("embedding_dim"),
+            "intent_library_sha256": (lib.get("meta") or {}).get("library_sha256"),
+            "formula_version": (lib.get("meta") or {}).get("formula_version"),
             "intent_count": len(lib.get("intents") or []),
-            "threshold": lib.get("thresholds", {}).get("default"),
-            "threshold_calibrated_on": lib.get("thresholds", {}).get("calibrated_on"),
+            "threshold": eff_thr.get("default", thresholds.get("default")),
+            "threshold_calibrated_on": eff_thr.get("calibrated_on",
+                                                   thresholds.get("calibrated_on")),
+            "thresholds_by_backend": {k: (v or {}).get("default")
+                                      for k, v in by_backend.items()},
         }
     result: dict[str, Any] = {
         "schema": "phase-c-run-semantic-v1",
@@ -319,7 +359,7 @@ def compare(systems: list[str]) -> dict:
             if not items:
                 block[setname] = {"n": 0, "rate": None, "note": "数据集缺失"}
                 continue
-            ev = evaluate_system(sysname, items, b_patch)
+            ev = evaluate_system(sysname, items, b_patch, backend)
             block[setname] = {
                 "n": ev["n"], "intercepted": ev["intercepted"], "rate": ev["rate"],
                 "latency": ev["latency"],
@@ -333,7 +373,7 @@ def compare(systems: list[str]) -> dict:
                     block[setname]["eligible_excluding_benign"] = elig
             if sysname == "C":
                 result["residual_misses_C"][setname] = _misses(ev["per_item"])
-        benign_rows = [judge(sysname, it, b_patch) for it in sets["benign"]]
+        benign_rows = [judge(sysname, it, b_patch, backend) for it in sets["benign"]]
         block["benign"] = _fp_report(benign_rows)
         result["systems"][sysname] = block
 
@@ -366,17 +406,50 @@ def compare(systems: list[str]) -> dict:
     e1_sha = result["eval_sets"]["E1"]["sha256"]
     result["eval_sets"]["E1"]["matches_expected_sha256"] = e1_sha.startswith(EXPECTED_E1_SHA_PREFIX)
 
-    result["limitations"] = [
-        "编码器是离线意图概念向量（offline, non-neural），本机无 torch/transformers/网络/Ollama，未使用 all-MiniLM 或任何神经句向量。",
-        "E1/E0 都是 held-out 变体，不是 OOD 数据；E0 只是新随机实现（新 seed），不是新攻击类型。",
-        "意图库含人工编写的多语词根，存在作者知识偏置；缓解：库哈希冻结、阈值只在 D_dev 校准、E0 独立评估。",
-        "良性语料 74 条无俄/阿文本，跨语种误伤率仍未被样本检验。",
-        "延迟为单机 numpy 实测（无并发、无网络），不代表生产端到端延迟；本阶段零外部 API 调用。",
-        "概念编码器无法处理完全无共享词根的改写（纯语义漂移/隐喻/代码语），这些会持续漏，见 residual_misses_C。",
-        "E1 的全部 40 条拦截率仍是主口径（与 Phase A/B 可比）；adjudicated 分组只是补充——"
-        "其中 B 组 2 条按项目策略本就不该拦，C 若拦了它们应计入误伤而非战果。",
-        "阈值 0.85 是 H0 建议值；若校准后不同，以 encoder.threshold 字段为准，并需单独说明校准协议。",
-    ]
+    eff_backend = (result.get("encoder") or {}).get("backend_effective", "unknown")
+    if eff_backend == "hybrid":
+        result["limitations"] = [
+            "系统 C 为混合后端：offline_concept（概念覆盖度，阈值 0.45）**或** "
+            "paraphrase-multilingual-MiniLM-L12-v2（神经句向量，阈值 0.684，ONNX int8 本地 CPU）。",
+            "混合规则只能提高召回、不能提高精度：任何神经命中都会计入拦截，"
+            "良性误伤按良性语料 74 条实测，见 systems.C.benign.fpr。",
+            "神经后端在 D_dev 上相对概念层**零增量**（其 FP=0 操作点拦到的样本概念层已全部覆盖），"
+            "因此混合后端在 D_dev 上等于概念层；E1/E0 上的差异是本次要给的数据。",
+            "E1/E0 都是 held-out 变体，不是 OOD 数据；E0 只是新随机实现（新 seed），不是新攻击类型。",
+            "良性语料 74 条无俄/阿文本，跨语种误伤率仍未被样本检验。",
+            "延迟为单机 CPU 实测（含神经推理），不代表生产端到端延迟；零外部 API 调用。",
+            "E1 的全部 40 条拦截率仍是主口径；adjudicated 分组只是补充——"
+            "其中 B 组 2 条按项目策略本就不该拦，C 若拦了它们应计入误伤而非战果。",
+        ]
+    elif eff_backend == "neural":
+        result["limitations"] = [
+            "编码器为真实神经句向量模型 paraphrase-multilingual-MiniLM-L12-v2（ONNX int8，"
+            "本地 CPU 推理），非概念词表；模型文件 sha256 见 encoder.model_sha256。",
+            "模型为多语（zh/en/ru/ar 覆盖），但训练语料以英语为主，跨语相似度不等于人工标注的"
+            "语义等价；阈值只在 D_dev 上校准。",
+            "E1/E0 都是 held-out 变体，不是 OOD 数据；E0 只是新随机实现（新 seed），不是新攻击类型。",
+            "良性语料 74 条无俄/阿文本，跨语种误伤率仍未被样本检验。",
+            "延迟为单机 CPU（int8 ONNX，无并发、无网络）实测，不代表生产端到端延迟；"
+            "本阶段零外部 API 调用（模型本地推理，不产生 token）。",
+            "神经编码器的固有上限：对抗性改写、隐喻、代码语、无共享语义表征的攻击仍可能漏，"
+            "见 residual_misses_C；它不建模多轮上下文。",
+            "E1 的全部 40 条拦截率仍是主口径（与 Phase A/B 可比）；adjudicated 分组只是补充——"
+            "其中 B 组 2 条按项目策略本就不该拦，C 若拦了它们应计入误伤而非战果。",
+            "阈值不是 H0 建议的 0.85：以 encoder.threshold 字段为准，"
+            "它是按预声明规则（dev 召回最大 ∧ 良性新增误伤=0）在 D_dev 上校准出来的。",
+        ]
+    else:
+        result["limitations"] = [
+            "编码器是离线意图概念向量（offline, non-neural），未使用神经句向量。",
+            "E1/E0 都是 held-out 变体，不是 OOD 数据；E0 只是新随机实现（新 seed），不是新攻击类型。",
+            "意图库含人工编写的多语词根，存在作者知识偏置；缓解：库哈希冻结、阈值只在 D_dev 校准、E0 独立评估。",
+            "良性语料 74 条无俄/阿文本，跨语种误伤率仍未被样本检验。",
+            "延迟为单机 numpy 实测（无并发、无网络），不代表生产端到端延迟；本阶段零外部 API 调用。",
+            "概念编码器无法处理完全无共享词根的改写（纯语义漂移/隐喻/代码语），这些会持续漏，见 residual_misses_C。",
+            "E1 的全部 40 条拦截率仍是主口径（与 Phase A/B 可比）；adjudicated 分组只是补充——"
+            "其中 B 组 2 条按项目策略本就不该拦，C 若拦了它们应计入误伤而非战果。",
+            "阈值 0.85 是 H0 建议值；若校准后不同，以 encoder.threshold 字段为准，并需单独说明校准协议。",
+        ]
     return result
 
 
@@ -419,6 +492,11 @@ def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.path.join(RESULT_DIR, "run-semantic.json"))
     ap.add_argument("--systems", default="A,B,C")
+    ap.add_argument("--backend", default="auto",
+                    choices=("auto", "neural", "offline_concept", "hybrid"),
+                    help="C 系统使用的编码器后端；auto = 预声明准则下最优（当前为 "
+                         "offline_concept）；neural = 神经句向量消融；"
+                         "hybrid = offline_concept OR neural（消融）")
     args = ap.parse_args(argv[1:])
     systems = [s.strip().upper() for s in args.systems.split(",") if s.strip()]
     bad = [s for s in systems if s not in ("A", "B", "C")]
@@ -426,7 +504,7 @@ def main(argv: list[str]) -> int:
         print("未知系统：%s" % bad)
         return 2
     try:
-        result = compare(systems)
+        result = compare(systems, args.backend)
     except FileNotFoundError as exc:
         print("FAIL: %s" % exc)
         return 2
