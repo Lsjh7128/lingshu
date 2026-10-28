@@ -1,0 +1,3 @@
+# Phase B 本地自测产物：不进版本库（保留在磁盘上供复查）
+archive-selftest/
+runs/_selftest_a4/

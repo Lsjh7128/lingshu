@@ -1,0 +1,1948 @@
+{
+  "schema": "phase-b-evolution-curve-v1",
+  "run_id": "run-20261028-185512",
+  "series_run_id": "run-20261028-185512",
+  "generated_at": "2026-10-28T19:04:05+08:00",
+  "generations": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "generation_count": 20,
+  "patches_total": 15,
+  "patch_ids_accepted": [
+    "P-0001",
+    "P-0002",
+    "P-0003",
+    "P-0004",
+    "P-0005",
+    "P-0006",
+    "P-0007",
+    "P-0008",
+    "P-0009",
+    "P-0010",
+    "P-0011",
+    "P-0012",
+    "P-0013",
+    "P-0014",
+    "P-0015"
+  ],
+  "patch_generated_total": 15,
+  "stop_reason": "max_generations",
+  "caption_zh": "攻防共演化收敛曲线。X 轴为演化代数（generation_id），Y 轴为比率（0-1）。红线为未演化（基线）防线在 held-out 变异集上的拦截率，蓝线为演化防线在同一 held-out 集上的拦截率，灰虚线为基线防线在明文攻击集上的拦截率（“本来能拦”的参照水平），橙线为演化防线在良性语料上的误伤率。数据来源：coevolution_log.jsonl 的 intercept_rate_baseline_zeroday / intercept_rate_evolved_zeroday / benign_false_positive_rate 字段；明文参照取 coevolution_evidence.json 的 plain_attack_baseline_intercept_rate。诚实边界：held-out 集是同一批种子的 held-out split，不是分布外数据；变异为确定性规则变异（编码/词表/嵌套），不是 LLM 红队；本阶段零模型调用。（本图 run_id：run-20261028-185512；20 代；15 patches；生成时间 2026-10-28T19:04:05+08:00。）",
+  "caption_en": "Evolution convergence curve of the attack-defense loop. X: evolution generation (generation_id); Y: rate (0-1). Red: baseline (non-evolved) defense intercept rate on held-out mutations; blue: evolved defense on the same held-out set; grey dashed: baseline defense intercept rate on the plaintext attack set (reference level); orange: benign false-positive rate of the evolved defense. Sources: coevolution_log.jsonl fields intercept_rate_baseline_zeroday / intercept_rate_evolved_zeroday / benign_false_positive_rate; plaintext reference from coevolution_evidence.json plain_attack_baseline_intercept_rate. Honesty note: the held-out set is a held-out split of the same seed pool, not out-of-distribution data; mutations are deterministic rule mutations, not an LLM red team. (run_id: run-20261028-185512; 20 generations; 15 patches; generated 2026-10-28T19:04:05+08:00)",
+  "figure": {
+    "page_pt": [
+      560.0,
+      400.0
+    ],
+    "pdf_ascii_only": true,
+    "pdf_font_family": "Helvetica (base-14)",
+    "lines_plotted": 4,
+    "inset": false
+  },
+  "lines": [
+    {
+      "id": "baseline_zeroday",
+      "label_en": "Baseline defense - held-out mutations",
+      "label_zh": "基线防线 · held-out 变异集拦截率",
+      "role": "baseline defense on held-out mutations (held-out split of the same seed pool)",
+      "source_file": "coevolution_log.jsonl",
+      "source_field": "intercept_rate_baseline_zeroday",
+      "constant": false,
+      "values": [
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375,
+        0.375
+      ],
+      "points": [
+        {
+          "generation_id": 0,
+          "value": 0.375
+        },
+        {
+          "generation_id": 1,
+          "value": 0.375
+        },
+        {
+          "generation_id": 2,
+          "value": 0.375
+        },
+        {
+          "generation_id": 3,
+          "value": 0.375
+        },
+        {
+          "generation_id": 4,
+          "value": 0.375
+        },
+        {
+          "generation_id": 5,
+          "value": 0.375
+        },
+        {
+          "generation_id": 6,
+          "value": 0.375
+        },
+        {
+          "generation_id": 7,
+          "value": 0.375
+        },
+        {
+          "generation_id": 8,
+          "value": 0.375
+        },
+        {
+          "generation_id": 9,
+          "value": 0.375
+        },
+        {
+          "generation_id": 10,
+          "value": 0.375
+        },
+        {
+          "generation_id": 11,
+          "value": 0.375
+        },
+        {
+          "generation_id": 12,
+          "value": 0.375
+        },
+        {
+          "generation_id": 13,
+          "value": 0.375
+        },
+        {
+          "generation_id": 14,
+          "value": 0.375
+        },
+        {
+          "generation_id": 15,
+          "value": 0.375
+        },
+        {
+          "generation_id": 16,
+          "value": 0.375
+        },
+        {
+          "generation_id": 17,
+          "value": 0.375
+        },
+        {
+          "generation_id": 18,
+          "value": 0.375
+        },
+        {
+          "generation_id": 19,
+          "value": 0.375
+        }
+      ]
+    },
+    {
+      "id": "evolved_zeroday",
+      "label_en": "Evolved defense - held-out mutations",
+      "label_zh": "演化防线 · 同一 held-out 变异集拦截率",
+      "role": "evolved defense on the same held-out mutations",
+      "source_file": "coevolution_log.jsonl",
+      "source_field": "intercept_rate_evolved_zeroday",
+      "constant": false,
+      "values": [
+        0.7,
+        0.775,
+        0.775,
+        0.775,
+        0.775,
+        0.775,
+        0.775,
+        0.775,
+        0.775,
+        0.775,
+        0.775,
+        0.775,
+        0.775,
+        0.775,
+        0.775,
+        0.775,
+        0.775,
+        0.775,
+        0.775,
+        0.775
+      ],
+      "points": [
+        {
+          "generation_id": 0,
+          "value": 0.7
+        },
+        {
+          "generation_id": 1,
+          "value": 0.775
+        },
+        {
+          "generation_id": 2,
+          "value": 0.775
+        },
+        {
+          "generation_id": 3,
+          "value": 0.775
+        },
+        {
+          "generation_id": 4,
+          "value": 0.775
+        },
+        {
+          "generation_id": 5,
+          "value": 0.775
+        },
+        {
+          "generation_id": 6,
+          "value": 0.775
+        },
+        {
+          "generation_id": 7,
+          "value": 0.775
+        },
+        {
+          "generation_id": 8,
+          "value": 0.775
+        },
+        {
+          "generation_id": 9,
+          "value": 0.775
+        },
+        {
+          "generation_id": 10,
+          "value": 0.775
+        },
+        {
+          "generation_id": 11,
+          "value": 0.775
+        },
+        {
+          "generation_id": 12,
+          "value": 0.775
+        },
+        {
+          "generation_id": 13,
+          "value": 0.775
+        },
+        {
+          "generation_id": 14,
+          "value": 0.775
+        },
+        {
+          "generation_id": 15,
+          "value": 0.775
+        },
+        {
+          "generation_id": 16,
+          "value": 0.775
+        },
+        {
+          "generation_id": 17,
+          "value": 0.775
+        },
+        {
+          "generation_id": 18,
+          "value": 0.775
+        },
+        {
+          "generation_id": 19,
+          "value": 0.775
+        }
+      ]
+    },
+    {
+      "id": "plain_attack_baseline",
+      "label_en": "Baseline defense - plaintext attacks (reference)",
+      "label_zh": "基线防线 · 明文攻击集拦截率（“本来能拦”的参照）",
+      "role": "reference: baseline defense on the plaintext attack set",
+      "source_file": "coevolution_evidence.json",
+      "source_field": "plain_attack_baseline_intercept_rate",
+      "constant": true,
+      "values": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "points": [
+        {
+          "generation_id": 0,
+          "value": 1.0
+        },
+        {
+          "generation_id": 1,
+          "value": 1.0
+        },
+        {
+          "generation_id": 2,
+          "value": 1.0
+        },
+        {
+          "generation_id": 3,
+          "value": 1.0
+        },
+        {
+          "generation_id": 4,
+          "value": 1.0
+        },
+        {
+          "generation_id": 5,
+          "value": 1.0
+        },
+        {
+          "generation_id": 6,
+          "value": 1.0
+        },
+        {
+          "generation_id": 7,
+          "value": 1.0
+        },
+        {
+          "generation_id": 8,
+          "value": 1.0
+        },
+        {
+          "generation_id": 9,
+          "value": 1.0
+        },
+        {
+          "generation_id": 10,
+          "value": 1.0
+        },
+        {
+          "generation_id": 11,
+          "value": 1.0
+        },
+        {
+          "generation_id": 12,
+          "value": 1.0
+        },
+        {
+          "generation_id": 13,
+          "value": 1.0
+        },
+        {
+          "generation_id": 14,
+          "value": 1.0
+        },
+        {
+          "generation_id": 15,
+          "value": 1.0
+        },
+        {
+          "generation_id": 16,
+          "value": 1.0
+        },
+        {
+          "generation_id": 17,
+          "value": 1.0
+        },
+        {
+          "generation_id": 18,
+          "value": 1.0
+        },
+        {
+          "generation_id": 19,
+          "value": 1.0
+        }
+      ],
+      "source_detail": {
+        "kind": "evidence",
+        "value": 1.0,
+        "field": "plain_attack_baseline_intercept_rate",
+        "file": "experiments/phase-b/runs/run-20261028-185512/coevolution_evidence.json",
+        "run_id": "run-20261028-185512"
+      }
+    },
+    {
+      "id": "benign_false_positive",
+      "label_en": "Benign false-positive rate",
+      "label_zh": "良性误伤率（演化防线）",
+      "role": "benign false-positive rate of the evolved defense",
+      "source_file": "coevolution_log.jsonl",
+      "source_field": "benign_false_positive_rate",
+      "constant": false,
+      "values": [
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027,
+        0.027
+      ],
+      "points": [
+        {
+          "generation_id": 0,
+          "value": 0.027
+        },
+        {
+          "generation_id": 1,
+          "value": 0.027
+        },
+        {
+          "generation_id": 2,
+          "value": 0.027
+        },
+        {
+          "generation_id": 3,
+          "value": 0.027
+        },
+        {
+          "generation_id": 4,
+          "value": 0.027
+        },
+        {
+          "generation_id": 5,
+          "value": 0.027
+        },
+        {
+          "generation_id": 6,
+          "value": 0.027
+        },
+        {
+          "generation_id": 7,
+          "value": 0.027
+        },
+        {
+          "generation_id": 8,
+          "value": 0.027
+        },
+        {
+          "generation_id": 9,
+          "value": 0.027
+        },
+        {
+          "generation_id": 10,
+          "value": 0.027
+        },
+        {
+          "generation_id": 11,
+          "value": 0.027
+        },
+        {
+          "generation_id": 12,
+          "value": 0.027
+        },
+        {
+          "generation_id": 13,
+          "value": 0.027
+        },
+        {
+          "generation_id": 14,
+          "value": 0.027
+        },
+        {
+          "generation_id": 15,
+          "value": 0.027
+        },
+        {
+          "generation_id": 16,
+          "value": 0.027
+        },
+        {
+          "generation_id": 17,
+          "value": 0.027
+        },
+        {
+          "generation_id": 18,
+          "value": 0.027
+        },
+        {
+          "generation_id": 19,
+          "value": 0.027
+        }
+      ]
+    }
+  ],
+  "context_series": {
+    "evolved_mutated_intercept_rate": {
+      "source_field": "intercept_rate_evolved",
+      "source_file": "coevolution_log.jsonl",
+      "note": "evolved defense intercept rate on the current red-team mutation set; plotted as context only, not one of the four contract lines",
+      "values": [
+        0.375,
+        0.7,
+        0.725,
+        0.8,
+        0.9,
+        0.825,
+        0.775,
+        0.9,
+        0.85,
+        0.825,
+        0.875,
+        0.9,
+        0.825,
+        0.875,
+        0.85,
+        0.85,
+        0.85,
+        0.9,
+        0.875,
+        0.9
+      ]
+    },
+    "bypass_success_count": {
+      "source_field": "bypass_success_count",
+      "source_file": "coevolution_log.jsonl",
+      "values": [
+        25,
+        12,
+        11,
+        8,
+        4,
+        7,
+        9,
+        4,
+        6,
+        7,
+        5,
+        4,
+        7,
+        5,
+        6,
+        6,
+        6,
+        4,
+        5,
+        4
+      ]
+    },
+    "patches_total_per_generation": {
+      "source_field": "patches_total",
+      "source_file": "coevolution_log.jsonl",
+      "values": [
+        1,
+        2,
+        3,
+        4,
+        4,
+        5,
+        6,
+        6,
+        7,
+        8,
+        9,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        14,
+        15,
+        15
+      ]
+    }
+  },
+  "fields": {
+    "generations": "generation_id",
+    "baseline_zeroday": "intercept_rate_baseline_zeroday",
+    "evolved_zeroday": "intercept_rate_evolved_zeroday",
+    "benign_false_positive": "benign_false_positive_rate",
+    "plain_attack_baseline": "plain_attack_baseline_intercept_rate"
+  },
+  "fields_derived": [],
+  "plateau": {
+    "evolved_zeroday_value": 0.775,
+    "plateau_start_generation": 1,
+    "plateau_start_index": 1,
+    "plateau_end_generation": 19,
+    "generations_in_plateau": 19,
+    "patches_at_plateau_start": 2,
+    "patches_at_end": 15,
+    "patches_added_during_plateau": 13,
+    "last_increment": 0.07500000000000007,
+    "evolved_zeroday": [
+      0.7,
+      0.775,
+      0.775,
+      0.775,
+      0.775,
+      0.775,
+      0.775,
+      0.775,
+      0.775,
+      0.775,
+      0.775,
+      0.775,
+      0.775,
+      0.775,
+      0.775,
+      0.775,
+      0.775,
+      0.775,
+      0.775,
+      0.775
+    ],
+    "patch_count_series": [
+      1,
+      2,
+      3,
+      4,
+      4,
+      5,
+      6,
+      6,
+      7,
+      8,
+      9,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      14,
+      15,
+      15
+    ]
+  },
+  "per_generation": [
+    {
+      "generation_id": 0,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 25,
+      "blue_team_patch_generated": 1,
+      "regression_test_pass": true,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 15,
+      "intercept_rate_evolved": 0.375,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.7,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 1,
+      "patch_ids_accepted": [
+        "P-0001"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g0.yaml",
+      "regression": {
+        "suite": "audit892",
+        "files": 14,
+        "passed": 915,
+        "failed": 0,
+        "seconds": 14.74
+      },
+      "strategy_mix": {
+        "encoding": 16,
+        "language": 12,
+        "nesting": 12
+      },
+      "technique_mix": {
+        "rot13": 4,
+        "zero_width": 4,
+        "ar_glossary": 4,
+        "reasoning_chain": 4,
+        "hex": 4,
+        "ru_glossary": 4,
+        "mixed_zh_en": 4,
+        "base64": 4,
+        "roleplay": 4,
+        "novel_fragment": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:55:26+08:00"
+    },
+    {
+      "generation_id": 1,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 12,
+      "blue_team_patch_generated": 1,
+      "regression_test_pass": true,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 28,
+      "intercept_rate_evolved": 0.7,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 2,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g1.yaml",
+      "regression": {
+        "suite": "audit892",
+        "files": 14,
+        "passed": 915,
+        "failed": 0,
+        "seconds": 14.53
+      },
+      "strategy_mix": {
+        "encoding": 16,
+        "language": 12,
+        "nesting": 12
+      },
+      "technique_mix": {
+        "zero_width": 16,
+        "mixed_zh_en": 4,
+        "reasoning_chain": 4,
+        "ru_glossary": 4,
+        "hex": 4,
+        "novel_fragment": 4,
+        "ar_glossary": 4,
+        "roleplay": 4,
+        "base64": 4,
+        "rot13": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:55:41+08:00"
+    },
+    {
+      "generation_id": 2,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 11,
+      "blue_team_patch_generated": 1,
+      "regression_test_pass": true,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 29,
+      "intercept_rate_evolved": 0.725,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 3,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g2.yaml",
+      "regression": {
+        "suite": "audit892",
+        "files": 14,
+        "passed": 915,
+        "failed": 0,
+        "seconds": 14.57
+      },
+      "strategy_mix": {
+        "language": 12,
+        "nesting": 12,
+        "encoding": 16
+      },
+      "technique_mix": {
+        "ar_glossary": 4,
+        "ru_glossary": 4,
+        "roleplay": 4,
+        "base64": 16,
+        "zero_width": 4,
+        "reasoning_chain": 4,
+        "novel_fragment": 4,
+        "rot13": 4,
+        "mixed_zh_en": 4,
+        "hex": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:55:56+08:00"
+    },
+    {
+      "generation_id": 3,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 8,
+      "blue_team_patch_generated": 1,
+      "regression_test_pass": true,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 32,
+      "intercept_rate_evolved": 0.8,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 4,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g3.yaml",
+      "regression": {
+        "suite": "audit892",
+        "files": 14,
+        "passed": 915,
+        "failed": 0,
+        "seconds": 14.86
+      },
+      "strategy_mix": {
+        "encoding": 16,
+        "nesting": 12,
+        "language": 12
+      },
+      "technique_mix": {
+        "rot13": 4,
+        "reasoning_chain": 4,
+        "base64": 16,
+        "hex": 4,
+        "novel_fragment": 4,
+        "ar_glossary": 4,
+        "zero_width": 4,
+        "mixed_zh_en": 4,
+        "ru_glossary": 4,
+        "roleplay": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:56:10+08:00"
+    },
+    {
+      "generation_id": 4,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 4,
+      "blue_team_patch_generated": 0,
+      "regression_test_pass": null,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 36,
+      "intercept_rate_evolved": 0.9,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 4,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g4.yaml",
+      "regression": null,
+      "strategy_mix": {
+        "nesting": 12,
+        "encoding": 16,
+        "language": 12
+      },
+      "technique_mix": {
+        "reasoning_chain": 4,
+        "base64": 16,
+        "hex": 4,
+        "ru_glossary": 4,
+        "novel_fragment": 4,
+        "zero_width": 4,
+        "roleplay": 4,
+        "mixed_zh_en": 4,
+        "ar_glossary": 4,
+        "rot13": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:56:11+08:00"
+    },
+    {
+      "generation_id": 5,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 7,
+      "blue_team_patch_generated": 1,
+      "regression_test_pass": true,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 33,
+      "intercept_rate_evolved": 0.825,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 5,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004",
+        "P-0005"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g5.yaml",
+      "regression": {
+        "suite": "audit892",
+        "files": 14,
+        "passed": 915,
+        "failed": 0,
+        "seconds": 14.29
+      },
+      "strategy_mix": {
+        "encoding": 16,
+        "nesting": 12,
+        "language": 12
+      },
+      "technique_mix": {
+        "base64": 16,
+        "novel_fragment": 4,
+        "zero_width": 4,
+        "ar_glossary": 4,
+        "hex": 4,
+        "ru_glossary": 4,
+        "mixed_zh_en": 4,
+        "rot13": 4,
+        "roleplay": 4,
+        "reasoning_chain": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:56:25+08:00"
+    },
+    {
+      "generation_id": 6,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 9,
+      "blue_team_patch_generated": 1,
+      "regression_test_pass": true,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 31,
+      "intercept_rate_evolved": 0.775,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 6,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004",
+        "P-0005",
+        "P-0006"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g6.yaml",
+      "regression": {
+        "suite": "audit892",
+        "files": 14,
+        "passed": 915,
+        "failed": 0,
+        "seconds": 15.2
+      },
+      "strategy_mix": {
+        "encoding": 16,
+        "language": 12,
+        "nesting": 12
+      },
+      "technique_mix": {
+        "rot13": 4,
+        "hex": 4,
+        "ru_glossary": 4,
+        "ar_glossary": 4,
+        "zero_width": 4,
+        "roleplay": 4,
+        "base64": 16,
+        "mixed_zh_en": 4,
+        "reasoning_chain": 4,
+        "novel_fragment": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:56:40+08:00"
+    },
+    {
+      "generation_id": 7,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 4,
+      "blue_team_patch_generated": 0,
+      "regression_test_pass": null,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 36,
+      "intercept_rate_evolved": 0.9,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 6,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004",
+        "P-0005",
+        "P-0006"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g7.yaml",
+      "regression": null,
+      "strategy_mix": {
+        "nesting": 12,
+        "language": 12,
+        "encoding": 16
+      },
+      "technique_mix": {
+        "reasoning_chain": 4,
+        "base64": 16,
+        "ar_glossary": 4,
+        "roleplay": 4,
+        "rot13": 4,
+        "hex": 4,
+        "mixed_zh_en": 4,
+        "novel_fragment": 4,
+        "zero_width": 4,
+        "ru_glossary": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:56:40+08:00"
+    },
+    {
+      "generation_id": 8,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 6,
+      "blue_team_patch_generated": 1,
+      "regression_test_pass": true,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 34,
+      "intercept_rate_evolved": 0.85,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 7,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004",
+        "P-0005",
+        "P-0006",
+        "P-0007"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g8.yaml",
+      "regression": {
+        "suite": "audit892",
+        "files": 14,
+        "passed": 915,
+        "failed": 0,
+        "seconds": 15.07
+      },
+      "strategy_mix": {
+        "encoding": 16,
+        "nesting": 12,
+        "language": 12
+      },
+      "technique_mix": {
+        "zero_width": 4,
+        "roleplay": 4,
+        "base64": 16,
+        "hex": 4,
+        "ar_glossary": 4,
+        "mixed_zh_en": 4,
+        "ru_glossary": 4,
+        "rot13": 4,
+        "reasoning_chain": 4,
+        "novel_fragment": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:56:55+08:00"
+    },
+    {
+      "generation_id": 9,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 7,
+      "blue_team_patch_generated": 1,
+      "regression_test_pass": true,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 33,
+      "intercept_rate_evolved": 0.825,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 8,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004",
+        "P-0005",
+        "P-0006",
+        "P-0007",
+        "P-0008"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g9.yaml",
+      "regression": {
+        "suite": "audit892",
+        "files": 14,
+        "passed": 915,
+        "failed": 0,
+        "seconds": 15.63
+      },
+      "strategy_mix": {
+        "language": 12,
+        "encoding": 16,
+        "nesting": 12
+      },
+      "technique_mix": {
+        "ru_glossary": 4,
+        "base64": 16,
+        "zero_width": 4,
+        "reasoning_chain": 4,
+        "novel_fragment": 4,
+        "roleplay": 4,
+        "hex": 4,
+        "rot13": 4,
+        "mixed_zh_en": 4,
+        "ar_glossary": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:57:11+08:00"
+    },
+    {
+      "generation_id": 10,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 5,
+      "blue_team_patch_generated": 1,
+      "regression_test_pass": true,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 35,
+      "intercept_rate_evolved": 0.875,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 9,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004",
+        "P-0005",
+        "P-0006",
+        "P-0007",
+        "P-0008",
+        "P-0009"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g10.yaml",
+      "regression": {
+        "suite": "audit892",
+        "files": 14,
+        "passed": 915,
+        "failed": 0,
+        "seconds": 14.45
+      },
+      "strategy_mix": {
+        "encoding": 16,
+        "nesting": 12,
+        "language": 12
+      },
+      "technique_mix": {
+        "hex": 4,
+        "novel_fragment": 4,
+        "base64": 16,
+        "ru_glossary": 4,
+        "mixed_zh_en": 4,
+        "rot13": 4,
+        "roleplay": 4,
+        "reasoning_chain": 4,
+        "ar_glossary": 4,
+        "zero_width": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:57:25+08:00"
+    },
+    {
+      "generation_id": 11,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 4,
+      "blue_team_patch_generated": 0,
+      "regression_test_pass": null,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 36,
+      "intercept_rate_evolved": 0.9,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 9,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004",
+        "P-0005",
+        "P-0006",
+        "P-0007",
+        "P-0008",
+        "P-0009"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g11.yaml",
+      "regression": null,
+      "strategy_mix": {
+        "encoding": 16,
+        "language": 12,
+        "nesting": 12
+      },
+      "technique_mix": {
+        "hex": 4,
+        "base64": 16,
+        "ru_glossary": 4,
+        "roleplay": 4,
+        "mixed_zh_en": 4,
+        "ar_glossary": 4,
+        "rot13": 4,
+        "reasoning_chain": 4,
+        "zero_width": 4,
+        "novel_fragment": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:57:25+08:00"
+    },
+    {
+      "generation_id": 12,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 7,
+      "blue_team_patch_generated": 1,
+      "regression_test_pass": true,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 33,
+      "intercept_rate_evolved": 0.825,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 10,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004",
+        "P-0005",
+        "P-0006",
+        "P-0007",
+        "P-0008",
+        "P-0009",
+        "P-0010"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g12.yaml",
+      "regression": {
+        "suite": "audit892",
+        "files": 14,
+        "passed": 915,
+        "failed": 0,
+        "seconds": 14.82
+      },
+      "strategy_mix": {
+        "language": 12,
+        "encoding": 16,
+        "nesting": 12
+      },
+      "technique_mix": {
+        "ar_glossary": 4,
+        "hex": 4,
+        "ru_glossary": 4,
+        "zero_width": 4,
+        "reasoning_chain": 4,
+        "base64": 16,
+        "roleplay": 4,
+        "rot13": 4,
+        "mixed_zh_en": 4,
+        "novel_fragment": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:57:40+08:00"
+    },
+    {
+      "generation_id": 13,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 5,
+      "blue_team_patch_generated": 1,
+      "regression_test_pass": true,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 35,
+      "intercept_rate_evolved": 0.875,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 11,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004",
+        "P-0005",
+        "P-0006",
+        "P-0007",
+        "P-0008",
+        "P-0009",
+        "P-0010",
+        "P-0011"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g13.yaml",
+      "regression": {
+        "suite": "audit892",
+        "files": 14,
+        "passed": 915,
+        "failed": 0,
+        "seconds": 16.98
+      },
+      "strategy_mix": {
+        "language": 12,
+        "encoding": 16,
+        "nesting": 12
+      },
+      "technique_mix": {
+        "ru_glossary": 4,
+        "ar_glossary": 4,
+        "rot13": 4,
+        "base64": 16,
+        "hex": 4,
+        "zero_width": 4,
+        "novel_fragment": 4,
+        "reasoning_chain": 4,
+        "roleplay": 4,
+        "mixed_zh_en": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:57:57+08:00"
+    },
+    {
+      "generation_id": 14,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 6,
+      "blue_team_patch_generated": 1,
+      "regression_test_pass": true,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 34,
+      "intercept_rate_evolved": 0.85,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 12,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004",
+        "P-0005",
+        "P-0006",
+        "P-0007",
+        "P-0008",
+        "P-0009",
+        "P-0010",
+        "P-0011",
+        "P-0012"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g14.yaml",
+      "regression": {
+        "suite": "audit892",
+        "files": 14,
+        "passed": 915,
+        "failed": 0,
+        "seconds": 15.82
+      },
+      "strategy_mix": {
+        "nesting": 12,
+        "language": 12,
+        "encoding": 16
+      },
+      "technique_mix": {
+        "roleplay": 4,
+        "base64": 16,
+        "ru_glossary": 4,
+        "zero_width": 4,
+        "ar_glossary": 4,
+        "mixed_zh_en": 4,
+        "rot13": 4,
+        "hex": 4,
+        "reasoning_chain": 4,
+        "novel_fragment": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:58:13+08:00"
+    },
+    {
+      "generation_id": 15,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 6,
+      "blue_team_patch_generated": 1,
+      "regression_test_pass": true,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 34,
+      "intercept_rate_evolved": 0.85,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 13,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004",
+        "P-0005",
+        "P-0006",
+        "P-0007",
+        "P-0008",
+        "P-0009",
+        "P-0010",
+        "P-0011",
+        "P-0012",
+        "P-0013"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g15.yaml",
+      "regression": {
+        "suite": "audit892",
+        "files": 14,
+        "passed": 915,
+        "failed": 0,
+        "seconds": 16.22
+      },
+      "strategy_mix": {
+        "encoding": 16,
+        "language": 12,
+        "nesting": 12
+      },
+      "technique_mix": {
+        "hex": 4,
+        "zero_width": 4,
+        "ar_glossary": 4,
+        "roleplay": 4,
+        "base64": 16,
+        "mixed_zh_en": 4,
+        "rot13": 4,
+        "novel_fragment": 4,
+        "ru_glossary": 4,
+        "reasoning_chain": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:58:30+08:00"
+    },
+    {
+      "generation_id": 16,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 6,
+      "blue_team_patch_generated": 1,
+      "regression_test_pass": true,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 34,
+      "intercept_rate_evolved": 0.85,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 14,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004",
+        "P-0005",
+        "P-0006",
+        "P-0007",
+        "P-0008",
+        "P-0009",
+        "P-0010",
+        "P-0011",
+        "P-0012",
+        "P-0013",
+        "P-0014"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g16.yaml",
+      "regression": {
+        "suite": "audit892",
+        "files": 14,
+        "passed": 915,
+        "failed": 0,
+        "seconds": 14.59
+      },
+      "strategy_mix": {
+        "nesting": 12,
+        "encoding": 16,
+        "language": 12
+      },
+      "technique_mix": {
+        "reasoning_chain": 4,
+        "base64": 16,
+        "roleplay": 4,
+        "rot13": 4,
+        "mixed_zh_en": 4,
+        "hex": 4,
+        "novel_fragment": 4,
+        "zero_width": 4,
+        "ru_glossary": 4,
+        "ar_glossary": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:58:44+08:00"
+    },
+    {
+      "generation_id": 17,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 4,
+      "blue_team_patch_generated": 0,
+      "regression_test_pass": null,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 36,
+      "intercept_rate_evolved": 0.9,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 14,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004",
+        "P-0005",
+        "P-0006",
+        "P-0007",
+        "P-0008",
+        "P-0009",
+        "P-0010",
+        "P-0011",
+        "P-0012",
+        "P-0013",
+        "P-0014"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g17.yaml",
+      "regression": null,
+      "strategy_mix": {
+        "encoding": 16,
+        "language": 12,
+        "nesting": 12
+      },
+      "technique_mix": {
+        "zero_width": 4,
+        "mixed_zh_en": 4,
+        "roleplay": 4,
+        "base64": 16,
+        "novel_fragment": 4,
+        "reasoning_chain": 4,
+        "hex": 4,
+        "ru_glossary": 4,
+        "rot13": 4,
+        "ar_glossary": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:58:44+08:00"
+    },
+    {
+      "generation_id": 18,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 5,
+      "blue_team_patch_generated": 1,
+      "regression_test_pass": true,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 35,
+      "intercept_rate_evolved": 0.875,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 15,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004",
+        "P-0005",
+        "P-0006",
+        "P-0007",
+        "P-0008",
+        "P-0009",
+        "P-0010",
+        "P-0011",
+        "P-0012",
+        "P-0013",
+        "P-0014",
+        "P-0015"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g18.yaml",
+      "regression": {
+        "suite": "audit892",
+        "files": 14,
+        "passed": 915,
+        "failed": 0,
+        "seconds": 17.58
+      },
+      "strategy_mix": {
+        "encoding": 16,
+        "nesting": 12,
+        "language": 12
+      },
+      "technique_mix": {
+        "rot13": 4,
+        "novel_fragment": 4,
+        "base64": 16,
+        "mixed_zh_en": 4,
+        "reasoning_chain": 4,
+        "zero_width": 4,
+        "roleplay": 4,
+        "hex": 4,
+        "ar_glossary": 4,
+        "ru_glossary": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": null,
+      "ts": "2026-10-28T18:59:02+08:00"
+    },
+    {
+      "generation_id": 19,
+      "red_team_variants_count": 40,
+      "bypass_success_count": 4,
+      "blue_team_patch_generated": 0,
+      "regression_test_pass": null,
+      "benign_false_positive_rate": 0.027,
+      "attacks_intercepted_count": 36,
+      "intercept_rate_evolved": 0.9,
+      "intercept_rate_baseline_zeroday": 0.375,
+      "intercept_rate_evolved_zeroday": 0.775,
+      "benign_total": 74,
+      "benign_false_positive_count": 2,
+      "benign_false_positive_rate_baseline": 0.027,
+      "zeroday_total": 40,
+      "zeroday_generation_id": 0,
+      "consecutive_zero_bypass": 0,
+      "patches_total": 15,
+      "patch_ids_accepted": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004",
+        "P-0005",
+        "P-0006",
+        "P-0007",
+        "P-0008",
+        "P-0009",
+        "P-0010",
+        "P-0011",
+        "P-0012",
+        "P-0013",
+        "P-0014",
+        "P-0015"
+      ],
+      "patch_rejected": [],
+      "candidate_ledger": "candidate_patch.yaml",
+      "candidate_ledger_snapshot": "candidate_patch_snapshot_g19.yaml",
+      "regression": null,
+      "strategy_mix": {
+        "nesting": 12,
+        "encoding": 16,
+        "language": 12
+      },
+      "technique_mix": {
+        "novel_fragment": 4,
+        "base64": 16,
+        "roleplay": 4,
+        "mixed_zh_en": 4,
+        "reasoning_chain": 4,
+        "rot13": 4,
+        "hex": 4,
+        "ru_glossary": 4,
+        "ar_glossary": 4,
+        "zero_width": 4
+      },
+      "api_calls": 0,
+      "api_tokens_used": 0,
+      "stop_reason": "max_generations",
+      "ts": "2026-10-28T18:59:02+08:00"
+    }
+  ],
+  "source": {
+    "log_files": [
+      "experiments/phase-b/runs/run-20261028-185512/coevolution_log.jsonl"
+    ],
+    "run_dirs": [
+      "experiments/phase-b/runs/run-20261028-185512"
+    ],
+    "evidence_file": "experiments/phase-b/runs/run-20261028-185512/coevolution_evidence.json"
+  },
+  "evidence": {
+    "schema": "phase-b-coevolution-evidence-v1",
+    "run_id": "run-20261028-185512",
+    "started_at": "2026-10-28T18:55:12+08:00",
+    "finished_at": "2026-10-28T18:59:02+08:00",
+    "generations_run": 20,
+    "stop_reason": "max_generations",
+    "converged": false,
+    "dry_run": false,
+    "plain_attack_baseline_intercept_rate": 1.0,
+    "zeroday_baseline_intercept_rate": 0.375,
+    "zeroday_evolved_intercept_rate_final": 0.775,
+    "max_intercept_rate_evolved": 0.9,
+    "max_intercept_rate_evolved_generation": 4,
+    "benign_false_positive_rate_max": 0.027,
+    "benign_false_positive_rate_baseline": 0.027,
+    "benign_total": 74,
+    "red_team_variants_total": 800,
+    "bypass_total": 145,
+    "patches_total": 15,
+    "patches": [
+      "P-0001",
+      "P-0002",
+      "P-0003",
+      "P-0004",
+      "P-0005",
+      "P-0006",
+      "P-0007",
+      "P-0008",
+      "P-0009",
+      "P-0010",
+      "P-0011",
+      "P-0012",
+      "P-0013",
+      "P-0014",
+      "P-0015"
+    ],
+    "regression_all_pass": true,
+    "api_calls": 0,
+    "api_tokens_used": 0,
+    "determinism": {
+      "seed": 20261028,
+      "rng": "random.Random",
+      "zeroday_seed": 20261028,
+      "note": "变异流/绕过序列/拦截率同 seed 可复现；补丁 id 由规范账本状态决定（官方 run 写唯一规范账本），复跑 id 顺延；单 run 内每代候选账本快照保证可回溯"
+    },
+    "limitations": [
+      "变异引擎是确定性规则变异（编码/词表/嵌套），不是 LLM 红队；不得写成“自主攻防智能体”。",
+      "语言变异是离线词表近似（provenance: offline_glossary），不是真实机器翻译。",
+      "api_tokens_used == 0 是事实：本阶段零模型调用，token 预算停止条件未获真实检验（代码路径已实现，仅由单元测试注入模拟值验证触发）。",
+      "被测防线是 Phase A 规则型闸门（词表匹配），编码变异能绕过属可预期；本文贡献是闭环自愈机制与度量方法，不是“Phase A 很弱”。",
+      "零日集与训练集来自同一批种子的不同 split，不是独立分布外数据（not OOD）；只能说 held-out 变体，不许写“零日/未见攻击”当 OOD 证据。",
+      "零日集按 Lead 口径用 generation_id=0 变异分布（与训练流同变异强度、只差 held-out 种子），避免把“泛化”与“攻击变强”混在一起；口径见 evidence.zeroday_protocol。",
+      "回归锁口径：audit892 = 2026-10-27 审计快照的 14 文件口径；今天同口径实测 915 项，与 892 不可换算，报告须注明口径与实测值。",
+      "tests/test_chaos_campaign.py 的 3 项失败属沙箱写权限环境性失败（非断言失败），不计入补丁判定（audit892 集合不含该文件）。",
+      "补丁以 run 目录内 evolved_patch_snapshot.json 快照形式保存；rules/candidate_patch.yaml 属 A1 写作用域，本脚本不写候选/生产规则文件，生产规则零改动。",
+      "A1 内部良性自检结果通过 LAST_ADJUDICATION 回传；A5 另以“演化防线对良性语料实测误伤率 > 基线”作为第二道闸门，不满足则丢弃本代补丁并记录 rejected。",
+      "官方 run 的候选账本按 Lead 裁决写规范入口 rules/candidate_patch.yaml（A1 persist），run 目录另存每代快照 candidate_patch_snapshot_g<g>.yaml 供单 run 回溯；生产规则零改动，合入生产 = H0 人工审批。",
+      "A5 未调用 A1 的 write_proposal（proposals/phase-b 属 A1 写作用域）；如需 PROP-*.yaml 人工审批件，由 Lead/A1 依据规范账本条目生成。",
+      "determinism：同 seed 的变异流、绕过序列与各拦截率可复现；但补丁 id 由规范账本当前状态决定（Lead 裁决官方 run 写唯一规范账本 rules/candidate_patch.yaml），复跑时 id 会顺延——单 run 内每代 candidate_patch_snapshot_g<g>.yaml 保证可回溯。",
+      "本 run 的逐代原始数值见 experiments/phase-b/runs/run-20261028-185512/coevolution_log.jsonl（20 行）；回归锁明细见 regression_gen*.json。"
+    ],
+    "zeroday_set": {
+      "path": "experiments/phase-b/runs/run-20261028-185512/zeroday_set.jsonl",
+      "count": 40,
+      "sha256": "432e08a2d47cdc968f80803be64cf337d43767781459d4431b180f1d6f7a210c",
+      "generation_id": 0,
+      "note": "held-out seeds 经 A4 确定性变异；蓝队永远拿不到 payload；run 内只读"
+    },
+    "zeroday_protocol": "held-out seeds x generation-0 mutation distribution; blue team never sees these payloads; held-out mutations are NOT OOD data",
+    "zeroday_generation_id": 0,
+    "defense_under_test": {
+      "baseline": "phase-a rule gate (classify_user_risk + preflight_audit UCA-01)",
+      "evolved": "baseline + this run's accepted sandbox patches (snapshot: experiments/phase-b/runs/run-20261028-185512/evolved_patch_snapshot.json)",
+      "candidate_ledger": "rules/candidate_patch.yaml",
+      "measurement": "tools/phase_b_defense.scan",
+      "note": "官方 run 的候选补丁按 Lead 裁决写入规范账本 rules/candidate_patch.yaml（A1 persist），run 目录另存 candidate_patch_snapshot_g<g>.yaml 每代快照；生产规则零改动；合入生产 = H0 人工审批，脚本无此能力"
+    }
+  },
+  "warnings": [],
+  "limitations": [
+    "held-out set = held-out split of the same seed pool; it is NOT out-of-distribution data (contract §8.5), so the figure must not be cited as OOD evidence.",
+    "mutations are deterministic rule mutations (encoding / offline glossary / nesting), not an LLM red team (contract §8.1); the language variants are offline-glossary approximations, not real machine translation (contract §8.2).",
+    "api_tokens_used = 0 in this phase; the token-budget stop condition was never exercised (contract §8.3).",
+    "the grey plaintext reference is a single baseline measurement (one value per run), not a per-generation measurement; its provenance is recorded in `lines[*].source`.",
+    "each logged rate is measured AFTER that generation's patch/regression step (contract §6.2 order 4)->5)): generation 0 already contains the gen-0 patch, so the blue curve does NOT start at the unpatched baseline level. The unpatched comparison is the red line (held-out) and the grey dashed line (plaintext); the 'gen-0 caveat' is `figure_data.plateau` / this limitation, and no pre-patch gen-0 measurement exists in coevolution_log.jsonl.",
+    "defense under test is the Phase A rule gate (vocabulary matching), so encoding mutations bypassing it is expected; the contribution claimed is the closed-loop self-healing mechanism and the measurement method, not 'Phase A is weak' (contract §8.4).",
+    "PDF is hand-written vector output (no matplotlib): base-14 Helvetica, ASCII text only; the Chinese caption lives only in this JSON file.",
+    "held-out evaluation-set protocol (from coevolution_evidence.json): held-out seeds x generation-0 mutation distribution; blue team never sees these payloads; held-out mutations are NOT OOD data; zeroday_generation_id=0 -- the mutation strength of the held-out set is fixed at generation 0, so movement of the red/blue curves reflects the defense, not a stronger attack stream. This run's zeroday set: 40 payloads.",
+    "plateau is data, not smoothing: the evolved defense stays at 0.775 on the held-out set from generation 1 through generation 19 (19 of 20 generations); the accepted patch count grows from 2 to 15 (+13) over that span while the held-out interception rate gains exactly 0 -- rule-level self-healing consumes surface forms but not rewrites that destroy semantic surface evidence."
+  ],
+  "api_calls": 0,
+  "api_tokens_used": 0
+}

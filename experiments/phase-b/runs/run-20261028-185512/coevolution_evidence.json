@@ -1,0 +1,227 @@
+{
+  "schema": "phase-b-coevolution-evidence-v1",
+  "run_id": "run-20261028-185512",
+  "started_at": "2026-10-28T18:55:12+08:00",
+  "finished_at": "2026-10-28T18:59:02+08:00",
+  "generations_run": 20,
+  "stop_reason": "max_generations",
+  "converged": false,
+  "dry_run": false,
+  "defense_under_test": {
+    "baseline": "phase-a rule gate (classify_user_risk + preflight_audit UCA-01)",
+    "evolved": "baseline + this run's accepted sandbox patches (snapshot: experiments/phase-b/runs/run-20261028-185512/evolved_patch_snapshot.json)",
+    "candidate_ledger": "rules/candidate_patch.yaml",
+    "measurement": "tools/phase_b_defense.scan",
+    "note": "官方 run 的候选补丁按 Lead 裁决写入规范账本 rules/candidate_patch.yaml（A1 persist），run 目录另存 candidate_patch_snapshot_g<g>.yaml 每代快照；生产规则零改动；合入生产 = H0 人工审批，脚本无此能力"
+  },
+  "candidate_ledger": "rules/candidate_patch.yaml",
+  "candidate_ledger_snapshots": [
+    "candidate_patch_snapshot_g0.yaml",
+    "candidate_patch_snapshot_g1.yaml",
+    "candidate_patch_snapshot_g2.yaml",
+    "candidate_patch_snapshot_g3.yaml",
+    "candidate_patch_snapshot_g4.yaml",
+    "candidate_patch_snapshot_g5.yaml",
+    "candidate_patch_snapshot_g6.yaml",
+    "candidate_patch_snapshot_g7.yaml",
+    "candidate_patch_snapshot_g8.yaml",
+    "candidate_patch_snapshot_g9.yaml",
+    "candidate_patch_snapshot_g10.yaml",
+    "candidate_patch_snapshot_g11.yaml",
+    "candidate_patch_snapshot_g12.yaml",
+    "candidate_patch_snapshot_g13.yaml",
+    "candidate_patch_snapshot_g14.yaml",
+    "candidate_patch_snapshot_g15.yaml",
+    "candidate_patch_snapshot_g16.yaml",
+    "candidate_patch_snapshot_g17.yaml",
+    "candidate_patch_snapshot_g18.yaml",
+    "candidate_patch_snapshot_g19.yaml"
+  ],
+  "evolved_patch_snapshot": "experiments/phase-b/runs/run-20261028-185512/evolved_patch_snapshot.json",
+  "zeroday_set": {
+    "path": "experiments/phase-b/runs/run-20261028-185512/zeroday_set.jsonl",
+    "count": 40,
+    "sha256": "432e08a2d47cdc968f80803be64cf337d43767781459d4431b180f1d6f7a210c",
+    "generation_id": 0,
+    "note": "held-out seeds 经 A4 确定性变异；蓝队永远拿不到 payload；run 内只读"
+  },
+  "zeroday_protocol": "held-out seeds x generation-0 mutation distribution; blue team never sees these payloads; held-out mutations are NOT OOD data",
+  "zeroday_generation_id": 0,
+  "plain_attack_baseline_intercept_rate": 1.0,
+  "zeroday_baseline_intercept_rate": 0.375,
+  "zeroday_evolved_intercept_rate_final": 0.775,
+  "max_intercept_rate_evolved": 0.9,
+  "max_intercept_rate_evolved_generation": 4,
+  "benign_false_positive_rate_max": 0.027,
+  "benign_false_positive_rate_baseline": 0.027,
+  "benign_total": 74,
+  "red_team_variants_total": 800,
+  "bypass_total": 145,
+  "patches_total": 15,
+  "patches": [
+    "P-0001",
+    "P-0002",
+    "P-0003",
+    "P-0004",
+    "P-0005",
+    "P-0006",
+    "P-0007",
+    "P-0008",
+    "P-0009",
+    "P-0010",
+    "P-0011",
+    "P-0012",
+    "P-0013",
+    "P-0014",
+    "P-0015"
+  ],
+  "patch_rejected": [],
+  "regression_all_pass": true,
+  "regression_runs": [
+    {
+      "suite": "audit892",
+      "files": 14,
+      "passed": 915,
+      "failed": 0,
+      "seconds": 14.74,
+      "generation_id": 0
+    },
+    {
+      "suite": "audit892",
+      "files": 14,
+      "passed": 915,
+      "failed": 0,
+      "seconds": 14.53,
+      "generation_id": 1
+    },
+    {
+      "suite": "audit892",
+      "files": 14,
+      "passed": 915,
+      "failed": 0,
+      "seconds": 14.57,
+      "generation_id": 2
+    },
+    {
+      "suite": "audit892",
+      "files": 14,
+      "passed": 915,
+      "failed": 0,
+      "seconds": 14.86,
+      "generation_id": 3
+    },
+    {
+      "suite": "audit892",
+      "files": 14,
+      "passed": 915,
+      "failed": 0,
+      "seconds": 14.29,
+      "generation_id": 5
+    },
+    {
+      "suite": "audit892",
+      "files": 14,
+      "passed": 915,
+      "failed": 0,
+      "seconds": 15.2,
+      "generation_id": 6
+    },
+    {
+      "suite": "audit892",
+      "files": 14,
+      "passed": 915,
+      "failed": 0,
+      "seconds": 15.07,
+      "generation_id": 8
+    },
+    {
+      "suite": "audit892",
+      "files": 14,
+      "passed": 915,
+      "failed": 0,
+      "seconds": 15.63,
+      "generation_id": 9
+    },
+    {
+      "suite": "audit892",
+      "files": 14,
+      "passed": 915,
+      "failed": 0,
+      "seconds": 14.45,
+      "generation_id": 10
+    },
+    {
+      "suite": "audit892",
+      "files": 14,
+      "passed": 915,
+      "failed": 0,
+      "seconds": 14.82,
+      "generation_id": 12
+    },
+    {
+      "suite": "audit892",
+      "files": 14,
+      "passed": 915,
+      "failed": 0,
+      "seconds": 16.98,
+      "generation_id": 13
+    },
+    {
+      "suite": "audit892",
+      "files": 14,
+      "passed": 915,
+      "failed": 0,
+      "seconds": 15.82,
+      "generation_id": 14
+    },
+    {
+      "suite": "audit892",
+      "files": 14,
+      "passed": 915,
+      "failed": 0,
+      "seconds": 16.22,
+      "generation_id": 15
+    },
+    {
+      "suite": "audit892",
+      "files": 14,
+      "passed": 915,
+      "failed": 0,
+      "seconds": 14.59,
+      "generation_id": 16
+    },
+    {
+      "suite": "audit892",
+      "files": 14,
+      "passed": 915,
+      "failed": 0,
+      "seconds": 17.58,
+      "generation_id": 18
+    }
+  ],
+  "api_calls": 0,
+  "api_tokens_used": 0,
+  "determinism": {
+    "seed": 20261028,
+    "rng": "random.Random",
+    "zeroday_seed": 20261028,
+    "note": "变异流/绕过序列/拦截率同 seed 可复现；补丁 id 由规范账本状态决定（官方 run 写唯一规范账本），复跑 id 顺延；单 run 内每代候选账本快照保证可回溯"
+  },
+  "log_path": "coevolution_log.jsonl",
+  "limitations": [
+    "变异引擎是确定性规则变异（编码/词表/嵌套），不是 LLM 红队；不得写成“自主攻防智能体”。",
+    "语言变异是离线词表近似（provenance: offline_glossary），不是真实机器翻译。",
+    "api_tokens_used == 0 是事实：本阶段零模型调用，token 预算停止条件未获真实检验（代码路径已实现，仅由单元测试注入模拟值验证触发）。",
+    "被测防线是 Phase A 规则型闸门（词表匹配），编码变异能绕过属可预期；本文贡献是闭环自愈机制与度量方法，不是“Phase A 很弱”。",
+    "零日集与训练集来自同一批种子的不同 split，不是独立分布外数据（not OOD）；只能说 held-out 变体，不许写“零日/未见攻击”当 OOD 证据。",
+    "零日集按 Lead 口径用 generation_id=0 变异分布（与训练流同变异强度、只差 held-out 种子），避免把“泛化”与“攻击变强”混在一起；口径见 evidence.zeroday_protocol。",
+    "回归锁口径：audit892 = 2026-10-27 审计快照的 14 文件口径；今天同口径实测 915 项，与 892 不可换算，报告须注明口径与实测值。",
+    "tests/test_chaos_campaign.py 的 3 项失败属沙箱写权限环境性失败（非断言失败），不计入补丁判定（audit892 集合不含该文件）。",
+    "补丁以 run 目录内 evolved_patch_snapshot.json 快照形式保存；rules/candidate_patch.yaml 属 A1 写作用域，本脚本不写候选/生产规则文件，生产规则零改动。",
+    "A1 内部良性自检结果通过 LAST_ADJUDICATION 回传；A5 另以“演化防线对良性语料实测误伤率 > 基线”作为第二道闸门，不满足则丢弃本代补丁并记录 rejected。",
+    "官方 run 的候选账本按 Lead 裁决写规范入口 rules/candidate_patch.yaml（A1 persist），run 目录另存每代快照 candidate_patch_snapshot_g<g>.yaml 供单 run 回溯；生产规则零改动，合入生产 = H0 人工审批。",
+    "A5 未调用 A1 的 write_proposal（proposals/phase-b 属 A1 写作用域）；如需 PROP-*.yaml 人工审批件，由 Lead/A1 依据规范账本条目生成。",
+    "determinism：同 seed 的变异流、绕过序列与各拦截率可复现；但补丁 id 由规范账本当前状态决定（Lead 裁决官方 run 写唯一规范账本 rules/candidate_patch.yaml），复跑时 id 会顺延——单 run 内每代 candidate_patch_snapshot_g<g>.yaml 保证可回溯。",
+    "本 run 的逐代原始数值见 experiments/phase-b/runs/run-20261028-185512/coevolution_log.jsonl（20 行）；回归锁明细见 regression_gen*.json。"
+  ]
+}
