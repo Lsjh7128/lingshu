@@ -13,12 +13,12 @@ Table~\ref{tab:uca} reproduces the eight unsafe control actions of the
 gate as defined in the implementation (the source strings are Chinese and are
 translated here). The table, the two trigger word lists and the verdict logic are
 hardcoded at
-\texttt{engine/control.py:175--188} and \texttt{engine/control.py:191--232};
+\texttt{engine/\allowbreak{}control.\allowbreak{}py:\allowbreak{}175-\allowbreak{}-\allowbreak{}188} and \texttt{engine/\allowbreak{}control.\allowbreak{}py:\allowbreak{}191-\allowbreak{}-\allowbreak{}232};
 checks are evaluated in code order, and any hit among UCA-01--07 sets the
 verdict to \texttt{block}. UCA-08 is downgrade-only: it is recorded in the
 \texttt{downgrades} field and never changes the verdict.
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering\small
 \caption{Unsafe control actions and their responses. ``Marker'' is a fixed
 five-character anchor sentinel beginning with U+3016; ``fact block'' is the
@@ -37,45 +37,45 @@ UCA-07 & Persona anchor missing during a phase shift & prefeed $\land$ marker $\
 UCA-08 & Integration continues after saturation & $\exists k: s_k$ (\texttt{:221--223}) & downgrade only \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 \section{Parameters and provenance}\label{sec:app:params}
 
 Table~\ref{tab:params} lists every numeric parameter touched by the mechanisms
 in Section~\ref{sec:method}. The authoritative source is
-\texttt{rules/decay-params.yaml}; \texttt{engine/config.py} is a zero-dependency
-shadow copy, cross-checked key by key by \texttt{tools/check\_config\_sync.py}
+\texttt{rules/\allowbreak{}decay-\allowbreak{}params.\allowbreak{}yaml}; \texttt{engine/config.py} is a zero-dependency
+shadow copy, cross-checked key by key by \texttt{tools/\allowbreak{}check\_\allowbreak{}config\_\allowbreak{}sync.\allowbreak{}py}
 (66 keys, 0 failures). \textbf{All entries are \texttt{provenance: guess}}; the
 number of measured parameters is zero
-(\texttt{acceptance/provenance-candidates.json} reports
-\texttt{upgrade\_eligible: false} for every entry).
+(\texttt{acceptance/\allowbreak{}provenance-\allowbreak{}candidates.\allowbreak{}json} reports
+\texttt{upgrade\_\allowbreak{}eligible:\allowbreak{} false} for every entry).
 
-\begin{table}[t]
-\centering\footnotesize
+\begin{table*}[t]
+\centering\scriptsize\setlength{\tabcolsep}{2.5pt}
 \caption{Numeric parameters, authoritative rule-file line, value, provenance and
 code shadow. ``guess'' is a design default, not a calibrated value.}\label{tab:params}
-\begin{tabular}{@{}p{0.25\textwidth}p{0.42\textwidth}p{0.18\textwidth}p{0.11\textwidth}@{}}
+\begin{tabular}{@{}p{0.24\textwidth}p{0.40\textwidth}p{0.16\textwidth}p{0.14\textwidth}@{}}
 \toprule
 Parameter key & Value & Provenance & Shadow \\
 \midrule
 \texttt{actr.d}, \texttt{actr.ref}, \texttt{actr.lo}, \texttt{actr.hi} & 0.5, 0.001 d, $-3.0$, $1.0$ (\texttt{:217--221}) & guess & \texttt{config.py:90--95} \\
 \texttt{memory.actrWeight} & 0.6 (\texttt{:18}) & guess\textsuperscript{a} & \texttt{config.py:21} \\
-\texttt{memory.decay.tau.*} & 7, 30, 90 d (\texttt{:39--48}) & guess & \texttt{config.py:15--19} \\
-\texttt{control.integralKi} / \texttt{Cap} / \texttt{Leak} / \texttt{Deadband} & 0.15 / 0.4 / 0.05 / 0.02 (\texttt{:224--233}) & guess & \texttt{config.py:97--100} \\
-\texttt{control.phaseShiftRatio} / \texttt{HardRatio} & 0.70 / 0.85 (\texttt{:228--233}) & guess & \texttt{config.py:101--102} \\
-\texttt{control.trendThreshold} / \texttt{ratioMax} / \texttt{historyCapacity} & 0.02 / 1.5 / 64 (\texttt{:230--233}) & guess & \texttt{config.py:104--106} \\
-\texttt{compose.weights.fact} / \texttt{organization} / \texttt{style} / \texttt{retrieval} & 0.70 / 0.50 / 0.40 / 0.45 (\texttt{:239--247}) & guess & \texttt{config.py:50--53} \\
-\texttt{compose.weights.boost*} & 0.50 / 0.35 / 0.40 (\texttt{:243--247}) & guess & \texttt{config.py:54--56} \\
-\texttt{compose.weights.styleBoostThreshold} & 0.6 (\texttt{:246}) & guess & \texttt{config.py:58} \\
-\texttt{memory.retrieval.topK} & 3 (\texttt{:20}) & guess & \texttt{config.py:22} \\
-\texttt{memory.recallBudget.tokenBudgetDefault} / \texttt{maxReturned} & 900 / 3 (\texttt{:70--71}) & guess\textsuperscript{a} & \texttt{config.py:25} \\
-\texttt{memory.potency.archiveThreshold} & 0.15 (\texttt{:50}) & guess\textsuperscript{a} & \texttt{config.py:20} \\
-\texttt{compose.injectionTokenRatioMax} & 0.15 (\texttt{:236}) & none\textsuperscript{b} & \texttt{config.py:45} (\texttt{tokenRatioMax}) \\
-\texttt{metacog.emotionCapIntensity} & 0.6 & no rule key\textsuperscript{c} & \texttt{config.py:30} \\
-\texttt{ASSUMED\_CONTEXT\_TOKENS} & 8000 & no rule key\textsuperscript{c} & \texttt{compose.py:36} \\
+\texttt{memory.\allowbreak{}decay.\allowbreak{}tau.\allowbreak{}*} & 7, 30, 90 d (\texttt{:39--48}) & guess & \texttt{config.py:15--19} \\
+\texttt{control.\allowbreak{}integralKi} / \texttt{Cap} / \texttt{Leak} / \texttt{Deadband} & 0.15 / 0.4 / 0.05 / 0.02 (\texttt{:224--233}) & guess & \texttt{config.py:97--100} \\
+\texttt{control.\allowbreak{}phaseShiftRatio} / \texttt{HardRatio} & 0.70 / 0.85 (\texttt{:228--233}) & guess & \texttt{config.\allowbreak{}py:\allowbreak{}101-\allowbreak{}-\allowbreak{}102} \\
+\texttt{control.\allowbreak{}trendThreshold} / \texttt{ratioMax} / \texttt{historyCapacity} & 0.02 / 1.5 / 64 (\texttt{:230--233}) & guess & \texttt{config.\allowbreak{}py:\allowbreak{}104-\allowbreak{}-\allowbreak{}106} \\
+\texttt{compose.\allowbreak{}weights.\allowbreak{}fact} / \texttt{organization} / \texttt{style} / \texttt{retrieval} & 0.70 / 0.50 / 0.40 / 0.45 (\texttt{:239--247}) & guess & \texttt{config.py:50--53} \\
+\texttt{compose.\allowbreak{}weights.\allowbreak{}boost*} & 0.50 / 0.35 / 0.40 (\texttt{:243--247}) & guess & \texttt{config.py:54--56} \\
+\texttt{compose.\allowbreak{}weights.\allowbreak{}styleBoostThreshold} & 0.6 (\texttt{:246}) & guess & \texttt{config.py:58} \\
+\texttt{memory.\allowbreak{}retrieval.\allowbreak{}topK} & 3 (\texttt{:20}) & guess & \texttt{config.py:22} \\
+\texttt{memory.\allowbreak{}recallBudget.\allowbreak{}tokenBudgetDefault} / \texttt{maxReturned} & 900 / 3 (\texttt{:70--71}) & guess\textsuperscript{a} & \texttt{config.py:25} \\
+\texttt{memory.\allowbreak{}potency.\allowbreak{}archiveThreshold} & 0.15 (\texttt{:50}) & guess\textsuperscript{a} & \texttt{config.py:20} \\
+\texttt{compose.\allowbreak{}injectionTokenRatioMax} & 0.15 (\texttt{:236}) & none\textsuperscript{b} & \texttt{config.py:45} (\texttt{tokenRatioMax}) \\
+\texttt{metacog.\allowbreak{}emotionCapIntensity} & 0.6 & no rule key\textsuperscript{c} & \texttt{config.py:30} \\
+\texttt{ASSUMED\_\allowbreak{}CONTEXT\_\allowbreak{}TOKENS} & 8000 & no rule key\textsuperscript{c} & \texttt{compose.py:36} \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 \noindent\textsuperscript{a}~The block carries no inline provenance key; the
 file header states that all values are guesses (\texttt{:4}), and the enclosing
@@ -93,7 +93,7 @@ preparing this paper. The environment variable is required on Windows because
 one assertion name contains U+2212, which the default console code page cannot
 encode; without it the run aborts on printing, not on an assertion failure.
 
-\begin{verbatim}
+\begin{lstlisting}
 $env:PYTHONIOENCODING = "utf-8"
 python tests/test_control.py                  # 161 passed, 0 failed
 python tests/test_pipeline_integration.py     #  65 passed, 0 failed
@@ -104,7 +104,7 @@ python tools/run_learning.py --json           #  recall_at_3 = 1.0
 node plugin/dsh-lingshu/host-sim.mjs --assert #  documented 188 assertions
 node plugin/dsh-lingshu/control-sim.mjs --assert # documented 148 assertions
 node plugin/dsh-lingshu/stress.mjs --assert   #  documented 45 assertions
-\end{verbatim}
+\end{lstlisting}
 
 Table~\ref{tab:assertions} attributes the executed Python assertions to the
 mechanisms of Section~\ref{sec:method}. Counts are executions, not call sites:
@@ -112,34 +112,34 @@ one call site inside a loop runs once per iteration (e.g.\ the top-$k$ slot
 check). Plugin assertion counts are those recorded by the project and were not
 re-executed for this paper.
 
-\begin{table}[t]
-\centering\footnotesize
+\begin{table*}[t]
+\centering\scriptsize\setlength{\tabcolsep}{2.5pt}
 \caption{Assertion inventory. ``Run'' is the number of assertion executions
 observed; ``site'' is the test-file line where the test function starts.}\label{tab:assertions}
-\begin{tabular}{@{}p{0.36\textwidth}p{0.34\textwidth}p{0.10\textwidth}p{0.12\textwidth}@{}}
+\begin{tabular}{@{}p{0.34\textwidth}p{0.36\textwidth}p{0.10\textwidth}p{0.12\textwidth}@{}}
 \toprule
 Mechanism & Test function (file) & Run & Site \\
 \midrule
-ACT-R base level & \texttt{test\_actr\_activation} (\texttt{test\_control.py}) & 15 & \texttt{:58} \\
-ACT-R dual channel & \texttt{test\_actr\_dual\_channel} (\texttt{test\_control.py}) & 7 & \texttt{:103} \\
-Top-$k$ slot contract & \texttt{test\_topk\_slot\_contract} (\texttt{test\_control.py}) & 9 & \texttt{:143} \\
-Integral feedback & \texttt{test\_integral\_baseline} (\texttt{test\_control.py}) & 18 & \texttt{:177} \\
-Phase-shift monitor & \texttt{test\_phase\_shift\_monitor} (\texttt{test\_control.py}) & 22 & \texttt{:258} \\
-Requisite-variety guard & \texttt{test\_requisite\_variety\_guard} (\texttt{test\_control.py}) & 11 & \texttt{:342} \\
-Pre-flight gate & \texttt{test\_preflight\_audit} (\texttt{test\_control.py}) & 33 & \texttt{:387} \\
-Dynamic weights & \texttt{test\_compose\_weights} (\texttt{test\_control.py}) & 29 & \texttt{:484} \\
-Single-source parameters & \texttt{test\_params\_single\_source} (\texttt{test\_control.py}) & 8 & \texttt{:623} \\
+ACT-R base level & \texttt{test\_\allowbreak{}actr\_\allowbreak{}activation} (\texttt{test\_control.py}) & 15 & \texttt{:58} \\
+ACT-R dual channel & \texttt{test\_\allowbreak{}actr\_\allowbreak{}dual\_\allowbreak{}channel} (\texttt{test\_control.py}) & 7 & \texttt{:103} \\
+Top-$k$ slot contract & \texttt{test\_\allowbreak{}topk\_\allowbreak{}slot\_\allowbreak{}contract} (\texttt{test\_control.py}) & 9 & \texttt{:143} \\
+Integral feedback & \texttt{test\_\allowbreak{}integral\_\allowbreak{}baseline} (\texttt{test\_control.py}) & 18 & \texttt{:177} \\
+Phase-shift monitor & \texttt{test\_\allowbreak{}phase\_\allowbreak{}shift\_\allowbreak{}monitor} (\texttt{test\_control.py}) & 22 & \texttt{:258} \\
+Requisite-variety guard & \texttt{test\_\allowbreak{}requisite\_\allowbreak{}variety\_\allowbreak{}guard} (\texttt{test\_control.py}) & 11 & \texttt{:342} \\
+Pre-flight gate & \texttt{test\_\allowbreak{}preflight\_\allowbreak{}audit} (\texttt{test\_control.py}) & 33 & \texttt{:387} \\
+Dynamic weights & \texttt{test\_\allowbreak{}compose\_\allowbreak{}weights} (\texttt{test\_control.py}) & 29 & \texttt{:484} \\
+Single-source parameters & \texttt{test\_\allowbreak{}params\_\allowbreak{}single\_\allowbreak{}source} (\texttt{test\_control.py}) & 8 & \texttt{:623} \\
 Impasse & \texttt{test\_impasse} (\texttt{test\_control.py}) & 7 & \texttt{:668} \\
-Pipeline integration & nine functions & 65 & \texttt{test\_pipeline\_integration.py:46--284} \\
-Constitution audit & five functions & 26 & \texttt{test\_constitution.py} \\
+Pipeline integration & \texttt{nine functions} (\texttt{test\_\allowbreak{}pipeline\_\allowbreak{}integration.\allowbreak{}py}) & 65 & \texttt{:46--284} \\
+Constitution audit & \texttt{five functions} (\texttt{test\_\allowbreak{}constitution.\allowbreak{}py}) & 26 & --- \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 The gate-level measurements quoted in the text were produced with the same
 token-free call used by the chaos executor
-(\texttt{tools/run\_chaos.py:443--446}): the sample text is passed as the
+(\texttt{tools/\allowbreak{}run\_\allowbreak{}chaos.\allowbreak{}py:\allowbreak{}443-\allowbreak{}-\allowbreak{}446}): the sample text is passed as the
 \texttt{prompt} argument with \texttt{frozen\_ok=True} and
-\texttt{constitution\_injected=True}, which isolates UCA-01. This is a unit-level
+\texttt{constitution\_\allowbreak{}injected=True}, which isolates UCA-01. This is a unit-level
 coverage check on the gate's scan surface, not an end-to-end interception
 measurement.

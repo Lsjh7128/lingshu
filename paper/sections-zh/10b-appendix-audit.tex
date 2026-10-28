@@ -6,16 +6,16 @@
 \begin{table*}[t]
 \centering
 \caption{变异矩阵。只有断言失败才计为杀死；仅因崩溃而杀死的计为排除（观测到 0 例）。补测后仍存活的变异体是等价变异体，不是测试弱点。规则文件变异体由跨文件一致性断言捕获，而非行为断言。}
-\small
+\scriptsize\setlength{\tabcolsep}{2.5pt}
 \begin{tabular}{lrrrrl}
 \toprule
 区域 & 变异体 & 杀死 & 比率 & 存活者 & 补测后 \\
 \midrule
 \texttt{plugin/control.js}      & 16 & 15 & 93.8\% & 1 个等价变异体 & 15/15 非等价 \\
-\texttt{plugin/memorywriter.js} &  5 &  3 & 60.0\% & 2 个真实盲点 & 5/5 \\
+\texttt{plugin/\allowbreak{}memorywriter.\allowbreak{}js} &  5 &  3 & 60.0\% & 2 个真实盲点 & 5/5 \\
 \texttt{plugin/index.js}        &  8 &  6 & 75.0\% & 2 个真实盲点 & 8/8 \\
 \texttt{engine/control.py}      & 11 & 10 & 90.9\% & 1 个等价变异体 & 10/10 非等价 \\
-\texttt{rules/decay-params.yaml}&  4 &  4 & 100\%  & 0 & 4/4 \\
+\texttt{rules/\allowbreak{}decay-\allowbreak{}params.\allowbreak{}yaml}&  4 &  4 & 100\%  & 0 & 4/4 \\
 \midrule
 合计                           & 44 & 38 & 86.4\% & 4 个真实 + 2 个等价 & 42/44（95.5\%）；42/42 非等价 \\
 \bottomrule
@@ -64,4 +64,4 @@
 
 \paragraph{表格没有显示的东西。} 有三条告诫必须与数字同放。第一，在被测配置下 \texttt{engine/control.py} 没有被执行的行（$141/141$ 行、$56/56$ 分支），但这不能确立死代码不存在：两个等价变异体存活恰恰是因为某个分支不可达，而“不可达”正是覆盖率数字无法与“未被测试的分支”区分开的东西。第二，全仓库 Python 数字 $45.81\%$ 被 \texttt{tools/}（$32.92\%$；26 个文件中执行了 3 个）拉低，而 \texttt{tools/} 覆盖率本身也是下界，因为以子进程方式调用的工具会被记录为未执行。第三，仓库没有版本控制历史，因此审计可以证明当前状态，但无法证明此前没有任何断言被弱化。
 
-\paragraph{复现。} 随附文件为 \texttt{acceptance/audit/mutation-results-2026-10-27.json}（逐变异体结果、存活者分析与前后 SHA-256 清单）与 \texttt{acceptance/audit/coverage-summary-2026-10-27.json}（逐文件行/分支数据），可读报告与它们放在一起。完整套件：十四个 Python 测试文件（892 条断言）与四个 JavaScript 套件（396 条断言）。变异复跑使用仓库的完整副本；变异驱动、逐轮原始输出与独立复跑日志存档于审计包中并可向作者索取，因为它们位于仓库之外，这样任何由审阅者运行产生的工件都无法改动提交树。在 Windows 上，有三个 Python 测试文件需要临时目录 shim，因为沙箱阻止 \texttt{tempfile.mkdtemp()}；该 shim 只替换临时目录创建，不改变任何断言、也不改变任何一行实现代码。
+\paragraph{复现。} 随附文件为 \texttt{acceptance/\allowbreak{}audit/\allowbreak{}mutation-\allowbreak{}results-\allowbreak{}2026-\allowbreak{}10-\allowbreak{}27.\allowbreak{}json}（逐变异体结果、存活者分析与前后 SHA-256 清单）与 \texttt{acceptance/\allowbreak{}audit/\allowbreak{}coverage-\allowbreak{}summary-\allowbreak{}2026-\allowbreak{}10-\allowbreak{}27.\allowbreak{}json}（逐文件行/分支数据），可读报告与它们放在一起。完整套件：十四个 Python 测试文件（892 条断言）与四个 JavaScript 套件（396 条断言）。变异复跑使用仓库的完整副本；变异驱动、逐轮原始输出与独立复跑日志存档于审计包中并可向作者索取，因为它们位于仓库之外，这样任何由审阅者运行产生的工件都无法改动提交树。在 Windows 上，有三个 Python 测试文件需要临时目录 shim，因为沙箱阻止 \texttt{tempfile.\allowbreak{}mkdtemp()}；该 shim 只替换临时目录创建，不改变任何断言、也不改变任何一行实现代码。

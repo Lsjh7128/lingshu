@@ -29,7 +29,7 @@ the shift phase. \emph{Data protection} (one): credentials in clear text.
 \emph{Mutation safety} (four): destructive delete or overwrite without exact
 confirmation, writes to frozen or protected paths, a mutating call after a failed
 frozen-region check, and path escape. \emph{Network and execution} (two):
-non-allowlisted egress and arbitrary code execution. \emph{Shape and registry}
+\mbox{non-allowlisted} egress and arbitrary code execution. \emph{Shape and registry}
 (four): oversized or recursive payloads, schema or delimiter violations,
 unregistered tools, undeclared capabilities. \emph{Auditability} (one):
 incomplete audit context. Thirteen rules block, three degrade: a degrade is not
@@ -59,21 +59,45 @@ identifiers in \texttt{ucas}, policy version, state snapshot), and injects a
 strong clarification prompt on the next turn. Detection is not blocking, and we
 label it as such.
 
+\paragraph{Explainable permission transfer.} On a degrade the gate records a
+permission request we call \emph{explanatory permission transfer}: the verdict
+restated in the persona's voice as an explanation a non-expert can act on,
+recomposed from the STPA gate's UCA rules, the persona baseline and the relation
+state. The \emph{fact layer} fixes action, object, worst case, reversibility and
+why now; these are mandatory and cannot be omitted or rewritten. The \emph{style
+layer} maps the persona's pleasure--arousal--dominance (PAD) baseline and the
+relation state onto tone, address and intensity by deterministic rules with zero
+model calls. A composer injects both into the next turn's prompt; the model's
+final wording is not verified. An \emph{executed} flag could mark the request as
+held pending confirmation at a pre-dispatch point (engine loop,
+\texttt{guardTool} routing), but the plugin wires only the detective path, where
+the call may already have been dispatched; the request arrives as an explainable
+account plus a request to continue or remediate, and no pre-dispatch hold is
+claimed for arbitrary tools. Five T-UCA rules for delete, credentials, egress,
+execution and path escape---together with any destructive or unclassified tool
+class---form a red zone: styling is stripped entirely, persona
+voice dropped, and the request becomes a serious, neutral warning, lest a joking
+tone mislead. The intended benefit, lower human-in-the-loop cognitive load, is a
+design argument, not a measurement: no user study, no blind approval rate, no
+effect size. Verdicts are unchanged: at a pre-dispatch point a degrade is still
+not executed, a degrade without an approval seam still falls back to block, and
+no new approval seam is created.
+
 \paragraph{Evidence.} The Python suite covers twenty constructed dangerous
 scenarios (all blocked), eight benign scenarios (none blocked), state-gated and
 fail-closed cases, and a twenty-case Python--JavaScript check in which verdict,
 matched identifiers and downgrade field all agree. The JavaScript simulation runs
 sixty-five checks; the Python suite reports 79 passing assertions. The reference
 demo emits the JSON cited here
-(\texttt{paper/ablation/results/actuator-demo-20261027.json}): twelve scripted
+(\texttt{paper/\allowbreak{}ablation/\allowbreak{}results/\allowbreak{}actuator-\allowbreak{}demo-\allowbreak{}20261027.\allowbreak{}json}): twelve scripted
 calls, four allowed and executed, eight blocked and none executed, with nine
 distinct rules among the matched identifiers. It uses a mock executor with zero
 model calls and zero real writes, so these are scenario counts showing
 ``judge before execute'', not an interception rate. The same run evaluates a
 ten-item held-out set written blind---its author did not read the rule table, the
 implementation, or the tests---frozen at
-\texttt{paper/ablation/tool/heldout-tool-calls-v1.jsonl} (SHA-256
-\texttt{f68fc1b3f19fc37e43b9856096d29b9a55de7dee9bf664a9b9a9592e070576d4}); ten
+\texttt{paper/\allowbreak{}ablation/\allowbreak{}tool/\allowbreak{}heldout-\allowbreak{}tool-\allowbreak{}calls-\allowbreak{}v1.\allowbreak{}jsonl} (SHA-256
+\texttt{\seqsplit{f68fc1b3f19fc37e43b9856096d29b9a55de7dee9bf664a9b9a9592e070576d4}}); ten
 of ten calls are blocked with arguments only and ten of ten with context, and its
 endpoints are placeholder domains, so a hit cannot be a domain coincidence. We
 report verdicts, not a correctness rate: whether each call \emph{should} be

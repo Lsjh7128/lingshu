@@ -18,8 +18,12 @@
 \usepackage{graphicx}
 \usepackage{microtype}
 \usepackage[numbers,sort&compress]{natbib}
-\usepackage[hidelinks]{hyperref}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=blue,urlcolor=blue]{hyperref}
 \usepackage{url}
+\usepackage{seqsplit}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,columns=fullflexible,
+  keepspaces=true,frame=none,aboveskip=4pt,belowskip=4pt}
 
 \setlength{\parskip}{2pt}
 \frenchspacing
@@ -76,6 +80,7 @@ yet available.
 \pair{sections/06e-actuator}{sections-zh/06e-actuator}
 \pair{sections/06f-baselines}{sections-zh/06f-baselines}
 \pair{sections/06g-case-study}{sections-zh/06g-case-study}
+\pair{sections/06h-immersive-case}{sections-zh/06h-immersive-case}
 \pair{sections/07-discussion}{sections-zh/07-discussion}
 \pair{sections/08-limitations}{sections-zh/08-limitations}
 \pair{sections/09-conclusion}{sections-zh/09-conclusion}
@@ -86,6 +91,8 @@ yet available.
 \pair{sections/10b-appendix-audit}{sections-zh/10b-appendix-audit}
 \pair{sections/10c-appendix-tool}{sections-zh/10c-appendix-tool}
 \pair{sections/10d-appendix-hostpilot}{sections-zh/10d-appendix-hostpilot}
+\pair{sections/10e-risk-classifier}{sections-zh/10e-risk-classifier}
+\pair{sections/10f-appendix-supplychain}{sections-zh/10f-appendix-supplychain}
 
 \bibliographystyle{plainnat}
 \bibliography{refs}

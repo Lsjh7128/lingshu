@@ -9,9 +9,9 @@
 
 \paragraph{逐轮长会话试点（S4）。} 最后一个实验把单条拼接消息替换为真正的逐轮调用。两条臂——\textsc{Full}（插件加控制面）与 \textsc{Baseline}（无插件；harness 拼接最近 $W=3$ 轮）——各运行两个 30 轮变体。设定在第 1--2 轮埋下，一条取代语句出现在第 3 轮，第 10、20、30 轮的探针询问该设定、被取代的值、界面偏好，以及一只从未被提及的猫。主交付是 v1 子集：60 个格、60/60 退出码为 0、419{,}203 个 token。完整的 120 格运行（873{,}198 个 token）仅存档，永不与主口径数字合并计数；额外变体只作交叉核对。
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering\footnotesize
-\caption{逐轮长会话 pilot（S4），主口径 v1 子集：六条探针结果（三个探针轮 $\times$ 两条臂），规则辅助计数。来源：\texttt{calls.json} 的字段 \texttt{observations\_raw\_counts.full-v1}、\texttt{.baseline-v1}、\texttt{aggregate.*}、\texttt{full\_arm\_memory\_evidence.v1}、\texttt{totals\_v1\_subset\_60}；同一记录亦见 \texttt{long-session-2026-10-27.json}。}
+\caption{逐轮长会话 pilot（S4），主口径 v1 子集：六条探针结果（三个探针轮 $\times$ 两条臂），规则辅助计数。来源：\texttt{calls.json} 的字段 \texttt{observations\_\allowbreak{}raw\_\allowbreak{}counts.\allowbreak{}full-\allowbreak{}v1}、\texttt{.baseline-v1}、\texttt{aggregate.*}、\texttt{full\_\allowbreak{}arm\_\allowbreak{}memory\_\allowbreak{}evidence.\allowbreak{}v1}、\texttt{totals\_\allowbreak{}v1\_\allowbreak{}subset\_\allowbreak{}60}；同一记录亦见 \texttt{long-\allowbreak{}session-\allowbreak{}2026-\allowbreak{}10-\allowbreak{}27.\allowbreak{}json}。}
 \begin{tabular}{@{}l ccccc@{}}
 \toprule
 臂 & 设定保持 & 陈旧 ALPHA & 未知承认 & 偏好保持 & 记忆注入 \\
@@ -20,8 +20,8 @@
 \textsc{Baseline} & 3/3 & 0/3 & 1/3 & 3/3 & 0/3 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
-表~\ref{tab:s4} 给出六条探针结果。单看这些数字会引出错误结论，因此必须同时读两条机制事实。第一，\textsc{Full} 在三个探针轮确实都注入了记忆，但内容是错的：第 3 轮的取代语句不匹配插件支持的三种抽取句式（\texttt{plugin/dsh-lingshu/index.js:1004--1011}），因此 BETA 从未被写入，记忆的 last-wins 视图为 \texttt{beta\_present=false}、项目代号仍是 ALPHA——一个陈旧值。第二，探针问句本身被抽取成了一条事实：询问界面偏好匹配到 object 为“什么”的句式，这条垃圾条目把正确的偏好取代掉了（一次 supersede 事件，方向错误）。因此 \textsc{Full} 的模型看到的是“代号 = ALPHA”与“偏好 = 什么”，并遵循不变量 I1（记忆是参考，绝不是当前陈述），回答没有记录。这是脏输入下的设计行为，不是能力上限。
+表~\ref{tab:s4} 给出六条探针结果。单看这些数字会引出错误结论，因此必须同时读两条机制事实。第一，\textsc{Full} 在三个探针轮确实都注入了记忆，但内容是错的：第 3 轮的取代语句不匹配插件支持的三种抽取句式（\texttt{plugin/\allowbreak{}dsh-\allowbreak{}lingshu/\allowbreak{}index.\allowbreak{}js:\allowbreak{}1004-\allowbreak{}-\allowbreak{}1011}），因此 BETA 从未被写入，记忆的 last-wins 视图为 \texttt{beta\_\allowbreak{}present=false}、项目代号仍是 ALPHA——一个陈旧值。第二，探针问句本身被抽取成了一条事实：询问界面偏好匹配到 object 为“什么”的句式，这条垃圾条目把正确的偏好取代掉了（一次 supersede 事件，方向错误）。因此 \textsc{Full} 的模型看到的是“代号 = ALPHA”与“偏好 = 什么”，并遵循不变量 I1（记忆是参考，绝不是当前陈述），回答没有记录。这是脏输入下的设计行为，不是能力上限。
 
 \textsc{Baseline} 表面上的“记住了”来源不同：窗口携带了助手自己先前的复述，于是 BETA 与深色主题靠自我复述存活，而不是通过记忆；并且有两条回答伪造了轮次引用——把填充轮 7--8 说成用户此前的陈述，而那些实际上是助手自己的复述。因此预注册的 P-S4a（Full 在设定保持上至少不劣于 Baseline）\emph{不成立}，记为 \texttt{null}。本 pilot 展示的是输入构造缺陷与规则抽取器真实边界的相互作用；它不能被读成“\textsc{Full} 能力更差”或“\textsc{Baseline} 更好”。由于每臂每变体只有一条链、单模型、单宿主，且采用规则辅助计数，我们只报告计数，不报告比率。已存档的 v2 变体重复了同一模式（\textsc{Full} 0/3，\textsc{Baseline} 2/3），不并入主口径。

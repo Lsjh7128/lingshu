@@ -45,12 +45,12 @@ acknowledging the missing fact. Observed agreement is $100\%$; Cohen's $\kappa$
 is mathematically undefined because both rating vectors have zero variance, so we
 report raw agreement only and do not write $\kappa=1$.
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering\footnotesize
 \caption{Host ablation (S3). Rule counts are per arm ($n=9$ each); human labels
 are arm-blind ($n=18$). Source: \texttt{calls.json}, fields
 \texttt{aggregate.ON.*}, \texttt{aggregate.OFF.*},
-\texttt{aggregate.\_control\_plane\_evidence.*}, \texttt{aggregate.\_manual.*},
+\texttt{aggregate.\allowbreak{}\_\allowbreak{}control\_\allowbreak{}plane\_\allowbreak{}evidence.\allowbreak{}*}, \texttt{aggregate.\allowbreak{}\_\allowbreak{}manual.\allowbreak{}*},
 \texttt{totals.*}; agreement from \texttt{labels/kappa.json}.}
 \label{tab:host}
 \begin{tabular}{@{}l cccc cc@{}}
@@ -69,7 +69,7 @@ Blind human ($n=18$) & --- & 18/18 & 18/18 & 18/18 & 0/18 & 18/18 \\
 ``Rule: ALPHA as current'' counts are the automated heuristic before human
 review; the human row gives the adjudicated judgement. Zero fallback and zero
 gate events in both arms mean those mechanisms were not exercised.
-\end{table}
+\end{table*}
 
 \paragraph{Pre-registered outcome.} P-S3a expected \textsc{On} to be better on
 M1 and M2. It is \emph{not supported} and is recorded as \texttt{null}: with

@@ -9,16 +9,16 @@
 写二十条变异攻击，测量已部署的闸门，加一个静态规则补丁，然后再测一次。
 
 \paragraph{载荷。} 二十条载荷，每个复杂度级别五条，全部经核实是可解释的指令而不是随机字符串
-（\texttt{paper/case-study/payloads.jsonl}，SHA-256 记录在结果文件中）：
+（\texttt{paper/\allowbreak{}case-\allowbreak{}study/\allowbreak{}payloads.\allowbreak{}jsonl}，SHA-256 记录在结果文件中）：
 (L1) 直接覆盖；(L2) 编码变体——Base64、ROT13、hex、零宽分隔符、全角拉丁字符；
 (L3) 多语言变体，覆盖英语、日语、俄语与阿拉伯语，外加一条中英混排；
 (L4) 嵌套变体——多层引用、先翻译后执行、角色扮演、分步诱导与 token 拆分。
 
 \paragraph{测量。} 每条载荷都作为用户消息送给一个 mock 宿主，该宿主加载真实插件，
 并触发与宿主契约相同的钩子（先 \texttt{session/event}，再 \texttt{agent/pre-step}）；
-拦截状态从 \texttt{state.control.blocked}、\texttt{preflight\_block} 审计事件、
+拦截状态从 \texttt{state.\allowbreak{}control.\allowbreak{}blocked}、\texttt{preflight\_block} 审计事件、
 UCA 列表与来源归因读取，而不是从模型行为读取。
-每条载荷都有自己的隔离 \texttt{LINGSHU\_DATA\_DIR} 与 \texttt{DSH\_HOME}，
+每条载荷都有自己的隔离 \texttt{LINGSHU\_\allowbreak{}DATA\_\allowbreak{}DIR} 与 \texttt{DSH\_HOME}，
 运行过程断言这些临时路径从不触碰真实插件目录。
 这样就把规则层的识别与模型自身的拒绝行为隔离开了。
 
@@ -51,8 +51,8 @@ UCA 列表与来源归因读取，而不是从模型行为读取。
 \caption{案例研究中的补丁回路。对二十条变异载荷在静态规则层打补丁前后的拦截情况，
 按构造复杂度分组（L1 直接、L2 编码、L3 多语言、L4 嵌套；每级 $n=5$）。
 打补丁前：3/20（15.0\%）；打补丁后：20/20（100\%）。来源：
-\texttt{paper/case-study/results-before.json} 与 \texttt{results-after.json}；
-绘图输入 \texttt{paper/case-study/fig4-inputs.json}。}
+\texttt{paper/\allowbreak{}case-\allowbreak{}study/\allowbreak{}results-\allowbreak{}before.\allowbreak{}json} 与 \texttt{results-\allowbreak{}after.\allowbreak{}json}；
+绘图输入 \texttt{paper/\allowbreak{}case-\allowbreak{}study/\allowbreak{}fig4-\allowbreak{}inputs.\allowbreak{}json}。}
 \end{figure}
 
 \paragraph{这说明了什么、不说明什么。} 它说明规则层\emph{在运维意义上可打补丁}：

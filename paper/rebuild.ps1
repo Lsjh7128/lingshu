@@ -1,5 +1,10 @@
-﻿# rebuild.ps1 -- 在隔离目录里构建英文版与中英对照版，避免与并行编辑抢文件
-# 用法：powershell -ExecutionPolicy Bypass -File paper\rebuild.ps1 [en|zh|both]
+# rebuild.ps1 -- isolated builds: English / Chinese / bilingual
+# usage: powershell -ExecutionPolicy Bypass -File paper\rebuild.ps1 [en|cn|bi|both|all]
+#   en   = main.tex -> main-en.pdf
+#   cn   = main-zh.tex -> main-zh.pdf (xr imports label numbers from the English aux)
+#   bi   = main-bilingual.tex -> main-bilingual.pdf
+#   both = en + cn (default)
+#   all  = en + cn + bi
 param([string]$what = "both")
 
 $ErrorActionPreference = "Continue"
@@ -15,6 +20,7 @@ function Prepare([string]$dst, [bool]$withZh) {
   Remove-Item $dst -Recurse -Force -ErrorAction SilentlyContinue
   New-Item -ItemType Directory -Force -Path $dst | Out-Null
   Copy-Item (Join-Path $paper "main.tex") $dst -Force
+  Copy-Item (Join-Path $paper "main-zh.tex") $dst -Force -ErrorAction SilentlyContinue
   Copy-Item (Join-Path $paper "main-bilingual.tex") $dst -Force -ErrorAction SilentlyContinue
   Copy-Item (Join-Path $paper "refs.bib") $dst -Force
   Copy-Item (Join-Path $paper "sections") $dst -Recurse -Force
@@ -41,14 +47,28 @@ function Build([string]$dir, [string]$main, [string]$engine, [bool]$bibtex) {
   return $null
 }
 
+$wantEn = @("en", "both", "all") -contains $what
+$wantCn = @("cn", "both", "all") -contains $what
+$wantBi = @("bi", "all") -contains $what
 $fail = 0
-if ($what -eq "en" -or $what -eq "both") {
+
+# Chinese build depends on the English aux (xr imports label numbers), so English goes first.
+if ($wantEn -or $wantCn) {
   $d = Join-Path $root "build\en"; Prepare $d $false
-  $pdf = Build $d "main" "xelatex" $true
-  if ($pdf) { Copy-Item $pdf (Join-Path $paper "main-en.pdf") -Force } else { $fail++ }
+  Copy-Item (Join-Path $d "main.tex") (Join-Path $d "main-en.tex") -Force
+  $pdf = Build $d "main-en" "xelatex" $true
+  if ($pdf) {
+    Copy-Item $pdf (Join-Path $paper "main-en.pdf") -Force
+    Copy-Item (Join-Path $paper "main.tex") (Join-Path $paper "main-en.tex") -Force
+  } else { $fail++ }
 }
-if ($what -eq "zh" -or $what -eq "both") {
-  $d = Join-Path $root "build\zh"; Prepare $d $true
+if ($wantCn) {
+  $d = Join-Path $root "build\cn"; Prepare $d $true
+  $pdf = Build $d "main-zh" "xelatex" $true
+  if ($pdf) { Copy-Item $pdf (Join-Path $paper "main-zh.pdf") -Force } else { $fail++ }
+}
+if ($wantBi) {
+  $d = Join-Path $root "build\bi"; Prepare $d $true
   $pdf = Build $d "main-bilingual" "xelatex" $true
   if ($pdf) { Copy-Item $pdf (Join-Path $paper "main-bilingual.pdf") -Force } else { $fail++ }
 }

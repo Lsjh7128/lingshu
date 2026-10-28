@@ -15,6 +15,10 @@ violation blocks injection instead of degrading it; every other component
 degrades open and records why. The contract is machine-checkable: 892 Python
 assertions across 14 files and 396 plugin-side assertions, with cross-copy
 parameter consistency checked key by key. A chaos suite exercises each mechanism
-in simulated and real hosts. We call the union the \emph{cyber-cognitive
-envelope}; the name is ours, not a new mechanism.
+in simulated and real hosts, and the v5.4 same-turn delivery path keeps the phase
+state in the prompt that carries the critical ratio, pinned by 24 regression
+assertions. A real-host smoke run shows the two layers decoupled: the gate blocks
+a role-play jailbreak with a soft redirect, and the model refuses inside its
+persona instead of quoting a system rule. We call the union the
+\emph{cyber-cognitive envelope}; the name is ours, not a new mechanism.
 \end{abstract}

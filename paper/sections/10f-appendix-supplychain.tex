@@ -1,0 +1,177 @@
+% ============================================================================
+% 10f-appendix-supplychain.tex -- Supply-chain gate and physical sandbox
+% Evidence: acceptance/supply-chain/2026-10-28-供应链防御验收.md / .json
+%   policy:   contracts/supply-chain-policy.json
+%             (10 capabilities, 10 scan rules, 19 error codes, 11-step precedence)
+%   impl:     plugin/dsh-lingshu/supply-chain.js      (pure decision functions)
+%             plugin/dsh-lingshu/sandbox-host.mjs    (parent / RPC / kill)
+%             plugin/dsh-lingshu/sandbox-child.mjs   (Node permission model)
+%             engine/supply_chain.py                 (Python reference, parity checked)
+%   measured: sim 59/59 assertions; integration 10/10; python test 172 assertions;
+%             py<->js parity 32 cases, 0 field differences (2026-10-28, Node 24.21.0)
+% ============================================================================
+
+\section{Supply-Chain Gate and Physical Sandbox}
+\label{sec:app:supplychain}
+
+\paragraph{Why an infrastructure layer.}
+The control plane analysed in Section~\ref{sec:actuator} and
+Appendix~\ref{app:tuca} governs calls that an agent \emph{decides} to make. It
+cannot contain a plugin whose module body executes with host privileges the
+moment it is imported: by the time any tool rule fires, a malicious
+\texttt{import} has already run. We therefore separate two threats that are
+often conflated: (i) a third-party cognition plugin that is malicious or
+compromised --- supply-chain poisoning; and (ii) a model attempting an
+out-of-policy tool call --- delegated to the T-UCA gate. This appendix covers
+(i) only. The two layers meet at the audit chain and at one shared capability
+vocabulary; they deliberately do not share a verdict vocabulary, because a
+machine cannot ask a human a question during \texttt{import}.
+
+\paragraph{Threat model and the fail-closed rule.}
+Two facts from our own host audit motivate the design: the host does not
+verify a plugin's declared capabilities (hypothesis H4 was falsified in
+\texttt{research/02 \S4}: the patch layer can rewrite any config), and a
+plugin's on-disk package can be modified by anything that can write the
+profile directory. The gate therefore makes no assumption of good behaviour.
+Three checks run in order: manifest validation, lexical source scan, and
+process-level sandboxing. The verdict is binary: \texttt{allow\_sandboxed} or
+\texttt{deny}. A deny means the module is never imported, no hook is
+registered, one \texttt{supply\_chain} audit event is written, and the loader
+is suspended (later plugins are skipped). There is no \texttt{degrade} in this
+layer by design: degradation is a human-in-the-loop decision and belongs to
+the control plane (ADR-017); infrastructure must not trade safety for
+availability.
+
+\paragraph{Manifest contract.}
+A plugin ships \texttt{plugin.manifest.json} with: \texttt{manifest\_version}
+(\texttt{lingshu.plugin-manifest/v1}); \texttt{id} and \texttt{version};
+\texttt{entry} (relative path, parent traversal rejected); \texttt{exports}
+(callable names, at most 32); \texttt{capabilities.required} /
+\texttt{capabilities.optional}; \texttt{fs.read} / \texttt{fs.write} scopes
+(relative, must stay inside the plugin directory); and
+\texttt{integrity.entry\_sha256}. The capability vocabulary is inherited
+verbatim from the \texttt{dsh-trust-check} ecosystem (ten names, 3841 scanned
+plugins). Only three are grantable: \texttt{fs-read}, \texttt{fs-write},
+\texttt{llm}. The other seven --- \texttt{network}, \texttt{shell},
+\texttt{credentials}, \texttt{dynamic-code}, \texttt{subagent},
+\texttt{env}, \texttt{host-runtime} --- are \emph{never} grantable; declaring
+one is itself a denial. A minimal manifest:
+
+{\footnotesize\begin{verbatim}
+{ "manifest_version": "lingshu.plugin-manifest/v1",
+  "id": "demo-emotion", "version": "0.1.0",
+  "entry": "index.mjs", "exports": ["ping"],
+  "capabilities": { "required": ["fs-read"] },
+  "fs": { "read": ["data"] },
+  "integrity": { "entry_sha256": "<64 hex>" } }
+\end{verbatim}}
+
+\paragraph{Lexical pre-filter, not the boundary.}
+Ten rules (SC-01\ldots SC-10) map API families to capabilities:
+write-side \texttt{fs} calls, read-side \texttt{fs} calls,
+\texttt{child\_process}, network modules and \texttt{fetch}, credential
+material, dynamic code (\texttt{eval}, \texttt{Function}, \texttt{vm},
+computed \texttt{import}), worker threads, native addons and
+\texttt{process.binding}, \texttt{process.env}, and obfuscation signals
+(base64/hex/atob). Line and block comments are stripped before matching, so
+prose that names an API does not trip a rule; string literals are
+deliberately \emph{not} stripped, which is conservative (a documentation
+string containing \texttt{fs.writeFileSync} is denied rather than trusted).
+A finding whose capability is not declared yields
+\texttt{undeclared\_usage} and a deny. We make no completeness claim: names
+built by concatenation, computed dynamic imports, and
+template-string interpolation evade lexical matching. That is exactly why the
+scan runs \emph{before} the sandbox rather than instead of it.
+
+\paragraph{Verdict precedence and error codes.}
+Blockers are ordered and the first one is reported as the reason:
+\texttt{sandbox\_unavailable}, \texttt{manifest\_missing},
+\texttt{manifest\_unreadable}, \texttt{manifest\_invalid},
+\texttt{entry\_missing}, \texttt{entry\_too\_large},
+\texttt{integrity\_mismatch}, \texttt{fs\_scope\_escape},
+\texttt{unknown\_capability}, \texttt{forbidden\_capability},
+\texttt{undeclared\_usage} (SC-E01\ldots SC-E11); runtime failures continue
+the same namespace with SC-E12\ldots SC-E19 (start failed, ready timeout,
+call timeout, crash, spawn failed, handshake failed, method not allowed,
+plugin error) and SC-E20 (skipped after suspension). Two codes are
+intentionally shareable rather than distinct: \texttt{unknown\_capability}
+is normally shadowed by \texttt{manifest\_invalid}, and
+\texttt{fs\_scope\_escape} is reachable through platform-specific
+traversal (e.g.\ backslash segments that the manifest validator does not
+split on). The whole policy is one file,
+\texttt{contracts/supply-chain-policy.json}, loaded at startup by both the
+JavaScript implementation and the Python reference; a missing or corrupt
+policy degrades to a deny-all fallback rather than to permissive defaults.
+
+\paragraph{Physical sandbox.}
+An allowed plugin is executed in a child process under Node's permission
+model. Flags are derived mechanically from the manifest: \texttt{--permission}
+always; \texttt{--allow-fs-read} for the plugin directory (module loading
+requires it) plus each declared read scope; \texttt{--allow-fs-write} only for
+declared write scopes; \texttt{--no-addons},
+\texttt{--disable-proto=throw},
+\texttt{--disallow-code-generation-from-strings} and
+\texttt{--max-old-space-size=128} unconditionally. No
+\texttt{--allow-child-process} and no \texttt{--allow-worker} flag is ever
+emitted. The parent and child speak newline-delimited JSON over a loopback TCP
+socket with a one-shot random token; only the exports declared in the manifest
+are callable; ready timeout is 5000\,ms and per-call timeout 2000\,ms; a
+timeout or uncaught violation kills the child and is reported as a deny.
+The transport is TCP rather than stdio pipes for an observed reason: under the
+host's own file sandbox, spawning with piped stdio fails with
+\texttt{EPERM}, while \texttt{stdio: inherit/ignore} works --- a constraint we
+record rather than hide.
+
+\paragraph{Measured enforcement (2026-10-28, Node 24.21.0).}
+The plugin-side suite (\texttt{supply-chain-sim.mjs}) passes 59/59
+assertions against real child processes, including: an out-of-scope file
+write and an out-of-scope read both fail with \texttt{ERR\_ACCESS\_DENIED};
+\texttt{child\_process} is denied by the permission model; a write performed
+through a concatenated property name (\texttt{fs["wri"+"teFileSync"]}) is
+\emph{not} flagged by the lexical scan (zero SC-01 findings) and is still
+denied at runtime, with the target file absent afterwards --- the concrete
+case where the sandbox catches what the scanner misses; an import-time escape
+fails the load with SC-E12 and leaves no file; a 300\,ms call timeout kills
+the child and returns SC-E14; a declared \texttt{network} capability is denied
+before any process is spawned. The index-level integration harness applies the
+real plugin with two third-party directories: both manifests are parsed, the
+benign plugin runs in a child whose pid differs from the host, the malicious
+plugin is denied and its marker file is never created, the loader is
+suspended, and the read-only status tool reports the suspended state (10/10
+assertions). Cross-language parity covers 32 decision cases (all error paths,
+comment stripping, scope escapes, optionals): Python and JavaScript agree on
+every contract field, 0 differences. The Python acceptance file totals 172
+assertions. Evidence, including raw JSON, is in
+\texttt{acceptance/supply-chain/}.
+
+\paragraph{Stated limits.}
+(1) The permission model does not cover the network: a \texttt{connect} under
+\texttt{--permission} succeeds (verified). Network egress is therefore
+prevented only by never granting \texttt{network} and by the lexical
+pre-filter; OS-level egress control is future work and is not claimed.
+(2) The plugin directory must remain readable for module loading, so a plugin
+that requests no \texttt{fs-read} can still read files inside its own
+directory; declared scopes add to, they do not restrict, that baseline.
+(3) Integrity is a pinned SHA-256: it detects drift between audit and load, not
+a malicious author who ships a matching hash. No signature/PKI is implemented.
+(4) Scan blind spots are listed above; the sandbox is the backstop, and the
+sandbox itself is one process-level boundary, not a VM. (5) WASM was
+considered and not adopted: existing plugins are ESM packages, and a
+subprocess already isolates the vulnerable native surface at a small migration
+cost; a WASM runtime is a future extension, not a current claim. (6) The gate
+has been exercised against synthetic plugins generated by the test harness,
+not yet against plugins from a live registry; the acceptance record says so
+explicitly.
+
+\paragraph{Relationship to the control plane.}
+The two layers close different gaps and share obligations. The infrastructure
+layer contributes: capability minimisation expressed in the same ten-name
+vocabulary as the host scanner; a binary, pre-execution decision with an audit
+record; and a process boundary that survives a compromised model. The control
+plane (Section~\ref{sec:actuator}, Appendix~\ref{app:tuca}, ADR-017)
+contributes the explainable escalation path when a high-risk \emph{tool} call
+is degraded rather than blocked. Neither layer claims the other's job; a
+plugin that passes the gate is still subject to every T-UCA rule for the tools
+it calls, and a model that obeys every tool rule can still be stopped from
+importing hostile code. That separation --- not any single check --- is what
+``defence in depth'' means in this system.

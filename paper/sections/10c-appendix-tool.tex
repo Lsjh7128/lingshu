@@ -9,9 +9,9 @@
 
 This appendix mirrors the tool-side matrix that the implementation encodes. The
 matrix is defined once, in the project's tool-gateway contract
-(\texttt{docs/24}), and is implemented twice---as \texttt{engine/tool\_gateway.py}
+(\texttt{docs/24}), and is implemented twice---as \texttt{engine/\allowbreak{}tool\_\allowbreak{}gateway.\allowbreak{}py}
 (pure functions, zero dependencies) and as
-\texttt{plugin/dsh-lingshu/tool-gateway.js} (same semantics)---with both rule
+\texttt{plugin/\allowbreak{}dsh-\allowbreak{}lingshu/\allowbreak{}tool-\allowbreak{}gateway.\allowbreak{}js} (same semantics)---with both rule
 tables machine-synchronised from the contract's rule array, so that each
 identifier, verdict and hint text agrees row by row. The namespace is disjoint
 from the injection-side UCA-01--08; the two are related only by ordering:
@@ -31,8 +31,8 @@ falls back to block when no approval channel exists). No rule returns
 The \emph{group} column follows the contract's grouping and is not a runtime
 field.}
 \label{tab:tuca}
-\small
-\begin{tabular}{llp{4.0cm}lp{1.7cm}l}
+\scriptsize
+\begin{tabular}{llp{3.6cm}lp{2.2cm}l}
 \toprule
 ID & Group & Trigger (contract summary) & State inputs & Verdict & Test case \\
 \midrule
@@ -57,16 +57,16 @@ T-UCA-16 & state        & destructive call while context phase is shift & phase 
 \end{table*}
 
 \paragraph{Default policy and evaluation order.} Unknown, unregistered or
-undecidable calls are blocked (fail-closed); read-only calls that match no rule
+undecidable calls are blocked (\mbox{fail-closed}); read-only calls that match no rule
 are allowed and logged; a mutating call whose phase is unknown is blocked; a
 parse failure is blocked with an explicit \texttt{parse\_error} reason rather
 than inferred intent. When several rules match, the verdict takes the highest
 severity (block over degrade over allow) and \emph{all} matched identifiers are
 recorded in \texttt{ucas} without truncation. Evaluation order puts static checks
 first, then the state-dependent rules, and the audit rule last:
-\texttt{T-UCA-01, 02, 03, 04, 05, 06, 07, 08, 09, 12, 14, 15, 10, 13, 16, 11}.
+\texttt{T-\allowbreak{}UCA-\allowbreak{}01, 02, 03, 04, 05, 06, 07, 08, 09, 12, 14, 15, 10, 13, 16, 11}.
 A \texttt{degrade} means the original call is not executed: the caller returns a
-strong hint, sets \texttt{requires\_confirmation}, and requires an explicit human
+strong hint, sets \texttt{requires\_\allowbreak{}confirmation}, and requires an explicit human
 confirmation through the host approval seam; a degrade with no approval channel
 is treated as a block (\texttt{degraded\_to}). The gate never executes a payload
 and never rewrites arguments; it classifies, consults state, and returns a
@@ -89,7 +89,7 @@ capability declarations rather than in the class enum.
 \texttt{schema}, \texttt{policy\_version}, \texttt{call\_id},
 \texttt{session\_id}, \texttt{turn\_id}, \texttt{tool}, \texttt{tool\_class},
 \texttt{verdict}, \texttt{allowed}, \texttt{ucas}, \texttt{degraded\_to},
-\texttt{requires\_confirmation}, \texttt{reason}, a nested
+\texttt{requires\_\allowbreak{}confirmation}, \texttt{reason}, a nested
 \texttt{audit} block (\texttt{args\_digest}, \texttt{args\_keys},
 \texttt{args\_bytes}, \texttt{args\_preview}, \texttt{phase},
 \texttt{variety\_fallback}, \texttt{frozen\_ok}, \texttt{saturated}), and a
@@ -99,17 +99,17 @@ are recorded instead of raw secret-bearing arguments. In the host plugin the
 same event drives a clarification flag that surfaces as a strong hint on the next
 turn.
 
-\paragraph{Reproduction.} \texttt{python tests/test\_tool\_gateway.py} exercises
+\paragraph{Reproduction.} \texttt{python tests/\allowbreak{}test\_\allowbreak{}tool\_\allowbreak{}gateway.\allowbreak{}py} exercises
 dangerous, benign, state-gated and cross-language cases (as run for this draft:
 79 passing assertions, 20/20 dangerous blocked, 0/8 benign blocked, 20/20
 cross-language agreement);
-\texttt{node plugin/dsh-lingshu/tool-gateway-sim.mjs --assert} checks the rules
+\texttt{node plugin/\allowbreak{}dsh-\allowbreak{}lingshu/\allowbreak{}tool-\allowbreak{}gateway-\allowbreak{}sim.\allowbreak{}mjs -\allowbreak{}-\allowbreak{}assert} checks the rules
 individually in JavaScript (65 checks);
-\texttt{python tools/run\_actuator\_demo.py} drives the reference loop and emits
+\texttt{python tools/\allowbreak{}run\_\allowbreak{}actuator\_\allowbreak{}demo.\allowbreak{}py} drives the reference loop and emits
 the JSON cited in Section~\ref{sec:actuator}. The frozen blind held-out set is
-\texttt{paper/ablation/tool/heldout-tool-calls-v1.jsonl} (ten calls, two per
+\texttt{paper/\allowbreak{}ablation/\allowbreak{}tool/\allowbreak{}heldout-\allowbreak{}tool-\allowbreak{}calls-\allowbreak{}v1.\allowbreak{}jsonl} (ten calls, two per
 family; SHA-256
-\texttt{f68fc1b3f19fc37e43b9856096d29b9a55de7dee9bf664a9b9a9592e070576d4}); it
+\texttt{\seqsplit{f68fc1b3f19fc37e43b9856096d29b9a55de7dee9bf664a9b9a9592e070576d4}}); it
 is evaluated by a party other than its author, under two regimes (arguments
 only, and arguments with context), because the conflict family depends on
 context.

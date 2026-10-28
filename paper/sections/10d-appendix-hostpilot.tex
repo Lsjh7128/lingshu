@@ -48,14 +48,14 @@ unmentioned cat. Primary delivery is the v1 subset: 60 cells, 60/60 exit zero,
 419{,}203 tokens. The full 120-cell run (873{,}198 tokens) is archived and is never
 pooled with the primary numbers; the extra variant is a cross-check only.
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering\footnotesize
 \caption{Per-turn long-session pilot (S4), primary v1 subset: six probe outcomes
 (three probe turns $\times$ two arms), rule-assisted counts. Source:
-\texttt{calls.json}, fields \texttt{observations\_raw\_counts.full-v1},
-\texttt{.baseline-v1}, \texttt{aggregate.*}, \texttt{full\_arm\_memory\_evidence.v1},
-\texttt{totals\_v1\_subset\_60}; the same record is duplicated in
-\texttt{long-session-2026-10-27.json}.}
+\texttt{calls.json}, fields \texttt{observations\_\allowbreak{}raw\_\allowbreak{}counts.\allowbreak{}full-\allowbreak{}v1},
+\texttt{.baseline-v1}, \texttt{aggregate.*}, \texttt{full\_\allowbreak{}arm\_\allowbreak{}memory\_\allowbreak{}evidence.\allowbreak{}v1},
+\texttt{totals\_\allowbreak{}v1\_\allowbreak{}subset\_\allowbreak{}60}; the same record is duplicated in
+\texttt{long-\allowbreak{}session-\allowbreak{}2026-\allowbreak{}10-\allowbreak{}27.\allowbreak{}json}.}
 \label{tab:s4}
 \begin{tabular}{@{}l ccccc@{}}
 \toprule
@@ -65,15 +65,15 @@ Arm & Setting kept & Stale ALPHA & Unknown ack. & Preference kept & Memory injec
 \textsc{Baseline} & 3/3 & 0/3 & 1/3 & 3/3 & 0/3 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 Table~\ref{tab:s4} shows the six probe outcomes. Read alone they invite the wrong
 conclusion, so two mechanism facts must be read with them. First, \textsc{Full}
 did inject memory in all three probe turns, but the content was wrong: the
 turn-3 supersession does not match any of the plugin's three supported extraction
-patterns (\texttt{plugin/dsh-lingshu/index.js:1004--1011}), so BETA was never
+patterns (\texttt{plugin/\allowbreak{}dsh-\allowbreak{}lingshu/\allowbreak{}index.\allowbreak{}js:\allowbreak{}1004-\allowbreak{}-\allowbreak{}1011}), so BETA was never
 written and the memory's last-wins view has
-\texttt{beta\_present=false} with the project code still ALPHA---a stale value.
+\texttt{beta\_\allowbreak{}present=false} with the project code still ALPHA---a stale value.
 Second, the probe question itself was extracted as a fact: asking for the
 interface preference matches the pattern with object ``what'', and that junk
 entry superseded the correct preference (one supersede event, in the wrong

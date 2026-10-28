@@ -1,4 +1,4 @@
-# LINGSHU 论文工程 · `paper/`
+﻿# LINGSHU 论文工程 · `paper/`
 
 本目录是 **LINGSHU（灵枢）v5.1** 的 arXiv 预印本工程：LaTeX 源码、矢量图、三臂消融结果、真实宿主验证记录，以及 H0 评审用的《大纲》《术语表》。
 
@@ -50,33 +50,36 @@ paper/
 
 ## 2. 怎么编译（本机已装 TeX Live 2026 portable）
 
-TeX Live 2026 已装在工作区：`<REPO_ROOT>\tools-tex\texlive`（portable，不写系统 PATH；`bin\windows` 下有 `pdflatex` / `xelatex` / `bibtex`）。中文对照版另装了 `xecjk` / `ctex` / `fontspec`（字体用 Windows 自带的 SimHei）。
+TeX Live 2026 已装在工作区：`<REPO_ROOT>\tools-tex\texlive`（portable，不写系统 PATH；`bin\windows` 下有 `pdflatex` / `xelatex` / `bibtex`）。中文版/对照版另装了 `xecjk` / `ctex` / `fontspec`（字体用 Windows 自带的 SimHei）。
 
 **一键构建（推荐）**：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File paper\rebuild.ps1 both
-# 只构建英文：... -File paper\rebuild.ps1 en
-# 只构建对照：... -File paper\rebuild.ps1 zh
+powershell -NoProfile -ExecutionPolicy Bypass -File paper\rebuild.ps1 both   # 英文 + 中文（默认）
+powershell -NoProfile -ExecutionPolicy Bypass -File paper\rebuild.ps1 all    # 英文 + 中文 + 中英对照
+# 只构建单版：... -File paper\rebuild.ps1 en / cn / bi
 ```
 
-`rebuild.ps1` 会把源码复制到 `<REPO_ROOT>\build\{en,zh}` **隔离编译**（避免与其他并行编辑/编译抢文件），成功后把产物拷回 `paper/`：
+`rebuild.ps1` 把源码复制到 `<REPO_ROOT>\build\{en,cn,bi}` **隔离编译**（避免与并行编辑抢文件），成功后把产物拷回 `paper/`：
 
 | 产物 | 页数 | 说明 |
 |---|---|---|
-| `paper/main-en.pdf` | 26 | 英文版（`xelatex`；因为 06f 引用了一句中文语料，编译时自动加载 CJK 字体） |
-| `paper/main-bilingual.pdf` | 59 | 中英对照版（`xelatex`；每节先英文后中文） |
+| `paper/main-en.pdf` | **29** | 英文版（`xelatex`；06f 有一句中文语料，故按 XeTeX 编译） |
+| `paper/main-zh.pdf` | **33** | 中文版（独立成篇；`main-zh.tex` + `sections-zh/`；`xr` 从英文 aux 导入图表/节号，所以**先构建英文**） |
+| `paper/main-bilingual.pdf` | **68** | 中英对照版（可选，`all` 才构建；每节先英文后中文） |
 
 **手动构建**（在 `paper/` 下，先 `$env:PATH="<REPO_ROOT>\tools-tex\texlive\bin\windows;$env:PATH"`）：
 
 ```powershell
-# 英文（建议 xelatex，理由同上）
+# 英文
 xelatex main; bibtex main; xelatex main; xelatex main
+# 中文（需先在 build/en 里构建英文，供 main-zh 的 xr 取 label）
+xelatex main-zh; bibtex main-zh; xelatex main-zh; xelatex main-zh
 # 中英对照
 xelatex main-bilingual; bibtex main-bilingual; xelatex main-bilingual; xelatex main-bilingual
 ```
 
-**Overleaf 备选**：上传 `paper/`（保持 `sections/`、`sections-zh/`、`figures/`、`tables/` 相对路径），英文版 pdfLaTeX 也可编译（但 06f 的中文例句会缺字，需把 Overleaf 编译器切到 XeLaTeX）；对照版**必须** XeLaTeX。
+**Overleaf 备选**：上传 `paper/`（保持 `sections/`、`sections-zh/`、`figures/`、`tables/` 相对路径），英文版 pdflatex 可编译但 06f 中文例句会缺字，建议切 XeLaTeX；中文版与对照版**必须** XeLaTeX，且中文版的 `\externaldocument{../en/main}` 需要在同一项目里先编译一次英文版。
 
 > **依赖宏包**：`geometry times amsmath amssymb booktabs graphicx microtype natbib hyperref url`；对照版另需 `fontspec xeCJK`。缺少时用 `tlmgr install <pkg>`（仓库已指向清华镜像）。
 

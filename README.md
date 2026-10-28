@@ -565,6 +565,7 @@ This project is dual-licensed: The source code is licensed under the MIT License
 
 - [English version — `paper/main-en.pdf`](paper/main-en.pdf)
 - [Bilingual (English / 中文) — `paper/main-bilingual.pdf`](paper/main-bilingual.pdf)
+- [中文版 / Chinese version — `paper/main-zh.pdf`](paper/main-zh.pdf)
 
 > 许可范围以根目录 [LICENSE](LICENSE) 与 [paper/LICENSE](paper/LICENSE) 为准；CC BY-NC-ND 4.0 的约束性文本见
 > <https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.en>。

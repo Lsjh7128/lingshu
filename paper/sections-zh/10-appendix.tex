@@ -3,9 +3,9 @@
 
 \section{安全控制动作（UCA-01--08）}
 
-表~\ref{tab:uca} 复现实现中定义的闸门八条不安全控制动作（源字符串为中文，此处按英文版转述）。该表、两个触发词表与判定逻辑硬编码于 \texttt{engine/control.py:175--188} 与 \texttt{engine/control.py:191--232}；检查按代码顺序求值，UCA-01--07 中任一命中都会把判定置为 \texttt{block}。UCA-08 只做降级：它被记录在 \texttt{downgrades} 字段中，从不改变判定。
+表~\ref{tab:uca} 复现实现中定义的闸门八条不安全控制动作（源字符串为中文，此处按英文版转述）。该表、两个触发词表与判定逻辑硬编码于 \texttt{engine/\allowbreak{}control.\allowbreak{}py:\allowbreak{}175-\allowbreak{}-\allowbreak{}188} 与 \texttt{engine/\allowbreak{}control.\allowbreak{}py:\allowbreak{}191-\allowbreak{}-\allowbreak{}232}；检查按代码顺序求值，UCA-01--07 中任一命中都会把判定置为 \texttt{block}。UCA-08 只做降级：它被记录在 \texttt{downgrades} 字段中，从不改变判定。
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering\small
 \caption{不安全控制动作及其响应。“Marker”是固定的五字符锚点哨兵，以 U+3016 开头；“fact block”是渲染后的事实块 \texttt{f}。}
 \begin{tabular}{@{}p{0.08\textwidth}p{0.42\textwidth}p{0.34\textwidth}p{0.09\textwidth}@{}}
@@ -22,37 +22,37 @@ UCA-07 & 相变期人格锚点缺失 & prefeed $\land$ marker $\not\subseteq p$�
 UCA-08 & 饱和后积分仍继续 & $\exists k: s_k$（\texttt{:221--223}） & 仅降级 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 \section{参数与 provenance}
 
-表~\ref{tab:params} 列出第~\ref{sec:method} 节各机制涉及的每个数值参数。权威来源是 \texttt{rules/decay-params.yaml}；\texttt{engine/config.py} 是零依赖的影子副本，由 \texttt{tools/check\_config\_sync.py} 逐键交叉核对（66 键，0 失败）。\textbf{所有条目均为 \texttt{provenance: guess}}；measured 参数数量为零（\texttt{acceptance/provenance-candidates.json} 对每个条目的 \texttt{upgrade\_eligible} 均为 \texttt{false}）。
+表~\ref{tab:params} 列出第~\ref{sec:method} 节各机制涉及的每个数值参数。权威来源是 \texttt{rules/\allowbreak{}decay-\allowbreak{}params.\allowbreak{}yaml}；\texttt{engine/config.py} 是零依赖的影子副本，由 \texttt{tools/\allowbreak{}check\_\allowbreak{}config\_\allowbreak{}sync.\allowbreak{}py} 逐键交叉核对（66 键，0 失败）。\textbf{所有条目均为 \texttt{provenance: guess}}；measured 参数数量为零（\texttt{acceptance/\allowbreak{}provenance-\allowbreak{}candidates.\allowbreak{}json} 对每个条目的 \texttt{upgrade\_eligible} 均为 \texttt{false}）。
 
-\begin{table}[t]
-\centering\footnotesize
+\begin{table*}[t]
+\centering\scriptsize\setlength{\tabcolsep}{2.5pt}
 \caption{数值参数、权威规则文件行号、取值、provenance 与代码影子。“guess”是设计默认值，不是标定值。}
-\begin{tabular}{@{}p{0.25\textwidth}p{0.42\textwidth}p{0.18\textwidth}p{0.11\textwidth}@{}}
+\begin{tabular}{@{}p{0.24\textwidth}p{0.39\textwidth}p{0.16\textwidth}p{0.15\textwidth}@{}}
 \toprule
 参数键 & 取值 & Provenance & 影子 \\
 \midrule
 \texttt{actr.d}, \texttt{actr.ref}, \texttt{actr.lo}, \texttt{actr.hi} & 0.5, 0.001 d, $-3.0$, $1.0$（\texttt{:217--221}） & guess & \texttt{config.py:90--95} \\
 \texttt{memory.actrWeight} & 0.6（\texttt{:18}） & guess\textsuperscript{a} & \texttt{config.py:21} \\
-\texttt{memory.decay.tau.*} & 7, 30, 90 d（\texttt{:39--48}） & guess & \texttt{config.py:15--19} \\
-\texttt{control.integralKi} / \texttt{Cap} / \texttt{Leak} / \texttt{Deadband} & 0.15 / 0.4 / 0.05 / 0.02（\texttt{:224--233}） & guess & \texttt{config.py:97--100} \\
-\texttt{control.phaseShiftRatio} / \texttt{HardRatio} & 0.70 / 0.85（\texttt{:228--233}） & guess & \texttt{config.py:101--102} \\
-\texttt{control.trendThreshold} / \texttt{ratioMax} / \texttt{historyCapacity} & 0.02 / 1.5 / 64（\texttt{:230--233}） & guess & \texttt{config.py:104--106} \\
-\texttt{compose.weights.fact} / \texttt{organization} / \texttt{style} / \texttt{retrieval} & 0.70 / 0.50 / 0.40 / 0.45（\texttt{:239--247}） & guess & \texttt{config.py:50--53} \\
-\texttt{compose.weights.boost*} & 0.50 / 0.35 / 0.40（\texttt{:243--247}） & guess & \texttt{config.py:54--56} \\
-\texttt{compose.weights.styleBoostThreshold} & 0.6（\texttt{:246}） & guess & \texttt{config.py:58} \\
-\texttt{memory.retrieval.topK} & 3（\texttt{:20}） & guess & \texttt{config.py:22} \\
-\texttt{memory.recallBudget.tokenBudgetDefault} / \texttt{maxReturned} & 900 / 3（\texttt{:70--71}） & guess\textsuperscript{a} & \texttt{config.py:25} \\
-\texttt{memory.potency.archiveThreshold} & 0.15（\texttt{:50}） & guess\textsuperscript{a} & \texttt{config.py:20} \\
-\texttt{compose.injectionTokenRatioMax} & 0.15（\texttt{:236}） & none\textsuperscript{b} & \texttt{config.py:45}（\texttt{tokenRatioMax}） \\
-\texttt{metacog.emotionCapIntensity} & 0.6 & 无规则键\textsuperscript{c} & \texttt{config.py:30} \\
-\texttt{ASSUMED\_CONTEXT\_TOKENS} & 8000 & 无规则键\textsuperscript{c} & \texttt{compose.py:36} \\
+\texttt{memory.\allowbreak{}decay.\allowbreak{}tau.\allowbreak{}*} & 7, 30, 90 d（\texttt{:39--48}） & guess & \texttt{config.py:15--19} \\
+\texttt{control.\allowbreak{}integralKi} / \texttt{Cap} / \texttt{Leak} / \texttt{Deadband} & 0.15 / 0.4 / 0.05 / 0.02（\texttt{:224--233}） & guess & \texttt{config.py:97--100} \\
+\texttt{control.\allowbreak{}phaseShiftRatio} / \texttt{HardRatio} & 0.70 / 0.85（\texttt{:228--233}） & guess & \texttt{config.\allowbreak{}py:\allowbreak{}101-\allowbreak{}-\allowbreak{}102} \\
+\texttt{control.\allowbreak{}trendThreshold} / \texttt{ratioMax} / \texttt{historyCapacity} & 0.02 / 1.5 / 64（\texttt{:230--233}） & guess & \texttt{config.\allowbreak{}py:\allowbreak{}104-\allowbreak{}-\allowbreak{}106} \\
+\texttt{compose.\allowbreak{}weights.\allowbreak{}fact} / \texttt{organization} / \texttt{style} / \texttt{retrieval} & 0.70 / 0.50 / 0.40 / 0.45（\texttt{:239--247}） & guess & \texttt{config.py:50--53} \\
+\texttt{compose.\allowbreak{}weights.\allowbreak{}boost*} & 0.50 / 0.35 / 0.40（\texttt{:243--247}） & guess & \texttt{config.py:54--56} \\
+\texttt{compose.\allowbreak{}weights.\allowbreak{}styleBoostThreshold} & 0.6（\texttt{:246}） & guess & \texttt{config.py:58} \\
+\texttt{memory.\allowbreak{}retrieval.\allowbreak{}topK} & 3（\texttt{:20}） & guess & \texttt{config.py:22} \\
+\texttt{memory.\allowbreak{}recallBudget.\allowbreak{}tokenBudgetDefault} / \texttt{maxReturned} & 900 / 3（\texttt{:70--71}） & guess\textsuperscript{a} & \texttt{config.py:25} \\
+\texttt{memory.\allowbreak{}potency.\allowbreak{}archiveThreshold} & 0.15（\texttt{:50}） & guess\textsuperscript{a} & \texttt{config.py:20} \\
+\texttt{compose.\allowbreak{}injectionTokenRatioMax} & 0.15（\texttt{:236}） & none\textsuperscript{b} & \texttt{config.py:45}（\texttt{tokenRatioMax}） \\
+\texttt{metacog.\allowbreak{}emotionCapIntensity} & 0.6 & 无规则键\textsuperscript{c} & \texttt{config.py:30} \\
+\texttt{ASSUMED\_\allowbreak{}CONTEXT\_\allowbreak{}TOKENS} & 8000 & 无规则键\textsuperscript{c} & \texttt{compose.py:36} \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 \noindent\textsuperscript{a}~该块没有内联 provenance 键；文件头声明所有值均为 guess（\texttt{:4}），其所属小节也重复了 \texttt{provenance: guess}。
 \textsuperscript{b}~规则键存在，但一致性工具未比对它（与影子副本存在键名不匹配）。
@@ -78,27 +78,27 @@ node plugin/dsh-lingshu/stress.mjs --assert   #  documented 45 assertions
 
 表~\ref{tab:assertions} 把已执行的 Python 断言归因到第~\ref{sec:method} 节的机制。计数是执行次数，不是调用点：循环内的一个调用点会每轮执行一次（例如 top-$k$ 槽位检查）。插件断言计数为项目记录值，本文未重新执行。
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering\footnotesize
 \caption{断言清单。“Run”是观测到的断言执行次数；“site”是测试函数起始的测试文件行号。}
-\begin{tabular}{@{}p{0.36\textwidth}p{0.34\textwidth}p{0.10\textwidth}p{0.12\textwidth}@{}}
+\begin{tabular}{@{}p{0.34\textwidth}p{0.36\textwidth}p{0.10\textwidth}p{0.12\textwidth}@{}}
 \toprule
 机制 & 测试函数（文件） & Run & Site \\
 \midrule
-ACT-R base level & \texttt{test\_actr\_activation}（\texttt{test\_control.py}） & 15 & \texttt{:58} \\
-ACT-R dual channel & \texttt{test\_actr\_dual\_channel}（\texttt{test\_control.py}） & 7 & \texttt{:103} \\
-Top-$k$ slot contract & \texttt{test\_topk\_slot\_contract}（\texttt{test\_control.py}） & 9 & \texttt{:143} \\
-Integral feedback & \texttt{test\_integral\_baseline}（\texttt{test\_control.py}） & 18 & \texttt{:177} \\
-Phase-shift monitor & \texttt{test\_phase\_shift\_monitor}（\texttt{test\_control.py}） & 22 & \texttt{:258} \\
-Requisite-variety guard & \texttt{test\_requisite\_variety\_guard}（\texttt{test\_control.py}） & 11 & \texttt{:342} \\
-Pre-flight gate & \texttt{test\_preflight\_audit}（\texttt{test\_control.py}） & 33 & \texttt{:387} \\
-Dynamic weights & \texttt{test\_compose\_weights}（\texttt{test\_control.py}） & 29 & \texttt{:484} \\
-Single-source parameters & \texttt{test\_params\_single\_source}（\texttt{test\_control.py}） & 8 & \texttt{:623} \\
+ACT-R base level & \texttt{test\_\allowbreak{}actr\_\allowbreak{}activation}（\texttt{test\_control.py}） & 15 & \texttt{:58} \\
+ACT-R dual channel & \texttt{test\_\allowbreak{}actr\_\allowbreak{}dual\_\allowbreak{}channel}（\texttt{test\_control.py}） & 7 & \texttt{:103} \\
+Top-$k$ slot contract & \texttt{test\_\allowbreak{}topk\_\allowbreak{}slot\_\allowbreak{}contract}（\texttt{test\_control.py}） & 9 & \texttt{:143} \\
+Integral feedback & \texttt{test\_\allowbreak{}integral\_\allowbreak{}baseline}（\texttt{test\_control.py}） & 18 & \texttt{:177} \\
+Phase-shift monitor & \texttt{test\_\allowbreak{}phase\_\allowbreak{}shift\_\allowbreak{}monitor}（\texttt{test\_control.py}） & 22 & \texttt{:258} \\
+Requisite-variety guard & \texttt{test\_\allowbreak{}requisite\_\allowbreak{}variety\_\allowbreak{}guard}（\texttt{test\_control.py}） & 11 & \texttt{:342} \\
+Pre-flight gate & \texttt{test\_\allowbreak{}preflight\_\allowbreak{}audit}（\texttt{test\_control.py}） & 33 & \texttt{:387} \\
+Dynamic weights & \texttt{test\_\allowbreak{}compose\_\allowbreak{}weights}（\texttt{test\_control.py}） & 29 & \texttt{:484} \\
+Single-source parameters & \texttt{test\_\allowbreak{}params\_\allowbreak{}single\_\allowbreak{}source}（\texttt{test\_control.py}） & 8 & \texttt{:623} \\
 Impasse & \texttt{test\_impasse}（\texttt{test\_control.py}） & 7 & \texttt{:668} \\
-Pipeline integration & 九个函数 & 65 & \texttt{test\_pipeline\_integration.py:46--284} \\
-Constitution audit & 五个函数 & 26 & \texttt{test\_constitution.py} \\
+Pipeline integration & \texttt{九个函数}（\texttt{test\_\allowbreak{}pipeline\_\allowbreak{}integration.\allowbreak{}py}） & 65 & \texttt{:46--284} \\
+Constitution audit & \texttt{五个函数}（\texttt{test\_\allowbreak{}constitution.\allowbreak{}py}） & 26 & --- \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
-正文引用的闸门级测量由与混沌执行器相同的无 token 调用产生（\texttt{tools/run\_chaos.py:443--446}）：样本文本作为 \texttt{prompt} 参数传入，并带 \texttt{frozen\_ok=True} 与 \texttt{constitution\_injected=True}，从而隔离出 UCA-01。这是对闸门扫描面的单元级覆盖检查，不是端到端拦截测量。
+正文引用的闸门级测量由与混沌执行器相同的无 token 调用产生（\texttt{tools/\allowbreak{}run\_\allowbreak{}chaos.\allowbreak{}py:\allowbreak{}443-\allowbreak{}-\allowbreak{}446}）：样本文本作为 \texttt{prompt} 参数传入，并带 \texttt{frozen\_ok=True} 与 \texttt{constitution\_\allowbreak{}injected=True}，从而隔离出 UCA-01。这是对闸门扫描面的单元级覆盖检查，不是端到端拦截测量。

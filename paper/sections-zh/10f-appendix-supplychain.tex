@@ -1,0 +1,126 @@
+% ============================================================================
+% 10f-appendix-supplychain.tex -- 供应链闸门与物理沙箱（中文对照版，不加 \label）
+% 证据：acceptance/supply-chain/2026-10-28-供应链防御验收.md / .json
+%   measured: sim 59/59；integration 10/10；Python 验收 172 条断言；
+%             py<->js parity 32 例、0 字段差异（2026-10-28，Node 24.21.0）
+% ============================================================================
+
+\section{供应链闸门与物理沙箱}
+
+\paragraph{为什么需要基础设施层。}
+第~\ref{sec:actuator} 节与附录~\ref{app:tuca} 分析的控制面，治理的是 Agent
+\emph{决定发起}的工具调用。它管不住一个模块体在 import 那一刻就以宿主权限执行的
+插件：等到任何工具规则触发时，恶意 \texttt{import} 早已运行完毕。因此我们把两类
+常被混为一谈的风险分开：(i) 恶意或被投毒的第三方认知插件——供应链投毒；(ii) 模型
+发起越权工具调用——交给 T-UCA 闸门。本附录只覆盖 (i)。两层在审计链与同一套能力
+词表上衔接；但**刻意不共享裁决词表**，因为机器无法在 \texttt{import} 期间向人提问。
+
+\paragraph{威胁模型与 fail-closed 规则。}
+本项目对宿主的实测给出两个前提：宿主不校验插件声明的能力（假设 H4 在
+\texttt{research/02 \S4} 被证伪：patch 层可以改写任何 config）；插件在磁盘上的包
+可被任何能写 profile 目录的东西替换。因此闸门不假设任何一方善意。三层检查依次
+执行：Manifest 校验、源码词法扫描、进程级沙箱。裁决是二值的：
+\texttt{allow\_sandboxed} 或 \texttt{deny}。deny 的含义是：模块不会被 import、
+不注册任何钩子、写一条 \texttt{supply\_chain} 审计、并挂起加载器（后续插件跳过）。
+本层**没有 \texttt{degrade}**：降级是人在环内的决定，属于控制面（ADR-017）；
+基础设施层不能拿安全性换可用性。
+
+\paragraph{Manifest 契约。}
+插件随包提供 \texttt{plugin.manifest.json}，字段为：\texttt{manifest\_version}
+（\texttt{lingshu.plugin-manifest/v1}）、\texttt{id} 与 \texttt{version}、
+\texttt{entry}（相对路径，拒绝父目录穿越）、\texttt{exports}（可调用名，最多 32
+个）、\texttt{capabilities.required} / \texttt{capabilities.optional}、
+\texttt{fs.read} / \texttt{fs.write} 作用域（相对路径，必须落在插件目录内）、
+\texttt{integrity.entry\_sha256}。能力词表逐字继承
+\texttt{dsh-trust-check} 生态（10 种，已扫描 3841 个插件）。其中只有三种可授予：
+\texttt{fs-read}、\texttt{fs-write}、\texttt{llm}；其余七种——\texttt{network}、
+\texttt{shell}、\texttt{credentials}、\texttt{dynamic-code}、\texttt{subagent}、
+\texttt{env}、\texttt{host-runtime}——**永不可授予**，声明其一本身就构成拒绝。
+最小示例：
+
+{\footnotesize\begin{verbatim}
+{ "manifest_version": "lingshu.plugin-manifest/v1",
+  "id": "demo-emotion", "version": "0.1.0",
+  "entry": "index.mjs", "exports": ["ping"],
+  "capabilities": { "required": ["fs-read"] },
+  "fs": { "read": ["data"] },
+  "integrity": { "entry_sha256": "<64 hex>" } }
+\end{verbatim}}
+
+\paragraph{词法预筛，不是边界。}
+10 条规则（SC-01\ldots SC-10）把 API 族映射到能力：写侧 \texttt{fs} 调用、读侧
+\texttt{fs} 调用、\texttt{child\_process}、网络模块与 \texttt{fetch}、凭证材料、
+动态代码（\texttt{eval}、\texttt{Function}、\texttt{vm}、计算型
+\texttt{import}）、工作线程、原生扩展与 \texttt{process.binding}、
+\texttt{process.env}、以及混淆信号（base64/hex/atob）。匹配前剥离行注释与块注释，
+因此"文档里提到某个 API"不会误报；字符串**刻意不剥离**，方向保守：
+文档字符串里出现 \texttt{fs.writeFileSync} 会被拒绝而不是被信任。命中能力未在
+Manifest 声明 → \texttt{undeclared\_usage} → deny。我们不宣称扫描完备：拼接出的
+名字、计算型动态 import、模板字符串插值都能绕过词法匹配。正因如此，扫描是沙箱
+**之前**的一道预筛，而不是沙箱的替代品。
+
+\paragraph{裁决优先级与错误码。}
+阻断项有序，第一条即报告原因：\texttt{sandbox\_unavailable}、
+\texttt{manifest\_missing}、\texttt{manifest\_unreadable}、
+\texttt{manifest\_invalid}、\texttt{entry\_missing}、
+\texttt{entry\_too\_large}、\texttt{integrity\_mismatch}、
+\texttt{fs\_scope\_escape}、\texttt{unknown\_capability}、
+\texttt{forbidden\_capability}、\texttt{undeclared\_usage}
+（SC-E01\ldots SC-E11）；运行时失败沿用同一命名空间 SC-E12\ldots SC-E19
+（启动失败、就绪超时、调用超时、崩溃、spawn 失败、握手失败、方法未声明、插件
+异常），以及 SC-E20（挂起后跳过）。有两个码是**同源遮蔽**而非独立路径：
+\texttt{unknown\_capability} 通常被 \texttt{manifest\_invalid} 遮蔽；
+\texttt{fs\_scope\_escape} 可经平台特定穿越（例如 manifest 校验不按反斜杠分段）
+真实到达。整套策略只有一份文件
+\texttt{contracts/supply-chain-policy.json}，JS 实现与 Python 参考实现启动时都读
+它；策略缺失或损坏时落到 deny-all 兜底，而不是落到宽松默认值。
+
+\paragraph{物理沙箱。}
+被放行的插件在 Node permission model 下的子进程中执行。参数由 Manifest 机械推导：
+\texttt{--permission} 恒有；\texttt{--allow-fs-read} 覆盖插件目录（模块加载必需）
+加每个声明的读作用域；\texttt{--allow-fs-write} 只覆盖声明的写作用域；
+无条件附带 \texttt{--no-addons}、\texttt{--disable-proto=throw}、
+\texttt{--disallow-code-generation-from-strings}、
+\texttt{--max-old-space-size=128}。**永不**输出
+\texttt{--allow-child-process} 或 \texttt{--allow-worker}。父子进程通过带一次性
+随机 token 的 127.0.0.1 TCP 纯回环、按行传输 JSON 通信；只有 Manifest 声明的
+exports 可调用；就绪超时 5000\,ms、单次调用超时 2000\,ms；超时或未捕获违规即杀
+子进程并按 deny 上报。传输选 TCP 而非 stdio 管道有实测理由：在宿主自己的文件
+沙箱下，带管道 stdio 的 spawn 会返回 \texttt{EPERM}，而
+\texttt{stdio: inherit/ignore} 正常——这是被记录的约束，不是偏好。
+
+\paragraph{实测强制力（2026-10-28，Node 24.21.0）。}
+插件侧套件（\texttt{supply-chain-sim.mjs}）对真实子进程通过 59/59 条断言，包括：
+作用域外写文件与作用域外读文件都返回 \texttt{ERR\_ACCESS\_DENIED}；
+\texttt{child\_process} 被权限模型拒绝；用拼接属性名
+（\texttt{fs["wri"+"teFileSync"]}）执行的写入**没有**被词法扫描命中
+（SC-01 命中数为 0），但运行时仍被拒绝，且事后目标文件不存在——这是"沙箱补上
+扫描漏报"的具体例证；导入期逃逸使加载以 SC-E12 失败且不留文件；300\,ms 调用
+超时杀掉子进程并返回 SC-E14；声明 \texttt{network} 的插件在 spawn 之前即被拒绝。
+index 级集成验证用真实插件与两个第三方目录：两份 Manifest 都被解析，良性插件运行
+在 pid 与宿主不同的子进程里，恶意插件被拒绝且其标记文件从未生成，加载器被挂起，
+只读状态工具显示出挂起状态（10/10 条断言）。跨语言 parity 覆盖 32 个裁决用例
+（全部错误路径、注释剥离、作用域逃逸、可选能力）：Python 与 JavaScript 在所有
+契约字段上一致，0 处差异。Python 验收文件共 172 条断言。证据（含原始 JSON）见
+\texttt{acceptance/supply-chain/}。
+
+\paragraph{如实声明的局限。}
+(1) 权限模型不覆盖网络：\texttt{--permission} 下 \texttt{connect} 仍成功（已实测）。
+因此网络外发只靠"永不授予 \texttt{network} + 词法预筛"来防，OS 级出网管控是
+后续工作，本文不宣称。 (2) 插件目录必须对模块加载可读，所以未申请
+\texttt{fs-read} 的插件仍能读自己目录内的文件；声明的作用域是"额外可读"，不是
+"白名单收窄"。 (3) 完整性是钉住的 SHA-256：它能发现"审计与加载之间"的漂移，
+防不住一个自带匹配哈希的恶意作者；签名/PKI 未实现。 (4) 扫描盲区如上；沙箱本身
+只是一层进程边界，不是虚拟机。 (5) WASM 评估后未采用：现有插件是 ESM 包，子进程
+已在较小迁移成本下隔离了原生攻击面；WASM 运行时是后续扩展，不是当前主张。
+(6) 闸门目前对测试装置生成的合成插件验证，尚未对实时注册表中的真实第三方插件
+运行；验收记录如实标注这一点。
+
+\paragraph{与控制面的关系。}
+两层补的是不同的洞，但承担共同义务。基础设施层贡献：用与宿主扫描器同一套 10 种
+词表表达的能力最小化；执行前、可审计的二值裁决；以及一道在模型被洗脑后仍然成立的
+进程边界。控制面（第~\ref{sec:actuator} 节、附录~\ref{app:tuca}、ADR-017）贡献
+的是高危**工具**调用被降级而非阻断时的可解释提权路径。任何一层都不冒充另一层：
+通过闸门的插件，其调用的工具仍逐条受 T-UCA 规则约束；遵守全部工具规则的模型，
+仍然可以在 import 恶意代码时被拦下。这种分层——而不是任何单点检查——才是本系统
+所说的"纵深防御"。

@@ -36,16 +36,16 @@ wire-compatible core; label-on divergences are recorded in the result file.
 Table~\ref{tab:ablation} and Figure~\ref{fig:retention} report the outcomes.
 
 \begin{table*}[t]
-\centering\footnotesize
+\centering\footnotesize\setlength{\tabcolsep}{5pt}
 \caption{Three-arm ablation. SFR: setting-forgetting rate per class and overall;
 NHD: no-hit discipline (literal variant in parentheses); IIR: adversarial
 interference ratio; telemetry: phase/anchor turns, fallback marks (actual drops),
 UCA-08 records. Source:
-\texttt{results/abl-20261027-003626-engine.json}, fields
-\texttt{conditions.<arm>.metrics.*} and \texttt{conditions.<arm>.telemetry.*};
+\texttt{results/\allowbreak{}abl-\allowbreak{}20261027-\allowbreak{}003626-\allowbreak{}engine.\allowbreak{}json}, fields
+\texttt{conditions.\allowbreak{}<arm>.\allowbreak{}metrics.\allowbreak{}*} and \texttt{conditions.\allowbreak{}<arm>.\allowbreak{}telemetry.\allowbreak{}*};
 verifier 51/51.}
 \label{tab:ablation}
-\begin{tabular}{@{}l cccc c c c c c ccc c@{}}
+\resizebox{\textwidth}{!}{\begin{tabular}{@{}l cccc c c c c c ccc c@{}}
 \toprule
  & \multicolumn{4}{c}{SFR by probe class} & & & & & & \multicolumn{3}{c}{Jailbreak (\%)} & \multicolumn{1}{c}{Telemetry}\\
 \cmidrule(lr){2-5}\cmidrule(lr){11-13}\cmidrule(lr){14-14}
@@ -55,7 +55,7 @@ Baseline & 1.00 & 1.00 & 1.00 & 1.00 & 1.00$^{\ddagger}$ & $\varnothing$ & $\var
 Basic & 0.00 & 0.00 & 0.00 & 1.00 & 0.25 [0.05, 0.57] & 0.25 & 0.56 & 1.00 (0.00) & $0^{\dagger}$ & $\varnothing$ & $\varnothing$ & $\varnothing$ & 0/0/0/0 \\
 Full & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 [0.00, 0.26] & 0.00 & 0.47 & 1.00 (0.00) & $0^{\dagger}$ & 1.00 (25) & 0.00 (294) & 0.00 (6) & 28/28/4(0)/62 \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 
 \vspace{2pt}
 \raggedright\scriptsize
@@ -126,7 +126,7 @@ does not change retrieval membership. Shaded bands mark the phase-shift window
 ($r \ge 0.70$ from turn 73, $r \ge 0.85$ from turn 85); the strip below the axis
 marks turns on which Full injects head/tail persona anchors. Source:
 \texttt{conditions.<arm>.turns[].\{setting\_ids\_injected, active\_setting\_ids,
-ratio, anchor\_applied\}} in \texttt{abl-20261027-003626-engine.json}.}
+ratio, anchor\_applied\}} in \texttt{abl-\allowbreak{}20261027-\allowbreak{}003626-\allowbreak{}engine.\allowbreak{}json}.}
 \label{fig:retention}
 \end{figure*}
 
@@ -143,7 +143,7 @@ final prompts are written to disk and analysed offline. One injected point is ru
 once ($n=1$); no red-team mutation is performed in this section.
 
 \emph{A, transport faults.} The host's model endpoint is redirected through the
-documented \texttt{DEEPSEEK\_BASE\_URL} environment variable to a local mock that
+documented \texttt{DEEPSEEK\_\allowbreak{}BASE\_\allowbreak{}URL} environment variable to a local mock that
 returns HTTP 500, a valid but empty 200 response, a valid 200 response carrying a
 fabricated answer, or accepts the connection and never answers.
 
@@ -158,7 +158,7 @@ setup is synthetic and disclosed as such.
 
 \emph{C, context flood.} A deterministic 150{,}000-character garbage stream
 ($\approx 50$k tokens at the plugin's 3-chars/token estimator) is passed as the
-user message while \texttt{LINGSHU\_CONTEXT\_WINDOW} fixes the plugin's perceived
+user message while \texttt{LINGSHU\_\allowbreak{}CONTEXT\_\allowbreak{}WINDOW} fixes the plugin's perceived
 window at four values; a mock endpoint records the assembled request body, so the
 run costs no model tokens.
 
@@ -168,9 +168,9 @@ run costs no model tokens.
 $\varnothing$ marks a quantity the injected fault makes inapplicable, never zero.
 A: five transport modes on one fixed prompt. B: three headless runs on a synthetic
 warm state. C: four window values on the same 150k-character input plus exact
-boundary brackets. Source: \texttt{experiments/chaos-injection/out/}.}
+boundary brackets. Source: \texttt{experiments/\allowbreak{}chaos-\allowbreak{}injection/\allowbreak{}out/\allowbreak{}}.}
 \label{tab:chaos}
-\begin{tabular}{@{}l l l l@{}}
+\begin{tabular}{@{}l l p{0.36\textwidth} p{0.24\textwidth}@{}}
 \toprule
 Fault & Injected mode & Control-plane observation & Key numbers \\
 \midrule
@@ -182,7 +182,7 @@ A transport & HTTP 500 & error surfaced by host; injection still ran once & 7 tr
 B memory    & store as directory (B1) & \texttt{hook\_error}=1 (\texttt{EISDIR}); writes 0; reply returned & 9.851 s, exit 0 \\
             & dirty store (B2) & \texttt{fallback=true}, \texttt{drop style}; superseded not recalled & 21.046 s, exit 0 \\
             & clean control (B0) & style and organization injected; no fallback & 45.654 s, exit 0 \\
-C context   & 4 windows, 150k chars & \texttt{normal/shift/shift/critical}; constitution 4/4 & ratios 0.681/0.701/0.721/0.851 \\
+C context   & 4 windows, 150k chars & \texttt{normal/\allowbreak{}shift/\allowbreak{}shift/\allowbreak{}critical}; constitution 4/4 & ratios 0.681/0.701/0.721/0.851 \\
             & boundary brackets & \texttt{0.7000}$\to$normal, \texttt{0.7006}$\to$shift; \texttt{0.8500}$\to$shift, \texttt{0.8507}$\to$critical & 8 headless calls, 0 model calls \\
 \bottomrule
 \end{tabular}
@@ -191,12 +191,12 @@ C context   & 4 windows, 150k chars & \texttt{normal/shift/shift/critical}; cons
 \paragraph{Transport faults (A).} A plain 200 response completes in 2.84\,s. An
 HTTP 500 is retried by the host seven times with exponential backoff
 (0.55, 0.96, 1.92, 4.25, 7.51\,s between attempts) and surfaces one error line
-(\texttt{dsh: SERVER: mock upstream 500}) after 17.99\,s, exiting non-zero with
+(\texttt{dsh:\allowbreak{} SERVER:\allowbreak{} mock upstream 500}) after 17.99\,s, exiting non-zero with
 \emph{no} fabricated text. An endpoint that never answers produces no response
 within a 150\,s observation window and is terminated by the harness, not by a
 client timeout. In all five modes the plugin performed exactly one pre-step
 injection, the constitution section remained in the final prompt,
-\texttt{state.control.blocked} stayed false and no hook error was recorded. An
+\texttt{state.\allowbreak{}control.\allowbreak{}blocked} stayed false and no hook error was recorded. An
 empty 200 response was passed through as an empty final message (exit 0), and a
 fabricated 200 response reached stdout verbatim (23 characters). The control plane
 therefore never converts a transport failure into fabricated content, but it adds
@@ -206,7 +206,7 @@ responsibilities.
 \paragraph{Memory faults (B).} With a clean store (B0) the injected prompt carries
 constitution, metacognition, organization and style sections and no fallback mark.
 Replacing the store by a directory (B1) raises one \texttt{hook\_error}
-(\texttt{Error: EISDIR ... write}) and leaves \texttt{stateWrites} at its
+(\texttt{Error:\allowbreak{} EISDIR .\allowbreak{}.\allowbreak{}.\allowbreak{} write}) and leaves \texttt{stateWrites} at its
 pre-run value, yet the turn still exits 0 and returns a 364-character answer with
 the constitution and style sections intact---feature fail-open, memory isolated.
 Two caveats are reported rather than smoothed over: the reply asserts that the
@@ -227,7 +227,7 @@ write supersedes both conflicting rows
 (\texttt{supersedeEvents}=2). That artefact must not be read as a benefit: it
 means the next turn's conflict can be erased by the query itself.
 \footnote{The byte-exact CJK prompt markers and conflict keys are recorded
-verbatim in \texttt{experiments/chaos-injection/out/}; this paper renders them in
+verbatim in \texttt{experiments/\allowbreak{}chaos-\allowbreak{}injection/\allowbreak{}out/\allowbreak{}}; this paper renders them in
 ASCII so that the source compiles with the standard T1 fonts.}
 
 \paragraph{Context flood (C).} Measured usage ratios (four decimals) are 0.6806,
@@ -250,9 +250,10 @@ override, and the ratio is a relative control signal rather than a saturation
 measurement.
 
 No truncation occurs: in 4/4 runs the full input appears in the mock request body
-(\texttt{prompt\_full\_in\_body}), the truncation rate is 0.0, and the constitution
-section is present in 4/4 requests. Anchor delivery, however, exposes a genuine
-one-assembly lag. The plugin's own prompt preview carries a head anchor whenever
+(\texttt{prompt\_\allowbreak{}full\_\allowbreak{}in\_\allowbreak{}body}), the truncation rate is 0.0, and the constitution
+section is present in 4/4 requests. Anchor delivery, however, exposed a genuine
+one-assembly lag in these draft runs (finding F-D; fixed in v5.4, so the numbers
+below describe the pre-fix behaviour that motivated the fix). The plugin's own prompt preview carries a head anchor whenever
 \texttt{prefeed} is set and both head and tail anchors once \texttt{critical};
 the \emph{request} reaching the model carries the anchor set of the \emph{previous}
 turn in 8/8 observed requests. The clearest case is the first \texttt{critical}
@@ -260,7 +261,11 @@ turn: its preview has head and tail, its request has only the head, and only the
 next request carries both. The mechanism is host-side: the agent loop assembles the
 system prompt before it emits \texttt{agent/pre-step}, where the plugin updates the
 phase state (assembly precedes the hook by four source lines in
-\texttt{dsh-agent-loop}); the plugin cannot rewrite the already-composed request.
+\texttt{dsh-agent-loop}); in the pre-fix plugin the already-composed request could
+not be rewritten. v5.4 removes the lag (Section~\ref{sec:method:phase}): the
+regression suite reproduces the host hook order and asserts
+\texttt{anchor\_lag=false}, and the S1 pilot was rerun post-fix
+(Section~\ref{sec:exp:baselines}).
 Even when delivered, the tail anchor ends at system offset 229 of 2{,}906 characters,
 i.e.\ at roughly $0.17\%$ of the model-visible text, so ``head and tail'' means
 sections 90/140 of the plugin's seven-part prompt, not the absolute ends of the
@@ -277,7 +282,7 @@ the security cut-off under a constitution violation (the existing STPA evidence
 in \texttt{docs/22})---while transport faults remain outside the control plane
 (A). Solid arcs are fault-to-degradation transitions, dashed arcs are recoveries.
 Per-point evidence and the exact numbers are in
-\texttt{experiments/chaos-injection/out/}; $n=1$ per injected point, plugin
+\texttt{experiments/\allowbreak{}chaos-\allowbreak{}injection/\allowbreak{}out/\allowbreak{}}; $n=1$ per injected point, plugin
 unmodified.}
 \label{fig:chaos}
 \end{figure*}
@@ -302,9 +307,9 @@ These experiments establish contract behaviour and mechanism reachability, not
 model-level effect sizes: the engine is model-free, the host runs are one run per
 cell on one model route, and the chaos faults are $n=1$ synthetic injections
 rather than a sample of production failures. Two structural limits are worth
-naming here because they shape the claims: the anchor set that reaches the model
-lags the plugin's phase by one assembly, so the first critical request carries
-only the head anchor; and host runs involve a real model and are therefore not
-deterministic, which is why every claim above is tied to a field in the evidence
-files rather than to a summary sentence. The full itemised list of parameter,
+naming here because they shape the claims: the chaos measurements above predate
+the v5.4 same-turn fix and are reported as the pre-fix behaviour that motivated it;
+and host runs involve a real model and are therefore not deterministic, which is
+why every claim above is tied to a field in the evidence files rather than to a
+summary sentence. The full itemised list of parameter,
 sample and environment limits is consolidated in Section~\ref{sec:limitations}.

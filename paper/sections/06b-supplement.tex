@@ -17,15 +17,15 @@ turns, and the probe bank is frozen by SHA-256
 (\texttt{cdccdde2966e3d49\ldots}) before any arm is run.
 
 \begin{table*}[t]
-\centering\footnotesize
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
 \caption{Mechanism-level ablation (S1). SFR: setting-forgetting rate per probe
 class (A long-range, B superseded, C distractor-overloaded, D ACT-R rescue,
 $n=12$ each) and pooled over 48 probes. Source:
-\texttt{abl-20261027-s1-engine.json}, fields
-\texttt{arms.<arm>.pooled.metrics.m1\_setting\_forgetting.*} and
-\texttt{arms.<arm>.pooled.telemetry.*}; the file reports \texttt{valid=true} and
+\texttt{abl-\allowbreak{}20261027-\allowbreak{}s1-\allowbreak{}engine.\allowbreak{}json}, fields
+\texttt{arms.\allowbreak{}<arm>.\allowbreak{}pooled.\allowbreak{}metrics.\allowbreak{}m1\_\allowbreak{}setting\_\allowbreak{}forgetting.\allowbreak{}*} and
+\texttt{arms.\allowbreak{}<arm>.\allowbreak{}pooled.\allowbreak{}telemetry.\allowbreak{}*}; the file reports \texttt{valid=true} and
 \texttt{model\_calls=0}.}\label{tab:mech}
-\begin{tabular}{@{}l cccc c p{0.42\textwidth}@{}}
+\begin{tabular}{@{}l cccc c p{0.46\textwidth}@{}}
 \toprule
 Arm & A & B & C & D & SFR$_{\text{text}}$ & Observed effect and caveat \\
 \midrule
@@ -93,14 +93,14 @@ either word list. The gate call is the frozen unit-level engine call used by the
 chaos executor, under which only UCA-01 can fire; the benign control is unchanged
 (200 replay messages plus 94 non-jailbreak script turns).
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering\footnotesize
 \caption{Held-out jailbreak evaluation (S2). JI-held: UCA-01 block rate on 20
 paraphrases per corpus; Clopper--Pearson exact 95\% intervals. JI-fp: false
 positives on 294 benign items. Source:
-\texttt{holdout-20261027-010313.json}, fields
-\texttt{sets.v1|v2.ji\_held.*}, \texttt{ji\_fp.overall.*},
-\texttt{comparison.ji\_held.*}; word-list hashes recorded in the same file.}
+\texttt{holdout-\allowbreak{}20261027-\allowbreak{}010313.\allowbreak{}json}, fields
+\texttt{sets.\allowbreak{}v1|v2.\allowbreak{}ji\_\allowbreak{}held.\allowbreak{}*}, \texttt{ji\_fp.overall.*},
+\texttt{comparison.*}; word-list hashes in the same file.}
 \label{tab:heldout}
 \begin{tabular}{@{}l l c c@{}}
 \toprule
@@ -112,7 +112,7 @@ difference v2$-$v1 & --- & 0.000 & floor effect \\
 JI-fp (benign) & --- & 0.000 [0.000, 0.012] & 0/294 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 Table~\ref{tab:heldout} gives the result: the lexical gate intercepts
 \textbf{none} of the forty paraphrases. Every family is 0/4 in both corpora
