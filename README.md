@@ -1,16 +1,21 @@
 # LINGSHU（灵枢）· Agent 认知插件体系
 
-> 版本：**v5.1** ｜ 状态：契约与提示词定稿；`engine/` 为可跑参考实现（含控制论层，已接线、有专项验收）｜ 目标宿主：DSH
+> 版本：内部开发版本 **v5.1** ｜ 开源发布基线 **v1.0.0**（tag `v1.0.0-paper-baseline`）｜ 状态：契约与提示词定稿；`engine/` 为可跑参考实现（含控制论层，已接线、有专项验收）｜ 目标宿主：DSH
 > 本文档集由 v2.0 全文 + v2.1 增量 + 学习机制 + 控制论重构整合而成（版本史与修正见 [CHANGELOG](CHANGELOG.md)）。
 
 > **Tagline：灵为行为，枢为边界。**
 > LINGSHU 是给 Agent 宿主（DSH）的**可插拔认知插件体系**——记忆 / 情感 / 元认知 / 目标 / 关系 / 叙事，外加**上下文控制论层**（70% / 85% 双阈值相变监控、首尾人格锚点、STPA 前置闸）与**学习闭环**（度量 → 提议 → 灰度 → 回滚）。
 > 它不追求"让 Agent 更像人"，而是：**让 Agent 的行为对人类可理解、可预期、可信。**
 
+> **📄 Publication · 论文预印本（Preprint）**
+> **[English PDF](paper/main-en.pdf)** ｜ **[中文版 PDF](paper/main-zh.pdf)** ｜ **[中英对照 PDF](paper/main-bilingual.pdf)**
+> 论文源文件（LaTeX / BibTeX / 图表 / 数据）见 [`paper/`](paper/)；引用信息与双许可见文末「十、License」。
+
 > **Prior Art / 首发时间戳（First Public Release）**：LINGSHU 首次公开发布于 **2026-10-28**
 > （归档基线 commit `d551079`，tag `v1.0.0-paper-baseline`）。本仓库后续的设计、实现与论文迭代，
 > 均以该日期作为可引用的首发时间戳（prior-art timestamp）。
 > 如引用本项目/本论文的优先权，请注明「LINGSHU, first public release 2026-10-28」。
+> **版本号说明**：项目内部开发版本为 **v5.1**（README / CHANGELOG 沿用的开发版本号），本次开源发布的基线版本为 **v1.0.0**（tag `v1.0.0-paper-baseline`），两者不冲突。
 
 **一句话证据（可复核）**：**Python 验收全绿**（19 个测试文件；含本次新增混沌 v2 **122 项**；其余分项与全局计数见 `acceptance/audit/` 的并行审计报告，口径不在此合并） + **561 条插件断言全绿**（host-sim 276 / control-sim 201 / stress 45 / mutation-regressions 15 / lag-regressions 24）；冻结回放基线 `recall@3 = 1.000`、`forbidden_leak = 0`、`truncated_turns = 0`；控制论层已在可丢弃的实验 profile 里跑通真实 headless 会话（`turns 1→5`、`hook_error = 0`），日常 `desktop` profile **零改动**；混沌工程 host 四剧本 **4/4** 跑通（S2 事实记忆/supersede、S4 冲突降维、UCA-08 降级留痕均已在真实宿主验证；阈值仍全为 `guess`，见 `docs/22`）；**混沌 v2 campaign**：8 族 / 212 检查 / **20 条不变量全过** / 零模型调用（`docs/23`、`acceptance/chaos/v2/`）。
 
