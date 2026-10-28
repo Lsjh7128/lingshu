@@ -155,5 +155,51 @@
       "p95_E1_ms": 13.8684,
       "p95_E0_ms": 17.5203
     }
+  },
+  "marker": "KEY_FINDING",
+  "key_finding": {
+    "label": "KEY_FINDING",
+    "title_zh": "通用句向量与安全意图不对齐：装了真神经编码器，反而不如概念层，且对系统 C 增量为 0",
+    "title_en": "Generic sentence embeddings are misaligned with security intent: a real neural encoder underperforms the intent-concept layer and adds zero interception over system C",
+    "claim": "在预注册准则（D_dev 召回最大 ∧ 良性新增误伤=0）下，offline_concept 召回 68.2%、neural(MiniLM ONNX) 28.9%；两者新增误伤均为 0；神经层对系统 C 的增量在 E1/E0 上均为 0 条。",
+    "numbers": {
+      "dev_recall_offline": 0.682,
+      "dev_recall_neural": 0.289,
+      "new_benign_fp_offline": 0,
+      "new_benign_fp_neural": 0,
+      "E1_neural_only_items": 1,
+      "E1_neural_only_already_covered_by_phase_b": 1,
+      "E1_increment_over_system_C": 0,
+      "E0_neural_only_items": 0,
+      "E0_increment_over_system_C": 0,
+      "latency_p95_ms_semantic_only": {
+        "offline_concept": 1.78,
+        "neural": 8.49
+      },
+      "latency_p95_ms_end_to_end_judgment": {
+        "C_offline": 1.24,
+        "C_neural": 11.88,
+        "C_hybrid": 13.87
+      }
+    },
+    "root_cause_zh": "句向量是话题级相似，不是有害意图判定：良性硬负例 benign-rc-border-04（模拟诈骗电话以练习识别）与写诈骗话术原型余弦 0.6896，把零新增误伤的阈值顶死；角色扮演式弱越狱在神经空间与良性创作同分布。",
+    "root_cause_en": "Sentence embeddings capture topic similarity, not harmful intent: the benign hard negative benign-rc-border-04 (role-playing a scam call in order to learn to spot one) scores cosine 0.6896 against the scam-script prototype, forcing the zero-new-FP threshold above genuine attack text; mild role-play jailbreaks occupy the same neighbourhood as benign creative writing.",
+    "consequence_zh": "因此 auto 默认仍选 offline_concept；neural/hybrid 仅作为可复现消融后端保留。更强的编码器 ≠ 更强的防御，表征必须与目标对齐。",
+    "evidence_files": [
+      "experiments/phase-c/results/run-semantic.json",
+      "experiments/phase-c/results/run-semantic-neural.json",
+      "experiments/phase-c/results/run-semantic-hybrid.json",
+      "experiments/phase-c/analysis/neural_overlap_check.py",
+      "experiments/phase-c/intent_library.json"
+    ],
+    "scope_limits": [
+      "E1/E0 为 held-out 变异，非 OOD",
+      "n=40 per set, 111 D_dev bypass samples",
+      "单机 CPU、int8 ONNX、无并发",
+      "M/R/B 判定为 Lead 预注册"
+    ],
+    "marked_by": "A0 (Lead)",
+    "marked_at": "2026-10-28T23:30:00+08:00",
+    "review_status": "awaiting_H0_ack"
   }
 }

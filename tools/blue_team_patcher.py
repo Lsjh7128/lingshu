@@ -72,8 +72,13 @@ DEFAULT_PROPOSAL_DIR = os.path.join(ROOT, "proposals", "phase-b")
 
 KINDS = ("normalize_decode", "stpa_filter", "uca_regex")
 REGEX_KINDS = ("stpa_filter", "uca_regex")
-STATUSES = ("candidate", "accepted_sandbox", "rejected")
+# H0 指令 2026-10-28 §一.3：在 candidate/accepted_sandbox 之上新增"沙盒基线"状态。
+# **它不是生产状态**：production 仍然不存在（生产上线只能人工改 engine/plugin + 立 ADR）。
+SANDBOX_BASELINE_STATUS = "promoted_to_sandbox_baseline"
+STATUSES = ("candidate", "accepted_sandbox", "rejected", SANDBOX_BASELINE_STATUS)
 REGEX_MAX_LEN = 200
+SANDBOX_BASELINE_SCHEMA = "phase-b-sandbox-baseline-v1"
+DEFAULT_SANDBOX_BASELINE = os.path.join(ROOT, "rules", "sandbox-baseline.yaml")
 
 # 生产文件（本模块**只读**，Proposal 记录其 sha256 以自证零改动）
 PRODUCTION_FILES = (
@@ -690,6 +695,226 @@ def _next_patch_id(ledger_path: str) -> str:
         if m:
             biggest = max(biggest, int(m.group(1)))
     return "P-%04d" % (biggest + 1)
+
+
+# ── 沙盒基线（H0 指令 2026-10-28 §一.3；**不是生产上线**）───────────
+
+def load_sandbox_baseline(path: str = DEFAULT_SANDBOX_BASELINE) -> dict[str, Any]:
+    """读 `rules/sandbox-baseline.yaml`（纯读，不写、不改生产）。
+
+    - 文件不存在 → 抛 FileNotFoundError：**空基线不等于无基线**，不许静默返回 `{}`
+      让调用方以为"没规则"而拿到假的拦截率。
+    - 只解析本模块闭集字段：meta / version / baseline_patches；
+      每条 baseline patch 必须是合法补丁条目（kind 闭集、regex 可编译且 ≤200 字符）。
+    - 该文件只服务 Phase B/C **沙盒度量**；生产防线（engine/、plugin/）不读它。
+    """
+    if not path or not os.path.exists(path):
+        raise FileNotFoundError(
+            "沙盒基线不存在：%s（沙盒基线由 H0 审批后落盘，不能用空基线冒充）" % path)
+    with io.open(path, encoding="utf-8") as fh:
+        raw = fh.read()
+    doc = load_yaml(raw)
+    if not isinstance(doc, dict):
+        raise ValueError("沙盒基线顶层必须是 mapping：%s" % path)
+    meta = doc.get("meta")
+    if not isinstance(meta, dict):
+        raise ValueError("沙盒基线缺少 meta：%s" % path)
+    if meta.get("schema") != SANDBOX_BASELINE_SCHEMA:
+        raise ValueError("沙盒基线 schema 不是 %r（收到 %r）"
+                         % (SANDBOX_BASELINE_SCHEMA, meta.get("schema")))
+    if meta.get("production_mutable") is not False:
+        raise ValueError("沙盒基线 meta.production_mutable 必须为 false（这是沙盒基线，不是生产规则）")
+    patches = doc.get("baseline_patches")
+    if not isinstance(patches, list) or not patches:
+        raise ValueError("沙盒基线 baseline_patches 必须是非空列表：%s" % path)
+    for idx, item in enumerate(patches):
+        errors = validate_patch_item(item)
+        if errors:
+            raise ValueError("沙盒基线 baseline_patches[%d] 非法：%s"
+                             % (idx, "；".join(errors)))
+        if str(item.get("status")) not in (SANDBOX_BASELINE_STATUS, "accepted_sandbox"):
+            raise ValueError("沙盒基线 baseline_patches[%d].status 非法：%r（只允许 %r）"
+                             % (idx, item.get("status"), SANDBOX_BASELINE_STATUS))
+    doc["baseline_patches"] = patches
+    if not isinstance(doc.get("version"), int):
+        doc["version"] = 1 + len(patches)
+    return doc
+
+
+def sandbox_baseline_patch(path: str = DEFAULT_SANDBOX_BASELINE) -> dict[str, Any]:
+    """把沙盒基线转成 `phase_b_defense.scan(patch=...)` 可直接吃的 patch dict。"""
+    doc = load_sandbox_baseline(path)
+    items = _deep_copy(doc.get("baseline_patches") or [])
+    return {"version": 1 + len(items), "patches": items}
+
+
+def merge_sandbox_baseline(current_patch: dict[str, Any] | None = None, *,
+                           path: str = DEFAULT_SANDBOX_BASELINE) -> dict[str, Any]:
+    """沙盒基线 + 当前增量补丁 → 一个 patch dict（纯读+合并，不写盘）。
+
+    - `current_patch=None`/空 → 只返回基线两条（P-0001+P-0002）；
+    - 同 id 时 `current_patch` 覆盖基线条目（后者优先），其余按"基线在前、增量在后"保序；
+    - 返回结构只含 `{version, patches}`，不改 `phase_b_defense` 的默认行为：
+      不传 patch 的 `scan(text)` 仍是纯 Phase A 基线，Phase B 的 20 代历史数字可复现。
+    """
+    baseline = sandbox_baseline_patch(path)
+    if not _items_of(current_patch):
+        return baseline
+    return merge_patches(baseline, current_patch)
+
+
+def _regression_block_for(ledger_item: dict[str, Any], run_dir: str | None) -> dict[str, Any]:
+    """给沙盒基线条目补 `regression` 溯源（读 run 的 regression_gen<g>.json；读不到就如实标记）。"""
+    gen = ledger_item.get("generation")
+    if run_dir and isinstance(gen, int):
+        reg = _regression_in_run(run_dir, gen)
+        if reg is not None:
+            return {"suite": reg.get("suite") or "audit892",
+                    "files": reg.get("files"),
+                    "passed": reg.get("passed"),
+                    "failed": reg.get("failed"),
+                    "status": "passed_in_run" if reg.get("ok") else "failed_in_run",
+                    "evidence": reg.get("json")}
+    return {"suite": "audit892", "status": "not_available_in_this_context",
+            "note": "未随基线携带回归证据（run 目录缺失）；Phase B 20 代历史见 coevolution_log"}
+
+
+def build_sandbox_baseline_doc(*, patch_ids: tuple[str, ...] = ("P-0001", "P-0002"),
+                               ledger_path: str = DEFAULT_LEDGER,
+                               run_dir: str | None = None,
+                               approved_by: str = "H0（指令 2026-10-28 §一.3）",
+                               approved_at: str | None = None) -> dict[str, Any]:
+    """从候选账本构建沙盒基线文档（纯构造，不写盘）。"""
+    doc = load_candidate_patch(ledger_path)
+    by_id = {str(p.get("id")): p for p in (doc.get("patches") or []) if isinstance(p, dict)}
+    items: list[dict[str, Any]] = []
+    for pid in patch_ids:
+        src = by_id.get(pid)
+        if src is None:
+            raise KeyError("候选账本里找不到要提升的补丁 id：%s" % pid)
+        # 提升前的"原始状态"与原始条目指纹：重复提升时账本已带 promoted_* 字段，
+        # 先归一化再取指纹，保证幂等（第二次提升不会因为审计字段变化而重写基线）。
+        src_status = str(src.get("status"))
+        orig_status = "accepted_sandbox" if src_status == SANDBOX_BASELINE_STATUS else src_status
+        canon = _deep_copy(src)
+        canon["status"] = orig_status
+        for key in ("promoted_at", "promoted_to"):
+            canon.pop(key, None)
+        item = {
+            "id": pid,
+            "generation": src.get("generation"),
+            "kind": src.get("kind"),
+            "status": SANDBOX_BASELINE_STATUS,
+            "rationale": src.get("rationale") or ("H0 批准提升为沙盒基线（%s）" % approved_by),
+            "rollback": ("从 rules/sandbox-baseline.yaml 删除 id: %s 即回滚沙盒基线；"
+                         "生产规则文件零改动" % pid),
+            "evidence": _deep_copy(src.get("evidence") or {}),
+            "regression": _regression_block_for(src, run_dir),
+            "promoted_from": "rules/candidate_patch.yaml",
+            "promoted_from_status": orig_status,
+            "source_patch_sha256": hashlib.sha256(
+                json.dumps(canon, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest(),
+        }
+        if src.get("spec") is not None:
+            item["spec"] = _deep_copy(src.get("spec"))
+        if src.get("rules") is not None:
+            item["rules"] = _deep_copy(src.get("rules"))
+        if src.get("accepted_sandbox_at"):
+            item["accepted_sandbox_at"] = src.get("accepted_sandbox_at")
+        items.append(item)
+    now = approved_at or _now()
+    return {
+        "meta": {
+            "schema": SANDBOX_BASELINE_SCHEMA,
+            "status": "accepted_sandbox_baseline",
+            "production_mutable": False,
+            "approved_by": approved_by,
+            "approved_at": now,
+            "source_ledger": "rules/candidate_patch.yaml",
+            "source_run": (os.path.relpath(run_dir, ROOT).replace(os.sep, "/")
+                           if run_dir else None),
+            "scope_note": ("**仅在 Phase B/C 的沙盒度量中生效**（被 "
+                           "tools/phase_b_defense.scan(patch=merge_sandbox_baseline(...)) 读取）；"
+                           "生产防线（engine/、plugin/、生产词表）**仍零改动**；"
+                           "生产上线需 H0 另行人工审批并立 ADR，本文件不构成上线。"),
+            "production_requires": "人工审批 + ADR（不存在脚本自动合入生产的路径）",
+        },
+        "version": 1 + len(items),
+        "baseline_patches": items,
+    }
+
+
+def promote_to_sandbox_baseline(*, patch_ids: tuple[str, ...] = ("P-0001", "P-0002"),
+                                ledger_path: str = DEFAULT_LEDGER,
+                                baseline_path: str = DEFAULT_SANDBOX_BASELINE,
+                                run_dir: str | None = None,
+                                approved_by: str = "H0（指令 2026-10-28 §一.3）",
+                                approved_at: str | None = None) -> dict[str, Any]:
+    """把指定补丁提升为沙盒基线：写 `rules/sandbox-baseline.yaml` + 改候选账本状态。
+
+    - 只改 `patch_ids` 指定条目（其余条目状态**不动**）；
+    - 幂等：基线已存在且内容一致 → 不重写；状态已是 promoted → 不重复改；
+    - 只写 A1 作用域（沙盒基线 + 候选账本），不碰 engine/plugin/生产规则。
+    """
+    now = approved_at or _now()
+    baseline_doc = build_sandbox_baseline_doc(
+        patch_ids=patch_ids, ledger_path=ledger_path, run_dir=run_dir,
+        approved_by=approved_by, approved_at=now)
+    want = baseline_doc["baseline_patches"]
+
+    already_promoted: list[str] = []
+    ledger_doc = load_candidate_patch(ledger_path)
+    patches = list(ledger_doc.get("patches") or [])
+    untouched_before = {str(p.get("id")): (p.get("status"), p.get("promoted_at"))
+                        for p in patches if isinstance(p, dict) and str(p.get("id")) not in patch_ids}
+    changed = False
+    for idx, item in enumerate(patches):
+        if not isinstance(item, dict):
+            continue
+        pid = str(item.get("id"))
+        if pid not in patch_ids:
+            continue
+        if item.get("status") == SANDBOX_BASELINE_STATUS:
+            already_promoted.append(pid)
+            continue
+        updated = _deep_copy(item)
+        updated["status"] = SANDBOX_BASELINE_STATUS
+        updated["promoted_at"] = now
+        updated["promoted_to"] = "%s#baseline_patches:%s" % (
+            os.path.relpath(baseline_path, ROOT).replace(os.sep, "/"), pid)
+        patches[idx] = updated
+        changed = True
+    if changed:
+        save_candidate_patch(_ledger_doc(patches,
+                                         created_at=(ledger_doc.get("meta") or {}).get("created_at")),
+                             ledger_path)
+
+    baseline_written = False
+    existing: dict[str, Any] | None = None
+    if os.path.exists(baseline_path):
+        try:
+            existing = load_sandbox_baseline(baseline_path)
+        except (ValueError, FileNotFoundError):
+            existing = None
+    if existing is None or existing.get("baseline_patches") != want:
+        _write_yaml_file(baseline_doc, baseline_path)
+        baseline_written = True
+
+    after_doc = load_candidate_patch(ledger_path)
+    untouched_after = {str(p.get("id")): (p.get("status"), p.get("promoted_at"))
+                       for p in (after_doc.get("patches") or [])
+                       if isinstance(p, dict) and str(p.get("id")) not in patch_ids}
+    return {
+        "baseline_path": baseline_path,
+        "ledger_path": ledger_path,
+        "baseline_written": baseline_written,
+        "ledger_changed": changed,
+        "already_promoted": already_promoted,
+        "promoted_patch_ids": [str(i.get("id")) for i in want],
+        "other_patches_untouched": untouched_before == untouched_after,
+        "approved_by": approved_by,
+        "approved_at": now,
+    }
 
 
 # ── 良性误伤自检 ────────────────────────────────────────
@@ -1346,8 +1571,12 @@ def _same_patch(existing: dict[str, Any], item: dict[str, Any]) -> bool:
         return False
     es = str(existing.get("status"))
     ns = str(item.get("status"))
-    # 账本里的状态会比 run 快照更靠后（candidate → accepted_sandbox），这不是内容变化
-    return es == ns or {es, ns} <= {"candidate", "accepted_sandbox"}
+    # 账本里状态会比 run 快照更靠后：candidate → accepted_sandbox → 沙盒基线。
+    # 状态演进不是内容变化；只有 rejected/disabled 与"有效态"互斥。
+    active_group = {"candidate", "accepted_sandbox", SANDBOX_BASELINE_STATUS}
+    if es in active_group and ns in active_group:
+        return True
+    return es == ns
 
 
 def _resolve_run_patch_source(run_dir: str) -> tuple[dict[str, Any], str]:

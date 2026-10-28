@@ -2,7 +2,7 @@ meta:
   schema: "phase-b-candidate-patch-v1"
   production_mutable: false
   created_at: "2026-10-28T19:00:00+08:00"
-  updated_at: "2026-10-28T18:59:02+08:00"
+  updated_at: "2026-10-28T23:29:51+08:00"
   note: "候选补丁账本（沙盒用）。生产防线永不读它；合入生产 = H0 人工审批，脚本无此能力。"
 version: 16
 patches:
@@ -185,11 +185,13 @@ patches:
         checked_at: "2026-10-28T18:55:12+08:00"
       created_at: "2026-10-28T18:55:12+08:00"
     rollback: "从 rules/candidate_patch.yaml 删除 id: P-0001 的条目即回滚（沙盒之外无人引用它）；生产规则文件零改动（sha256 见 Proposal 的 production_files_untouched_sha256）"
-    status: "accepted_sandbox"
+    status: "promoted_to_sandbox_baseline"
     spec:
       detectors: ["base64", "hex", "zero_width", "rot13"]
     accepted_sandbox_at: "2026-10-28T18:55:26+08:00"
     accept_note: "regression_lock_pass_benign_no_new_fp"
+    promoted_at: "2026-10-28T23:29:51+08:00"
+    promoted_to: "rules/sandbox-baseline.yaml#baseline_patches:P-0001"
   - id: "P-0002"
     generation: 1
     kind: "stpa_filter"
@@ -287,13 +289,15 @@ patches:
         checked_at: "2026-10-28T18:55:26+08:00"
       created_at: "2026-10-28T18:55:26+08:00"
     rollback: "从 rules/candidate_patch.yaml 删除 id: P-0002 的条目即回滚（沙盒之外无人引用它）；生产规则文件零改动（sha256 见 Proposal 的 production_files_untouched_sha256）"
-    status: "accepted_sandbox"
+    status: "promoted_to_sandbox_baseline"
     rules:
       - id: "RX-01-01"
         regex: "(?:перевоплощение|разработчика|проникнуть|устройство|المتفجرات|взрывное|систему|собрать|подлец|اختلاس|الأمان|المرور|режим|تجاوز|تضليل|كلمات|роль|أداء|وصفة)"
         note: "离线词表式语言变异（俄语/阿拉伯语换词面）绕过了中文/英文触发词表；本规则匹配观测到的外来文字触发词符号串。**表面符号匹配，非语义翻译**，换词/改写可绕过（见 limitations）。"
     accepted_sandbox_at: "2026-10-28T18:55:41+08:00"
     accept_note: "regression_lock_pass_benign_no_new_fp"
+    promoted_at: "2026-10-28T23:29:51+08:00"
+    promoted_to: "rules/sandbox-baseline.yaml#baseline_patches:P-0002"
   - id: "P-0003"
     generation: 2
     kind: "stpa_filter"
