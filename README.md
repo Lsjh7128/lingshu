@@ -105,6 +105,95 @@ node plugin/dsh-lingshu/host-sim.mjs --assert    # 插件验收（需 Node；moc
 
 ---
 
+## 🚀 Installation · 安装
+
+> 三条路径，按你想做的事选。**不需要联网安装依赖**：Python 侧零第三方库，插件侧不发布 npm 包。
+> ⚠️ 本项目的硬边界：**只装进可丢弃的 profile，不要装进日常 `desktop` profile**（见文末说明）。
+
+### 路径 A · 只想跑起来看看（零安装，推荐第一次）
+
+要求：**Python ≥ 3.8**，只用标准库。
+
+```bash
+git clone https://github.com/Lsjh7128/lingshu.git
+cd lingshu
+
+python scripts/quickstart.py --no-open   # 冻结回放 → 生成 console/demo.html（不打开浏览器）
+```
+
+然后双击 `console/demo.html`。它单文件、内联 CSS/SVG、无外部请求；**不安装任何东西，也不读写你的 DSH profile**。
+只想看脱敏演示页也可以：`python tools/gen_demo_report.py --no-real`。
+
+### 路径 B · 装进 DSH 宿主（可丢弃 profile）
+
+要求：
+
+- **DSH 桌面端 ≥ 0.2.0-rc.2**（见 `plugin/dsh-lingshu/package.json` 的 `dsh.engines`）
+- **Node.js ≥ 20.10**，或直接使用 DSH 自带的 node
+- `plugin add` 会用到 **pnpm**；若提示找不到，先 `npm i -g pnpm`（或把 DSH 自带 pnpm 加进 `PATH`）
+
+下面以 Windows 默认安装位置为例（其他平台把 `$dshBin` / `$node` 换成你的实际路径）：
+
+```powershell
+# 0) 定位 DSH CLI 与 node（Windows 默认位置）
+$dshBin = "$env:USERPROFILE\.dsh\profiles\node_modules\@deepseek-ai\dsh\lib\bin.js"
+$node   = "$env:USERPROFILE\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\node\bin\node.exe"
+# 若 node 已在 PATH，可用 node 代替 & $node
+
+# 1) 建一个可丢弃的实验 profile（不要用 desktop）
+& $node "$dshBin" lingshu-lab-headless --from-default-profile headless --dump-config
+
+# 2) 官方安装：link: 指向你 clone 下来的仓库
+#    不要手建 junction、不要手改 package.json
+& $node "$dshBin" plugin --profile lingshu-lab-headless add "link:<你的仓库路径>/plugin/dsh-lingshu"
+
+# 3) 跑一轮真实会话（headless，跑完即退）
+& $node "$dshBin" lingshu-lab-headless "用一句话回答：项目代号是什么？"
+
+# 4) 查看审计事件
+Get-Content "$env:USERPROFILE\.dsh\plugins\dsh-lingshu\audit.jsonl" -Tail 20
+```
+
+安装后插件自动挂载：本包在 `package.json` 里声明了 `dsh.bundle.patch`，`cordis.patch.yml`
+会被 loader 自动接上，**不需要手改 profile 的补丁**。
+
+> **两条红线**
+> 1. **不要把插件装进 `desktop` profile。** 日常 profile 一旦挂上插件，记忆 / 审计就会写进真实数据目录；
+>    本项目所有实验只在**可丢弃** profile 里跑（`docs/21-开源发布清单.md` §B2）。
+> 2. 插件数据落在 `$DSH_HOME/plugins/dsh-lingshu/`（`state.json` / `memory.jsonl` / `audit.jsonl`），
+>    那是**本机真实数据**，**不要提交进仓库、不要外发**。
+
+### 路径 C · 跑验收 / 复现论文
+
+```bash
+pdfinfo paper/main-en.pdf 2>/dev/null || echo "PDF 见 paper/"   # 论文
+python tests/test_learning.py                                   # 单个验收文件
+node plugin/dsh-lingshu/host-sim.mjs --assert                   # 插件 mock 宿主断言（不碰 DSH）
+node plugin/dsh-lingshu/control-sim.mjs --assert                # 控制论层纯函数断言
+```
+
+完整命令、逐文件期望与 CI 口径见下方 **§七 快速开始** 与 [`docs/21-开源发布清单.md`](docs/21-开源发布清单.md)。
+
+### 卸载 / 回滚（约三分钟）
+
+```powershell
+# 1) 从实验 profile 卸载插件
+& $node "$dshBin" plugin --profile lingshu-lab-headless remove dsh-lingshu
+
+# 2) 删掉可丢弃 profile
+Remove-Item -Recurse -Force "$env:USERPROFILE\.dsh\profiles\lingshu-lab-headless"
+
+# 3) 删掉插件数据（state / memory / audit）
+Remove-Item -Recurse -Force "$env:USERPROFILE\.dsh\plugins\dsh-lingshu"
+```
+
+更细的说明（含三条真机踩过的契约坑、observe 静默模式、记忆唯一写入口）见
+[`plugin/README.md`](plugin/README.md)。
+
+> 平台说明：本项目在 **Windows** 上实测；macOS / Linux 路径换成 `~/.dsh/...` 同理，但尚未做真机验证。
+
+---
+
 ## 零、先读这个
 
 **如果你是接手的人**：直接看 [`交接总览.md`](交接总览.md)——30 分钟知道全貌、进度、边界与下一步。
@@ -295,6 +384,8 @@ lingshu/
 ---
 
 ## 七、快速开始
+
+> 还没跑过？先看上面的 **🚀 Installation · 安装**（路径 A 两条命令即可跑起来）。以下是完整自检命令。
 
 ```bash
 python tools/gen_replay_set.py        # 生成 200 条回放集（可复现）
