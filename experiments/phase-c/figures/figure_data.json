@@ -1,0 +1,711 @@
+{
+  "schema": "phase-c-figure-data-v1",
+  "source_file": "experiments/phase-c/results/run-semantic.json",
+  "source_schema": "phase-c-run-semantic-v1",
+  "generated_at": "2026-10-28T19:43:40+08:00",
+  "run": {
+    "run_id": "run-semantic-20261028-193207",
+    "run_label": "run-semantic-20261028-193207",
+    "run_id_source": "run-semantic.json:run_id",
+    "source_generated_at": "2026-10-28T19:32:07+0800",
+    "branch": "feat/phase-c-semantic-guard",
+    "generated_by": "tools/phase_c_eval.py"
+  },
+  "encoder": {
+    "backend": "offline_concept",
+    "is_neural": false,
+    "intent_count": 9,
+    "threshold": 0.45,
+    "threshold_calibrated_on": "D_dev",
+    "intent_library_sha256": "29ed8e3e09560c96c1395c7df47d2213287f0449bc585fea5b184d1fe4d73b46",
+    "naming_note": "the report/paper must call this an 'intent-concept encoder (offline, non-neural)' when is_neural is false; never 'all-MiniLM-L6-v2' or 'neural sentence embedding' (contract 0.4)"
+  },
+  "eval_sets": {
+    "E1": {
+      "count": 40,
+      "sha256": "432e08a2d47cdc968f80803be64cf337d43767781459d4431b180f1d6f7a210c",
+      "path": "experiments\\phase-b\\runs\\run-20261028-185512\\zeroday_set.jsonl",
+      "source": "Phase B 官方 run 的 held-out 零日集（H0 指定）"
+    },
+    "E0": {
+      "count": 40,
+      "sha256": "5fa5398389834a6a592eca765110d1921ea928aa781d46da54ab035ca68636e2",
+      "path": "experiments\\phase-c\\eval\\zeroday_fresh.jsonl",
+      "source": "A4 新 seed 重生成的新鲜 held-out（防泄漏控制）"
+    },
+    "benign": {
+      "count": 74,
+      "path": "experiments\\phase-b\\corpora\\benign.jsonl"
+    }
+  },
+  "figures": {
+    "comparison": {
+      "pdf": "experiments/phase-c/figures/phase_c_comparison.pdf",
+      "png": "experiments/phase-c/figures/phase_c_comparison.png",
+      "page_pt": [
+        504.0,
+        416.0
+      ],
+      "description_en": "2x2 panels: grouped bars of interception rate for A/B/C x E1/E0; the M subset (explicit cross-lingual red lines that must be intercepted); p95 latency (ms) with the 100 ms budget line; benign FPR. A one-line note gives the E1 rates excluding the two benign-creation items (n=38)."
+    },
+    "radar": {
+      "pdf": "experiments/phase-c/figures/phase_c_radar.pdf",
+      "png": "experiments/phase-c/figures/phase_c_radar.png",
+      "page_pt": [
+        504.0,
+        452.0
+      ],
+      "description_en": "radar over interception rate / 1-FPR / speed / intent coverage / explainability; axes 3-5 max-normalised"
+    }
+  },
+  "comparison": {
+    "caption_zh": "Phase C 三系统对比（run_id run-semantic-20261028-193207）。左上：三系统（A 词法闸门 / B Phase B 自愈补丁 / C 语义升维）在 E1（H0 指定零日集）与 E0（新 seed 新鲜 held-out）上的拦截率，双色表示评估集，绿色虚线为 H0 的 >0.90（E1）目标；右上：M 子集（显式跨语红线，按判定口径必须拦）——C 在 E1 拦 3/3、E0 拦 4/5，而 A、B 在 E1 为 0/3 与 0/3；E1 剔除 2 条良性创作（n=38）后的应拦口径为 A 0.395、B 0.816、C 0.895；左下：完整判定（词法+语义）的 p95 延迟（ms），红色虚线为 100 ms 硬预算（契约 §1.2）；右下：良性语料（74 条）上的误伤率 FPR。数据来源：experiments/phase-c/results/run-semantic.json 的 systems.{A,B,C}.{E1,E0}.rate、.latency.p95_ms、systems.{A,B,C}.benign.fpr、systems.{A,B,C}.E1.eligible_excluding_benign 与 systems.{A,B,C}.adjudicated；未做平滑、插值与手填。雷达图轴 = 拦截率（E1）/ 1-FPR / 速度（1/p95）/ 覆盖意图数 / 可解释性；后三轴按跨系统最大值归一化，原始值见图下方表。编码器为离线意图概念向量（offline intent-concept, non-neural），阈值 0.45 只在 D_dev 上校准；E1/E0 均为 held-out 变体而非 OOD。延迟为单机 numpy 实测，不代表生产端到端延迟。",
+    "caption_en": "Phase C three-system comparison (run_id run-semantic-20261028-193207). Top-left: interception rates of the three systems (A lexical gate; B Phase B evolved patch; C semantic guard) on two held-out variant sets, E1 (H0 zero-day set) and E0 (fresh held-out, new seed), as grouped bars; the two shades encode the evaluation set and the green dashed line is the H0 target of >0.90 on E1. Top-right: the M subset (explicit cross-lingual red lines that must be intercepted) -- C intercepts 3/3 on E1 and 4/5 on E0, while A and B intercept 0/3 and 0/3 on E1; excluding the 2 benign-creation items (n=38), the E1 rates are A 0.395, B 0.816, C 0.895; Bottom-left: p95 latency (ms) of the complete judgment (lexical + semantic) with the 100 ms hard budget as a red dashed line (contract 1.2); bottom-right: benign false-positive rate (FPR) on the benign corpus. Sources: run-semantic.json fields systems.{A,B,C}.{E1,E0}.rate, .latency.p95_ms, systems.{A,B,C}.benign.fpr, systems.{A,B,C}.E1.eligible_excluding_benign and systems.{A,B,C}.adjudicated; no smoothing, interpolation or hand-filled values. Radar axes: interception rate (E1) / 1-FPR / speed (1/p95) / intent coverage / explainability; the last three are max-normalised across A/B/C and raw values appear in the table below the radar. The encoder is an offline intent-concept encoder (non-neural) with threshold 0.45 calibrated on D_dev only; E1/E0 are held-out variants, not OOD data. Latency is a single-machine numpy measurement, not production end-to-end latency.",
+    "bars": [
+      {
+        "system": "A",
+        "eval_set": "E1",
+        "rate": 0.375,
+        "intercepted": 15,
+        "n": 40,
+        "source_field": "systems.A.E1.rate",
+        "source_count_fields": [
+          "systems.A.E1.intercepted",
+          "systems.A.E1.n"
+        ]
+      },
+      {
+        "system": "A",
+        "eval_set": "E0",
+        "rate": 0.4,
+        "intercepted": 16,
+        "n": 40,
+        "source_field": "systems.A.E0.rate",
+        "source_count_fields": [
+          "systems.A.E0.intercepted",
+          "systems.A.E0.n"
+        ]
+      },
+      {
+        "system": "B",
+        "eval_set": "E1",
+        "rate": 0.775,
+        "intercepted": 31,
+        "n": 40,
+        "source_field": "systems.B.E1.rate",
+        "source_count_fields": [
+          "systems.B.E1.intercepted",
+          "systems.B.E1.n"
+        ]
+      },
+      {
+        "system": "B",
+        "eval_set": "E0",
+        "rate": 0.825,
+        "intercepted": 33,
+        "n": 40,
+        "source_field": "systems.B.E0.rate",
+        "source_count_fields": [
+          "systems.B.E0.intercepted",
+          "systems.B.E0.n"
+        ]
+      },
+      {
+        "system": "C",
+        "eval_set": "E1",
+        "rate": 0.85,
+        "intercepted": 34,
+        "n": 40,
+        "source_field": "systems.C.E1.rate",
+        "source_count_fields": [
+          "systems.C.E1.intercepted",
+          "systems.C.E1.n"
+        ]
+      },
+      {
+        "system": "C",
+        "eval_set": "E0",
+        "rate": 0.925,
+        "intercepted": 37,
+        "n": 40,
+        "source_field": "systems.C.E0.rate",
+        "source_count_fields": [
+          "systems.C.E0.intercepted",
+          "systems.C.E0.n"
+        ]
+      }
+    ],
+    "latency": [
+      {
+        "system": "A",
+        "eval_set": "E1",
+        "p50_ms": 0.0131,
+        "p95_ms": 0.0228,
+        "mean_ms": 0.0144,
+        "max_ms": 0.0416,
+        "n": 40,
+        "source_field": "systems.A.E1.latency.p95_ms"
+      },
+      {
+        "system": "A",
+        "eval_set": "E0",
+        "p50_ms": 0.0123,
+        "p95_ms": 0.0207,
+        "mean_ms": 0.0134,
+        "max_ms": 0.022,
+        "n": 40,
+        "source_field": "systems.A.E0.latency.p95_ms"
+      },
+      {
+        "system": "B",
+        "eval_set": "E1",
+        "p50_ms": 0.049,
+        "p95_ms": 0.2479,
+        "mean_ms": 0.1511,
+        "max_ms": 2.3417,
+        "n": 40,
+        "source_field": "systems.B.E1.latency.p95_ms"
+      },
+      {
+        "system": "B",
+        "eval_set": "E0",
+        "p50_ms": 0.0449,
+        "p95_ms": 0.1084,
+        "mean_ms": 0.0551,
+        "max_ms": 0.1302,
+        "n": 40,
+        "source_field": "systems.B.E0.latency.p95_ms"
+      },
+      {
+        "system": "C",
+        "eval_set": "E1",
+        "p50_ms": 1.185,
+        "p95_ms": 2.7241,
+        "mean_ms": 1.8989,
+        "max_ms": 20.5733,
+        "n": 40,
+        "source_field": "systems.C.E1.latency.p95_ms"
+      },
+      {
+        "system": "C",
+        "eval_set": "E0",
+        "p50_ms": 1.1004,
+        "p95_ms": 1.2755,
+        "mean_ms": 1.1194,
+        "max_ms": 1.4106,
+        "n": 40,
+        "source_field": "systems.C.E0.latency.p95_ms"
+      }
+    ],
+    "fpr": [
+      {
+        "system": "A",
+        "fpr": 0.027027,
+        "fp_count": 2,
+        "n": 74,
+        "source_field": "systems.A.benign.fpr",
+        "source_count_fields": [
+          "systems.A.benign.fp_count",
+          "systems.A.benign.n"
+        ]
+      },
+      {
+        "system": "B",
+        "fpr": 0.027027,
+        "fp_count": 2,
+        "n": 74,
+        "source_field": "systems.B.benign.fpr",
+        "source_count_fields": [
+          "systems.B.benign.fp_count",
+          "systems.B.benign.n"
+        ]
+      },
+      {
+        "system": "C",
+        "fpr": 0.027027,
+        "fp_count": 2,
+        "n": 74,
+        "source_field": "systems.C.benign.fpr",
+        "source_count_fields": [
+          "systems.C.benign.fp_count",
+          "systems.C.benign.n"
+        ]
+      }
+    ],
+    "adjudicated": [
+      {
+        "system": "A",
+        "eval_set": "E1",
+        "subset": "M",
+        "n": 3,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": null,
+        "source_field": "systems.A.E1.adjudicated.M.intercepted",
+        "source_count_fields": [
+          "systems.A.E1.adjudicated.M.n",
+          "systems.A.E1.adjudicated.M.intercepted"
+        ]
+      },
+      {
+        "system": "A",
+        "eval_set": "E1",
+        "subset": "R",
+        "n": 4,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": null,
+        "source_field": "systems.A.E1.adjudicated.R.intercepted",
+        "source_count_fields": [
+          "systems.A.E1.adjudicated.R.n",
+          "systems.A.E1.adjudicated.R.intercepted"
+        ]
+      },
+      {
+        "system": "A",
+        "eval_set": "E1",
+        "subset": "B",
+        "n": 2,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": 0,
+        "source_field": "systems.A.E1.adjudicated.B.intercepted",
+        "source_count_fields": [
+          "systems.A.E1.adjudicated.B.n",
+          "systems.A.E1.adjudicated.B.intercepted"
+        ]
+      },
+      {
+        "system": "A",
+        "eval_set": "E0",
+        "subset": "M",
+        "n": 5,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": null,
+        "source_field": "systems.A.E0.adjudicated.M.intercepted",
+        "source_count_fields": [
+          "systems.A.E0.adjudicated.M.n",
+          "systems.A.E0.adjudicated.M.intercepted"
+        ]
+      },
+      {
+        "system": "A",
+        "eval_set": "E0",
+        "subset": "R",
+        "n": 2,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": null,
+        "source_field": "systems.A.E0.adjudicated.R.intercepted",
+        "source_count_fields": [
+          "systems.A.E0.adjudicated.R.n",
+          "systems.A.E0.adjudicated.R.intercepted"
+        ]
+      },
+      {
+        "system": "B",
+        "eval_set": "E1",
+        "subset": "M",
+        "n": 3,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": null,
+        "source_field": "systems.B.E1.adjudicated.M.intercepted",
+        "source_count_fields": [
+          "systems.B.E1.adjudicated.M.n",
+          "systems.B.E1.adjudicated.M.intercepted"
+        ]
+      },
+      {
+        "system": "B",
+        "eval_set": "E1",
+        "subset": "R",
+        "n": 4,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": null,
+        "source_field": "systems.B.E1.adjudicated.R.intercepted",
+        "source_count_fields": [
+          "systems.B.E1.adjudicated.R.n",
+          "systems.B.E1.adjudicated.R.intercepted"
+        ]
+      },
+      {
+        "system": "B",
+        "eval_set": "E1",
+        "subset": "B",
+        "n": 2,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": 0,
+        "source_field": "systems.B.E1.adjudicated.B.intercepted",
+        "source_count_fields": [
+          "systems.B.E1.adjudicated.B.n",
+          "systems.B.E1.adjudicated.B.intercepted"
+        ]
+      },
+      {
+        "system": "B",
+        "eval_set": "E0",
+        "subset": "M",
+        "n": 5,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": null,
+        "source_field": "systems.B.E0.adjudicated.M.intercepted",
+        "source_count_fields": [
+          "systems.B.E0.adjudicated.M.n",
+          "systems.B.E0.adjudicated.M.intercepted"
+        ]
+      },
+      {
+        "system": "B",
+        "eval_set": "E0",
+        "subset": "R",
+        "n": 2,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": null,
+        "source_field": "systems.B.E0.adjudicated.R.intercepted",
+        "source_count_fields": [
+          "systems.B.E0.adjudicated.R.n",
+          "systems.B.E0.adjudicated.R.intercepted"
+        ]
+      },
+      {
+        "system": "C",
+        "eval_set": "E1",
+        "subset": "M",
+        "n": 3,
+        "intercepted": 3,
+        "rate": 1.0,
+        "false_positive_count": null,
+        "source_field": "systems.C.E1.adjudicated.M.intercepted",
+        "source_count_fields": [
+          "systems.C.E1.adjudicated.M.n",
+          "systems.C.E1.adjudicated.M.intercepted"
+        ]
+      },
+      {
+        "system": "C",
+        "eval_set": "E1",
+        "subset": "R",
+        "n": 4,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": null,
+        "source_field": "systems.C.E1.adjudicated.R.intercepted",
+        "source_count_fields": [
+          "systems.C.E1.adjudicated.R.n",
+          "systems.C.E1.adjudicated.R.intercepted"
+        ]
+      },
+      {
+        "system": "C",
+        "eval_set": "E1",
+        "subset": "B",
+        "n": 2,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": 0,
+        "source_field": "systems.C.E1.adjudicated.B.intercepted",
+        "source_count_fields": [
+          "systems.C.E1.adjudicated.B.n",
+          "systems.C.E1.adjudicated.B.intercepted"
+        ]
+      },
+      {
+        "system": "C",
+        "eval_set": "E0",
+        "subset": "M",
+        "n": 5,
+        "intercepted": 4,
+        "rate": 0.8,
+        "false_positive_count": null,
+        "source_field": "systems.C.E0.adjudicated.M.intercepted",
+        "source_count_fields": [
+          "systems.C.E0.adjudicated.M.n",
+          "systems.C.E0.adjudicated.M.intercepted"
+        ]
+      },
+      {
+        "system": "C",
+        "eval_set": "E0",
+        "subset": "R",
+        "n": 2,
+        "intercepted": 0,
+        "rate": 0.0,
+        "false_positive_count": null,
+        "source_field": "systems.C.E0.adjudicated.R.intercepted",
+        "source_count_fields": [
+          "systems.C.E0.adjudicated.R.n",
+          "systems.C.E0.adjudicated.R.intercepted"
+        ]
+      }
+    ],
+    "eligible_excluding_benign": [
+      {
+        "system": "A",
+        "eval_set": "E1",
+        "n": 38,
+        "intercepted": 15,
+        "rate": 0.394737,
+        "excluded_benign_creations": 2,
+        "source_field": "systems.A.E1.eligible_excluding_benign.rate",
+        "note": "分母排除 B 类（良性创作）；E1 的 40 条中排除 2 条"
+      },
+      {
+        "system": "A",
+        "eval_set": "E0",
+        "n": null,
+        "rate": null,
+        "intercepted": null,
+        "excluded_benign_creations": null,
+        "source_field": "systems.A.E0.eligible_excluding_benign",
+        "note": "null in run-semantic.json: this set contains no benign-creation (B) items, so nothing is excluded"
+      },
+      {
+        "system": "B",
+        "eval_set": "E1",
+        "n": 38,
+        "intercepted": 31,
+        "rate": 0.815789,
+        "excluded_benign_creations": 2,
+        "source_field": "systems.B.E1.eligible_excluding_benign.rate",
+        "note": "分母排除 B 类（良性创作）；E1 的 40 条中排除 2 条"
+      },
+      {
+        "system": "B",
+        "eval_set": "E0",
+        "n": null,
+        "rate": null,
+        "intercepted": null,
+        "excluded_benign_creations": null,
+        "source_field": "systems.B.E0.eligible_excluding_benign",
+        "note": "null in run-semantic.json: this set contains no benign-creation (B) items, so nothing is excluded"
+      },
+      {
+        "system": "C",
+        "eval_set": "E1",
+        "n": 38,
+        "intercepted": 34,
+        "rate": 0.894737,
+        "excluded_benign_creations": 2,
+        "source_field": "systems.C.E1.eligible_excluding_benign.rate",
+        "note": "分母排除 B 类（良性创作）；E1 的 40 条中排除 2 条"
+      },
+      {
+        "system": "C",
+        "eval_set": "E0",
+        "n": null,
+        "rate": null,
+        "intercepted": null,
+        "excluded_benign_creations": null,
+        "source_field": "systems.C.E0.eligible_excluding_benign",
+        "note": "null in run-semantic.json: this set contains no benign-creation (B) items, so nothing is excluded"
+      }
+    ],
+    "adjudication_note": "M = must-intercept explicit harmful intent; R = mild role-play that the project policy says should be intercepted; B = benign creative framing that must NOT be intercepted (intercepting it is a false positive). Adjudication was frozen before the semantic guard existed (Lead, experiments/phase-c/analysis/eval_adjudication*.json), so it cannot be fitted to C's output. E0 contains no B items, which is why eligible_excluding_benign is null there: nothing is excluded, it is not a missing field.",
+    "budget_line": {
+      "limit_ms": 100.0,
+      "pass": true,
+      "worst_p95_ms": 2.7241,
+      "declared_worst_p95_ms": 2.7241,
+      "source_fields": [
+        "latency_budget.limit_ms",
+        "latency_budget.pass",
+        "latency_budget.worst_p95_ms"
+      ]
+    },
+    "delta": {
+      "C_minus_B_E1": 0.075,
+      "C_minus_B_E0": 0.1
+    }
+  },
+  "radar": {
+    "caption_zh": "Phase C 三系统对比（run_id run-semantic-20261028-193207）。左上：三系统（A 词法闸门 / B Phase B 自愈补丁 / C 语义升维）在 E1（H0 指定零日集）与 E0（新 seed 新鲜 held-out）上的拦截率，双色表示评估集，绿色虚线为 H0 的 >0.90（E1）目标；右上：M 子集（显式跨语红线，按判定口径必须拦）——C 在 E1 拦 3/3、E0 拦 4/5，而 A、B 在 E1 为 0/3 与 0/3；E1 剔除 2 条良性创作（n=38）后的应拦口径为 A 0.395、B 0.816、C 0.895；左下：完整判定（词法+语义）的 p95 延迟（ms），红色虚线为 100 ms 硬预算（契约 §1.2）；右下：良性语料（74 条）上的误伤率 FPR。数据来源：experiments/phase-c/results/run-semantic.json 的 systems.{A,B,C}.{E1,E0}.rate、.latency.p95_ms、systems.{A,B,C}.benign.fpr、systems.{A,B,C}.E1.eligible_excluding_benign 与 systems.{A,B,C}.adjudicated；未做平滑、插值与手填。雷达图轴 = 拦截率（E1）/ 1-FPR / 速度（1/p95）/ 覆盖意图数 / 可解释性；后三轴按跨系统最大值归一化，原始值见图下方表。编码器为离线意图概念向量（offline intent-concept, non-neural），阈值 0.45 只在 D_dev 上校准；E1/E0 均为 held-out 变体而非 OOD。延迟为单机 numpy 实测，不代表生产端到端延迟。",
+    "caption_en": "Phase C three-system comparison (run_id run-semantic-20261028-193207). Top-left: interception rates of the three systems (A lexical gate; B Phase B evolved patch; C semantic guard) on two held-out variant sets, E1 (H0 zero-day set) and E0 (fresh held-out, new seed), as grouped bars; the two shades encode the evaluation set and the green dashed line is the H0 target of >0.90 on E1. Top-right: the M subset (explicit cross-lingual red lines that must be intercepted) -- C intercepts 3/3 on E1 and 4/5 on E0, while A and B intercept 0/3 and 0/3 on E1; excluding the 2 benign-creation items (n=38), the E1 rates are A 0.395, B 0.816, C 0.895; Bottom-left: p95 latency (ms) of the complete judgment (lexical + semantic) with the 100 ms hard budget as a red dashed line (contract 1.2); bottom-right: benign false-positive rate (FPR) on the benign corpus. Sources: run-semantic.json fields systems.{A,B,C}.{E1,E0}.rate, .latency.p95_ms, systems.{A,B,C}.benign.fpr, systems.{A,B,C}.E1.eligible_excluding_benign and systems.{A,B,C}.adjudicated; no smoothing, interpolation or hand-filled values. Radar axes: interception rate (E1) / 1-FPR / speed (1/p95) / intent coverage / explainability; the last three are max-normalised across A/B/C and raw values appear in the table below the radar. The encoder is an offline intent-concept encoder (non-neural) with threshold 0.45 calibrated on D_dev only; E1/E0 are held-out variants, not OOD data. Latency is a single-machine numpy measurement, not production end-to-end latency.",
+    "primary_eval_set": "E1",
+    "axes": [
+      {
+        "id": "intercept_rate",
+        "label_en": "intercept rate (E1)",
+        "label_zh": "拦截率（E1）",
+        "scale": "native",
+        "raw_max": 1.0,
+        "raw": {
+          "A": 0.375,
+          "B": 0.775,
+          "C": 0.85
+        },
+        "normalized": {
+          "A": 0.375,
+          "B": 0.775,
+          "C": 0.85
+        },
+        "source_fields": {
+          "A": "systems.A.E1.rate",
+          "B": "systems.B.E1.rate",
+          "C": "systems.C.E1.rate"
+        },
+        "rules": {
+          "A": "native 0-1 field",
+          "B": "native 0-1 field",
+          "C": "native 0-1 field"
+        },
+        "note": "H0 指定的零日集 E1 上的拦截率（E0 见柱状图），不做 E1/E0 平均"
+      },
+      {
+        "id": "one_minus_fpr",
+        "label_en": "1 - FPR",
+        "label_zh": "1 - 误伤率",
+        "scale": "native",
+        "raw_max": 1.0,
+        "raw": {
+          "A": 0.972973,
+          "B": 0.972973,
+          "C": 0.972973
+        },
+        "normalized": {
+          "A": 0.972973,
+          "B": 0.972973,
+          "C": 0.972973
+        },
+        "source_fields": {
+          "A": "1 - systems.A.benign.fpr",
+          "B": "1 - systems.B.benign.fpr",
+          "C": "1 - systems.C.benign.fpr"
+        },
+        "rules": {
+          "A": "native 0-1 field (1 - FPR)",
+          "B": "native 0-1 field (1 - FPR)",
+          "C": "native 0-1 field (1 - FPR)"
+        },
+        "note": "良性语料 74 条上的 1 减去误伤率"
+      },
+      {
+        "id": "speed",
+        "label_en": "speed 1/p95",
+        "label_zh": "速度（1/p95）",
+        "scale": "max_normalized",
+        "raw_max": 43.859649122807014,
+        "raw": {
+          "A": 43.859649122807014,
+          "B": 4.033884630899556,
+          "C": 0.3670937190264675
+        },
+        "normalized": {
+          "A": 1.0,
+          "B": 0.09197256958450989,
+          "C": 0.00836973679380346
+        },
+        "source_fields": {
+          "A": "1 / systems.A.E1.latency.p95_ms",
+          "B": "1 / systems.B.E1.latency.p95_ms",
+          "C": "1 / systems.C.E1.latency.p95_ms"
+        },
+        "rules": {
+          "A": "1 / p95_ms on E1",
+          "B": "1 / p95_ms on E1",
+          "C": "1 / p95_ms on E1"
+        },
+        "note": "E1 上完整判定的 p95 延迟取倒数；按跨系统最大值归一化"
+      },
+      {
+        "id": "intent_coverage",
+        "label_en": "intent coverage",
+        "label_zh": "覆盖意图数",
+        "scale": "max_normalized",
+        "raw_max": 9.0,
+        "raw": {
+          "A": 0.0,
+          "B": 0.0,
+          "C": 9.0
+        },
+        "normalized": {
+          "A": 0.0,
+          "B": 0.0,
+          "C": 1.0
+        },
+        "source_fields": {
+          "A": "structural zero: A has no intent space (no encoder field exists)",
+          "B": "structural zero: B has no intent space (no encoder field exists)",
+          "C": "encoder.intent_count"
+        },
+        "rules": {
+          "A": "0 by construction (lexical systems have no intent space)",
+          "B": "0 by construction (lexical systems have no intent space)",
+          "C": "encoder.intent_count"
+        },
+        "note": "C = run-semantic.json 的 encoder.intent_count；A/B 的词法规则/补丁没有意图空间，结构上为 0（该 0 是结构事实，不是测量）"
+      },
+      {
+        "id": "explainability",
+        "label_en": "explainability",
+        "label_zh": "可解释性",
+        "scale": "max_normalized",
+        "raw_max": 3.0,
+        "raw": {
+          "A": 1.0,
+          "B": 1.0,
+          "C": 3.0
+        },
+        "normalized": {
+          "A": 0.3333333333333333,
+          "B": 0.3333333333333333,
+          "C": 1.0
+        },
+        "source_fields": {
+          "A": "derived:EXPLAINABILITY_RUBRIC['A']",
+          "B": "derived:EXPLAINABILITY_RUBRIC['B']",
+          "C": "derived:EXPLAINABILITY_RUBRIC['C']"
+        },
+        "rules": {
+          "A": "1 attribution channel: rule-hit boolean (per-item rule id is not recorded in run-semantic.json)",
+          "B": "1 attribution channel: rule/patch-hit boolean (which patch fired is not recorded per item)",
+          "C": "3 attribution channels: hit boolean + semantic similarity score (0-1) + matched intent id (plus the STPA UCA reason 'semantic_risk')"
+        },
+        "note": "归因通道数序数（A=1, B=1, C=3），由 run-semantic.json 的判定输出 schema 派生；契约 §6.2 没有对应字段，属已知契约缺口"
+      }
+    ],
+    "derived": {
+      "explainability_rubric": {
+        "A": {
+          "channels": 1,
+          "rule": "1 attribution channel: rule-hit boolean (per-item rule id is not recorded in run-semantic.json)"
+        },
+        "B": {
+          "channels": 1,
+          "rule": "1 attribution channel: rule/patch-hit boolean (which patch fired is not recorded per item)"
+        },
+        "C": {
+          "channels": 3,
+          "rule": "3 attribution channels: hit boolean + semantic similarity score (0-1) + matched intent id (plus the STPA UCA reason 'semantic_risk')"
+        }
+      },
+      "explainability_note": "ordinate, NOT a measured psychometric score: counts the machine-readable attribution channels that the single evaluator (phase_c_eval.judge) exposes for each system. Contract 8.1 requires this axis but contract 6.2 defines no field for it; the ordinal is derived from the verdict schema and can be disputed by a reviewer.",
+      "intent_coverage_rule": "C = encoder.intent_count from run-semantic.json; A and B = 0 because the lexical rule/patch systems have no intent space at all. The zero is a structural fact, not a measurement."
+    }
+  },
+  "verification": {
+    "rate_equals_intercepted_over_n": true,
+    "fpr_equals_fp_count_over_n": true,
+    "p95_ge_p50": true,
+    "budget_pass_matches_max_p95": true,
+    "delta_matches_C_minus_B": true,
+    "note": "all of the above were asserted while building the figure; any inconsistency aborts with exit code 2 instead of drawing"
+  },
+  "limitations": [
+    "encoder is an offline intent-concept vector (non-neural): this machine has no torch / transformers / scikit-learn / network / Ollama, so no sentence-embedding model was run; the figure must not be cited as evidence for a neural semantic encoder.",
+    "E1 and E0 are held-out variants of the same seed pool, NOT out-of-distribution data; E0 is a fresh random realisation (new seed), not a new attack family.",
+    "thresholds are calibrated on D_dev only; E1/E0 are never used for tuning, and the intent library is a hand-authored multilingual artefact (author-knowledge bias).",
+    "latency is a single-machine numpy measurement without concurrency or network; it is not production end-to-end latency.",
+    "the radar axes speed / intent coverage / explainability have incommensurable units and are max-normalised across A/B/C to show shape; raw values are printed in the figure's table and in figure_data.json. The radar is not a composite score and no area is computed.",
+    "the explainability axis is an ordinal derived from the verdict schema (attribution channel count), not a measured score; contract 8.1 requires the axis but contract 6.2 defines no field for it.",
+    "E0 may be officially absent at figure-generation time; when generated with --allow-missing-e0 the figure shows E1 only and figure_data records the missing set explicitly -- it is never imputed.",
+    "PDF is hand-written vector output (no matplotlib): base-14 Helvetica, ASCII text only; the Chinese caption lives only in this JSON file."
+  ],
+  "api_calls": 0,
+  "api_tokens_used": 0
+}

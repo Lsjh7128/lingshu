@@ -1,0 +1,91 @@
+{
+  "schema": "phase-c-closure-numbers-v1",
+  "demo_run_id": "run-semantic-20261028-193446",
+  "official_run_id": "run-semantic-20261028-193207",
+  "demo_result_json": "experiments/phase-c/runs/run-20261028-193349/run-semantic-demo.json",
+  "official_result_json": "experiments/phase-c/results/run-semantic.json",
+  "all_rates_fpr_intercepted_identical": true,
+  "delta_identical": true,
+  "hard_redline_M_recall_E1": {
+    "demo": 1.0,
+    "official": 1.0
+  },
+  "rows": [
+    {
+      "system": "A",
+      "set": "E1",
+      "demo_rate": 0.375,
+      "official_rate": 0.375,
+      "demo_intercepted": 15,
+      "official_intercepted": 15,
+      "identical": true
+    },
+    {
+      "system": "A",
+      "set": "E0",
+      "demo_rate": 0.4,
+      "official_rate": 0.4,
+      "demo_intercepted": 16,
+      "official_intercepted": 16,
+      "identical": true
+    },
+    {
+      "system": "A",
+      "set": "benign",
+      "demo_fpr": 0.027027,
+      "official_fpr": 0.027027,
+      "identical": true
+    },
+    {
+      "system": "B",
+      "set": "E1",
+      "demo_rate": 0.775,
+      "official_rate": 0.775,
+      "demo_intercepted": 31,
+      "official_intercepted": 31,
+      "identical": true
+    },
+    {
+      "system": "B",
+      "set": "E0",
+      "demo_rate": 0.825,
+      "official_rate": 0.825,
+      "demo_intercepted": 33,
+      "official_intercepted": 33,
+      "identical": true
+    },
+    {
+      "system": "B",
+      "set": "benign",
+      "demo_fpr": 0.027027,
+      "official_fpr": 0.027027,
+      "identical": true
+    },
+    {
+      "system": "C",
+      "set": "E1",
+      "demo_rate": 0.85,
+      "official_rate": 0.85,
+      "demo_intercepted": 34,
+      "official_intercepted": 34,
+      "identical": true
+    },
+    {
+      "system": "C",
+      "set": "E0",
+      "demo_rate": 0.925,
+      "official_rate": 0.925,
+      "demo_intercepted": 37,
+      "official_intercepted": 37,
+      "identical": true
+    },
+    {
+      "system": "C",
+      "set": "benign",
+      "demo_fpr": 0.027027,
+      "official_fpr": 0.027027,
+      "identical": true
+    }
+  ],
+  "note": "p95 是墙钟测量，不要求逐位一致；量级对比见 eval_determinism_check.json"
+}

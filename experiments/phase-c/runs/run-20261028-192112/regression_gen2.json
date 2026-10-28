@@ -1,0 +1,210 @@
+{
+  "suite": "audit892",
+  "generated_at": "2026-10-28T19:21:55+0800",
+  "root": "D:\\LSJH\\lingshu",
+  "files": 14,
+  "total_passed": 915,
+  "total_failed": 0,
+  "failing_files": [],
+  "known_env_failing_files": [],
+  "known_env_failed_assertions": 0,
+  "unparsed_summary_files": [],
+  "results": [
+    {
+      "file": "test_agent_state.py",
+      "exit": 0,
+      "passed": 45,
+      "failed": 0,
+      "seconds": 0.1,
+      "tail": [
+        "  ok   渲染含来源 entry_id",
+        "  ok   空结果渲染为空串",
+        "45 passed, 0 failed"
+      ],
+      "sha256": "59702a2219383b719ed9dce92773b88927fed05affaff30813fbcd858cf0bc8a",
+      "known_env_fail": null
+    },
+    {
+      "file": "test_astrbot_adapter.py",
+      "exit": 0,
+      "passed": 12,
+      "failed": 0,
+      "seconds": 0.1,
+      "tail": [
+        "  ok   风格段不参与事实",
+        "  ok   畸形入参不抛异常（红线）  — None",
+        "12 passed, 0 failed"
+      ],
+      "sha256": "5e70999de636ad1304487900fe85c4868a6d381096fd21693aa901da963e62c1",
+      "known_env_fail": null
+    },
+    {
+      "file": "test_chaos_calibrate.py",
+      "exit": 0,
+      "passed": 134,
+      "failed": 0,
+      "seconds": 1.4,
+      "tail": [
+        "                               [--candidates-out CANDIDATES_OUT] [--apply]",
+        "                               [--quiet]",
+        "test_chaos_calibrate.py: error: unrecognized arguments: --min-degraded 1"
+      ],
+      "sha256": "da7710ef8cb6d432172c8e3902c1ee1c4acf66507d20bd9388a5616486e08e64",
+      "known_env_fail": null
+    },
+    {
+      "file": "test_constitution.py",
+      "exit": 0,
+      "passed": 26,
+      "failed": 0,
+      "seconds": 0.1,
+      "tail": [
+        "  ok   文件缺失 → not ok",
+        "  ok   缺失出现在 missing",
+        "26 passed, 0 failed"
+      ],
+      "sha256": "87cfde0445fd5ba1004422be743e321a36fdf841275b62880f4d29af9b8208a2",
+      "known_env_fail": null
+    },
+    {
+      "file": "test_control.py",
+      "exit": 0,
+      "passed": 174,
+      "failed": 0,
+      "seconds": 0.6,
+      "tail": [
+        "  ok   mid + none → None",
+        "  ok   缺 conflict 字段 → None",
+        "174 passed, 0 failed"
+      ],
+      "sha256": "8ab10d822c0348ae0b0e9c5a591afa9ddbb3f9030da5fd71335b077aa9d24989",
+      "known_env_fail": null
+    },
+    {
+      "file": "test_gray.py",
+      "exit": 0,
+      "passed": 27,
+      "failed": 0,
+      "seconds": 0.6,
+      "tail": [
+        "  ok   supersede 错误率可测且为 0",
+        "  ok   未给 baseline_recall 时 recall_delta 为 None",
+        "27 passed, 0 failed"
+      ],
+      "sha256": "094357d4a153e2014f0ca69acc92d5c1becd9b4bc7aa938bf0619943150a892f",
+      "known_env_fail": null
+    },
+    {
+      "file": "test_learning.py",
+      "exit": 0,
+      "passed": 23,
+      "failed": 0,
+      "seconds": 2.4,
+      "tail": [
+        "  ok   MEM-20 六步同步清单完整  — ['aggregates', 'derived_refs', 'edges', 'entry', 'text_index', 'vector_index']",
+        "  ok   MEM-20 审计留痕",
+        "23 passed, 0 failed"
+      ],
+      "sha256": "5e95bf1749a686d6827a6979075268610527d3fe4f72fb0ecc62c2b25593aac6",
+      "known_env_fail": null
+    },
+    {
+      "file": "test_mutation_regressions.py",
+      "exit": 0,
+      "passed": 22,
+      "failed": 0,
+      "seconds": 0.1,
+      "tail": [
+        "  ok   双阈值都在 (0,1) 开区间  — {'phaseShiftRatio': 0.7, 'phaseShiftHardRatio': 0.85}",
+        "  ok   积分参数均为正数  — {'integralKi': 0.15, 'integralCap': 0.4, 'integralLeak': 0.05, 'integralDeadband': 0.02}",
+        "22 passed, 0 failed"
+      ],
+      "sha256": "27773a952a98461fae393e56f52dca63b4962699e8573641155ccce52cdf1cc7",
+      "known_env_fail": null
+    },
+    {
+      "file": "test_onboarding_persona.py",
+      "exit": 0,
+      "passed": 50,
+      "failed": 0,
+      "seconds": 1.0,
+      "tail": [
+        "  ok   永不直接生效（needs_confirm）",
+        "  ok   默认不存原文",
+        "50 passed, 0 failed"
+      ],
+      "sha256": "888830104abe0e11c94df218a595b43e4000880fbb28244931b85100c798be25",
+      "known_env_fail": null
+    },
+    {
+      "file": "test_pipeline.py",
+      "exit": 0,
+      "passed": 46,
+      "failed": 0,
+      "seconds": 0.1,
+      "tail": [
+        "  ok   COMPOSE-6 hard 路径不产生 soft_buffer  — {'applied': False, 'reason': None, 'emotion_label': None, 'notice': None, 'intensity': 0.0}",
+        "  ok   COMPOSE-6 hard 路径仍然丢弃风格域（第 8 条不放宽）  — [{'plugin': 'style', 'reason': 'constitution_reject'}, {'plugin': 'organization', 'reason': 'constitution_reject'}, {'plugin': 'retrieval', 'reason': 'constitution_reject'}]",
+        "46 passed, 0 failed"
+      ],
+      "sha256": "8cc94992ace67e1f9b1966abbd6fefc9cce69e59146331f144a411f95bea0a06",
+      "known_env_fail": null
+    },
+    {
+      "file": "test_pipeline_integration.py",
+      "exit": 0,
+      "passed": 65,
+      "failed": 0,
+      "seconds": 3.8,
+      "tail": [
+        "  ok   UCA-08 饱和：audit 记录 downgrades  — {'verdict': 'allow', 'ucas': [], 'downgrades': ['UCA-08'], 'fail_mode': 'closed', 'explain': [], 'explain_downgrades': ['情感基线积分饱和后仍持续积分（拒绝后再难恢复）'], 'severity': None, 'safe_redirect': False, 'prompt_allowed': False, 'risk_tier': 'none', 'emotion': None, 'trust_exempt': False, 'escalated': False}",
+        "  ok   UCA-08 饱和：事件留痕  — {'verdict': 'allow', 'ucas': [], 'downgrades': ['UCA-08'], 'fail_mode': 'closed', 'explain': [], 'explain_downgrades': ['情感基线积分饱和后仍持续积分（拒绝后再难恢复）'], 'severity': None, 'safe_redirect': False, 'prompt_allowed': False, 'risk_tier': 'none', 'emotion': None, 'trust_exempt': False, 'escalated': False}",
+        "65 passed, 0 failed"
+      ],
+      "sha256": "103df10b13641072862b14df3192bc925f8a955722364eac036700752fa72af7",
+      "known_env_fail": null
+    },
+    {
+      "file": "test_proposal.py",
+      "exit": 0,
+      "passed": 18,
+      "failed": 0,
+      "seconds": 3.6,
+      "tail": [
+        "  ok   缺 rollback → 拒绝  — missing:rollback",
+        "  ok   合法提案通过校验  — None",
+        "18 passed, 0 failed"
+      ],
+      "sha256": "f47438b85db7053c7bfae3ab0dc8c0e7e7b3863d07ba30f0a6a4782cbc7f04e8",
+      "known_env_fail": null
+    },
+    {
+      "file": "test_run_chaos.py",
+      "exit": 0,
+      "passed": 117,
+      "failed": 0,
+      "seconds": 0.2,
+      "tail": [
+        "============================================================",
+        "PASS: 117 ｜ FAIL: 0 ｜ 断言总数: 117",
+        "全部通过（engine/host 指标解析为纯函数级验证；真实 host 由 Lead 在 danger-full-access 会话执行）"
+      ],
+      "sha256": "11623efe1a01d559bbf3bdbf823a2d24266f625a89070495337a861728051414",
+      "known_env_fail": null
+    },
+    {
+      "file": "test_shadow_analysis.py",
+      "exit": 0,
+      "passed": 156,
+      "failed": 0,
+      "seconds": 0.3,
+      "tail": [
+        "156 passed, 0 failed",
+        "拒绝写入插件数据目录：D:\\LSJH\\tools-tex\\tmp\\tmp15760_20\\plugins\\dsh-lingshu\\不该写.md（本工具只读）",
+        "拒绝写入插件数据目录：D:\\LSJH\\tools-tex\\tmp\\tmp15760_20\\plugins\\dsh-lingshu\\c.json（本工具只读）"
+      ],
+      "sha256": "1862e7ffda40cea4cdda5daff573ab94e22f6c77cbd9262131dbd516d91825e9",
+      "known_env_fail": null
+    }
+  ]
+}

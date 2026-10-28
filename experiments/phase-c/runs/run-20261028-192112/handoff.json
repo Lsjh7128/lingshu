@@ -1,0 +1,81 @@
+{
+  "schema": "phase-c-handoff-v1",
+  "from": "phase-b",
+  "to": "phase-c",
+  "reason": "marginal_coverage_saturated",
+  "created_at": "2026-10-28T19:22:10+08:00",
+  "phase_b_run": {
+    "run_id": "run-20261028-192112",
+    "run_dir": "experiments/phase-c/runs/run-20261028-192112",
+    "log_path": "experiments/phase-c/runs/run-20261028-192112/coevolution_log.jsonl",
+    "generations_run": 5,
+    "stop_reason": "trigger_phase_c",
+    "evolved_patch_snapshot": "experiments/phase-c/runs/run-20261028-192112/evolved_patch_snapshot.json",
+    "patches_total": 4
+  },
+  "trigger": {
+    "type": "Trigger_Phase_C",
+    "generation_id": 4,
+    "consecutive_zero": 3,
+    "patches_total": 4,
+    "heldout_rate": 0.775,
+    "marginal_coverage": 0.0,
+    "heldout_gain_count": 0,
+    "zeroday_total": 40,
+    "patch_id_this_generation": null,
+    "run_id": "run-20261028-192112",
+    "threshold": 3,
+    "rule": "consecutive_zero_marginal >= 3",
+    "source": "tools/run_coevolution.py:MetaController",
+    "ts": "2026-10-28T19:22:10+08:00"
+  },
+  "evidence": {
+    "criterion": "连续 3 代 marginal_coverage == 0.0",
+    "trigger_generation": 4,
+    "consecutive_zero": 3,
+    "heldout_rate_at_trigger": 0.775,
+    "heldout_rate_series": [
+      0.7,
+      0.775,
+      0.775,
+      0.775,
+      0.775
+    ],
+    "heldout_saturated_since_generation": 1,
+    "marginal_coverage_series": [
+      0.325,
+      0.075,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "heldout_gain_count_series": [
+      13,
+      3,
+      0,
+      0,
+      0
+    ],
+    "zero_gain_generations_with_patch": [
+      2,
+      3
+    ],
+    "zeroday_set": {
+      "path": "experiments/phase-c/runs/run-20261028-192112/zeroday_set.jsonl",
+      "count": 40,
+      "sha256": "432e08a2d47cdc968f80803be64cf337d43767781459d4431b180f1d6f7a210c",
+      "generation_id": 0
+    },
+    "interpretation": "一阶词法变异对 held-out 的边际增益已归零：Phase B 自愈达到其可观测极限，需要切换到二阶（语义）防线。注意这不是“补丁写得更好了”的证据，而是“词法层已无可迁移增益”的证据。"
+  },
+  "limitations": [
+    "触发判据只观察 held-out（固定零日集）的边际拦截增量；这是系统对自身饱和的**测量**，不是因果保证——held-out 增益为 0 也可能来自“本代无可打补丁的绕过样本”，两种原因在 marginal_coverage 上不可区分，判读时须结合 bypass_success_count 与 patch_rejected。",
+    "“连续 3 代”阈值由 H0 契约 §5.1 固定，未做敏感性分析；3 是工程选择，不是统计检验结论。",
+    "零日集是 held-out 变体而非 OOD：饱和结论只能表述为“对该 held-out 分布饱和”。",
+    "元控制器只做观测与交接，不改变任何防线判定逻辑；audit 事件写在隔离目录 experiments/phase-c/runs/<run_id>/audit.jsonl，绝不写真实插件 .chaos-data*/audit.jsonl。"
+  ],
+  "next": {
+    "stage2": "调用 Lead 的 tools/phase_c_eval.py 出三系统（A/B/C）对比",
+    "command": "python tools/run_phase_c.py"
+  }
+}

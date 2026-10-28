@@ -30,6 +30,25 @@ experiments/phase-b/runs/**。本文件**不写** rules/candidate_patch.yaml（A
 
 诚实边界（契约 §8）：变异是确定性规则变异而非 LLM 红队；语言变异是离线词表近似；
 api_tokens_used == 0 是事实；零日集是 held-out 变体而非 OOD 数据。详见落盘 evidence 的 limitations。
+
+── Phase C 扩展（A5，契约 §5.1）：元控制器 ──────────────────────────────
+
+Phase B 官方 run（run-20261028-185512，20 代）证明一阶词法自愈在第 1 代就把 held-out
+拦截率顶到 0.775 平台，之后 13 个补丁对 held-out 零增量。Phase C 要让系统**观察到自己饱和**：
+
+    --enable-meta-controller       # 默认关；关闭时 Phase B 行为与官方 run 逐字一致
+    --handoff-to phase-c           # 触发后写交接包 handoff.json（需同时开元控制器）
+
+每代在第 6 步落盘前计算 `marginal_coverage(state)` = 本代补丁在 held-out（固定零日集）
+上带来的**增量**拦截率；无补丁代 = 0.0（定义与理由见该函数 docstring）。连续
+`META_ZERO_THRESHOLD`(=3) 代 marginal_coverage == 0.0 → `stop_reason="trigger_phase_c"`，
+停止补丁生成（停止 Phase B 循环），并把 `{"type":"Trigger_Phase_C",...}` 事件写到
+**隔离目录** `experiments/phase-c/runs/<run_id>/audit.jsonl`——绝不允许写真实插件的
+`.chaos-data*/audit.jsonl`（由 assert_isolated_audit_path 硬拦截）。
+
+Phase C 模式（元控制器开启且未显式改 --out）默认把 run 目录放进隔离目录
+`experiments/phase-c/runs/`，便于 audit.jsonl / handoff.json 与逐代 log 同处一地；
+`--candidate-ledger` 可把候选账本指到隔离路径，避免 A1 的规范账本被演示 run 推进。
 """
 from __future__ import annotations
 
@@ -70,6 +89,24 @@ DEFAULT_LEDGER_REL = os.path.join("rules", "candidate_patch.yaml")
 # 零日集口径（Lead 2026-10-28 通知）：held-out 集与训练流**只差种子、不差变异强度**。
 # A4 的 build_zeroday_set 默认 generation_id=2（最大深度档），A5 必须显式传 0。
 ZERODAY_GENERATION_ID = 0
+
+# ── Phase C（二阶控制论观察器，契约 §5.1）───────────────
+# 隔离产物根目录：audit.jsonl / handoff.json 只允许写这里的 <run_id>/ 下。
+DEFAULT_PHASE_C_RUNS = os.path.join("experiments", "phase-c", "runs")
+# 触发判据（契约 §5.1 / H0 §三.1）：连续 3 代 marginal_coverage == 0.0。
+# 故意不做成 CLI 可调：契约钉死 3 代，开放调节等于允许"调阈值凑触发"。
+META_ZERO_THRESHOLD = 3
+PHASE_C_HANDOFF_TARGETS = ("phase-c",)
+
+META_LIMITATIONS = [
+    "触发判据只观察 held-out（固定零日集）的边际拦截增量；这是系统对自身饱和的**测量**，"
+    "不是因果保证——held-out 增益为 0 也可能来自“本代无可打补丁的绕过样本”，"
+    "两种原因在 marginal_coverage 上不可区分，判读时须结合 bypass_success_count 与 patch_rejected。",
+    "“连续 3 代”阈值由 H0 契约 §5.1 固定，未做敏感性分析；3 是工程选择，不是统计检验结论。",
+    "零日集是 held-out 变体而非 OOD：饱和结论只能表述为“对该 held-out 分布饱和”。",
+    "元控制器只做观测与交接，不改变任何防线判定逻辑；audit 事件写在隔离目录 "
+    "experiments/phase-c/runs/<run_id>/audit.jsonl，绝不写真实插件 .chaos-data*/audit.jsonl。",
+]
 
 # 契约 §6.3 的六个核心字段（字段名不许改）
 CORE_FIELDS = (
@@ -179,12 +216,254 @@ def _unique_run_dir(base: str, run_id: str) -> str:
         n += 1
 
 
+# ── Phase C 元控制器（契约 §5.1；独立成纯函数/小类便于单测）──────
+
+def _norm_abs(path: str) -> str:
+    return os.path.normcase(os.path.abspath(path))
+
+
+def is_isolated_audit_path(path: str, audit_root: str | None = None) -> bool:
+    """audit 是否被允许写：必须落在隔离根目录（默认 experiments/phase-c/runs）之下，
+    且路径里绝不允许出现 `.chaos-data`（真实插件/演示运行的审计账本）。
+
+    这条闸门是硬红线（契约 §5.1）：元控制器的观察事件只能进隔离目录，
+    混进生产侧 audit 账本就等于伪造了系统自身的审计记录。
+    """
+    ap = _norm_abs(path).replace("\\", "/")
+    if ".chaos-data" in ap:
+        return False
+    root = _norm_abs(audit_root or os.path.join(ROOT, DEFAULT_PHASE_C_RUNS)).replace("\\", "/")
+    return ap == root or ap.startswith(root + "/")
+
+
+def assert_isolated_audit_path(path: str, audit_root: str | None = None) -> str:
+    """不允许写就抛 RuntimeError（fail-closed，绝不静默改道）。"""
+    if not is_isolated_audit_path(path, audit_root):
+        raise RuntimeError(
+            "拒绝写非隔离目录的 audit：%s（只允许 %s/**，且绝不允许 .chaos-data*）"
+            % (path, audit_root or DEFAULT_PHASE_C_RUNS))
+    return path
+
+
+def marginal_coverage(state: dict) -> dict:
+    """契约 §5.1：本代补丁在 held-out（固定零日集）上带来的**增量**拦截率。
+
+    定义（写死；任何调用方不得另行发挥）：
+        heldout_gain_count = 本代演化防线在零日集上多拦的条数
+                           = heldout_intercepted - heldout_intercepted_prev
+        heldout_gain_rate  = heldout_gain_count / zeroday_total
+        marginal_coverage  = heldout_gain_rate
+                             （本文件里两个字段同值，并列保留以对齐契约字段名）
+
+    参照点是**上一代演化防线**，不是 Phase A 基线：数值回答的是"本代补丁有没有让
+    held-out 拦截率上升"，而不是"累计比基线高多少"。首代（gen 0）参照点是基线防线本身。
+
+    **无补丁代 = 0.0**（契约 §5.1 明确要求，这里给出理由）：
+
+      1) 没有补丁被接受进入演化防线（propose_patch 返回 None，或补丁被回归锁 / 良性误伤
+         闸门拒绝），防线一字未变，held-out 拦截条数的真实增量就是 0——不是"未知"，
+         也不是"缺失"，而是一个真实的观测值；
+      2) 语义上这一代系统没有获得任何新的泛化能力。若把"未生效的补丁"记成非零增量，
+         等于用纸面 mutation 冒充防线能力，会让"饱和"永远观察不到；
+      3) 这正是二阶控制论要观察的信号本身：连续多代"变异/补丁照常在产出，但 held-out
+         增益为 0" → 一阶词法变异的边际收益已归零，必须切换到二阶（语义）防线。
+
+    state 输入键（纯函数：不读全局状态；缺键按 0/None 处理）：
+        generation_id、patch_id（本代真正进入演化防线的补丁 id，None = 无补丁）、
+        zeroday_total、heldout_intercepted_prev、heldout_intercepted
+    """
+    generation_id = int(state.get("generation_id") or 0)
+    patch_id = state.get("patch_id")
+    total = int(state.get("zeroday_total") or 0)
+    prev = int(state.get("heldout_intercepted_prev") or 0)
+    now = int(state.get("heldout_intercepted") or 0)
+    # 无补丁代（含被拒补丁）→ 真实增量为 0，见 docstring 理由 1/2。
+    gain = (now - prev) if (patch_id and total > 0) else 0
+    rate = (gain / total) if total else 0.0
+    return {
+        "generation_id": generation_id,
+        "patch_id": str(patch_id) if patch_id else None,
+        "heldout_gain_count": int(gain),
+        "heldout_gain_rate": _round4(rate),
+        "marginal_coverage": _round4(rate),
+    }
+
+
+class MetaController:
+    """二阶控制论观察器：只看 held-out 的逐代增量，不看训练流指标（契约 §5.1）。
+
+    - 关闭（默认）：`observe` 只记录观测，不累计连续零代数、不写 audit、不影响任何
+      停止条件 → Phase B 行为与官方 run 逐字一致（可复现性证据）；
+    - 开启：连续 `threshold`(3) 代 marginal_coverage == 0.0 → 置 triggered，
+      把 Trigger_Phase_C 事件追加到隔离 audit.jsonl；调用方据 triggered 停止补丁生成。
+    """
+
+    def __init__(self, *, enabled: bool = False, audit_dir: str | None = None,
+                 audit_root: str | None = None, threshold: int = META_ZERO_THRESHOLD):
+        self.enabled = bool(enabled)
+        self.threshold = int(threshold)
+        self.audit_root = audit_root or os.path.join(ROOT, DEFAULT_PHASE_C_RUNS)
+        self.audit_dir = audit_dir
+        self.audit_path = os.path.join(audit_dir, "audit.jsonl") if audit_dir else None
+        self.history: list[dict] = []
+        self.consecutive_zero = 0
+        self.triggered = False
+        self.trigger_event: dict | None = None
+
+    # -- 观测 -------------------------------------------------
+    def observe(self, state: dict, **ctx) -> dict:
+        """喂一个 marginal_coverage 的 state，返回本代观测与触发状态。"""
+        obs = marginal_coverage(state)
+        if not self.enabled:
+            # 关闭时必须"零副作用"：不累计、不写盘、不改 Phase B 的任何字段。
+            self.history.append(dict(obs, consecutive_zero=None, triggered=False))
+            return {"observation": obs, "consecutive_zero": None, "triggered": False}
+        if obs["marginal_coverage"] == 0.0:
+            self.consecutive_zero += 1
+        else:
+            self.consecutive_zero = 0
+        entry = dict(obs, consecutive_zero=self.consecutive_zero)
+        self.history.append(entry)
+        fired = (not self.triggered) and self.consecutive_zero >= self.threshold
+        if fired:
+            self.triggered = True
+            self.trigger_event = self._make_event(obs, **ctx)
+            self._append_audit(self.trigger_event)
+        return {"observation": obs, "consecutive_zero": self.consecutive_zero,
+                "triggered": fired}
+
+    def _make_event(self, obs: dict, **ctx) -> dict:
+        return {
+            "type": "Trigger_Phase_C",
+            "generation_id": obs["generation_id"],
+            "consecutive_zero": self.consecutive_zero,
+            "patches_total": int(ctx.get("patches_total") or 0),
+            "heldout_rate": _round4(float(ctx.get("heldout_rate") or 0.0)),
+            "marginal_coverage": obs["marginal_coverage"],
+            "heldout_gain_count": obs["heldout_gain_count"],
+            "zeroday_total": int(ctx.get("zeroday_total") or 0),
+            "patch_id_this_generation": obs["patch_id"],
+            "run_id": ctx.get("run_id"),
+            "threshold": self.threshold,
+            "rule": "consecutive_zero_marginal >= %d" % self.threshold,
+            "source": "tools/run_coevolution.py:MetaController",
+            "ts": _now_iso(),
+        }
+
+    def _append_audit(self, event: dict) -> str:
+        if not self.audit_path:
+            raise RuntimeError("元控制器已触发但未配置 audit_dir（隔离目录）")
+        assert_isolated_audit_path(self.audit_path, self.audit_root)
+        os.makedirs(os.path.dirname(os.path.abspath(self.audit_path)) or ".", exist_ok=True)
+        with io.open(self.audit_path, "a", encoding="utf-8", newline="\n") as fh:
+            fh.write(json.dumps(event, ensure_ascii=False) + "\n")
+        return self.audit_path
+
+    # -- 汇总 -------------------------------------------------
+    def summary(self) -> dict:
+        return {
+            "enabled": self.enabled,
+            "threshold": self.threshold,
+            "triggered": self.triggered,
+            "consecutive_zero_final": self.consecutive_zero if self.enabled else None,
+            "trigger_event": copy.deepcopy(self.trigger_event),
+            "audit_path": _rel(self.audit_path) if self.audit_path else None,
+            "history": copy.deepcopy(self.history),
+        }
+
+
+def build_handoff(*, run_id: str, run_dir: str, log_rows: list[dict],
+                  trigger_event: dict, marginals: list[dict], log_path: str,
+                  zeroday_path: str, zeroday_sha: str, zeroday_count: int,
+                  zeroday_generation_id: int | None, patches_total: int,
+                  snapshot_path: str) -> dict:
+    """契约 §5.1 的交接包：Phase B 自愈饱和 → Phase C 语义升维。
+
+    evidence 全部由本 run 的逐代 log 与元控制器观测导出，不许手填数字。
+    """
+    rates = [r.get("intercept_rate_evolved_zeroday", 0.0) for r in log_rows]
+    final_rate = rates[-1] if rates else 0.0
+    saturated_since = None
+    for i, rate in enumerate(rates):
+        if abs(float(rate) - float(final_rate)) <= 1e-12:
+            saturated_since = i
+            break
+    zero_gain_with_patch = [
+        int(row.get("generation_id", i))
+        for i, (row, obs) in enumerate(zip(log_rows, marginals))
+        if obs.get("marginal_coverage") == 0.0 and row.get("blue_team_patch_generated") == 1
+    ]
+    return {
+        "schema": "phase-c-handoff-v1",
+        "from": "phase-b",
+        "to": "phase-c",
+        "reason": "marginal_coverage_saturated",
+        "created_at": _now_iso(),
+        "phase_b_run": {
+            "run_id": run_id,
+            "run_dir": _rel(run_dir),
+            "log_path": _rel(log_path),
+            "generations_run": len(log_rows),
+            "stop_reason": "trigger_phase_c",
+            "evolved_patch_snapshot": _rel(snapshot_path),
+            "patches_total": int(patches_total),
+        },
+        "trigger": copy.deepcopy(trigger_event),
+        "evidence": {
+            "criterion": "连续 %d 代 marginal_coverage == 0.0" % META_ZERO_THRESHOLD,
+            "trigger_generation": int(trigger_event.get("generation_id")),
+            "consecutive_zero": int(trigger_event.get("consecutive_zero") or 0),
+            "heldout_rate_at_trigger": trigger_event.get("heldout_rate"),
+            "heldout_rate_series": list(rates),
+            "heldout_saturated_since_generation": saturated_since,
+            "marginal_coverage_series": [o.get("marginal_coverage") for o in marginals],
+            "heldout_gain_count_series": [o.get("heldout_gain_count") for o in marginals],
+            "zero_gain_generations_with_patch": zero_gain_with_patch,
+            "zeroday_set": {
+                "path": _rel(zeroday_path),
+                "count": int(zeroday_count),
+                "sha256": zeroday_sha,
+                "generation_id": zeroday_generation_id,
+            },
+            "interpretation": (
+                "一阶词法变异对 held-out 的边际增益已归零：Phase B 自愈达到其可观测极限，"
+                "需要切换到二阶（语义）防线。注意这不是“补丁写得更好了”的证据，"
+                "而是“词法层已无可迁移增益”的证据。"),
+        },
+        "limitations": list(META_LIMITATIONS),
+        "next": {
+            "stage2": "调用 Lead 的 tools/phase_c_eval.py 出三系统（A/B/C）对比",
+            "command": "python tools/run_phase_c.py",
+        },
+    }
+
+
+def write_handoff(path: str, payload: dict, audit_root: str | None = None) -> str:
+    """交接包与 audit 同写隔离目录，写前过隔离闸门（fail-closed）。"""
+    assert_isolated_audit_path(path, audit_root)
+    os.makedirs(os.path.dirname(os.path.abspath(path)) or ".", exist_ok=True)
+    with io.open(path, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump(payload, fh, ensure_ascii=False, indent=2)
+    return path
+
+
 # ── 停止条件（契约 §6.1，独立成纯函数便于单测）──────────
 
 def check_stop_conditions(*, generations_run: int, max_generations: int,
                           consecutive_zero_bypass: int, patience: int,
-                          api_tokens_used: int, token_budget: int) -> str | None:
-    """返回 stop_reason 或 None。顺序：收敛 → token 预算 → 代数上限。"""
+                          api_tokens_used: int, token_budget: int,
+                          consecutive_zero_marginal: int = 0,
+                          meta_zero_threshold: int = 0) -> str | None:
+    """返回 stop_reason 或 None。顺序：Phase C 交接 → 收敛 → token 预算 → 代数上限。
+
+    `meta_zero_threshold <= 0`（默认）= 元控制器关闭，行为与 Phase B 完全一致；
+    两个新参数都有默认值，所以 Phase B 的既有调用/单测不受影响。
+
+    Phase C 交接排第一：它表达的是"一阶自愈已饱和、该换二阶防线了"，
+    比"代数跑满"更本质——到了上限才报 max_generations 会把饱和信号淹掉。
+    """
+    if meta_zero_threshold > 0 and consecutive_zero_marginal >= meta_zero_threshold:
+        return "trigger_phase_c"
     if patience > 0 and consecutive_zero_bypass >= patience:
         return "converged"
     if api_tokens_used > token_budget:
@@ -414,6 +693,17 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     ap.add_argument("--token-budget", type=int, default=DEFAULT_TOKEN_BUDGET)
     ap.add_argument("--dry-run", action="store_true",
                     help="只跑 1 代、不写 coevolution_evidence.json（快速自检）")
+    # ── Phase C（契约 §5.1）──────────────────────────────
+    ap.add_argument("--enable-meta-controller", action="store_true",
+                    help="开启 Phase C 元控制器（默认关：关闭时 Phase B 行为与官方 run "
+                         "逐字一致，这是可复现性证据）")
+    ap.add_argument("--handoff-to", choices=list(PHASE_C_HANDOFF_TARGETS), default=None,
+                    help="触发 Phase C 后写出交接包 handoff.json（需同时 --enable-meta-controller）")
+    ap.add_argument("--phase-c-runs", default=DEFAULT_PHASE_C_RUNS,
+                    help="Phase C 隔离产物根目录（audit.jsonl / handoff.json 只允许写这里）")
+    ap.add_argument("--candidate-ledger", default=None,
+                    help="候选补丁账本路径（默认 rules/candidate_patch.yaml；Phase C 演示可指到"
+                         "隔离账本，避免推进 A1 的规范账本）")
     ns = ap.parse_args(argv)
     if ns.max_generations < 1:
         ap.error("--max-generations 必须 >= 1")
@@ -421,6 +711,8 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         ap.error("--variants-per-gen 必须 >= 1")
     if ns.patience < 1:
         ap.error("--patience 必须 >= 1")
+    if ns.handoff_to and not ns.enable_meta_controller:
+        ap.error("--handoff-to 需要同时 --enable-meta-controller（没有元控制器就没有触发与交接）")
     return ns
 
 
@@ -433,20 +725,35 @@ def run(argv: list[str] | None = None, *,
     依赖注入只用于测试：默认从磁盘导入 A4/A1、跑真实回归锁、token 恒 0。
     `ledger_path` 仅在测试时注入（默认 = 规范账本 rules/candidate_patch.yaml，
     Lead 裁决：官方 run 必须写规范账本，同时 run 目录留每代快照）。
+
+    Phase C（契约 §5.1）：
+    - `--enable-meta-controller` 开启元控制器；**关闭（默认）时本函数逐字复现 Phase B 行为**，
+      不新增字段、不写 audit、不改停止条件（可复现性证据由 tests/test_phase_c_meta.py 逐代对比）；
+    - `--handoff-to phase-c`：触发 Phase C 交接后写 handoff.json（与 audit 同写隔离目录）；
+    - `--candidate-ledger`：把候选账本指到隔离路径（Phase C 演示用，避免推进 A1 规范账本）；
+    - 元控制器开启且未显式改 `--out` → run 目录默认落 experiments/phase-c/runs（隔离目录）。
     """
+    args = _parse_args(argv)
     defense_mod = defense_mod or defense
     regression_runner = regression_runner or default_regression_runner
     token_meter = token_meter or (lambda: 0)
     canonical_ledger = (os.path.abspath(ledger_path) if ledger_path
+                        else os.path.abspath(args.candidate_ledger) if args.candidate_ledger
                         else os.path.join(ROOT, DEFAULT_LEDGER_REL))
 
-    args = _parse_args(argv)
     if red_team is None or blue_team is None:
         red, blue = load_teammate_modules()
         red_team = red_team or red
         blue_team = blue_team or blue
 
-    out_base = args.out if os.path.isabs(args.out) else os.path.join(ROOT, args.out)
+    # Phase C 隔离：元控制器开启时默认把 run 目录放进隔离目录（audit/handoff 与 log 同处一地）。
+    meta_enabled = bool(args.enable_meta_controller)
+    out_arg = args.out
+    if meta_enabled and out_arg == DEFAULT_OUT:
+        out_arg = DEFAULT_PHASE_C_RUNS
+        print("[A5][META] 元控制器开启且未显式指定 --out → run 目录改用隔离目录 %s"
+              % DEFAULT_PHASE_C_RUNS)
+    out_base = out_arg if os.path.isabs(out_arg) else os.path.join(ROOT, out_arg)
     os.makedirs(out_base, exist_ok=True)
     dry_run = bool(args.dry_run)
     max_generations = 1 if dry_run else args.max_generations
@@ -523,15 +830,32 @@ def run(argv: list[str] | None = None, *,
           % (zeroday_baseline["n"], zeroday_baseline["rate"], benign_baseline["rate"],
              benign_baseline["intercepted"], benign_baseline["n"], plain_attack_baseline["rate"]))
 
+    # ── Phase C 元控制器（契约 §5.1）──────────────────────
+    meta: MetaController | None = None
+    phase_c_runs_base = (args.phase_c_runs if os.path.isabs(args.phase_c_runs)
+                         else os.path.join(ROOT, args.phase_c_runs))
+    if meta_enabled:
+        audit_dir = os.path.join(phase_c_runs_base, os.path.basename(run_dir))
+        # 先过隔离闸门，再构造控制器：宁可在跑之前失败，也不许写错地方。
+        assert_isolated_audit_path(os.path.join(audit_dir, "audit.jsonl"), phase_c_runs_base)
+        meta = MetaController(enabled=True, audit_dir=audit_dir,
+                              audit_root=phase_c_runs_base,
+                              threshold=META_ZERO_THRESHOLD)
+        print("[A5][META] 元控制器开启：判据=连续 %d 代 marginal_coverage==0.0；"
+              "audit 只写隔离目录 %s"
+              % (META_ZERO_THRESHOLD, _rel(os.path.join(audit_dir, "audit.jsonl"))))
+
     rng = random.Random(args.seed)
     evolved_patch: dict = {"version": 0, "patches": []}
     # Lead 裁决（2026-10-28）：官方 run 的每代 propose_patch 必须写规范账本
     # rules/candidate_patch.yaml（H0 人工审批的唯一入口），同时每代在 run 目录留一份
     # candidate_patch_snapshot_g<g>.yaml 快照（单 run 可复现、可回溯）。
     if not os.path.exists(canonical_ledger):
-        print("[WARN] 规范账本不存在：%s（下一步 A1 会新建；正式长跑前请由 Lead 重置为空账本）"
+        print("[WARN] 候选账本不存在：%s（下一步 A1 会新建；正式长跑前请由 Lead 重置为空账本）"
               % _rel(canonical_ledger))
-    print("[A5] 规范候选账本：%s" % _rel(canonical_ledger))
+    print("[A5] 候选补丁账本：%s%s"
+          % (_rel(canonical_ledger),
+             "（隔离路径，不推进 A1 规范账本）" if args.candidate_ledger else ""))
     candidate_ledger = canonical_ledger
     ledger_snapshots: list[str] = []
     accepted_ids: list[str] = []
@@ -544,6 +868,9 @@ def run(argv: list[str] | None = None, *,
     api_calls = 0
     api_tokens_used = int(token_meter() or 0)
     stop_reason: str | None = None
+    # 元控制器观测的参照点：上一代演化防线在零日集上的拦截条数（首代为基线）。
+    prev_zeroday_intercepted = zeroday_baseline["intercepted"]
+    handoff_path: str | None = None
     step = "1/6 generate"
 
     for generation_id in range(max_generations):
@@ -604,6 +931,7 @@ def run(argv: list[str] | None = None, *,
                         + [copy.deepcopy(patch_item)],
                     }
             blue_team_patch_generated = 1 if patch_item is not None else 0
+            accepted_patch_id: str | None = None
             if patch_item is not None and str(patch_item.get("status")) in ("rejected", "disabled"):
                 # A1 自己把补丁标成 rejected：绝不进入演化防线
                 _record_rejection(rejected_patches, {
@@ -683,6 +1011,7 @@ def run(argv: list[str] | None = None, *,
                 else:
                     evolved_patch = candidate_patch
                     accepted_ids.append(str(patch_item.get("id")))
+                    accepted_patch_id = str(patch_item.get("id"))
                     _call_update_status(blue_team, patch_item.get("id"), "accepted_sandbox",
                                         candidate_ledger, "regression_lock_pass_benign_no_new_fp",
                                         {"regression": regression_info,
@@ -700,6 +1029,24 @@ def run(argv: list[str] | None = None, *,
             consecutive_zero_bypass = consecutive_zero_bypass + 1 if bypass_count == 0 else 0
             generations_run = generation_id + 1
             api_tokens_used = int(token_meter() or 0)
+            # 元控制器观测：参照上一代演化防线，看本代（真正进防线的）补丁带来多少 held-out 增量。
+            meta_obs = None
+            consecutive_zero_marginal = 0
+            if meta is not None:
+                meta_obs = meta.observe(
+                    {
+                        "generation_id": generation_id,
+                        "patch_id": accepted_patch_id,
+                        "zeroday_total": zeroday_baseline["n"],
+                        "heldout_intercepted_prev": prev_zeroday_intercepted,
+                        "heldout_intercepted": zeroday_evolved["intercepted"],
+                    },
+                    run_id=os.path.basename(run_dir),
+                    patches_total=len(evolved_patch.get("patches") or []),
+                    heldout_rate=zeroday_evolved["rate"],
+                    zeroday_total=zeroday_baseline["n"],
+                )["observation"]
+                consecutive_zero_marginal = meta.consecutive_zero
             stop_reason = check_stop_conditions(
                 generations_run=generations_run,
                 max_generations=max_generations,
@@ -707,6 +1054,8 @@ def run(argv: list[str] | None = None, *,
                 patience=args.patience,
                 api_tokens_used=api_tokens_used,
                 token_budget=args.token_budget,
+                consecutive_zero_marginal=consecutive_zero_marginal,
+                meta_zero_threshold=META_ZERO_THRESHOLD if meta is not None else 0,
             )
             # 每代账本快照（Lead 裁决：run 目录留 candidate_patch_snapshot_g<g>.yaml）
             ledger_snapshot = None
@@ -754,6 +1103,15 @@ def run(argv: list[str] | None = None, *,
                 "stop_reason": stop_reason,
                 "ts": _now_iso(),
             }
+            if meta_obs is not None:
+                # 只有元控制器开启时才新增字段；关闭时 log 行与官方 run 逐字一致（可复现性）。
+                row.update({
+                    "meta_controller_enabled": True,
+                    "marginal_coverage": meta_obs["marginal_coverage"],
+                    "heldout_gain_count": meta_obs["heldout_gain_count"],
+                    "heldout_gain_rate": meta_obs["heldout_gain_rate"],
+                    "consecutive_zero_marginal": consecutive_zero_marginal,
+                })
             missing = [f for f in CORE_FIELDS if f not in row]
             if missing:
                 raise RuntimeError("log 行缺核心字段：%s" % missing)
@@ -762,13 +1120,18 @@ def run(argv: list[str] | None = None, *,
             log_rows.append(row)
             result["generations_run"] = generations_run
             result["stop_reason"] = stop_reason
+            meta_info = ""
+            if meta_obs is not None:
+                meta_info = " marginal=%.4f zero=%d" % (
+                    meta_obs["marginal_coverage"], consecutive_zero_marginal)
             print("[gen %d] variants=%d bypass=%d patch_gen=%d regress=%s "
-                  "拦截(明文)=%.4f 零日基线=%.4f 零日演化=%.4f 误伤=%.4f (%.4f) stop=%s"
+                  "拦截(明文)=%.4f 零日基线=%.4f 零日演化=%.4f 误伤=%.4f (%.4f)%s stop=%s"
                   % (generation_id, len(variants), bypass_count, blue_team_patch_generated,
                      "null" if regression_test_pass is None else regression_test_pass,
                      row["intercept_rate_evolved"], row["intercept_rate_baseline_zeroday"],
                      row["intercept_rate_evolved_zeroday"], row["benign_false_positive_rate"],
-                     row["benign_false_positive_rate_baseline"], stop_reason))
+                     row["benign_false_positive_rate_baseline"], meta_info, stop_reason))
+            prev_zeroday_intercepted = zeroday_evolved["intercepted"]
             if stop_reason:
                 break
         except Exception as exc:
@@ -787,6 +1150,35 @@ def run(argv: list[str] | None = None, *,
     except Exception as exc:
         print("[WARN] 演化防线快照写入失败：%s" % exc)
 
+    # ── Phase C 交接（契约 §5.1）：触发才写，且只写隔离目录 ──
+    if meta is not None and meta.triggered:
+        print("[A5][META] 连续 %d 代 marginal_coverage==0.0 → 触发 Phase C 交接："
+              "stop_reason=trigger_phase_c（已停止补丁生成）"
+              % meta.consecutive_zero)
+        print("[A5][META] Trigger_Phase_C 事件 → %s" % _rel(meta.audit_path))
+        print("[A5][META] 事件原文：%s"
+              % json.dumps(meta.trigger_event, ensure_ascii=False))
+        if args.handoff_to == "phase-c":
+            handoff = build_handoff(
+                run_id=os.path.basename(run_dir), run_dir=run_dir, log_rows=log_rows,
+                trigger_event=meta.trigger_event,
+                marginals=[dict(o) for o in meta.history if o.get("consecutive_zero") is not None],
+                log_path=log_path, zeroday_path=zeroday_path, zeroday_sha=zeroday_sha,
+                zeroday_count=zeroday_baseline["n"],
+                zeroday_generation_id=zeroday_generation_id,
+                patches_total=len(evolved_patch.get("patches") or []),
+                snapshot_path=snapshot_path)
+            handoff_path = os.path.join(os.path.dirname(meta.audit_path), "handoff.json")
+            write_handoff(handoff_path, handoff, audit_root=meta.audit_root)
+            print("[A5][META] 交接包 handoff.json → %s" % _rel(handoff_path))
+            print("[A5][META] 交接：from=phase-b to=phase-c reason=%s evidence(trigger_generation=%s, "
+                  "heldout_rate=%s, patches_total=%s)"
+                  % (handoff["reason"], handoff["evidence"]["trigger_generation"],
+                     handoff["evidence"]["heldout_rate_at_trigger"],
+                     handoff["phase_b_run"]["patches_total"]))
+    elif meta is not None and args.handoff_to == "phase-c":
+        print("[A5][META] 未触发 Phase C（停止原因=%s）→ 不写 handoff.json" % stop_reason)
+
     result.update(log_rows=log_rows, generations_run=len(log_rows),
                   stop_reason=stop_reason,
                   run_dir=run_dir, log_path=log_path,
@@ -795,6 +1187,11 @@ def run(argv: list[str] | None = None, *,
     result["patch_ids_accepted"] = accepted_ids
     result["patch_rejected"] = rejected_patches
     result["regression_runs"] = regression_runs
+    result["meta_controller"] = meta.summary() if meta is not None else {"enabled": False}
+    result["audit_path"] = meta.audit_path if meta is not None else None
+    result["handoff_path"] = handoff_path
+    result["zeroday_path"] = zeroday_path
+    result["zeroday_sha256"] = zeroday_sha
 
     # dry-run：只跑 1 代、不写 evidence（契约 §6.5）
     if not dry_run:
@@ -824,6 +1221,7 @@ def run(argv: list[str] | None = None, *,
             api_tokens_used=api_tokens_used,
             snapshot_path=snapshot_path,
             dry_run=dry_run,
+            meta_controller=(meta.summary() if meta is not None else None),
         )
         with io.open(evidence_path, "w", encoding="utf-8") as fh:
             json.dump(evidence, fh, ensure_ascii=False, indent=2)
@@ -848,8 +1246,13 @@ def build_evidence(*, run_id: str, run_dir: str, started_at: str, log_rows: list
                    regression_runs: list[dict], candidate_ledger: str,
                    api_calls: int, api_tokens_used: int,
                    snapshot_path: str, dry_run: bool,
-                   ledger_snapshots: list[str] | None = None) -> dict:
-    """契约 §6.4 的 coevolution_evidence.json。"""
+                   ledger_snapshots: list[str] | None = None,
+                   meta_controller: dict | None = None) -> dict:
+    """契约 §6.4 的 coevolution_evidence.json。
+
+    `meta_controller` 仅在元控制器开启（--enable-meta-controller）时传入并落盘；
+    关闭时不写该键 → evidence 也保持 Phase B 官方 run 的结构（可复现性）。
+    """
     rows = log_rows
     last = rows[-1] if rows else {}
     zero_rows = [r for r in rows if r.get("intercept_rate_evolved") is not None] or rows
@@ -919,7 +1322,10 @@ def build_evidence(*, run_id: str, run_dir: str, started_at: str, log_rows: list
                                 "决定（官方 run 写唯一规范账本），复跑 id 顺延；单 run 内每代"
                                 "候选账本快照保证可回溯"},
         "log_path": "coevolution_log.jsonl",
-        "limitations": list(LIMITATIONS) + [
+        # 元控制器关闭时不写该键（保持 Phase B 官方 run 的 evidence 结构）
+        **({"meta_controller": meta_controller} if meta_controller is not None else {}),
+        "limitations": list(LIMITATIONS) + (
+            list(META_LIMITATIONS) if meta_controller is not None else []) + [
             "本 run 的逐代原始数值见 %s（%d 行）；回归锁明细见 regression_gen*.json。"
             % (_rel(os.path.join(run_dir, "coevolution_log.jsonl")), len(rows)),
         ],

@@ -1,0 +1,61 @@
+{
+  "schema": "phase-c-eval-determinism-check-v1",
+  "purpose": "闭环 demo 的 C 数字与 Lead 官方 run-semantic.json 对比（determinism 证据）",
+  "deterministic_fields_compared": 16,
+  "deterministic_fields_identical": 16,
+  "deterministic_all_match": true,
+  "diffs": [],
+  "p95_same_order": true,
+  "p95_factor": 3.0,
+  "p95_detail": [
+    {
+      "system": "A",
+      "set": "E1",
+      "demo_p95_ms": 0.0224,
+      "official_p95_ms": 0.0228,
+      "ratio": 0.982,
+      "same_order": true
+    },
+    {
+      "system": "A",
+      "set": "E0",
+      "demo_p95_ms": 0.0217,
+      "official_p95_ms": 0.0207,
+      "ratio": 1.048,
+      "same_order": true
+    },
+    {
+      "system": "B",
+      "set": "E1",
+      "demo_p95_ms": 0.1137,
+      "official_p95_ms": 0.2479,
+      "ratio": 0.459,
+      "same_order": true
+    },
+    {
+      "system": "B",
+      "set": "E0",
+      "demo_p95_ms": 0.1312,
+      "official_p95_ms": 0.1084,
+      "ratio": 1.21,
+      "same_order": true
+    },
+    {
+      "system": "C",
+      "set": "E1",
+      "demo_p95_ms": 1.4772,
+      "official_p95_ms": 2.7241,
+      "ratio": 0.542,
+      "same_order": true
+    },
+    {
+      "system": "C",
+      "set": "E0",
+      "demo_p95_ms": 1.3583,
+      "official_p95_ms": 1.2755,
+      "ratio": 1.065,
+      "same_order": true
+    }
+  ],
+  "note": "rate/fpr/delta/encoder/评估集 sha256 必须逐位一致；p95 是墙钟测量，只判同量级（<= 3.0 倍且 < 100ms）"
+}

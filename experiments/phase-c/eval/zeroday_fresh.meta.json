@@ -1,0 +1,119 @@
+{
+  "schema": "phase-c-zeroday-fresh-meta-v1",
+  "requested_seed": 20261029,
+  "generation_id": 0,
+  "target_count": 40,
+  "candidates_drawn": 43,
+  "removed_collision_with_E1": 3,
+  "removed_collision_with_train": 0,
+  "removed_internal_dup": 0,
+  "selected_count": 40,
+  "selection_rule": "rejection sampling on exact payload_sha256 collision only; no label/score-based selection",
+  "collision_rate_vs_E1_at_seed": 0.075,
+  "collision_rate_vs_E1_at_seed_hits": "3/40",
+  "collision_rate_vs_E1_at_seed_measure": "seed=20261029 的规范前 40 条抽取（即 build_zeroday_set(seed=20261029) 会产出的集合）中与 E1 payload_sha256 逐字节相同的条数 / 40",
+  "observed_removal_rate_in_draw": 0.069767,
+  "selected_seed": 20261029,
+  "schema_note": "E0 = held-out 变体；拒绝采样只丢与 E1/训练流逐字节撞车的候选，按既定抽取顺序保留前 40 条，未参考任何拦截率/判定结果。",
+  "path": "D:\\LSJH\\lingshu\\experiments\\phase-c\\eval\\zeroday_fresh.jsonl",
+  "count": 40,
+  "sha256": "5fa5398389834a6a592eca765110d1921ea928aa781d46da54ab035ca68636e2",
+  "seed": 20261029,
+  "generated_at": "2026-10-28T19:17:34+08:00",
+  "source": {
+    "corpus": "experiments/phase-b/corpora/seed_attacks.jsonl",
+    "seed_split": "heldout",
+    "heldout_seed_count": 35,
+    "generator": "tools/red_team_evolver.py::_core_generate（build_zeroday_set 内部同一生成路径，未改动引擎）",
+    "writer": "tools/red_team_evolver.py::save_variants",
+    "generator_args": {
+      "seed": 20261029,
+      "generation_id": 0,
+      "n_pool": 4000,
+      "n_heldout_seeds": 35,
+      "target_count": 40
+    },
+    "phase_b_run": "experiments/phase-b/runs/run-20261028-185512",
+    "e1": {
+      "path": "experiments/phase-b/runs/run-20261028-185512/zeroday_set.jsonl",
+      "sha256": "432e08a2d47cdc968f80803be64cf337d43767781459d4431b180f1d6f7a210c",
+      "count": 40
+    },
+    "role": "E0 = 防泄漏控制集：与 E1 同批 held-out 种子、同随机种子、同变异档，只做了逐字节污染过滤；用途是检验 Phase C 语义防线不依赖作者对 E1 的可见性。"
+  },
+  "leakage_control": {
+    "payload_sha256_zero_overlap": true,
+    "vs_E1": {
+      "overlap_count": 0,
+      "e1_frozen_sha256": "432e08a2d47cdc968f80803be64cf337d43767781459d4431b180f1d6f7a210c"
+    },
+    "vs_train_stream": {
+      "overlap_count": 0,
+      "train_reference_files": 20,
+      "train_unique_payload_sha256": 513
+    },
+    "collision_rate_vs_E1_at_seed": 0.075,
+    "observed_collision_distribution_note": "payload 是 (种子文本, technique, idx) 的确定性函数，换随机种子只重排配对关系、不扩展 payload 空间；seed=20261029 的规范 40 条中有 3 条与 E1 逐字节相同，过滤后 E0 与 E1/训练流零重合。E0 不是新攻击类型、不是 OOD。"
+  },
+  "checks": {
+    "count": 40,
+    "sha256": "5fa5398389834a6a592eca765110d1921ea928aa781d46da54ab035ca68636e2",
+    "internal_unique_payload_sha256": 40,
+    "internal_duplicates": 0,
+    "payload_sha256_selfcheck_pass": 40,
+    "overlap_vs_E1": [],
+    "overlap_vs_E1_count": 0,
+    "overlap_vs_train_count": 0,
+    "train_reference": {
+      "files": 20,
+      "unique_payload_sha256": 513
+    },
+    "e1_reference": {
+      "path": "experiments/phase-b/runs/run-20261028-185512/zeroday_set.jsonl",
+      "sha256": "432e08a2d47cdc968f80803be64cf337d43767781459d4431b180f1d6f7a210c",
+      "count": 40,
+      "unique_payload_sha256": 40
+    },
+    "seed_split": "heldout",
+    "n_distinct_heldout_seeds_used": 31,
+    "n_heldout_seed_pool": 35,
+    "non_heldout_seed_ids": [],
+    "train_seed_ids_present": [],
+    "generation_ids": [
+      0
+    ],
+    "all_zeroday_flag": true,
+    "all_seed_split_heldout": true,
+    "technique_mix": {
+      "ar_glossary": 4,
+      "base64": 4,
+      "hex": 5,
+      "mixed_zh_en": 4,
+      "novel_fragment": 4,
+      "reasoning_chain": 4,
+      "roleplay": 4,
+      "rot13": 4,
+      "ru_glossary": 4,
+      "zero_width": 3
+    },
+    "strategy_mix": {
+      "encoding": 16,
+      "language": 12,
+      "nesting": 12
+    },
+    "zero_overlap": true,
+    "all_pass": true
+  },
+  "visibility": "a4_only",
+  "blue_team_access": false,
+  "read_only_after_creation": true,
+  "note": "held-out 变体，不是 OOD（与 Phase B 同口径，契约 §11.2）；E0 与 E1 共享同一 payload 生成函数，靠\"拒绝采样只丢逐字节撞车候选\"保证与 E1 及训练流零重合；生成后只读，sha256 冻结。",
+  "limitations": [
+    "离线规则变异，不是 LLM 红队（Phase B 契约 §8.1）。",
+    "E0 与 E1 是同一批 held-out 种子、同一随机种子 seed=20261029 的变体集合；E0 只做了逐字节污染过滤，**不是 OOD**，也不是新攻击类型。",
+    "payload 由确定性规则生成，随机种子只重排 (种子, technique) 配对；E0 的\"新鲜\"来自过滤掉与 E1/训练流逐字节相同的候选，不是新的攻击空间；单 seed 与 E1 的逐字节重合率约 7.5%（3/40）。",
+    "拒绝采样规则 outcome-blind：只看 payload_sha256 是否撞车，未参考任何拦截率/判定分数。",
+    "可见性隔离是流程约定（A1/A5 训练路径不读 zeroday 文件），非 OS 级强制。",
+    "零模型调用：api_calls/api_tokens_used 恒 0。"
+  ]
+}

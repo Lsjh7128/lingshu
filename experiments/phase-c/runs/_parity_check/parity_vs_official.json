@@ -1,0 +1,64 @@
+{
+  "schema": "phase-c-phase-b-parity-check-v1",
+  "claim": "--enable-meta-controller 关闭（默认）时 Phase B 行为与官方 run 逐字一致",
+  "official_run": "experiments/phase-b/runs/run-20261028-185512",
+  "new_run_log": "experiments/phase-c/runs/_parity_check/run-20261028-192453/coevolution_log.jsonl",
+  "compared_generations": 5,
+  "excluded_volatile_fields": [
+    "ts",
+    "regression.seconds"
+  ],
+  "total_field_diffs": 0,
+  "compare_generations": true,
+  "per_generation": [
+    {
+      "generation_id": 0,
+      "field_diffs": [],
+      "patch_ids": [
+        "P-0001"
+      ],
+      "heldout_rate_evolved_zeroday": 0.7
+    },
+    {
+      "generation_id": 1,
+      "field_diffs": [],
+      "patch_ids": [
+        "P-0001",
+        "P-0002"
+      ],
+      "heldout_rate_evolved_zeroday": 0.775
+    },
+    {
+      "generation_id": 2,
+      "field_diffs": [],
+      "patch_ids": [
+        "P-0001",
+        "P-0002",
+        "P-0003"
+      ],
+      "heldout_rate_evolved_zeroday": 0.775
+    },
+    {
+      "generation_id": 3,
+      "field_diffs": [],
+      "patch_ids": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004"
+      ],
+      "heldout_rate_evolved_zeroday": 0.775
+    },
+    {
+      "generation_id": 4,
+      "field_diffs": [],
+      "patch_ids": [
+        "P-0001",
+        "P-0002",
+        "P-0003",
+        "P-0004"
+      ],
+      "heldout_rate_evolved_zeroday": 0.775
+    }
+  ]
+}

@@ -1,0 +1,375 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 504 416] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 7501 >>
+stream
+0.1 0.1 0.1 rg
+BT /F2 12 Tf 1 0 0 1 121.632 394 Tm (Phase C: Three Systems on Held-out Variants) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 57.824 380 Tm (A: lexical gate | B: + Phase B evolved patch | C: + semantic guard \(offline intent-concept encoder, non-neural\)) Tj ET
+298 361 11 9 re
+0.1 0.1 0.1 rg
+f
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 313 364 Tm (E1: zero-day set) Tj ET
+412 361 11 9 re
+0.72 0.72 0.72 rg
+0.2 0.2 0.2 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 427 364 Tm (E0: fresh held-out) Tj ET
+0.05 0.28 0.75 rg
+BT /F1 8 Tf 1 0 0 1 64 364 Tm (C - B: E1 +0.075 / E0 +0.100) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 37.984 173.4 Tm (0.000) Tj ET
+0.86 0.86 0.86 RG
+0.5 w
+[] 0 d
+64 213.0536 m 270 213.0536 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 37.984 210.4536 Tm (0.250) Tj ET
+0.86 0.86 0.86 RG
+0.5 w
+[] 0 d
+64 250.1071 m 270 250.1071 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 37.984 247.5071 Tm (0.500) Tj ET
+0.86 0.86 0.86 RG
+0.5 w
+[] 0 d
+64 287.1607 m 270 287.1607 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 37.984 284.5607 Tm (0.750) Tj ET
+0.86 0.86 0.86 RG
+0.5 w
+[] 0 d
+64 324.2143 m 270 324.2143 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 37.984 321.6143 Tm (1.000) Tj ET
+0.2 0.2 0.2 RG
+0.9 w
+[] 0 d
+64 342 m 64 176 l S
+0.2 0.2 0.2 RG
+0.9 w
+[] 0 d
+64 176 m 270 176 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 64 348 Tm (interception rate \(held-out\)) Tj ET
+0.15 0.5 0.25 RG
+0.9 w
+[2 2] 0 d
+64 309.3929 m 270 309.3929 l S
+0.15 0.5 0.25 rg
+BT /F1 8 Tf 1 0 0 1 67 313.3929 Tm (H0 target: > 0.90 on E1) Tj ET
+0.1 0.1 0.1 rg
+BT /F2 9 Tf 1 0 0 1 95.0843 163 Tm (A) Tj ET
+67.8333 176 28 55.5804 re
+0.85 0.1 0.1 rg
+f
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 71.8253 236.5804 Tm (0.375) Tj ET
+100.8333 176 28 59.2857 re
+1 0.87 0.87 rg
+0.85 0.1 0.1 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 104.8253 240.2857 Tm (0.400) Tj ET
+0.1 0.1 0.1 rg
+BT /F2 9 Tf 1 0 0 1 163.751 163 Tm (B) Tj ET
+136.5 176 28 114.8661 re
+0.93 0.52 0.05 rg
+f
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 140.492 295.8661 Tm (0.775) Tj ET
+169.5 176 28 122.2768 re
+1 0.92 0.8 rg
+0.93 0.52 0.05 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 173.492 303.2768 Tm (0.825) Tj ET
+0.1 0.1 0.1 rg
+BT /F2 9 Tf 1 0 0 1 232.4177 163 Tm (C) Tj ET
+205.1667 176 28 125.9821 re
+0.05 0.28 0.75 rg
+f
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 209.1587 306.9821 Tm (0.850) Tj ET
+238.1667 176 28 137.0982 re
+0.86 0.91 1 rg
+0.05 0.28 0.75 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 242.1587 318.0982 Tm (0.925) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 289.984 173.4 Tm (0.000) Tj ET
+0.86 0.86 0.86 RG
+0.5 w
+[] 0 d
+316 213.0536 m 486 213.0536 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 289.984 210.4536 Tm (0.250) Tj ET
+0.86 0.86 0.86 RG
+0.5 w
+[] 0 d
+316 250.1071 m 486 250.1071 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 289.984 247.5071 Tm (0.500) Tj ET
+0.86 0.86 0.86 RG
+0.5 w
+[] 0 d
+316 287.1607 m 486 287.1607 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 289.984 284.5607 Tm (0.750) Tj ET
+0.86 0.86 0.86 RG
+0.5 w
+[] 0 d
+316 324.2143 m 486 324.2143 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 289.984 321.6143 Tm (1.000) Tj ET
+0.2 0.2 0.2 RG
+0.9 w
+[] 0 d
+316 342 m 316 176 l S
+0.2 0.2 0.2 RG
+0.9 w
+[] 0 d
+316 176 m 486 176 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 316 348 Tm (explicit red lines \(M subset\)) Tj ET
+0.1 0.1 0.1 rg
+BT /F2 9 Tf 1 0 0 1 341.0843 163 Tm (A) Tj ET
+318.3333 175 24 1 re
+0.85 0.1 0.1 rg
+f
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 324.7733 181 Tm (0/3) Tj ET
+346.3333 175 24 1 re
+1 0.87 0.87 rg
+0.85 0.1 0.1 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 352.7733 181 Tm (0/5) Tj ET
+0.1 0.1 0.1 rg
+BT /F2 9 Tf 1 0 0 1 397.751 163 Tm (B) Tj ET
+375 175 24 1 re
+0.93 0.52 0.05 rg
+f
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 381.44 181 Tm (0/3) Tj ET
+403 175 24 1 re
+1 0.92 0.8 rg
+0.93 0.52 0.05 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 409.44 181 Tm (0/5) Tj ET
+0.1 0.1 0.1 rg
+BT /F2 9 Tf 1 0 0 1 454.4177 163 Tm (C) Tj ET
+431.6667 176 24 148.2143 re
+0.05 0.28 0.75 rg
+f
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 438.1067 329.2143 Tm (3/3) Tj ET
+459.6667 176 24 118.5714 re
+0.86 0.91 1 rg
+0.05 0.28 0.75 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 466.1067 299.5714 Tm (4/5) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 64 150 Tm (E1 excluding 2 benign-creation items \(n=38\): A 0.395 | B 0.816 | C 0.895) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 53.552 47.4 Tm (0) Tj ET
+0.86 0.86 0.86 RG
+0.5 w
+[] 0 d
+64 65.2 m 270 65.2 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 49.104 62.6 Tm (25) Tj ET
+0.86 0.86 0.86 RG
+0.5 w
+[] 0 d
+64 80.4 m 270 80.4 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 49.104 77.8 Tm (50) Tj ET
+0.86 0.86 0.86 RG
+0.5 w
+[] 0 d
+64 95.6 m 270 95.6 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 49.104 93 Tm (75) Tj ET
+0.86 0.86 0.86 RG
+0.5 w
+[] 0 d
+64 110.8 m 270 110.8 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 44.656 108.2 Tm (100) Tj ET
+0.86 0.86 0.86 RG
+0.5 w
+[] 0 d
+64 126 m 270 126 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 44.656 123.4 Tm (125) Tj ET
+0.2 0.2 0.2 RG
+0.9 w
+[] 0 d
+64 126 m 64 50 l S
+0.2 0.2 0.2 RG
+0.9 w
+[] 0 d
+64 50 m 270 50 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 64 132 Tm (p95 judgment latency \(ms\)) Tj ET
+0.85 0.1 0.1 RG
+1.4 w
+[4 2.5] 0 d
+64 110.8 m 270 110.8 l S
+0.85 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 66 114.8 Tm (100 ms budget) Tj ET
+0.1 0.1 0.1 rg
+BT /F2 9 Tf 1 0 0 1 95.0843 37 Tm (A) Tj ET
+67.8333 49.0139 28 1 re
+0.85 0.1 0.1 rg
+f
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 74.0493 54.0139 Tm (0.02) Tj ET
+100.8333 49.0126 28 1 re
+1 0.87 0.87 rg
+0.85 0.1 0.1 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 107.0493 54.0126 Tm (0.02) Tj ET
+0.1 0.1 0.1 rg
+BT /F2 9 Tf 1 0 0 1 163.751 37 Tm (B) Tj ET
+136.5 49.1507 28 1 re
+0.93 0.52 0.05 rg
+f
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 142.716 54.1507 Tm (0.25) Tj ET
+169.5 49.0659 28 1 re
+1 0.92 0.8 rg
+0.93 0.52 0.05 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 175.716 54.0659 Tm (0.11) Tj ET
+0.1 0.1 0.1 rg
+BT /F2 9 Tf 1 0 0 1 232.4177 37 Tm (C) Tj ET
+205.1667 50 28 1.6563 re
+0.05 0.28 0.75 rg
+f
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 211.3827 55.6563 Tm (2.72) Tj ET
+238.1667 49.7755 28 1 re
+0.86 0.91 1 rg
+0.05 0.28 0.75 RG
+0.8 w
+[] 0 d
+B
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 244.3827 54.7755 Tm (1.28) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 289.984 47.4 Tm (0.000) Tj ET
+0.86 0.86 0.86 RG
+0.5 w
+[] 0 d
+316 88 m 486 88 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 289.984 85.4 Tm (0.025) Tj ET
+0.86 0.86 0.86 RG
+0.5 w
+[] 0 d
+316 126 m 486 126 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 289.984 123.4 Tm (0.050) Tj ET
+0.2 0.2 0.2 RG
+0.9 w
+[] 0 d
+316 126 m 316 50 l S
+0.2 0.2 0.2 RG
+0.9 w
+[] 0 d
+316 50 m 486 50 l S
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 316 132 Tm (benign FPR \(n=74\)) Tj ET
+326.3333 50 36 41.081 re
+0.85 0.1 0.1 rg
+f
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 334.3253 95.081 Tm (0.027) Tj ET
+0.1 0.1 0.1 rg
+BT /F2 9 Tf 1 0 0 1 341.0843 37 Tm (A) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 336.5493 26 Tm (2/74) Tj ET
+383 50 36 41.081 re
+0.93 0.52 0.05 rg
+f
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 390.992 95.081 Tm (0.027) Tj ET
+0.1 0.1 0.1 rg
+BT /F2 9 Tf 1 0 0 1 397.751 37 Tm (B) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 393.216 26 Tm (2/74) Tj ET
+439.6667 50 36 41.081 re
+0.05 0.28 0.75 rg
+f
+0.1 0.1 0.1 rg
+BT /F1 8 Tf 1 0 0 1 447.6587 95.081 Tm (0.027) Tj ET
+0.1 0.1 0.1 rg
+BT /F2 9 Tf 1 0 0 1 454.4177 37 Tm (C) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 8 Tf 1 0 0 1 449.8827 26 Tm (2/74) Tj ET
+0.2 0.2 0.2 rg
+BT /F1 6 Tf 1 0 0 1 8 14 Tm (source: run-semantic.json | run run-semantic-20261028-193207 | encoder offline_concept, is_neural=false, thr 0.45 \(D_dev\) | E1 sha 432e08a2) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+7 0 obj
+<< /Producer (LINGSHU Phase C A2 plot_phase_c.py) /Title (Phase C: Three Systems on Held-out Variants) /Subject (run run-semantic-20261028-193207) /CreationDate (D:20261028193207+08'00') >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000257 00000 n 
+0000007809 00000 n 
+0000007906 00000 n 
+0000008008 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R /Info 7 0 R >>
+startxref
+8213
+%%EOF

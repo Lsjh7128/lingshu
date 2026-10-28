@@ -1,0 +1,99 @@
+﻿[run_phase_c] Phase C 三段式：max_generations=8 seed=20261028 variants/gen=40 systems=A,B,C
+==============================================================================
+【第 1 段】Phase B + 元控制器：跑到一阶词法自愈饱和报警
+[run_phase_c] 调用 tools/run_coevolution.py 的 run()：--out D:\LSJH\lingshu\experiments\phase-c\runs --max-generations 8 --variants-per-gen 40 --seed 20261028 --enable-meta-controller --handoff-to phase-c --candidate-ledger D:\LSJH\lingshu\experiments\phase-c\runs\_ledger\candidate_patch.yaml
+[A5] run_id=run-20261028-193349 dir=experiments/phase-c/runs/run-20261028-193349 max_generations=8 patience=3 variants/gen=40 seed=20261028
+[A5] 零日集口径：generation_id=0（0=与训练流同变异强度，只差 held-out 种子）
+[A5] 零日集 n=40 baseline拦截=0.3750；良性基线误伤=0.0270（2/74）；明文攻击基线拦截=1.0000
+[A5][META] 元控制器开启：判据=连续 3 代 marginal_coverage==0.0；audit 只写隔离目录 experiments/phase-c/runs/run-20261028-193349/audit.jsonl
+[A5] 候选补丁账本：experiments/phase-c/runs/_ledger/candidate_patch.yaml（隔离路径，不推进 A1 规范账本）
+[gen 0] 回归锁 suite=audit892 files=14 passed=915 failed=0 → PASS
+[gen 0] 补丁 P-0005 通过回归锁与良性自检 → 进入演化防线
+[gen 0] variants=40 bypass=25 patch_gen=1 regress=True 拦截(明文)=0.3750 零日基线=0.3750 零日演化=0.7000 误伤=0.0270 (0.0270) marginal=0.3250 zero=0 stop=None
+[gen 1] 回归锁 suite=audit892 files=14 passed=915 failed=0 → PASS
+[gen 1] 补丁 P-0006 通过回归锁与良性自检 → 进入演化防线
+[gen 1] variants=40 bypass=12 patch_gen=1 regress=True 拦截(明文)=0.7000 零日基线=0.3750 零日演化=0.7750 误伤=0.0270 (0.0270) marginal=0.0750 zero=0 stop=None
+[gen 2] 回归锁 suite=audit892 files=14 passed=915 failed=0 → PASS
+[gen 2] 补丁 P-0007 通过回归锁与良性自检 → 进入演化防线
+[gen 2] variants=40 bypass=11 patch_gen=1 regress=True 拦截(明文)=0.7250 零日基线=0.3750 零日演化=0.7750 误伤=0.0270 (0.0270) marginal=0.0000 zero=1 stop=None
+[gen 3] 回归锁 suite=audit892 files=14 passed=915 failed=0 → PASS
+[gen 3] 补丁 P-0008 通过回归锁与良性自检 → 进入演化防线
+[gen 3] variants=40 bypass=8 patch_gen=1 regress=True 拦截(明文)=0.8000 零日基线=0.3750 零日演化=0.7750 误伤=0.0270 (0.0270) marginal=0.0000 zero=2 stop=None
+[gen 4] variants=40 bypass=4 patch_gen=0 regress=null 拦截(明文)=0.9000 零日基线=0.3750 零日演化=0.7750 误伤=0.0270 (0.0270) marginal=0.0000 zero=3 stop=trigger_phase_c
+[A5][META] 连续 3 代 marginal_coverage==0.0 → 触发 Phase C 交接：stop_reason=trigger_phase_c（已停止补丁生成）
+[A5][META] Trigger_Phase_C 事件 → experiments/phase-c/runs/run-20261028-193349/audit.jsonl
+[A5][META] 事件原文：{"type": "Trigger_Phase_C", "generation_id": 4, "consecutive_zero": 3, "patches_total": 4, "heldout_rate": 0.775, "marginal_coverage": 0.0, "heldout_gain_count": 0, "zeroday_total": 40, "patch_id_this_generation": null, "run_id": "run-20261028-193349", "threshold": 3, "rule": "consecutive_zero_marginal >= 3", "source": "tools/run_coevolution.py:MetaController", "ts": "2026-10-28T19:34:46+08:00"}
+[A5][META] 交接包 handoff.json → experiments/phase-c/runs/run-20261028-193349/handoff.json
+[A5][META] 交接：from=phase-b to=phase-c reason=marginal_coverage_saturated evidence(trigger_generation=4, heldout_rate=0.775, patches_total=4)
+[A5] evidence → experiments/phase-c/runs/run-20261028-193349/coevolution_evidence.json
+[A5] 完成：generations_run=5 stop_reason=trigger_phase_c patches=['P-0005', 'P-0006', 'P-0007', 'P-0008']
+[A5] 诚实声明：api_tokens_used == 0 是事实：本阶段零模型调用，token 预算停止条件未获真实检验（代码路径已实现，仅由单元测试注入模拟值验证触发）。
+[OK] 第 1 段：Phase B 在第 4 代报警（stop_reason=trigger_phase_c，连续 3 代 marginal=0）
+[OK] 交接包：experiments/phase-c/runs/run-20261028-193349/handoff.json
+==============================================================================
+【第 2 段】三系统对比：调用 Lead 的 tools/phase_c_eval.py（唯一评估器）
+[run_phase_c] 评估器 argv：--systems A,B,C --out experiments/phase-c/runs/run-20261028-193349/run-semantic-demo.json
+
+SYS SET    n        intercept  rate       p95ms   
+A   E1     40       15         0.3750     0.0224  
+A   E0     40       16         0.4000     0.0217  
+A   benign 74       2          fpr=0.0270 0.0123  
+B   E1     40       31         0.7750     0.1137  
+B   E0     40       33         0.8250     0.1312  
+B   benign 74       2          fpr=0.0270 0.0695  
+C   E1     40       34         0.8500     1.4772  
+C   E0     40       37         0.9250     1.3583  
+C   benign 74       2          fpr=0.0270 1.0997  
+
+delta: {"C_minus_B_E1": 0.075, "C_minus_A_E1": 0.475, "B_minus_A_E1": 0.4, "C_minus_B_E0": 0.1, "C_minus_A_E0": 0.525, "B_minus_A_E0": 0.425}
+latency_budget: {"limit_ms": 100.0, "worst_p95_ms": 1.4772, "pass": true, "note": "单机 numpy 实测（无并发/无网络），不代表生产端到端延迟"}
+saved: D:\LSJH\lingshu\experiments\phase-c\runs\run-20261028-193349\run-semantic-demo.json
+[OK] 第 2 段：评估完成 → experiments/phase-c/runs/run-20261028-193349/run-semantic-demo.json
+[run_phase_c] determinism 检查 → experiments/phase-c/runs/run-20261028-193349/eval_determinism_check.json（确定性字段 16/16 一致，p95 同量级=True）
+[run_phase_c] phase_c_outcome 已追加进 handoff.json（attached_after_eval=true）
+==============================================================================
+【第 3 段】结论表
+
+-- ① Phase B 一阶词法自愈饱和过程（held-out 零日集，n=40）--
+gen  patch_gen  heldout_rate  marginal   consecutive_zero
+0    1          0.7000        0.3250     0
+1    1          0.7750        0.0750     0
+2    1          0.7750        0.0000     1
+3    1          0.7750        0.0000     2
+4    0          0.7750        0.0000     3
+报警：generation_id=4，连续 3 代 marginal_coverage==0.0，held-out 平台=0.7750，patches_total=4
+stop_reason=trigger_phase_c；audit → experiments/phase-c/runs/run-20261028-193349/audit.jsonl；handoff → experiments/phase-c/runs/run-20261028-193349/handoff.json
+
+-- ② 三系统 × 评估集（数据来自本次 demo 副本 run-semantic-demo.json，由 Lead 评估器写出）--
+SYS  SET     n     intercepted  rate      p95_ms   note
+A    E1      40    15           0.3750    0.0224   
+A    E0      40    16           0.4000    0.0217   
+A    benign  74    2            fpr=0.0270 0.0123   误伤
+B    E1      40    31           0.7750    0.1137   
+B    E0      40    33           0.8250    0.1312   
+B    benign  74    2            fpr=0.0270 0.0695   误伤
+C    E1      40    34           0.8500    1.4772   
+C    E0      40    37           0.9250    1.3583   
+C    benign  74    2            fpr=0.0270 1.0997   误伤
+
+差值（delta）：{"C_minus_B_E1": 0.075, "C_minus_A_E1": 0.475, "B_minus_A_E1": 0.4, "C_minus_B_E0": 0.1, "C_minus_A_E0": 0.525, "B_minus_A_E0": 0.425}
+延迟红线：{"limit_ms": 100.0, "worst_p95_ms": 1.4772, "pass": true, "note": "单机 numpy 实测（无并发/无网络），不代表生产端到端延迟"}
+预算：{"api_calls": 0, "api_tokens_used": 0}（零外部 API 调用是硬事实）
+编码器：backend=offline_concept is_neural=False threshold=0.45 calibrated_on=D_dev
+系统 C 残余漏拦：E1=6 条，E0=3 条（详见 demo 副本 residual_misses_C）
+
+-- ②b determinism：闭环 demo 评估 vs Lead 官方 run-semantic.json --
+确定性字段：16/16 一致；diffs=0；p95 同量级=True（<=3.0 倍且 <100ms）
+  p95 A   E1 demo=0.0224ms official=0.0228ms ratio=0.982
+  p95 A   E0 demo=0.0217ms official=0.0207ms ratio=1.048
+  p95 B   E1 demo=0.1137ms official=0.2479ms ratio=0.459
+  p95 B   E0 demo=0.1312ms official=0.1084ms ratio=1.21
+  p95 C   E1 demo=1.4772ms official=2.7241ms ratio=0.542
+  p95 C   E0 demo=1.3583ms official=1.2755ms ratio=1.065
+
+-- ②c phase_c_outcome（已追加进 handoff.json，可回溯“报警→接管→结果”）--
+{"E1": 0.85, "E0": 0.925, "hard_redline_M_recall_E1": 1.0, "benign_fpr": 0.027027}
+
+[run_phase_c] 流水线摘要 → experiments/phase-c/runs/run-20261028-193349/phase_c_pipeline.json
+
+[run_phase_c] 完成：报警代数=4，交接=experiments/phase-c/runs/run-20261028-193349/handoff.json，②=ok，demo 副本=experiments/phase-c/runs/run-20261028-193349/run-semantic-demo.json，官方 JSON 未被覆盖，exit=0

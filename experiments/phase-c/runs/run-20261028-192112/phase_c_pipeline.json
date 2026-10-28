@@ -1,0 +1,74 @@
+{
+  "schema": "phase-c-pipeline-v1",
+  "generated_at": "2026-10-28T19:22:10+08:00",
+  "segment1_phase_b": {
+    "ok": true,
+    "run_id": "run-20261028-192112",
+    "run_dir": "experiments/phase-c/runs/run-20261028-192112",
+    "stop_reason": "trigger_phase_c",
+    "generations_run": 5,
+    "patches": [
+      "P-0001",
+      "P-0002",
+      "P-0003",
+      "P-0004"
+    ],
+    "audit_path": "experiments/phase-c/runs/run-20261028-192112/audit.jsonl",
+    "handoff_path": "experiments/phase-c/runs/run-20261028-192112/handoff.json",
+    "trigger": {
+      "type": "Trigger_Phase_C",
+      "generation_id": 4,
+      "consecutive_zero": 3,
+      "patches_total": 4,
+      "heldout_rate": 0.775,
+      "marginal_coverage": 0.0,
+      "heldout_gain_count": 0,
+      "zeroday_total": 40,
+      "patch_id_this_generation": null,
+      "run_id": "run-20261028-192112",
+      "threshold": 3,
+      "rule": "consecutive_zero_marginal >= 3",
+      "source": "tools/run_coevolution.py:MetaController",
+      "ts": "2026-10-28T19:22:10+08:00"
+    }
+  },
+  "segment2_eval": {
+    "ok": true,
+    "skipped": false,
+    "systems": "A,B,C",
+    "result_json": "experiments/phase-c/results/run-semantic.json",
+    "returncode": 0
+  },
+  "segment3_conclusion": {
+    "trigger_generation": 4,
+    "consecutive_zero": 3,
+    "heldout_rate_at_trigger": 0.775,
+    "delta": {
+      "C_minus_B_E1": 0.0,
+      "C_minus_A_E1": 0.4,
+      "B_minus_A_E1": 0.4,
+      "C_minus_B_E0": 0.0,
+      "C_minus_A_E0": 0.425,
+      "B_minus_A_E0": 0.425
+    },
+    "latency_budget": {
+      "limit_ms": 100.0,
+      "worst_p95_ms": 1.8437,
+      "pass": true,
+      "note": "单机 numpy 实测（无并发/无网络），不代表生产端到端延迟"
+    },
+    "budget": {
+      "api_calls": 0,
+      "api_tokens_used": 0
+    }
+  },
+  "budget": {
+    "api_calls": 0,
+    "api_tokens_used": 0
+  },
+  "limitations": [
+    "报警判据是 held-out 边际增益连续 3 代为 0，是“对自身饱和的测量”而非因果证明；“补丁无效”与“无可打补丁”在 marginal_coverage 上不可区分，见 handoff.json。",
+    "零日集是 held-out 变体而非 OOD；饱和只能表述为“对该 held-out 分布饱和”。",
+    "三系统数字全部来自 Lead 的 tools/phase_c_eval.py，本脚本不重写评估逻辑。"
+  ]
+}

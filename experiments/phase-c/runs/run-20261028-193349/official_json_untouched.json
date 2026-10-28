@@ -1,0 +1,12 @@
+﻿{
+    "schema":  "phase-c-official-json-untouched-v1",
+    "official_result_json":  "experiments/phase-c/results/run-semantic.json",
+    "sha256_before_demo":  "789E55F02EEDE8E7CF6854226951E98701417E9FD96ECDA40956305227C59EFA",
+    "sha256_after_demo":  "789E55F02EEDE8E7CF6854226951E98701417E9FD96ECDA40956305227C59EFA",
+    "official_json_identical":  true,
+    "official_mtime":  "2026-10-28T19:32:07+08:00",
+    "demo_copy":  "experiments/phase-c/runs/run-20261028-193349/run-semantic-demo.json",
+    "demo_copy_sha256":  "3999A0CD07EE046062E6B1033C56E46AAB5A4A73E5552387B5376C0FB34D8230",
+    "method":  "run_phase_c 默认将本次 demo 评估副本写到 experiments/phase-c/runs/\u003crun_id\u003e/run-semantic-demo.json；--eval-out 指向官方文件会被 argparse 直接拒绝；run_segment2 另有 _same_path 运行时闸门",
+    "ts":  "2026-10-28T19:35:02+08:00"
+}

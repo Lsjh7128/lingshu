@@ -1,0 +1,45 @@
+{
+  "schema": "phase-b-zeroday-set-v1",
+  "path": "D:\\LSJH\\lingshu\\experiments\\phase-c\\runs\\run-20261028-192112\\zeroday_set.jsonl",
+  "count": 40,
+  "sha256": "432e08a2d47cdc968f80803be64cf337d43767781459d4431b180f1d6f7a210c",
+  "seed": 20261028,
+  "rng": "random.Random",
+  "generation_id": 0,
+  "nesting_profile": "depth1_pure_wrapper",
+  "nesting_max_depth": 3,
+  "generation_policy": "official_zero_day=gen0（与训练同变异档，Lead 2026-10-28 拍板）；gen2=深度档仅作 robustness/敏感性对照，不进 headline",
+  "sensitivity_control": {
+    "generation_id": 2,
+    "nesting_profile": "depth3_base64_core",
+    "note": "同一批 held-out 种子改用最深档（嵌套+base64 核心）时的基线拦截率，仅作敏感性对照；由 --measure / 自测实测，不写入正式 evidence 口径。"
+  },
+  "strategy_mix": {
+    "encoding": 16,
+    "language": 12,
+    "nesting": 12
+  },
+  "technique_mix": {
+    "ar_glossary": 4,
+    "base64": 4,
+    "hex": 4,
+    "mixed_zh_en": 4,
+    "novel_fragment": 4,
+    "reasoning_chain": 4,
+    "roleplay": 4,
+    "rot13": 4,
+    "ru_glossary": 4,
+    "zero_width": 4
+  },
+  "seed_split": "heldout",
+  "visibility": "a4_only",
+  "blue_team_access": false,
+  "read_only_after_creation": true,
+  "note": "held-out 变体（不是独立分布外数据，见契约 §8.5）；生成一次后只读，sha256 写进 coevolution_evidence.zeroday_set。可见性隔离是**流程约定**（A1/A5 训练路径不读本文件），不是操作系统级隔离——共享工作区里 A4 无法强制文件权限。",
+  "limitations": [
+    "离线规则变异，不是 LLM 红队（契约 §8.1）。",
+    "零日集与训练集来自同一批种子的不同 split，不是 OOD 证据（契约 §8.5）。",
+    "可见性隔离靠流程约定，非 OS 级强制（共享工作区）。",
+    "零模型调用：api_tokens_used 恒 0（契约 §8.3）。"
+  ]
+}

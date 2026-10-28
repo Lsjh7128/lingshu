@@ -1,0 +1,156 @@
+{
+  "schema": "phase-c-pipeline-v1",
+  "generated_at": "2026-10-28T19:34:47+08:00",
+  "segment1_phase_b": {
+    "ok": true,
+    "run_id": "run-20261028-193349",
+    "run_dir": "experiments/phase-c/runs/run-20261028-193349",
+    "stop_reason": "trigger_phase_c",
+    "generations_run": 5,
+    "patches": [
+      "P-0005",
+      "P-0006",
+      "P-0007",
+      "P-0008"
+    ],
+    "audit_path": "experiments/phase-c/runs/run-20261028-193349/audit.jsonl",
+    "handoff_path": "experiments/phase-c/runs/run-20261028-193349/handoff.json",
+    "trigger": {
+      "type": "Trigger_Phase_C",
+      "generation_id": 4,
+      "consecutive_zero": 3,
+      "patches_total": 4,
+      "heldout_rate": 0.775,
+      "marginal_coverage": 0.0,
+      "heldout_gain_count": 0,
+      "zeroday_total": 40,
+      "patch_id_this_generation": null,
+      "run_id": "run-20261028-193349",
+      "threshold": 3,
+      "rule": "consecutive_zero_marginal >= 3",
+      "source": "tools/run_coevolution.py:MetaController",
+      "ts": "2026-10-28T19:34:46+08:00"
+    }
+  },
+  "segment2_eval": {
+    "ok": true,
+    "skipped": false,
+    "systems": "A,B,C",
+    "demo_result_json": "experiments/phase-c/runs/run-20261028-193349/run-semantic-demo.json",
+    "official_result_json": "experiments/phase-c/results/run-semantic.json",
+    "official_overwritten": false,
+    "returncode": 0
+  },
+  "segment3_conclusion": {
+    "trigger_generation": 4,
+    "consecutive_zero": 3,
+    "heldout_rate_at_trigger": 0.775,
+    "delta": {
+      "C_minus_B_E1": 0.075,
+      "C_minus_A_E1": 0.475,
+      "B_minus_A_E1": 0.4,
+      "C_minus_B_E0": 0.1,
+      "C_minus_A_E0": 0.525,
+      "B_minus_A_E0": 0.425
+    },
+    "latency_budget": {
+      "limit_ms": 100.0,
+      "worst_p95_ms": 1.4772,
+      "pass": true,
+      "note": "单机 numpy 实测（无并发/无网络），不代表生产端到端延迟"
+    },
+    "budget": {
+      "api_calls": 0,
+      "api_tokens_used": 0
+    },
+    "phase_c_outcome": {
+      "E1": 0.85,
+      "E0": 0.925,
+      "hard_redline_M_recall_E1": 1.0,
+      "benign_fpr": 0.027027,
+      "system": "C",
+      "derived_from": {
+        "E1": "systems.C.E1.rate",
+        "E0": "systems.C.E0.rate",
+        "hard_redline_M_recall_E1": "systems.C.E1.adjudicated.M.rate",
+        "benign_fpr": "systems.C.benign.fpr"
+      },
+      "source_eval": "experiments/phase-c/runs/run-20261028-193349/run-semantic-demo.json",
+      "official_result_json": "experiments/phase-c/results/run-semantic.json",
+      "attached_after_eval": true,
+      "attached_at": "2026-10-28T19:34:47+08:00",
+      "note": "由 tools/run_phase_c.py 在第 ② 段评估完成后追加，用于把“报警→接管→结果”放在同一个交接产物里可追溯；不修改 handoff 的触发时刻字段（trigger/evidence）。"
+    }
+  },
+  "determinism_check": {
+    "schema": "phase-c-eval-determinism-check-v1",
+    "purpose": "闭环 demo 的 C 数字与 Lead 官方 run-semantic.json 对比（determinism 证据）",
+    "deterministic_fields_compared": 16,
+    "deterministic_fields_identical": 16,
+    "deterministic_all_match": true,
+    "diffs": [],
+    "p95_same_order": true,
+    "p95_factor": 3.0,
+    "p95_detail": [
+      {
+        "system": "A",
+        "set": "E1",
+        "demo_p95_ms": 0.0224,
+        "official_p95_ms": 0.0228,
+        "ratio": 0.982,
+        "same_order": true
+      },
+      {
+        "system": "A",
+        "set": "E0",
+        "demo_p95_ms": 0.0217,
+        "official_p95_ms": 0.0207,
+        "ratio": 1.048,
+        "same_order": true
+      },
+      {
+        "system": "B",
+        "set": "E1",
+        "demo_p95_ms": 0.1137,
+        "official_p95_ms": 0.2479,
+        "ratio": 0.459,
+        "same_order": true
+      },
+      {
+        "system": "B",
+        "set": "E0",
+        "demo_p95_ms": 0.1312,
+        "official_p95_ms": 0.1084,
+        "ratio": 1.21,
+        "same_order": true
+      },
+      {
+        "system": "C",
+        "set": "E1",
+        "demo_p95_ms": 1.4772,
+        "official_p95_ms": 2.7241,
+        "ratio": 0.542,
+        "same_order": true
+      },
+      {
+        "system": "C",
+        "set": "E0",
+        "demo_p95_ms": 1.3583,
+        "official_p95_ms": 1.2755,
+        "ratio": 1.065,
+        "same_order": true
+      }
+    ],
+    "note": "rate/fpr/delta/encoder/评估集 sha256 必须逐位一致；p95 是墙钟测量，只判同量级（<= 3.0 倍且 < 100ms）"
+  },
+  "budget": {
+    "api_calls": 0,
+    "api_tokens_used": 0
+  },
+  "limitations": [
+    "报警判据是 held-out 边际增益连续 3 代为 0，是“对自身饱和的测量”而非因果证明；“补丁无效”与“无可打补丁”在 marginal_coverage 上不可区分，见 handoff.json。",
+    "零日集是 held-out 变体而非 OOD；饱和只能表述为“对该 held-out 分布饱和”。",
+    "三系统数字全部来自 Lead 的 tools/phase_c_eval.py，本脚本不重写评估逻辑；demo 副本写本次 run 目录，官方 run-semantic.json 不被覆盖。",
+    "phase_c_outcome 是评估完成后追加进 handoff.json 的字段（attached_after_eval=true），不改触发时刻的 trigger/evidence；p95 是墙钟量级，不保证逐位复现。"
+  ]
+}
