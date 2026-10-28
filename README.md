@@ -7,6 +7,11 @@
 > LINGSHU 是给 Agent 宿主（DSH）的**可插拔认知插件体系**——记忆 / 情感 / 元认知 / 目标 / 关系 / 叙事，外加**上下文控制论层**（70% / 85% 双阈值相变监控、首尾人格锚点、STPA 前置闸）与**学习闭环**（度量 → 提议 → 灰度 → 回滚）。
 > 它不追求"让 Agent 更像人"，而是：**让 Agent 的行为对人类可理解、可预期、可信。**
 
+> **Prior Art / 首发时间戳（First Public Release）**：LINGSHU 首次公开发布于 **2026-10-28**
+> （归档基线 commit `d551079`，tag `v1.0.0-paper-baseline`）。本仓库后续的设计、实现与论文迭代，
+> 均以该日期作为可引用的首发时间戳（prior-art timestamp）。
+> 如引用本项目/本论文的优先权，请注明「LINGSHU, first public release 2026-10-28」。
+
 **一句话证据（可复核）**：**Python 验收全绿**（19 个测试文件；含本次新增混沌 v2 **122 项**；其余分项与全局计数见 `acceptance/audit/` 的并行审计报告，口径不在此合并） + **561 条插件断言全绿**（host-sim 276 / control-sim 201 / stress 45 / mutation-regressions 15 / lag-regressions 24）；冻结回放基线 `recall@3 = 1.000`、`forbidden_leak = 0`、`truncated_turns = 0`；控制论层已在可丢弃的实验 profile 里跑通真实 headless 会话（`turns 1→5`、`hook_error = 0`），日常 `desktop` profile **零改动**；混沌工程 host 四剧本 **4/4** 跑通（S2 事实记忆/supersede、S4 冲突降维、UCA-08 降级留痕均已在真实宿主验证；阈值仍全为 `guess`，见 `docs/22`）；**混沌 v2 campaign**：8 族 / 212 检查 / **20 条不变量全过** / 零模型调用（`docs/23`、`acceptance/chaos/v2/`）。
 
 > **测试徽章（2026-10-27 `v1.0.0-paper-baseline` tag 快照实测，静态徽章，非实时 CI 状态）**
@@ -502,7 +507,7 @@ python tools/run_actuator_demo.py
 
 ## 八、许可证与发布
 
-- 代码与文档以 **MIT** 许可发布，全文见 [LICENSE](LICENSE)；插件 `plugin/dsh-lingshu/package.json` 的 `license` 同为 `MIT`（`private: true`，不发布到 npm）。
+- **双许可（dual-licensed）**：**源代码**以 **MIT** 许可发布，全文见根目录 [LICENSE](LICENSE)；插件 `plugin/dsh-lingshu/package.json` 的 `license` 同为 `MIT`（`private: true`，不发布到 npm）。**学术论文与文档**（`paper/` 目录）以 **CC BY-NC-ND 4.0** 许可发布，全文/官方链接声明见 [paper/LICENSE](paper/LICENSE)。完整声明见文末「十、License」。
 - 发布前检查表：[`docs/21-开源发布清单.md`](docs/21-开源发布清单.md)——依赖、密钥扫描、数据脱敏、profile 隔离声明、版本号、CI 命令、issue/PR 模板、许可证，逐项可勾选。
 - **数据与 profile 边界**：仓库不含任何真实运行数据（`$DSH_HOME/plugins/dsh-lingshu/` 的 `state.json` / `memory.jsonl` / `audit.jsonl` 属于本机数据，不入库）；`console/demo.html` 是**可重复生成**的演示产物，只保留脱敏后的字段级统计（无原始消息文本 / 本机路径 / 用户名）。本仓库**不安装**插件、**不改**任何 DSH profile；实验一律用可丢弃 profile（见 [`plugin/README.md`](plugin/README.md)）。
 - 一句话提醒：`replay-set/` 全合成、参数 `provenance: guess`、控制论真实收益未验证——发布文案与 issue 里不要把它们说成"已验证的线上效果"。
@@ -546,5 +551,22 @@ python scripts/quickstart.py --no-open
 - arXiv: `https://arxiv.org/abs/XXXX.XXXXX` —— **TODO：投稿后替换为真实编号并补 BibTeX**。
 - 论文材料与可复现实验（图表、数据、消融、案例研究）在本仓库 `paper/` 下；数字口径与已知限制见
   [`项目简介.md`](项目简介.md) §七与 [`docs/21-开源发布清单.md`](docs/21-开源发布清单.md) §10。
+
+---
+
+## 十、License（双许可声明）
+
+This project is dual-licensed: The source code is licensed under the MIT License. The academic paper and documentation are licensed under CC-BY-NC-ND 4.0.
+
+- **源代码 / Source code** — [MIT License](LICENSE)：`engine/`、`plugin/`、`tests/`、`tools/`、`scripts/`、`console/` 等。
+- **学术论文与文档 / Academic paper and documentation** — [CC BY-NC-ND 4.0](paper/LICENSE)：`paper/` 目录下的论文、图表、数据与文档（署名—非商业性使用—禁止演绎 4.0 国际）。
+
+### 论文 PDF 下载（Paper PDFs）
+
+- [English version — `paper/main-en.pdf`](paper/main-en.pdf)
+- [Bilingual (English / 中文) — `paper/main-bilingual.pdf`](paper/main-bilingual.pdf)
+
+> 许可范围以根目录 [LICENSE](LICENSE) 与 [paper/LICENSE](paper/LICENSE) 为准；CC BY-NC-ND 4.0 的约束性文本见
+> <https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.en>。
 
 
