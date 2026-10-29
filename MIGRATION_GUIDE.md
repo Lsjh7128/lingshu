@@ -171,6 +171,7 @@ git switch feat/phase-c-semantic-guard     # 或迁移前的 HEAD
 | 迁移后读不到旧记忆 | `--workspace-root` 与旧数据不是同一个项目根 → 换了 sandboxId | 用迁移输出里的 canonical_path 核对，必要时按 R2 重来 |
 | 旧 `profiles/<tag>` 里的数据在 v0.2 看不到 | profile 层已废弃 | 迁移脚本已把它收编进 `sandboxes/<sid>/<pid>/`；确认 `migrated_from` 含 `profiles/<tag>` |
 | 想彻底删除一条记忆 | 面板「彻底删除」= redact（抹内容留骨架） | 需要"磁盘无痕"必须单独审批，本期不做 |
+| `--apply` 报 `备份复制失败: [WinError 5]` | DSH 下 Python 子进程只能写会话工作区（如 `D:\LSJH`），不能写 `D:\.lingshu-backups` 或数据根 | 先把数据根整份复制到工作区快照（如 `.tmp/v02stage`），在**快照**上 `--apply`；再用 PowerShell 把 `layout.json` / `audit/` / `personas/` / `sandboxes/` 拷进真实数据根；备份同理先落工作区，再拷到 `D:\.lingshu-backups`。旧 `workspace_qq` 保持不动 |
 
 ---
 
