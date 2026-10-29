@@ -67,6 +67,12 @@ function makeHost() {
   return { ctx, sections, hooks, routes };
 }
 
+// 每个场景都从"没有持久化选择"开始：否则上一个场景自愈写入的 sandboxId 会被下一个实例优先选中。
+// （真实宿主里"面板选择优先于会话 workspaceRoot"是期望行为，测试必须显式隔离场景。）
+function clearSelection(root) {
+  try { fs.rmSync(path.join(root, 'active-workspace.json'), { force: true }); } catch { /* noop */ }
+}
+
 function sectionText(h, name) {
   const sec = h.sections.find((s) => s.name === name);
   if (!sec) return null;
@@ -208,6 +214,7 @@ const CFG = { mode: 'active', coldTurns: 0, warmTurns: 0 };   // 跳过 cold/war
 
 // ══ G2：DirA 启动 → 写记忆 → /switch 到 DirB → 读不到 DirA → 自动加载 DirB 人格 ══
 const hA = makeHost();
+clearSelection(DATA);
 apply(hA.ctx, { ...CFG, workspaceRoot: PROJ.A });
 const skel = hA.sections.find((s) => s.name === 'lingshu:skeleton');
 check('G2：v0.2 注册 8 段（含 skeleton@105）', hA.sections.length === 8, String(hA.sections.length));
@@ -251,6 +258,7 @@ check('G2：切换后面板只显示当前沙盒（local 为空）',
 
 // ══ G3：ProjectA「红茶」global +「涉密」local → ProjectB 答得出红茶、答不出涉密 ══
 const hC = makeHost();
+clearSelection(DATA);
 apply(hC.ctx, { ...CFG, workspaceRoot: PROJ.C });
 await sendUser(hC, '以后都记住：我的饮料是红茶', 10);
 await sendUser(hC, '本项目记住：我的资料是涉密', 11);
@@ -305,6 +313,7 @@ check('G4：待定区默认不参与检索', !(await ask(hC, '蓝色')).includes
 
 // d) 跨沙盒读被拒（DirB 层面看不到 DirA 的任何 local）
 const hB2 = makeHost();
+clearSelection(DATA);
 apply(hB2.ctx, { ...CFG, workspaceRoot: PROJ.B });
 const factInB = await ask(hB2, '红茶');
 check('G4：新进程在 DirB 读不到 DirA 记忆', !factInB.includes('红茶'));
@@ -314,6 +323,7 @@ check('G4：面板在 DirB 不暴露 DirA 条目',
 
 // 冷启动：无 mapping 绑定 / 无 persona 文件 / 无记忆
 const hE = makeHost();
+clearSelection(DATA);
 apply(hE.ctx, { ...CFG, workspaceRoot: PROJ.E });
 check('G4：冷启动无 mapping 时回退 config 默认人格（butler）',
   readJsonl(path.join(DATA, 'audit', 'audit.jsonl')).some(
@@ -339,7 +349,10 @@ fs.writeFileSync(path.join(DATA2, 'sandbox_mapping.yaml'),
   `schema_version: mapping-0.1\nbindings:\n  - canonical_path: "${canonicalizePath(PROJ_F)}"\n    sandbox_id: "${SID_F}"\n    default_persona: "solo"\n    label: "single"\n`, 'utf8');
 process.env.LINGSHU_DATA_DIR = DATA2;
 const hF = makeHost();
-apply(hF.ctx, CFG);                       // 刻意不给 workspaceRoot
+clearSelection(DATA2);
+// 刻意给一个**不命中 mapping** 的 workspaceRoot（真实宿主传的是会话目录 D:\LSJH 这类）：
+// 单绑定兜底应仍然选中绑定里的项目根，而不是 workspaceRoot。
+apply(hF.ctx, { ...CFG, workspaceRoot: ROOT });
 const applyF = readJsonl(path.join(DATA2, 'audit', 'audit.jsonl')).find((r) => r.kind === 'apply');
 check('部署兜底：无 workspaceRoot + 单绑定 → sandboxId 取绑定项目根',
   applyF && applyF.sandbox_id === SID_F, JSON.stringify(applyF && applyF.sandbox_id));

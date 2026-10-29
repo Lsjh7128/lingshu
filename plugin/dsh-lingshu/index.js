@@ -356,6 +356,24 @@ function readStartupSelection(base, profileTag) {
   if (normalized.workspaceId === '') {
     return { selected: '', notice: null };   // 显式 legacy
   }
+  // v0.2：选择里存的是 sandboxId；存在性看 sandboxes/<sid>，不能再用 workspace_<id>。
+  // 旧 workspaceId（如 qq）在 v0.2 下已无寻址意义：忽略并留痕，由 v0.2 绑定逻辑回退。
+  if (readLayout(base)) {
+    const sid = String(normalized.workspaceId);
+    if (/^[0-9a-f]{8}$/.test(sid)) {
+      if (isRealDir(path.join(path.resolve(base), 'sandboxes', sid))) {
+        return { selected: sid, notice: null };
+      }
+      return {
+        selected: undefined,
+        notice: { reason: 'workspace_missing', workspaceId: sid, source: 'active-workspace.json', applied: false },
+      };
+    }
+    return {
+      selected: undefined,
+      notice: { reason: 'legacy_workspace_id_ignored', workspaceId: sid, source: 'active-workspace.json', applied: false },
+    };
+  }
   // 选择指向的工作区必须还在（否则不隐式创建/不静默落到别的 workspace）。
   const target = stateDir(profileTag, normalized.workspaceId);
   if (!isRealDir(target)) {
@@ -663,32 +681,54 @@ export function apply(ctx, config = {}) {
   // 布局上，只有显式迁移过的数据根才走新路径；回滚 = 删掉 layout.json（旧文件从未被改写）。
   const layoutDoc = readLayout(roots.base);
   const v02 = layoutDoc ? (() => {
-    // 沙盒 ↔ 人格绑定（施工单 §3.2 / G2）：mapping 里 default_persona 优先；
-    // 没有 mapping 时回退 config.personaId 再回退 butler。
-    // 部署实测：宿主不给 workspaceRoot 时 process.cwd() 是宿主本体目录，算出的 sandboxId
-    // 会与迁移时用的项目根不一致 → 单项目部署下改用 mapping 里**唯一**的 binding 兜底。
+    // 沙盒 ↔ 人格绑定（施工单 §3.2 / G2）。优先级（部署实测后定）：
+    //   ① 持久化选择是 sandboxId（面板 v0.2 切换写回的就是它）
+    //   ② 宿主 workspaceRoot 命中 mapping
+    //   ③ mapping 只有一条绑定 → 用它兜底（宿主 workspaceRoot 常是会话目录而非项目根）
+    //   ④ 只有一条沙盒索引 → 用它兜底（旧 workspaceId 选择被忽略时仍能落到唯一沙盒）
+    //   ⑤ 都没有 → 用宿主 workspaceRoot（未迁移数据根的兼容路径）
     const bindings = readMappingBindings(roots.base);
+    const index = readSandboxIndex(roots.base);
     const explicitRoot = String(process.env.LINGSHU_SANDBOX_ROOT || cfg.workspaceRoot || '').trim();
+    const selected = String(ws.id || '').trim();
+    const isSid = (x) => /^[0-9a-f]{8}$/.test(x) && Boolean(index[x]);
+
     let binding = null;
-    let workspaceRoot = '';
-    if (explicitRoot) {
-      workspaceRoot = explicitRoot;
-      const c = canonicalizePath(explicitRoot);
+    let sid = '';
+    let canonical = '';
+    if (isSid(selected)) {
+      sid = selected;
+      canonical = canonicalizePath(String(index[selected].canonical_path || ''));
       binding = bindings.find(
-        (b) => canonicalizePath(String(b.canonical_path || '')) === c) || null;
-    } else if (bindings.length === 1) {
-      binding = bindings[0];
-      workspaceRoot = String(binding.canonical_path || process.cwd());
-    } else {
-      workspaceRoot = process.cwd();
+        (b) => canonicalizePath(String(b.canonical_path || '')) === canonical) || null;
+    } else if (explicitRoot) {
+      canonical = canonicalizePath(explicitRoot);
+      binding = bindings.find(
+        (b) => canonicalizePath(String(b.canonical_path || '')) === canonical) || null;
+      if (binding) sid = sandboxIdOf(canonical);
     }
-    const canonical = canonicalizePath(workspaceRoot);
+    if (!sid && bindings.length === 1) {
+      binding = bindings[0];
+      canonical = canonicalizePath(String(binding.canonical_path || ''));
+      sid = sandboxIdOf(canonical);
+    }
+    if (!sid && Object.keys(index).length === 1) {
+      const only = Object.keys(index)[0];
+      sid = only;
+      canonical = canonicalizePath(String(index[only].canonical_path || ''));
+      binding = bindings.find(
+        (b) => canonicalizePath(String(b.canonical_path || '')) === canonical) || null;
+    }
+    if (!sid) {
+      canonical = canonicalizePath(explicitRoot || process.cwd());
+      sid = sandboxIdOf(canonical);
+    }
     const personaId = String((binding && binding.default_persona) || cfg.personaId || 'butler');
-    // sandboxId 由"当前项目根"派生（D7）：sha256(canonicalPath)[0:8]；mapping 里写了也以文件为准。
-    const sid = sandboxIdOf(canonical);
+    const workspaceRoot = canonical || explicitRoot || process.cwd();
     return {
       personaId, workspaceRoot, canonical, sandboxId: sid,
       bindingLabel: binding ? (binding.label || null) : null,
+      selected: isSid(selected) ? selected : null,
       personaStateFile: path.join(roots.base, 'personas', personaId, 'persona_state.json'),
       paths: resolveMemoryPaths(roots.base, sid, personaId),
     };
@@ -712,6 +752,12 @@ export function apply(ctx, config = {}) {
     // 运行时身份统一用 sandboxId（面板/审计/切换都看它），旧 workspaceId 语义在 v0.2 不再使用。
     ws.id = v02.sandboxId;
     ws.source = 'v02';
+  }
+  // v0.2 自愈：把旧 workspaceId 选择（如 "qq"）改写成 sandboxId，下次启动直接命中优先级①。
+  if (v02 && startupSelection.selected !== v02.sandboxId) {
+    try {
+      writeActiveSelection(roots.base, { workspaceId: v02.sandboxId, profileTag });
+    } catch { /* 选择文件写失败不影响启动 */ }
   }
   // 读全量：legacy = 单文件 last-wins；v0.2 = local + global 两个文件各自折叠后合并。
   // pending（待定区）**不参与检索**（§4.2），所以不在这里返回。
@@ -943,12 +989,16 @@ export function apply(ctx, config = {}) {
       ws.rejectedSource = null;
       saveState();
     }
+    const persisted = writeActiveSelection(roots.base, { workspaceId: sid, profileTag });
     audit('workspace_switch', {
       from: previousId, to: sid, previousWorkspaceId: previousId, currentWorkspaceId: sid,
       previous_persona_id: previousPersona, persona_id: pid, already_active: alreadyActive,
-      turn_active: false, persisted: true, canonical_path: canonical,
+      turn_active: false, persisted: Boolean(persisted.ok), canonical_path: canonical,
       host_hook: 'v0.2/sandbox_mapping',
     });
+    if (!persisted.ok) {
+      audit('workspace_selection_write_failed', { workspace: sid, err: persisted.error });
+    }
     try { onWorkspaceSwitched?.(sid); } catch { /* 面板视图同步失败不影响切换 */ }
     return {
       ok: true, status: 200, activated: true, alreadyActive,

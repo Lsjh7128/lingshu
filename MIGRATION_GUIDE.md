@@ -94,6 +94,17 @@ Get-ChildItem "$data\sandboxes" -Recurse -File | Select-Object FullName,Length
 2. `audit/audit.jsonl` 每行都有 `sandbox_id` 与 `persona_id`；
 3. 旧 `state.json` / `memory.jsonl` / `audit.jsonl` **仍在原位且字节未变**（`Get-FileHash` 对比备份清单）。
 
+### 启动时沙盒/人格怎么选（v0.2 优先级，排错必读）
+
+1. `active-workspace.json` 的 `workspaceId` 若是 **8 位 hex 且存在于 `sandboxes/index.json`** → 用它（面板热切换写回的就是这个）；
+2. 宿主传入的 `workspaceRoot` 命中 `sandbox_mapping.yaml` → 用它；
+3. `sandbox_mapping.yaml` 只有**一条**绑定 → 用它兜底（宿主 `workspaceRoot` 常是会话目录而非项目根）；
+4. `sandboxes/index.json` 只有**一个**沙盒 → 用它兜底（旧的 `workspaceId` 选择被忽略时仍能落到唯一沙盒）；
+5. 都没有 → 用宿主 `workspaceRoot` 现算 sandboxId（未迁移数据根的兼容路径）。
+
+启动成功后会把第 1 条自愈写成 sandboxId；旧 `workspaceId`（如 `qq`）在 v0.2 下会被忽略并落一条
+`legacy_workspace_id_ignored` 审计。
+
 ---
 
 ## 5. 重装 / 切换运行

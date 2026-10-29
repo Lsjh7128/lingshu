@@ -27,6 +27,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { WORKSPACE_ID_RE, PROFILE_TAG_RE } from './workspace.js';
 import { describeWorkspacePolicy, loadWorkspacePolicy } from './workspace-policy.js';
+// v0.2（施工单 v2）：数据根存在 layout.json 时，工作区 = 沙盒（sandboxId），
+// 行内数据在 sandboxes/<sid>/<pid>/ 与 personas/<pid>/，不再用 workspace_<id>/ 目录寻址。
+import { readLayout, foldRows } from './memory-paths.js';
 
 export const API_SCHEMA_VERSION = 'workspace-api-0.2';
 // legacy 伪工作区的展示 id；若真的存在 workspace_legacy/ 则以真实工作区优先（见 list/detail）。
@@ -363,6 +366,129 @@ function collectWorkspaceIds(base) {
   return { ids, ignored };
 }
 
+// ── v0.2：沙盒索引 / 绑定 / 摘要（只读）───────────────────────────────
+const SANDBOX_ID_RE = /^[0-9a-f]{8}$/;
+const V02_PERSONA_RE = /^[A-Za-z0-9_-]{1,64}$/;
+
+function readSandboxIndexV02(base) {
+  const root = path.resolve(base);
+  const file = path.join(root, 'sandboxes', 'index.json');
+  try {
+    const doc = JSON.parse(fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
+    if (doc && doc.sandboxes && typeof doc.sandboxes === 'object') return doc.sandboxes;
+  } catch { /* 回退扫描 */ }
+  const out = {};
+  try {
+    for (const sid of fs.readdirSync(path.join(root, 'sandboxes'))) {
+      if (!SANDBOX_ID_RE.test(sid)) continue;
+      try {
+        const rec = JSON.parse(fs.readFileSync(
+          path.join(root, 'sandboxes', sid, 'sandbox.json'), 'utf8').replace(/^\uFEFF/, ''));
+        if (rec && typeof rec === 'object') out[sid] = rec;
+      } catch { /* 单个坏记录跳过 */ }
+    }
+  } catch { /* 无 sandboxes 目录 */ }
+  return out;
+}
+
+function readMappingBindingsV02(base) {
+  const file = path.join(path.resolve(base), 'sandbox_mapping.yaml');
+  let raw = '';
+  try { raw = fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''); } catch { return []; }
+  const out = [];
+  let cur = null;
+  for (const line of raw.split(/\r?\n/)) {
+    const item = /^\s*-\s*canonical_path:\s*"?(.+?)"?\s*$/.exec(line);
+    if (item) { cur = { canonical_path: item[1] }; out.push(cur); continue; }
+    if (!cur) continue;
+    const kv = /^\s*(sandbox_id|default_persona|label):\s*"?(.*?)"?\s*$/.exec(line);
+    if (kv) cur[kv[1]] = kv[2];
+  }
+  return out;
+}
+
+/** 沙盒绑定的人格：目录即事实（只有一个 persona 子目录时用它），否则查 mapping。 */
+function sandboxPersonaId(base, sid) {
+  let dirs = [];
+  try {
+    dirs = fs.readdirSync(path.join(path.resolve(base), 'sandboxes', sid), { withFileTypes: true })
+      .filter((e) => e.isDirectory() && V02_PERSONA_RE.test(e.name))
+      .map((e) => e.name).sort();
+  } catch { /* noop */ }
+  if (dirs.length === 1) return dirs[0];
+  const binding = readMappingBindingsV02(base).find((b) => b.sandbox_id === sid);
+  if (binding && V02_PERSONA_RE.test(String(binding.default_persona || ''))) {
+    return String(binding.default_persona);
+  }
+  return dirs[0] || 'butler';
+}
+
+function summarizeSandbox(o, sid, rec) {
+  const root = path.resolve(o.base);
+  const pid = sandboxPersonaId(o.base, sid);
+  const sdir = path.join(root, 'sandboxes', sid, pid);
+  const pdir = path.join(root, 'personas', pid);
+  const state = readStateFile(path.join(sdir, 'state.json'));
+  const pstate = readStateFile(path.join(pdir, 'persona_state.json'));
+  const local = readJsonl(path.join(sdir, 'local_memory.jsonl'), MEMORY_MAX_BYTES);
+  const global = readJsonl(path.join(pdir, 'global_memory.jsonl'), MEMORY_MAX_BYTES);
+  const auditAll = readJsonl(path.join(root, 'audit', 'audit.jsonl'), AUDIT_MAX_BYTES);
+  const auditEntries = auditAll.entries.filter((e) => String(e.sandbox_id || '') === sid);
+  const turns = toCount(state.turns);
+  const phase = state.control?.phase?.phase;
+  const frozenAt = Number(state.frozen?.checkedAt);
+  const relation = (pstate.relations && typeof pstate.relations === 'object')
+    ? pstate.relations : (state.relation || {});
+  const emo = (pstate.emotion_baseline && typeof pstate.emotion_baseline === 'object')
+    ? pstate.emotion_baseline : state.dev;
+  const policyStatus = describeWorkspacePolicy(loadWorkspacePolicy({
+    policyDir: o.policyDir || '',
+    workspaceId: sid,
+  }));
+  const localRows = foldRows(local.entries);
+  const globalRows = foldRows(global.entries);
+  return {
+    workspaceId: sid,
+    label: rec && typeof rec.label === 'string' ? rec.label : null,
+    canonicalPath: rec && typeof rec.canonical_path === 'string' ? rec.canonical_path : null,
+    relativeDataDir: `sandboxes/${sid}`,
+    isCurrent: sid === o.currentId,
+    turns,
+    stage: stageOf(turns, o.coldTurns, o.warmTurns),
+    frozen: {
+      ok: state.frozen?.ok === true,
+      checkedAt: Number.isFinite(frozenAt) && frozenAt > 0 ? frozenAt : null,
+    },
+    relation: {
+      trustLevel: typeof relation.trustLevel === 'string' ? relation.trustLevel : 'unknown',
+      stage: typeof relation.stage === 'string' ? relation.stage : 'unknown',
+      unresolvedConflict: Boolean(relation.unresolvedConflict),
+    },
+    control: { phase: typeof phase === 'string' ? phase : 'unknown' },
+    emotion: { label: emotionLabel(emo) },
+    // 面板的 memory.total 在 v0.2 指"本项目 local + 该人格 global"的 active 条数。
+    memory: summarizeMemory([...localRows.active, ...globalRows.active],
+      local.truncated || global.truncated),
+    audit: summarizeAudit(auditEntries, auditAll.truncated),
+    persona: readPersona(path.join(pdir, 'persona.json')),
+    policy: { ...policyStatus, enforced: Boolean(sid === o.currentId && policyStatus.status === 'loaded') },
+    capabilities: { ...CAPABILITIES },
+    files: {
+      state: fileInfo(path.join(sdir, 'state.json')),
+      memory: fileInfo(path.join(sdir, 'local_memory.jsonl')),
+      audit: fileInfo(path.join(root, 'audit', 'audit.jsonl')),
+      persona: fileInfo(path.join(pdir, 'persona.json')),
+      skeleton: fileInfo(path.join(sdir, 'skeleton.md')),
+    },
+  };
+}
+
+function v02Layout(o) {
+  if (!o.base) return null;
+  const doc = readLayout(o.base);
+  return doc ? doc : null;
+}
+
 // ── 对外 API ────────────────────────────────────────────
 
 /**
@@ -386,6 +512,28 @@ export function listWorkspaces(options = {}) {
       schemaVersion: API_SCHEMA_VERSION,
       generatedAt: new Date().toISOString(),
       error: 'data_root_unavailable',
+    };
+  }
+
+  // v0.2：工作区列表 = 沙盒列表（sandboxes/index.json）；id 是 sandboxId。
+  const layoutDoc = v02Layout(o);
+  if (layoutDoc) {
+    const index = readSandboxIndexV02(o.base);
+    const workspaces = Object.keys(index).sort()
+      .map((sid) => summarizeSandbox(o, sid, index[sid]));
+    workspaces.sort((a, b) => (Number(b.isCurrent) - Number(a.isCurrent))
+      || (a.workspaceId < b.workspaceId ? -1 : a.workspaceId > b.workspaceId ? 1 : 0));
+    return {
+      ok: true,
+      schemaVersion: API_SCHEMA_VERSION,
+      generatedAt: new Date().toISOString(),
+      source: 'dsh-lingshu/v0.2-sandboxes',
+      currentWorkspaceId: o.currentId || null,
+      profileTag: o.profileTag || null,
+      layout: 'v0.2',
+      rejectedWorkspaceId: o.rejected,
+      ignoredWorkspaceDirs: 0,
+      workspaces,
     };
   }
 
@@ -455,6 +603,20 @@ export function readWorkspace(options = {}, rawId) {
   }
   if (!o.base) {
     return { ok: false, status: 404, error: 'workspace_not_found', workspaceId: WORKSPACE_ID_RE.test(id) ? id : undefined };
+  }
+
+  // v0.2：详情按 sandboxId 查；非法/不存在统一 404，不猜旧 workspace_<id> 目录。
+  if (v02Layout(o)) {
+    const index = readSandboxIndexV02(o.base);
+    if (!SANDBOX_ID_RE.test(id) || !index[id]) {
+      return { ok: false, status: 404, error: 'workspace_not_found', workspaceId: id };
+    }
+    return {
+      ok: true,
+      schemaVersion: API_SCHEMA_VERSION,
+      generatedAt: new Date().toISOString(),
+      workspace: summarizeSandbox(o, id, index[id]),
+    };
   }
 
   if (id === LEGACY_ID) {
@@ -679,6 +841,54 @@ function summaryForTarget(o, target) {
  */
 export function writePersona(options = {}, rawId, rawPayload) {
   const o = normalizeOptions(options);
+  // v0.2：persona 写在 personas/<pid>/persona.json；persona_id 必须与沙盒绑定一致。
+  if (v02Layout(o)) {
+    const id = typeof rawId === 'string' ? rawId.trim() : '';
+    if (!id) return { ok: false, status: 400, error: 'invalid_workspace_id' };
+    const index = readSandboxIndexV02(o.base);
+    if (!SANDBOX_ID_RE.test(id) || !index[id]) {
+      return { ok: false, status: 404, error: 'workspace_not_found', workspaceId: id };
+    }
+    const validated = validatePersonaPayload(rawPayload);
+    if (!validated.ok) {
+      return { ok: false, status: 400, error: validated.error, field: validated.field };
+    }
+    const pid = sandboxPersonaId(o.base, id);
+    if (validated.value.persona_id !== pid) {
+      return { ok: false, status: 400, error: 'persona_id_mismatch', workspaceId: id };
+    }
+    const file = path.join(path.resolve(o.base), 'personas', pid, 'persona.json');
+    const prevExists = isRealFile(file);
+    let written;
+    try {
+      written = atomicWriteJson(file, validated.value);
+    } catch (err) {
+      return { ok: false, status: 500, error: 'persona_write_failed', detail: String(err?.code || 'io_error') };
+    }
+    const auditEvent = {
+      workspace: id,
+      layout: 'v0.2',
+      persona_id: pid,
+      name_len: validated.value.name.length,
+      summary_len: validated.value.summary.length,
+      traits: Object.keys(validated.value.traits),
+      bytes: written.bytes,
+      sha256: written.sha256,
+      prev_exists: prevExists,
+      atomic: 'tmp+fsync+rename',
+      source: 'api',
+      host_hook: 'PUT /dsh-lingshu/api/workspaces/:id/persona',
+    };
+    safeAudit(o.audit, 'persona_write', auditEvent);
+    return {
+      ok: true,
+      status: 200,
+      activated: false,
+      persona: validated.value,
+      workspace: summarizeSandbox(o, id, index[id]),
+      audit: auditEvent,
+    };
+  }
   const target = resolveWriteTarget(o, rawId);
   if (!target.ok) return target;
   const validated = validatePersonaPayload(rawPayload);
@@ -726,6 +936,10 @@ export function writePersona(options = {}, rawId, rawPayload) {
  */
 export function createWorkspace(options = {}, rawPayload) {
   const o = normalizeOptions(options);
+  // v0.2：沙盒由"项目根 → sandboxId"派生，不允许面板凭空创建目录（会与 mapping 脱节）。
+  if (v02Layout(o)) {
+    return { ok: false, status: 400, error: 'layout_v02_create_unsupported' };
+  }
   if (!o.base) return { ok: false, status: 503, error: 'data_root_unavailable' };
   if (!rawPayload || typeof rawPayload !== 'object' || Array.isArray(rawPayload)) {
     return { ok: false, status: 400, error: 'invalid_body' };

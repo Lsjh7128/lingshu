@@ -54,6 +54,19 @@ function makeHost() {
 fs.mkdirSync(DATA, { recursive: true });
 fs.mkdirSync(PROJ, { recursive: true });
 writeLayout(DATA, { migratedFrom: ['http-sim'], now: Math.floor(Date.now() / 1000) });
+writeJson(path.join(DATA, 'sandboxes', 'index.json'), {
+  schema_version: 'sandbox-index-0.1',
+  sandboxes: {
+    [SID]: {
+      canonical_path: canonicalizePath(PROJ), label: 'http-sim',
+      created_at: Math.floor(Date.now() / 1000), last_active_at: Math.floor(Date.now() / 1000),
+    },
+  },
+});
+writeJson(path.join(DATA, 'sandboxes', SID, 'sandbox.json'), {
+  schema_version: 'sandbox-0.1', sandbox_id: SID, canonical_path: canonicalizePath(PROJ),
+  label: 'http-sim', created_at: Math.floor(Date.now() / 1000), profile_tag: null,
+});
 writeJson(path.join(DATA, 'personas', 'butler', 'persona.json'), {
   schema_version: 'persona-0.1', persona_id: 'butler', name: 'Butler',
   summary: '沉稳管家', confirmed_by_user: true, confirmed_at: new Date().toISOString(),
@@ -152,6 +165,21 @@ const bad = await post('/forget', {});
 check('HTTP：空 id → 400', bad.status === 400, String(bad.status));
 const missing = await fetch(`${BASE}/dsh-lingshu/api/nope`);
 check('HTTP：未知路由 → 404', missing.status === 404, String(missing.status));
+
+// ── 工作区面板：v0.2 列表 = 沙盒列表；热切换按 sandboxId ──
+const wsList = await (await fetch(`${BASE}/dsh-lingshu/api/workspaces`)).json();
+check('HTTP：工作区列表 v0.2 = 沙盒列表（当前项高亮）',
+  wsList.ok === true && wsList.layout === 'v0.2'
+    && (wsList.workspaces || []).some((w) => w.workspaceId === SID && w.isCurrent === true),
+  JSON.stringify((wsList.workspaces || []).map((w) => [w.workspaceId, w.isCurrent])));
+const wsOne = await (await fetch(`${BASE}/dsh-lingshu/api/workspaces/${SID}`)).json();
+check('HTTP：工作区详情按 sandboxId 可读',
+  wsOne.ok === true && wsOne.workspace?.workspaceId === SID);
+const act = await fetch(`${BASE}/dsh-lingshu/api/workspaces/${SID}/activate`, { method: 'POST' });
+const actJson = await act.json();
+check('HTTP：热切换（POST activate）200 且返回 sandboxId',
+  act.status === 200 && actJson.ok === true && actJson.currentWorkspaceId === SID,
+  JSON.stringify(actJson));
 
 // 文件层自证：purge 之后本地文件里仍有该 id 的骨架行（append-only、不物理删行）
 const rawLocal = readJsonl(path.join(DATA, 'sandboxes', SID, 'butler', 'local_memory.jsonl'));
