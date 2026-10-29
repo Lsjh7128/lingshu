@@ -137,29 +137,37 @@
         });
       }
       card.appendChild(ul);
-      if (unboundWorkspaces().length) {
-        var row = el('div', 'bind-row');
+      // 绑定区：候选只显示真实存在的路径（避免扫描噪声）+ 手填路径兜底（不依赖扫描）
+      var row = el('div', 'bind-row');
+      var cands = unboundWorkspaces().filter(function (w) { return w.exists; });
+      if (cands.length) {
         var sel = el('select');
-        unboundWorkspaces().forEach(function (w) {
+        cands.forEach(function (w) {
           var opt = el('option');
           opt.value = w.workspace_root;
-          opt.textContent = workspaceLabel(w) + (w.exists ? '' : '（路径不存在）');
+          opt.textContent = workspaceLabel(w);
           sel.appendChild(opt);
         });
-        var btn = el('button', 'primary', '绑定到人格舱');
-        btn.addEventListener('click', function () {
-          if (!sel.value) return;
-          api(API.bind, {
-            method: 'POST', headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ persona_id: p.persona_id, workspace_root: sel.value }),
-          }).then(function () { return refresh(); }).then(function () {
-            $('status').textContent = '已绑定：' + sel.value + ' → ' + p.name;
-          }).catch(function (e) { $('status').textContent = '绑定失败：' + e.message; });
-        });
         row.appendChild(sel);
-        row.appendChild(btn);
-        card.appendChild(row);
       }
+      var manual = el('input');
+      manual.placeholder = '或手填人格舱路径，如 D:\\qq鲸鱼';
+      manual.style.minWidth = '260px';
+      row.appendChild(manual);
+      var btn = el('button', 'primary', '绑定到人格舱');
+      btn.addEventListener('click', function () {
+        var selEl = row.querySelector('select');
+        var target = manual.value.trim() || (selEl ? selEl.value : '');
+        if (!target) { $('status').textContent = '请选择或填写人格舱路径'; return; }
+        api(API.bind, {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ persona_id: p.persona_id, workspace_root: target }),
+        }).then(function () { return refresh(); }).then(function () {
+          $('status').textContent = '已绑定：' + target + ' → ' + p.name;
+        }).catch(function (e) { $('status').textContent = '绑定失败：' + e.message; });
+      });
+      row.appendChild(btn);
+      card.appendChild(row);
       box.appendChild(card);
     });
   }
