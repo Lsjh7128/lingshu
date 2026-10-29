@@ -665,10 +665,24 @@ export function apply(ctx, config = {}) {
   const v02 = layoutDoc ? (() => {
     // 沙盒 ↔ 人格绑定（施工单 §3.2 / G2）：mapping 里 default_persona 优先；
     // 没有 mapping 时回退 config.personaId 再回退 butler。
-    const workspaceRoot = String(cfg.workspaceRoot || process.cwd());
+    // 部署实测：宿主不给 workspaceRoot 时 process.cwd() 是宿主本体目录，算出的 sandboxId
+    // 会与迁移时用的项目根不一致 → 单项目部署下改用 mapping 里**唯一**的 binding 兜底。
+    const bindings = readMappingBindings(roots.base);
+    const explicitRoot = String(process.env.LINGSHU_SANDBOX_ROOT || cfg.workspaceRoot || '').trim();
+    let binding = null;
+    let workspaceRoot = '';
+    if (explicitRoot) {
+      workspaceRoot = explicitRoot;
+      const c = canonicalizePath(explicitRoot);
+      binding = bindings.find(
+        (b) => canonicalizePath(String(b.canonical_path || '')) === c) || null;
+    } else if (bindings.length === 1) {
+      binding = bindings[0];
+      workspaceRoot = String(binding.canonical_path || process.cwd());
+    } else {
+      workspaceRoot = process.cwd();
+    }
     const canonical = canonicalizePath(workspaceRoot);
-    const binding = readMappingBindings(roots.base).find(
-      (b) => canonicalizePath(String(b.canonical_path || '')) === canonical);
     const personaId = String((binding && binding.default_persona) || cfg.personaId || 'butler');
     // sandboxId 由"当前项目根"派生（D7）：sha256(canonicalPath)[0:8]；mapping 里写了也以文件为准。
     const sid = sandboxIdOf(canonical);

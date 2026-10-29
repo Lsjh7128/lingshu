@@ -312,7 +312,7 @@ const panelB2 = await panelGet(hB2);
 check('G4：面板在 DirB 不暴露 DirA 条目',
   panelB2.ok === true && (panelB2.local || []).length === 0 && (panelB2.global || []).length === 0);
 
-// e) 冷启动：无 mapping 绑定 / 无 persona 文件 / 无记忆
+// 冷启动：无 mapping 绑定 / 无 persona 文件 / 无记忆
 const hE = makeHost();
 apply(hE.ctx, { ...CFG, workspaceRoot: PROJ.E });
 check('G4：冷启动无 mapping 时回退 config 默认人格（butler）',
@@ -324,6 +324,30 @@ check('G4：冷启动无记忆时召回为空且不报错（unknown/ask_clarify�
   coldFact === '' || coldFact.includes('记忆库中无记录') || coldFact.includes('unknown'), coldFact.slice(0, 100));
 check('G4：冷启动仍注册骨架段（v0.2 8 段，skeleton 空串）',
   hE.sections.length === 8 && (hE.sections.find((s) => s.name === 'lingshu:skeleton')?.text() === ''));
+
+// f) 部署兜底：宿主不给 workspaceRoot 时，单绑定 mapping 决定 sandbox/persona
+//    （真实环境 desktop profile 就是这个形态：宿主 cwd 不是项目根）
+const DATA2 = path.join(ROOT, 'data-single');
+const PROJ_F = path.join(ROOT, 'proj-single');
+const SID_F = sandboxId(canonicalizePath(PROJ_F));
+fs.mkdirSync(PROJ_F, { recursive: true });
+writeLayout(DATA2, { migratedFrom: ['sim-single'], now: Math.floor(Date.now() / 1000) });
+writeJson(path.join(DATA2, 'personas', 'solo', 'persona.json'), {
+  schema_version: 'persona-0.1', persona_id: 'solo', name: 'Solo', summary: '单项目人格',
+});
+fs.writeFileSync(path.join(DATA2, 'sandbox_mapping.yaml'),
+  `schema_version: mapping-0.1\nbindings:\n  - canonical_path: "${canonicalizePath(PROJ_F)}"\n    sandbox_id: "${SID_F}"\n    default_persona: "solo"\n    label: "single"\n`, 'utf8');
+process.env.LINGSHU_DATA_DIR = DATA2;
+const hF = makeHost();
+apply(hF.ctx, CFG);                       // 刻意不给 workspaceRoot
+const applyF = readJsonl(path.join(DATA2, 'audit', 'audit.jsonl')).find((r) => r.kind === 'apply');
+check('部署兜底：无 workspaceRoot + 单绑定 → sandboxId 取绑定项目根',
+  applyF && applyF.sandbox_id === SID_F, JSON.stringify(applyF && applyF.sandbox_id));
+check('部署兜底：无 workspaceRoot + 单绑定 → persona 取 default_persona',
+  applyF && applyF.persona_id === 'solo', JSON.stringify(applyF && applyF.persona_id));
+check('部署兜底：样式段加载到绑定人格（Solo）',
+  String(sectionText(hF, 'lingshu:style') || '').includes('Solo'));
+process.env.LINGSHU_DATA_DIR = DATA;
 
 // ── 汇总 ────────────────────────────────────────────────
 // LINGSHU_V02SIM_KEEP=1 时保留临时数据根（用于采集 [Host][Sandbox][Persona] 日志样例）。
