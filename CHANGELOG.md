@@ -31,7 +31,7 @@
 3. **混沌 v2 自检未通过**：2026-10-29 运行 19/20 不变量、4 条 FINDING（`acceptance/chaos/v2/2026-10-29-report.md`），不计入本版判定，需单独修。
 4. **Docker 未验证**：`demo/Dockerfile` / `docker-compose.demo.yml` 未在本机构建或运行。
 5. **截图未入库**：`acceptance/v2-refactor/*.png` 含真实路径与人格体正文，未提交；README 暂不放截图。
-6. **本机门禁环境限制（非代码缺陷）**：本机 `%TEMP%` 对当前进程不可写，导致 `test_demo_scripts` 的"仓库外目录"断言与 chaos F6 落入仓库内临时目录而失败；`.venv-neural` 未装 Pillow，`test_plot_coevolution_curve` 的 `render_png` 段失败；`check_plugin_pack` 对 `workspaces` / `ui/` 两个**目录**条目按文件判定而误报（已补 `memory-paths.js` / `tool-gateway.js` 两个真实漏项）。在正常桌面环境应全绿。
+6. **本机门禁环境限制（非代码缺陷）**：本机 `%TEMP%` 对当前进程不可写，导致 `test_demo_scripts` 的"仓库外目录"断言与 chaos F6 落入仓库内临时目录而失败；`.venv-neural` 未装 Pillow，`test_plot_coevolution_curve` 的 `render_png` 段失败。在正常桌面环境应全绿。
 
 ---
 
