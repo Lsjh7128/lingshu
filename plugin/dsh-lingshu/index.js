@@ -2795,19 +2795,34 @@ export function apply(ctx, config = {}) {
       const globalRaw = readJsonlRaw(path.join(base, 'personas', pid, 'global_memory.jsonl'));
       const pendingRaw = readJsonlRaw(path.join(base, 'personas', pid, 'global_pending.jsonl'));
       const bindings = readMappingBindings(base).filter((item) => item.default_persona === pid);
-      const layers = bindings.map((binding) => {
-        const raw = readJsonlRaw(path.join(base, 'sandboxes', binding.sandbox_id, pid, 'local_memory.jsonl'));
+      const bindingBySid = new Map(bindings.map((item) => [item.sandbox_id, item]));
+      let sandboxIds = [];
+      try {
+        sandboxIds = fs.readdirSync(path.join(base, 'sandboxes'), { withFileTypes: true })
+          .filter((entry) => entry.isDirectory() && /^[0-9a-f]{8}$/.test(entry.name))
+          .map((entry) => entry.name);
+      } catch { sandboxIds = []; }
+      for (const sid of bindingBySid.keys()) {
+        if (!sandboxIds.includes(sid)) sandboxIds.push(sid);
+      }
+      const rawsBySid = new Map();
+      const layers = sandboxIds.map((sid) => {
+        const raw = readJsonlRaw(path.join(base, 'sandboxes', sid, pid, 'local_memory.jsonl'));
+        rawsBySid.set(sid, raw);
         return {
-          sandbox_id: binding.sandbox_id,
-          canonical_path: binding.canonical_path,
-          rows: foldRows(raw).active.map((row) => memoryBrief(row, 'local', binding.sandbox_id)),
+          sandbox_id: sid,
+          canonical_path: bindingBySid.get(sid)?.canonical_path || null,
+          bound: bindingBySid.has(sid),
+          rows: foldRows(raw).active.map((row) => memoryBrief(row, 'local', sid)),
         };
-      });
+      })
+        // 有记忆的历史沙盒也列出（未绑定也保留，便于查看/清理）；空的未绑定沙盒不占 tab。
+        .filter((layer) => layer.rows.length > 0 || layer.bound)
+        .sort((a, b) => (Number(b.bound) - Number(a.bound)) || a.sandbox_id.localeCompare(b.sandbox_id));
       const allRaw = [
         ...globalRaw,
         ...pendingRaw,
-        ...bindings.flatMap((binding) => readJsonlRaw(
-          path.join(base, 'sandboxes', binding.sandbox_id, pid, 'local_memory.jsonl'))),
+        ...sandboxIds.flatMap((sid) => rawsBySid.get(sid) || []),
       ];
       return {
         ok: true, status: 200, persona_id: pid,
