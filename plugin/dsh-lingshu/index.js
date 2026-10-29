@@ -675,8 +675,18 @@ export function apply(ctx, config = {}) {
   // 不再有"单绑定/单沙盒/cwd"兜底：没绑定必须显式进入 unbound（不注入人格、不读不写记忆）。
   // layout.json 是 v0.2 唯一开关（缺省 legacy 布局逐字节不变）
   const layoutDoc = readLayout(roots.base);
-  const resolveV02 = () => {
-    const workspaceRoot = String(process.env.LINGSHU_SANDBOX_ROOT || cfg.workspaceRoot || process.cwd());
+  // 从宿主对象（pre-step payload / session/event 首参）里取"会话自己的工作区"。
+  // DSH 的 session header 有 cwd；多会话同进程时 process.cwd() 是服务启动目录，
+  // 不能代表当前会话，否则所有会话都会拿到同一个（通常是错的）绑定。
+  const workspaceRootFrom = (source) => {
+    if (!source) return null;
+    const agent = source.agent ?? source;
+    const header = agent?.session?.header ?? source?.session?.header ?? source?.header ?? null;
+    const cwd = header?.cwd ?? source?.cwd ?? source?.workspaceRoot;
+    return typeof cwd === 'string' && cwd.trim() ? cwd : null;
+  };
+  const resolveV02 = (rootOverride) => {
+    const workspaceRoot = String(rootOverride || process.env.LINGSHU_SANDBOX_ROOT || cfg.workspaceRoot || process.cwd());
     const canonical = canonicalizePath(workspaceRoot);
     const binding = resolveBinding(roots.base, canonical);
     const sid = String((binding && binding.sandbox_id) || '');
@@ -772,12 +782,22 @@ export function apply(ctx, config = {}) {
    * 绑定热更新：sandbox_mapping.yaml 变化后，下一轮自动重解析（绑定/解绑无需重启）。
    * 只有"目标沙盒/人格"真的变了才整体重载；同一绑定只更新引用。
    */
-  function refreshV02Binding() {
+  function refreshV02Binding(rootOverride) {
     if (!v02) return;
+    const targetRoot = rootOverride || v02.workspaceRoot;
+    const targetCanonical = targetRoot ? canonicalizePath(targetRoot) : '';
     const sig = mappingSig();
-    if (sig === v02Sig) return;
+    const rootChanged = Boolean(targetCanonical) && targetCanonical !== v02.canonical;
+    if (!rootChanged && sig === v02Sig) return;
     v02Sig = sig;
-    const next = resolveV02();
+    const next = resolveV02(targetRoot);
+    if (next.canonical !== v02.canonical) {
+      audit('workspace_identity', {
+        from: v02.canonical, to: next.canonical, bound: Boolean(next.bound),
+        sandbox_id: next.sandboxId || null, persona_id: next.personaId || null,
+        reason: next.reason || null, host_hook: 'session-workspace',
+      });
+    }
     const same = v02.bound && next.bound
       && v02.sandboxId === next.sandboxId && v02.personaId === next.personaId;
     if (same) { v02 = next; return; }
@@ -1155,7 +1175,7 @@ export function apply(ctx, config = {}) {
     capabilities: { declared: ['fs-read', 'fs-write', 'llm'],
                     granted: ['fs-read', 'fs-write', 'llm'] },
     // v1.2：把工作区根喂给网关，T-UCA-15 才能区分"工作区内绝对路径"与"真逃逸"。
-    workspace_root: cfg.workspaceRoot || process.cwd(),
+    workspace_root: (v02 && v02.workspaceRoot) || cfg.workspaceRoot || process.cwd(),
     confirmation: null,
     // 插件自有工具的 schema 声明（否则 T-UCA-09 会把合法参数判非法）；其余工具沿用网关登记表。
     tool_registry: (gw && gw.REGISTRY)
@@ -1796,6 +1816,7 @@ export function apply(ctx, config = {}) {
     try {
       // 热切换保护：claimed 之后、turn/end 之前视为 turn 活着（不切换、不并发写旧 state）。
       markTurnActive(payload?.turn);
+      try { refreshV02Binding(workspaceRootFrom(payload)); } catch { /* 内部已审计 */ }
       const t = payload?.turn;
       if (t === null || t === undefined) return undefined;
       if (claimedTurn !== t || claimedAgent !== (payload?.agent ?? null)) {
@@ -1835,8 +1856,9 @@ export function apply(ctx, config = {}) {
   const preStepHandler = (payload, next) => {
     const now = Date.now();
     // 绑定可能刚被面板改过：每轮开头做一次 mtime 检查，变化则重解析（无变化零开销）。
+    // 同时用本会话的 workspace 解析，避免多会话共用 process.cwd() 串台。
     try {
-      refreshV02Binding();
+      refreshV02Binding(workspaceRootFrom(payload));
     } catch (err) {
       audit('binding_reload_error', { err: String(err).slice(0, 160) });
     }
@@ -2137,6 +2159,8 @@ export function apply(ctx, config = {}) {
   const seenEvents = {};
   const seenUserText = new Set();
   on('session/event', async (a, b, c) => {
+    // 每个会话事件都带 session（header.cwd）：先把身份切到该会话自己的工作区。
+    try { refreshV02Binding(workspaceRootFrom(a)); } catch { /* 内部已审计 */ }
     // user/message 是"用户说了话"的唯一可靠入口；用它驱动目标与关系。
     const evType = b?.type ?? null;
     // 热切换保护（observe 模式也生效）：没有 claimed/pre-step 的 profile 靠这条事件置位，
@@ -2698,7 +2722,7 @@ export function apply(ctx, config = {}) {
       currentId: ws.id,
       rejected: ws.rejected,
       // 新绑定模型：面板的"当前人格舱"= 当前会话工作区（canonicalPath → mapping）。
-      workspaceRoot: String(cfg.workspaceRoot || process.cwd()),
+      workspaceRoot: String((v02 && v02.workspaceRoot) || cfg.workspaceRoot || process.cwd()),
       dsHome: home(),
       coldTurns: Number(cfg.coldTurns),
       warmTurns: Number(cfg.warmTurns),
