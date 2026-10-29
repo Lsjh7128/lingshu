@@ -13,10 +13,12 @@
         topK: 3
         tokenBudgetTokens: 900
         archiveThreshold: 0.15
-        # 2026-10-28（v1.2 / T-UCA-15）：工具网关判定"路径逃逸"的工作区根。
-        # 不配时 index.js 回落 `process.cwd()`——若宿主进程 cwd 不是 D:\LSJH，
-        # 工作区内的正常读写会被误判成逃逸（成片 T-UCA-15 误报）→ 必须显式给出。
-        workspaceRoot: 'D:/LSJH'
+        # 工具网关判定"路径逃逸"的工作区根（T-UCA-15）。
+        # 留空 = index.js 回落 `process.cwd()`；也可用环境变量 LINGSHU_SANDBOX_ROOT 覆盖。
+        # 若宿主进程 cwd 不等于实际工作区根，工作区内的正常读写会被误判成逃逸
+        # （成片 T-UCA-15 误报）→ 集成方应显式配置为部署环境的工作区绝对路径。
+        # 发布包不携带任何本机绝对路径，故此处默认留空。
+        workspaceRoot: ''
         # 人格体工作区隔离（ADR-017 / P1）：留空 = 沿用历史平铺目录（零回归）。
         # 需要隔离时改成 'code' / 'roleplay' 之类（只接受 [A-Za-z0-9_-]{1,32}）。
         workspaceId: ''

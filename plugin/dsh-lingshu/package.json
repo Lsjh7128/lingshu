@@ -3,6 +3,15 @@
   "version": "0.2.0",
   "private": true,
   "description": "LINGSHU 认知插件：记忆/元认知/情感/合成/目标/关系 + 控制论层（相变/积分/UCA 前置闸）",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "memory",
+    "metacognition",
+    "cognitive-architecture",
+    "stpa"
+  ],
   "type": "module",
   "main": "index.js",
   "exports": {
@@ -28,7 +37,9 @@
     "client.js",
     "dashboard.js",
     "ui/",
-    "cordis.patch.yml"
+    "cordis.patch.yml",
+    "README.md",
+    "PROVENANCE.md"
   ],
   "scripts": {
     "sim": "node host-sim.mjs --assert",
@@ -43,6 +54,15 @@
     "supply-chain": "node supply-chain-sim.mjs --assert",
     "supply-chain:integration": "node supply-chain-integration.mjs"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lsjh7128/lingshu.git",
+    "directory": "plugin/dsh-lingshu"
+  },
+  "bugs": {
+    "url": "https://github.com/Lsjh7128/lingshu/issues"
+  },
+  "homepage": "https://github.com/Lsjh7128/lingshu/tree/main/plugin/dsh-lingshu#readme",
   "dsh": {
     "engines": { "dsh": ">=0.2.0-rc.2" },
     "bundle": { "patch": "./cordis.patch.yml" },

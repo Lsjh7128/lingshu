@@ -28,7 +28,9 @@ def main() -> int:
     errors: list[str] = []
 
     for f in files:
-        if not os.path.isfile(os.path.join(PKG_DIR, f)):
+        # 目录条目（如 `ui/`、`workspaces`）在 files 里合法：npm 会整目录打包。
+        # 因此这里判「存在」（os.path.exists），不判 isfile——否则目录条目必然误报。
+        if not os.path.exists(os.path.join(PKG_DIR, f)):
             errors.append("files 列了但不存在: %s" % f)
 
     # 运行时依赖：从 main 出发，沿 import 递归
