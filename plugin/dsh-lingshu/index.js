@@ -49,6 +49,11 @@ import {
   listPersonas as listPersonaStore,
   createPersona as createPersonaRecord,
   updatePersona as updatePersonaRecord,
+  setPersonaLock as setPersonaLockRecord,
+  deletePersona as deletePersonaRecord,
+  listPersonaTrash as listPersonaTrashRecord,
+  restorePersonaTrash as restorePersonaTrashRecord,
+  purgePersonaTrash as purgePersonaTrashRecord,
   bindWorkspace as bindWorkspaceRecord,
   unbindWorkspace as unbindWorkspaceRecord,
   availableWorkspaces as listAvailableWorkspaces,
@@ -2859,6 +2864,17 @@ export function apply(ctx, config = {}) {
     const getPersonas = () => listPersonaStore(workspaceOptions);
     const makePersona = (body) => createPersonaRecord(workspaceOptions, body);
     const updatePersonaHandler = (body) => updatePersonaRecord(workspaceOptions, body);
+    const lockPersonaHandler = (body) => setPersonaLockRecord(workspaceOptions, body);
+    const deletePersonaHandler = (body) => {
+      const res = deletePersonaRecord(workspaceOptions, body);
+      if (res.ok) {
+        try { refreshV02Binding(); } catch { /* 内部已审计 */ }
+      }
+      return res;
+    };
+    const listPersonaTrashHandler = () => listPersonaTrashRecord(workspaceOptions);
+    const restorePersonaTrashHandler = (body) => restorePersonaTrashRecord(workspaceOptions, body);
+    const purgePersonaTrashHandler = (body) => purgePersonaTrashRecord(workspaceOptions, body);
     const bindPersona = (body) => {
       const res = bindWorkspaceRecord(workspaceOptions, body);
       if (res.ok) {
@@ -2913,6 +2929,11 @@ export function apply(ctx, config = {}) {
         getPersonas,
         createPersona: makePersona,
         updatePersona: updatePersonaHandler,
+        lockPersona: lockPersonaHandler,
+        deletePersona: deletePersonaHandler,
+        listPersonaTrash: listPersonaTrashHandler,
+        restorePersonaTrash: restorePersonaTrashHandler,
+        purgePersonaTrash: purgePersonaTrashHandler,
         bindWorkspace: bindPersona,
         unbindWorkspace: unbindPersona,
         getAvailableWorkspaces: availablePersonaWorkspaces,

@@ -1062,6 +1062,7 @@ export function listPersonas(options = {}) {
     if (!entry.isDirectory() || !V02_PERSONA_RE.test(entry.name)) continue;
     const p = readPersona(path.join(personaRoot(o), entry.name, 'persona.json'));
     if (!p) continue;                    // 无 persona.json 的孤儿目录不展示
+    const lock = readPersonaLock(o, entry.name);
     personas.push({
       persona_id: entry.name,
       name: p.name,
@@ -1070,6 +1071,8 @@ export function listPersonas(options = {}) {
       self_reference: p.self_reference,
       tone: p.tone,
       boundaries: p.boundaries,
+      locked: lock.locked,
+      unlocked_until: lock.unlocked_until,
       bindings: bindings.filter((b) => b.default_persona === entry.name).map((b) => ({ ...b })),
     });
   }
@@ -1292,6 +1295,186 @@ export function updatePersona(options = {}, raw = {}) {
   };
 }
 
+// ── 人格体锁 / 归档删除 / 回收站（L1 只锁删除，U1 一次性解锁 60s，D1 归档）──
+const PERSONA_LOCK_FILE = 'lock.json';
+const PERSONA_UNLOCK_TTL_MS = 60 * 1000;
+
+function readPersonaLock(o, pid) {
+  const file = path.join(personaRoot(o), pid, PERSONA_LOCK_FILE);
+  let doc = null;
+  try { doc = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { doc = null; }
+  const until = Number(doc?.unlocked_until || 0);
+  const unlocked = doc?.locked === false && until > Date.now();
+  return {
+    locked: !unlocked,
+    unlocked_until: unlocked ? until : 0,
+  };
+}
+
+function writePersonaLock(o, pid, locked) {
+  const file = path.join(personaRoot(o), pid, PERSONA_LOCK_FILE);
+  const doc = locked
+    ? { locked: true, unlocked_until: 0, updated_at: new Date().toISOString() }
+    : { locked: false, unlocked_until: Date.now() + PERSONA_UNLOCK_TTL_MS, updated_at: new Date().toISOString() };
+  atomicWriteJson(file, doc);
+  return doc;
+}
+
+function personaTrashRoot(o) {
+  return path.join(path.resolve(o.base), 'trash', 'personas');
+}
+
+function moveDir(src, dst) {
+  try {
+    fs.renameSync(src, dst);
+  } catch (err) {
+    if (err?.code !== 'EXDEV') throw err;
+    fs.cpSync(src, dst, { recursive: true });
+    fs.rmSync(src, { recursive: true, force: true });
+  }
+}
+
+/** 锁定 / 解锁人格体。默认锁定；解锁 60s 后自动回锁。 */
+export function setPersonaLock(options = {}, raw = {}) {
+  const o = normalizeOptions(options);
+  if (!o.base) return { ok: false, status: 503, error: 'data_root_unavailable' };
+  const pid = String(raw.persona_id || '').trim();
+  if (!personaExists(o, pid)) return { ok: false, status: 404, error: 'persona_not_found' };
+  if (typeof raw.locked !== 'boolean') return { ok: false, status: 400, error: 'bad_locked' };
+  try {
+    writePersonaLock(o, pid, raw.locked);
+  } catch {
+    return { ok: false, status: 500, error: 'lock_write_failed' };
+  }
+  const state = readPersonaLock(o, pid);
+  safeAudit(o.audit, 'persona_lock_changed', {
+    persona_id: pid, locked: state.locked, unlocked_until: state.unlocked_until || null,
+    source: 'api', layout: 'v0.2',
+  });
+  return { ok: true, status: 200, persona_id: pid, ...state };
+}
+
+/** 归档删除人格体：解绑所有工作区，目录移动到 trash/personas/<pid>_<ts>/。 */
+export function deletePersona(options = {}, raw = {}) {
+  const o = normalizeOptions(options);
+  if (!o.base) return { ok: false, status: 503, error: 'data_root_unavailable' };
+  const pid = String(raw.persona_id || '').trim();
+  if (!personaExists(o, pid)) return { ok: false, status: 404, error: 'persona_not_found' };
+  const persona = readPersona(path.join(personaRoot(o), pid, 'persona.json'));
+  const confirmName = String(raw.confirm_name ?? '');
+  if (!persona || confirmName !== persona.name) {
+    return { ok: false, status: 400, error: 'confirm_name_mismatch' };
+  }
+  const lock = readPersonaLock(o, pid);
+  if (lock.locked) return { ok: false, status: 403, error: 'persona_locked' };
+
+  const bindings = readMappingBindings(o.base).filter((b) => b.default_persona === pid);
+  const remaining = readMappingBindings(o.base).filter((b) => b.default_persona !== pid);
+  if (bindings.length) {
+    try { writeMappingBindings(o.base, remaining); } catch {
+      return { ok: false, status: 500, error: 'unbind_failed' };
+    }
+  }
+  const trashRoot = personaTrashRoot(o);
+  try { fs.mkdirSync(trashRoot, { recursive: true }); } catch {
+    return { ok: false, status: 500, error: 'trash_unavailable' };
+  }
+  const trashId = `${pid}_${Date.now()}`;
+  const dest = path.join(trashRoot, trashId);
+  try {
+    moveDir(path.join(personaRoot(o), pid), dest);
+    atomicWriteJson(path.join(dest, 'manifest.json'), {
+      schema_version: 'persona-trash-0.1',
+      trash_id: trashId,
+      persona_id: pid,
+      name: persona.name,
+      archived_at: new Date().toISOString(),
+      bindings_removed: bindings.map((b) => ({ canonical_path: b.canonical_path, sandbox_id: b.sandbox_id })),
+      mode: 'archive',
+    });
+  } catch {
+    return { ok: false, status: 500, error: 'archive_failed' };
+  }
+  safeAudit(o.audit, 'persona_archived', {
+    persona_id: pid, trash_id: trashId, bindings_removed: bindings.length,
+    source: 'api', layout: 'v0.2',
+  });
+  return { ok: true, status: 200, persona_id: pid, trash_id: trashId, bindings_removed: bindings.length };
+}
+
+/** 回收站列表（只读目录，不自动清理）。 */
+export function listPersonaTrash(options = {}) {
+  const o = normalizeOptions(options);
+  if (!o.base) return { ok: false, status: 503, error: 'data_root_unavailable' };
+  let dirs = [];
+  try {
+    dirs = fs.readdirSync(personaTrashRoot(o), { withFileTypes: true });
+  } catch { dirs = []; }
+  const items = [];
+  for (const entry of dirs) {
+    if (!entry.isDirectory()) continue;
+    const dir = path.join(personaTrashRoot(o), entry.name);
+    let manifest = null;
+    try { manifest = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8')); } catch { manifest = null; }
+    items.push({
+      trash_id: entry.name,
+      persona_id: manifest?.persona_id || entry.name.split('_')[0],
+      name: manifest?.name || null,
+      archived_at: manifest?.archived_at || null,
+      bindings_removed: Array.isArray(manifest?.bindings_removed) ? manifest.bindings_removed.length : 0,
+    });
+  }
+  items.sort((a, b) => String(b.archived_at || b.trash_id).localeCompare(String(a.archived_at || a.trash_id)));
+  return { ok: true, status: 200, items };
+}
+
+/** 从回收站恢复（只恢复人格体目录，不自动恢复绑定）。 */
+export function restorePersonaTrash(options = {}, raw = {}) {
+  const o = normalizeOptions(options);
+  if (!o.base) return { ok: false, status: 503, error: 'data_root_unavailable' };
+  const trashId = String(raw.trash_id || '').trim();
+  if (!/^[A-Za-z0-9_-]{1,120}$/.test(trashId)) return { ok: false, status: 400, error: 'bad_trash_id' };
+  const root = personaTrashRoot(o);
+  const src = path.join(root, trashId);
+  if (!isRealDir(src)) return { ok: false, status: 404, error: 'trash_not_found' };
+  let personaId = trashId.split('_')[0];
+  try {
+    const manifest = JSON.parse(fs.readFileSync(path.join(src, 'manifest.json'), 'utf8'));
+    if (manifest?.persona_id) personaId = manifest.persona_id;
+  } catch { /* 用目录名兜底 */ }
+  if (!V02_PERSONA_RE.test(personaId)) return { ok: false, status: 400, error: 'bad_persona_id' };
+  const dest = path.join(personaRoot(o), personaId);
+  if (fs.existsSync(dest)) return { ok: false, status: 409, error: 'persona_exists' };
+  try {
+    fs.rmSync(path.join(src, 'manifest.json'), { force: true });
+    moveDir(src, dest);
+  } catch {
+    return { ok: false, status: 500, error: 'restore_failed' };
+  }
+  safeAudit(o.audit, 'persona_restored', { persona_id: personaId, trash_id: trashId, source: 'api', layout: 'v0.2' });
+  return { ok: true, status: 200, persona_id: personaId };
+}
+
+/** 彻底删除回收站条目：需要二次确认文本，不可恢复。 */
+export function purgePersonaTrash(options = {}, raw = {}) {
+  const o = normalizeOptions(options);
+  if (!o.base) return { ok: false, status: 503, error: 'data_root_unavailable' };
+  const trashId = String(raw.trash_id || '').trim();
+  if (!/^[A-Za-z0-9_-]{1,120}$/.test(trashId)) return { ok: false, status: 400, error: 'bad_trash_id' };
+  if (String(raw.confirm_text || '') !== '彻底删除') {
+    return { ok: false, status: 400, error: 'confirm_text_mismatch' };
+  }
+  const src = path.join(personaTrashRoot(o), trashId);
+  if (!isRealDir(src)) return { ok: false, status: 404, error: 'trash_not_found' };
+  try {
+    fs.rmSync(src, { recursive: true, force: true });
+  } catch {
+    return { ok: false, status: 500, error: 'purge_failed' };
+  }
+  safeAudit(o.audit, 'persona_purged', { trash_id: trashId, source: 'api', layout: 'v0.2' });
+  return { ok: true, status: 200, trash_id: trashId };
+}
+
 export default {
   listWorkspaces,
   readWorkspace,
@@ -1300,6 +1483,11 @@ export default {
   listPersonas,
   createPersona,
   updatePersona,
+  setPersonaLock,
+  deletePersona,
+  listPersonaTrash,
+  restorePersonaTrash,
+  purgePersonaTrash,
   bindWorkspace,
   unbindWorkspace,
   availableWorkspaces,
