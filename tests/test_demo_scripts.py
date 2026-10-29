@@ -349,7 +349,7 @@ check("demo.sh 使用 \"$@\" 转发全部参数", '"$@"' in read_text("demo.sh")
 # B. README「Try Demo」区块
 # ════════════════════════════════════════════════════════════════════════
 print("\n[B] README Try Demo 区块与实现一致性")
-readme = read_text("README.md")
+readme = read_text("README.zh-CN.md")
 start = readme.find("## 🚀 Try LINGSHU in 10 Seconds")
 check("README 存在 Try Demo 区块", start >= 0)
 section = ""
@@ -1174,7 +1174,7 @@ check("docs §4 注明 seed --dir 是测试入口（允许仓库外，仍拒真�
 check("docs 的 STPA soft 预期已指向 /audit 的 severity=soft（保留 Safe_Redirect）",
       "/audit" in docs and "severity=soft" in docs and "Safe_Redirect" in docs)
 # README 目录树 / CHANGELOG 记录（Lead 写域，独立核对是否已登记）
-readme_all = read_text("README.md")
+readme_all = read_text("README.zh-CN.md")
 for rel in ["demo.sh", "demo.bat", "demo/", "docker-compose.demo.yml", "docs/demo-sandbox.md"]:
     check("README 目录树/正文提到 %s" % rel, rel in readme_all)
 changelog = read_text("CHANGELOG.md")
