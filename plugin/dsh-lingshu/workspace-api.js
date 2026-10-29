@@ -1186,8 +1186,9 @@ export function unbindWorkspace(options = {}, raw = {}) {
 function decodeSessionDir(name) {
   if (typeof name !== 'string' || !name.startsWith('--') || !name.endsWith('--')) return null;
   let s = name.slice(2, -2);
-  // 编码：非 ASCII → ~XXXX（UTF-16 码元，可能不带尾部 ~）；分隔符 → '-'（有歧义，靠 exists 过滤）
-  s = s.replace(/~([0-9A-Fa-f]{4})~?/g, (_m, hex) => String.fromCharCode(parseInt(hex, 16)));
+  // 编码：非 ASCII → ~XXXX（UTF-16 码元，连续时形如 ~9CB8~9C7C，最后一个不带尾部 ~）。
+  // 用负向前瞻而不是"?": 不能把下一个 ~ 吃掉，否则 `~9CB8~9C7C` 只解出前半截。
+  s = s.replace(/~([0-9A-Fa-f]{4})(?![0-9A-Fa-f])/g, (_m, hex) => String.fromCharCode(parseInt(hex, 16)));
   const m = /^([A-Za-z])-(.*)$/.exec(s);
   if (!m) return null;
   return `${m[1]}:\\${m[2].replace(/-/g, '\\')}`;
