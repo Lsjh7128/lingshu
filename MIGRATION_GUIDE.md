@@ -127,7 +127,7 @@ Get-ChildItem "$data\sandboxes" -Recurse -File | Select-Object FullName,Length
 - **创建人格体**：`POST /dsh-lingshu/api/personas` `{name, summary, traits}` → `personas/{pid}/`（persona.json + 全局记忆空文件 + persona_state）。
 - **绑定人格舱**：`POST /dsh-lingshu/api/bindings` `{persona_id, workspace_root}` → 写 `sandbox_mapping.yaml` + `sandboxes/{sid}/sandbox.json` + `sandboxes/index.json`。
 - **解绑**：`POST /dsh-lingshu/api/bindings/unbind` `{workspace_root}`（沙盒数据保留，不删除）。
-- **面板**：`/dsh-lingshu/dashboard/personas`（创建 / 绑定 / 解绑；候选人格舱 = 当前会话工作区 + `~/.dsh/sessions` 扫描，失败可手填）。
+- **面板**：`/dsh-lingshu/dashboard`（人格体中枢主页；每张人格体卡片右上角 = 未绑定「绑定」/ 已绑定「解绑」，支持下拉或手填人格舱；旧的独立绑定页已废弃并 302 回主页）。
 - **语义**：没有绑定 = **不加载任何人格、不读不写记忆**（fail-closed）；绑定/解绑**下一轮生效**（mapping 热读）。
 - `active-workspace.json` 在 v0.2 不再决定人格（文件保留但忽略）；legacy 布局不受影响。
 
