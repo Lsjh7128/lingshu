@@ -82,6 +82,91 @@ Full runbook: [`docs/demo-sandbox.md`](docs/demo-sandbox.md) · Plugin internals
 
 ---
 
+## 🚀 Installation
+
+> Three paths; pick the one that matches what you want to do. **No network installs required**: the Python side is stdlib-only, and the plugin is not published to npm.
+> ⚠️ Hard boundary: **install only into a disposable profile, never into your daily `desktop` profile** (see the note at the end).
+
+### Path A · Just want to see it run (zero install, recommended first time)
+
+Requirements: **Python ≥ 3.8**, standard library only.
+
+```bash
+git clone https://github.com/Lsjh7128/lingshu.git
+cd lingshu
+
+python scripts/quickstart.py --no-open   # frozen replay → generate console/demo.html (does not open a browser)
+```
+
+Then double-click `console/demo.html`. Single file, inline CSS/SVG, no external requests; **installs nothing and never reads or writes your DSH profile**.
+Just want the redacted demo page? `python tools/gen_demo_report.py --no-real`.
+
+### Path B · Install into the DSH host (disposable profile)
+
+Requirements:
+
+- **DSH desktop ≥ 0.2.0-rc.2** (see `dsh.engines` in `plugin/dsh-lingshu/package.json`)
+- **Node.js ≥ 20.10**, or use the node bundled with DSH
+- `plugin add` needs **pnpm**; if missing, `npm i -g pnpm` (or add DSH's bundled pnpm to `PATH`)
+
+Windows default locations shown; on other platforms substitute `$dshBin` / `$node`:
+
+```powershell
+# 0) Locate the DSH CLI and node (Windows defaults)
+$dshBin = "$env:USERPROFILE\.dsh\profiles\node_modules\@deepseek-ai\dsh\lib\bin.js"
+$node   = "$env:USERPROFILE\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\node\bin\node.exe"
+# if node is already on PATH, plain `node` works instead of & $node
+
+# 1) Create a disposable experiment profile (do NOT use desktop)
+& $node "$dshBin" lingshu-lab-headless --from-default-profile headless --dump-config
+
+# 2) Official install: link: pointing at your clone
+#    Do not hand-create junctions, do not hand-edit package.json
+& $node "$dshBin" plugin --profile lingshu-lab-headless add "link:<your-repo>/plugin/dsh-lingshu"
+
+# 3) Run one real session (headless, exits when done)
+& $node "$dshBin" lingshu-lab-headless "Answer in one sentence: what is the project codename?"
+
+# 4) Inspect audit events
+Get-Content "$env:USERPROFILE\.dsh\plugins\dsh-lingshu\audit.jsonl" -Tail 20
+```
+
+After install the plugin mounts automatically: the package declares `dsh.bundle.patch`, so `cordis.patch.yml` is wired in by the loader — **no manual profile patch edits**.
+
+> **Two red lines**
+> 1. **Never install the plugin into the `desktop` profile.** Once the daily profile has it, memory/audit writes go into your real data directory; every experiment here runs in a **disposable** profile (`docs/21-开源发布清单.md` §B2).
+> 2. Plugin data lands in `$DSH_HOME/plugins/dsh-lingshu/` (`state.json` / `memory.jsonl` / `audit.jsonl`). That is **real local data** — **do not commit it, do not send it out**.
+
+### Path C · Run acceptance / reproduce the paper
+
+```bash
+pdfinfo paper/main-en.pdf 2>/dev/null || echo "PDFs live under paper/"   # paper
+python tests/test_learning.py                                   # a single acceptance file
+node plugin/dsh-lingshu/host-sim.mjs --assert                   # plugin mock-host assertions (no DSH)
+node plugin/dsh-lingshu/control-sim.mjs --assert                # control-theory pure-function assertions
+```
+
+Full command list, per-file expectations and CI basis: **§7 Quick start** below and [`docs/21-开源发布清单.md`](docs/21-开源发布清单.md).
+
+### Uninstall / rollback (~3 minutes)
+
+```powershell
+# 1) Remove the plugin from the experiment profile
+& $node "$dshBin" plugin --profile lingshu-lab-headless remove dsh-lingshu
+
+# 2) Delete the disposable profile
+Remove-Item -Recurse -Force "$env:USERPROFILE\.dsh\profiles\lingshu-lab-headless"
+
+# 3) Delete the plugin data (state / memory / audit)
+Remove-Item -Recurse -Force "$env:USERPROFILE\.dsh\plugins\dsh-lingshu"
+```
+
+More detail (three contract pitfalls hit on real machines, observe mode, the single memory writer): [`plugin/README.md`](plugin/README.md).
+
+> Platform note: measured on **Windows**; on macOS / Linux the paths become `~/.dsh/...`, not yet verified on real machines.
+
+---
+
 ## Why LINGSHU exists · Background ("cyber fish-keeping")
 
 **Plainly: you are keeping a fish in cyberspace.**
@@ -542,7 +627,19 @@ python tools/run_actuator_demo.py
 
 ## 8. License and release
 
-- Code and documents are released under **MIT**; full text in [LICENSE](LICENSE). The plugin's `plugin/dsh-lingshu/package.json` declares `license: MIT` (`private: true`, not published to npm).
+This project is **dual-licensed**:
+
+- **Source code** — [MIT License](LICENSE): `engine/`, `plugin/`, `tests/`, `tools/`, `scripts/`, `console/`, etc.
+- **Academic paper and documentation** — [CC BY-NC-ND 4.0](paper/LICENSE): the paper, figures, data and documents under `paper/` (Attribution–NonCommercial–NoDerivatives 4.0 International).
+
+The plugin's `plugin/dsh-lingshu/package.json` declares `license: MIT` (`private: true`, not published to npm). License scope is governed by [LICENSE](LICENSE) and [paper/LICENSE](paper/LICENSE); the binding text of CC BY-NC-ND 4.0 is at <https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.en>.
+
+### Paper PDFs
+
+- [English version — `paper/main-en.pdf`](paper/main-en.pdf)
+- [Bilingual (English / 中文) — `paper/main-bilingual.pdf`](paper/main-bilingual.pdf)
+- [Chinese version — `paper/main-zh.pdf`](paper/main-zh.pdf)
+
 - Pre-release checklist: [`docs/21-开源发布清单.md`](docs/21-开源发布清单.md) — dependencies, secret scanning, data redaction, profile isolation statements, version numbers, CI commands, issue/PR templates, license. Every item is checkable.
 - **Data and profile boundary**: the repository contains no real run data (`state.json` / `memory.jsonl` / `audit.jsonl` under `$DSH_HOME/plugins/dsh-lingshu/` are local data and are not committed); `console/demo.html` is a **reproducibly generated** demo artifact holding only redacted field-level statistics (no raw message text / local paths / user names). This repository **does not install** the plugin and **does not modify** any DSH profile; all experiments use disposable profiles (see [`plugin/README.md`](plugin/README.md)).
 - One-line reminder: `replay-set/` is fully synthetic, parameters are `provenance: guess`, and the real benefit of the control-theoretic layer is unverified. Do not describe them as "verified production effect" in release notes or issues.

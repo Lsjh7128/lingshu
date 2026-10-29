@@ -24,8 +24,8 @@
       "duration_ms": 4107,
       "started_at": "2026-10-27T23:59:25+08:00",
       "finished_at": "2026-10-27T23:59:29+08:00",
-      "cwd": "D:\\LSJH\\lingshu\\paper\\comparison-lab\\.runtime\\cwd\\smoke-baseline\\turn1",
-      "dsh_home": "D:\\LSJH\\lingshu\\paper\\comparison-lab\\.runtime\\dshhome",
+      "cwd": "<REPO_ROOT>\\paper\\comparison-lab\\.runtime\\cwd\\smoke-baseline\\turn1",
+      "dsh_home": "<REPO_ROOT>\\paper\\comparison-lab\\.runtime\\dshhome",
       "session_files_before": [
         "--D-LSJH-lingshu-paper-comparison-lab-.runtime-cwd--\\session-2e1b914c-5d2f-4606-8710-a039991af57d\\session.v4.jsonl.zstd",
         "--D-LSJH-lingshu-paper-comparison-lab-.runtime-cwd--\\session-d09fbbc1-ea63-4fb9-af0f-771c30221217\\session.v4.jsonl.zstd",
@@ -276,8 +276,8 @@
       "duration_ms": 4081,
       "started_at": "2026-10-27T23:59:29+08:00",
       "finished_at": "2026-10-27T23:59:33+08:00",
-      "cwd": "D:\\LSJH\\lingshu\\paper\\comparison-lab\\.runtime\\cwd\\smoke-lingshu\\turn1",
-      "dsh_home": "D:\\LSJH\\lingshu\\paper\\comparison-lab\\.runtime\\dshhome",
+      "cwd": "<REPO_ROOT>\\paper\\comparison-lab\\.runtime\\cwd\\smoke-lingshu\\turn1",
+      "dsh_home": "<REPO_ROOT>\\paper\\comparison-lab\\.runtime\\dshhome",
       "session_files_before": [
         "--D-LSJH-lingshu-paper-comparison-lab-.runtime-cwd--\\session-2e1b914c-5d2f-4606-8710-a039991af57d\\session.v4.jsonl.zstd",
         "--D-LSJH-lingshu-paper-comparison-lab-.runtime-cwd--\\session-d09fbbc1-ea63-4fb9-af0f-771c30221217\\session.v4.jsonl.zstd",
@@ -503,7 +503,7 @@
         "--D-LSJH-lingshu-paper-comparison-lab-.runtime-cwd-smoke-lingshu-turn1--\\session-8958f772-a8d0-4140-9e60-bf6807850af6\\session.v4.jsonl.zstd",
         "--D-LSJH-lingshu-paper-comparison-lab-.runtime-cwd-smoke-lingshu-turn1--\\session-9d286da4-9ea1-4aa8-b032-4b3b1d4646a2\\session.v4.jsonl.zstd"
       ],
-      "data_dir": "D:\\LSJH\\lingshu\\paper\\comparison-lab\\raw\\smoke\\lingshu-data",
+      "data_dir": "<REPO_ROOT>\\paper\\comparison-lab\\raw\\smoke\\lingshu-data",
       "is_judged_turn": false,
       "error": null
     }

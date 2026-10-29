@@ -1,0 +1,37 @@
+LINGSHU 论文与文档许可 / LINGSHU Paper & Documentation License
+================================================================
+
+本目录（paper/）下的学术论文、文档及其源文件（.tex、.bib、图表、数据、PDF 等）
+按 Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International
+（CC BY-NC-ND 4.0，署名—非商业性使用—禁止演绎 4.0 国际）许可协议发布。
+
+Copyright (c) 2026 Chen Yan (LINGSHU Project Team)
+
+你可以自由地：
+  - 共享（Share）— 以任何媒介或格式复制、分发本作品。
+
+但须遵守以下条件：
+  - 署名（Attribution, BY）— 必须给出适当的署名，提供指向本许可协议的链接，
+    并说明是否作了修改。你可以以任何合理的方式署名，但不得暗示许可人认可你或你的使用。
+  - 非商业性使用（NonCommercial, NC）— 不得将本作品用于商业目的。
+  - 禁止演绎（NoDerivatives, ND）— 若你再混合、转换或基于本作品创作，
+    你不得分发修改后的作品。
+  - 不得增加额外限制 — 不得适用法律术语或技术措施，从而限制他人做本许可协议允许的事。
+
+许可协议全文（具有法律约束力的官方文本）：
+  - 人类可读摘要（中文）：https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh
+  - 法律文本（英文）：https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.en
+  - Deed (English)：https://creativecommons.org/licenses/by-nc-nd/4.0/
+
+适用范围 / Scope
+----------------
+  - 本许可仅覆盖 paper/ 目录下的学术论文与文档（含其源文件、图表与数据）。
+  - 仓库其它部分（engine/、plugin/、tests/、tools/、scripts/ 等源代码与脚本）
+    采用 MIT License，见仓库根目录 LICENSE。
+  - 若本文件的摘要与 CC 官方法律文本存在歧义，以官方法律文本
+    （https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.en）为准。
+
+引用 / Citation
+---------------
+引用本论文时，请使用仓库根目录 README.md 中给出的引用信息，并注明
+"Chen Yan (LINGSHU Project Team)" 与首次公开发布日期。

@@ -88,6 +88,32 @@ paper/.pylib/
 paper/.wheels/
 paper/figures/__pycache__/
 
+# LaTeX 编译产生的中间垃圾文件（可由 paper/build.ps1 / paper/rebuild.ps1 重建，不入库）
+*.aux
+*.toc
+*.lof
+*.lot
+*.out
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.synctex(busy)
+*.nav
+*.snm
+*.vrb
+*.run.xml
+*.bcf
+*.xdv
+*.upa
+*.upb
+paper/*.aux
+paper/*.toc
+paper/*.out
+paper/*.log
+paper/*.synctex.gz
+
 # 本地 research 检出（只发布 research/*.md）
 research/_trees/
 research/repos/
