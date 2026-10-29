@@ -15,18 +15,20 @@
   section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
   section h2 { font-size:13px; margin:0 0 10px; color:var(--muted); font-weight:600; }
   .persona { border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-bottom:10px; }
-  .persona h3 { margin:0 0 4px; font-size:14px; }
-  .persona .summary { color:var(--muted); font-size:12px; max-height:54px; overflow:auto; }
-  .bindings { margin:8px 0 0; padding:0; list-style:none; display:grid; gap:6px; }
-  .bindings li { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); }
-  .bindings code { color:var(--fg); font-size:12px; }
-  .bind-row { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+  .persona-head { display:flex; align-items:center; gap:8px; }
+  .persona-head h3 { margin:0; font-size:14px; flex:1; }
+  .persona .summary { color:var(--muted); font-size:12px; max-height:54px; overflow:auto; margin:4px 0 6px; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin:4px 0 8px; }
+  .chip { border:1px solid var(--line); border-radius:999px; padding:2px 9px; font-size:11px; color:var(--muted); }
+  .chip.bound { color:var(--ok); border-color:var(--ok); }
+  .bind-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
   select, input, textarea { background:var(--bg); color:var(--fg); border:1px solid var(--line); border-radius:6px; padding:6px 8px; font:inherit; font-size:12px; }
   textarea { width:100%; min-height:64px; resize:vertical; }
   button { background:transparent; color:var(--accent); border:1px solid var(--line); border-radius:6px; padding:5px 12px; cursor:pointer; font-size:12px; }
-  button.danger { color:var(--danger); }
   button.primary { border-color:var(--accent); }
-  button:hover { border-color:var(--accent); }
+  button.unbind { color:var(--danger); border-color:var(--danger); }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  button:hover:not(:disabled) { border-color:var(--accent); }
   label { display:block; font-size:12px; color:var(--muted); margin-top:8px; }
   .traits { display:grid; grid-template-columns:1fr 1fr; gap:6px 10px; margin-top:6px; }
   .traits label { margin:0; display:flex; align-items:center; gap:6px; }
@@ -34,7 +36,7 @@
   .status { color:var(--muted); font-size:12px; }
   .error { color:var(--danger); font-size:12px; }
   .tag { border:1px solid var(--line); border-radius:999px; padding:1px 8px; font-size:11px; color:var(--muted); }
-  .tag.bound { color:var(--ok); border-color:var(--ok); }
+  .hintline { color:var(--muted); font-size:11px; margin-top:6px; }
 </style>
 </head>
 <body>
@@ -73,6 +75,7 @@
     unbind: '/dsh-lingshu/api/bindings/unbind',
   };
   var state = { personas: [], workspaces: [] };
+  var drafts = {};                       // pid -> { target, manual }
   var $ = function (id) { return document.getElementById(id); };
 
   function el(tag, cls, text) {
@@ -80,6 +83,10 @@
     if (cls) n.className = cls;
     if (text !== undefined) n.textContent = text;
     return n;
+  }
+
+  function norm(p) {
+    return String(p || '').trim().replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase();
   }
 
   function api(path, opts) {
@@ -91,13 +98,73 @@
     });
   }
 
-  function unboundWorkspaces() {
-    return state.workspaces.filter(function (w) { return !w.bound_persona_id; });
+  function candidates() {
+    return state.workspaces.filter(function (w) { return w.exists; });
+  }
+
+  function defaultTarget() {
+    var list = candidates();
+    var cur = null;
+    for (var i = 0; i < list.length; i++) { if (list[i].source === 'current') { cur = list[i]; break; } }
+    return (cur || list[0] || {}).workspace_root || '';
   }
 
   function workspaceLabel(w) {
-    var tail = w.workspace_root;
-    return (w.label || tail) + '  ·  ' + tail;
+    var bound = w.bound_persona_id ? ('（已被 ' + w.bound_persona_id + ' 绑定）') : '';
+    return (w.label || w.workspace_root) + '  ·  ' + w.workspace_root + bound;
+  }
+
+  function bindingOf(persona, target) {
+    var t = norm(target);
+    if (!t) return null;
+    var bs = persona.bindings || [];
+    for (var i = 0; i < bs.length; i++) {
+      if (norm(bs[i].canonical_path) === t) return bs[i];
+    }
+    return null;
+  }
+
+  function bindingOwner(target) {
+    var t = norm(target);
+    if (!t) return null;
+    for (var i = 0; i < state.personas.length; i++) {
+      if (bindingOf(state.personas[i], target)) return state.personas[i].persona_id;
+    }
+    return null;
+  }
+
+  function effectiveTarget(d) {
+    return String(d.manual || '').trim() || String(d.target || '');
+  }
+
+  /** 刷新卡片右上角按钮：绑定 / 解绑 / 已被他人绑定。 */
+  function syncToggle(persona, d, btn, hint) {
+    var target = effectiveTarget(d);
+    var own = bindingOf(persona, target);
+    var owner = own ? persona.persona_id : bindingOwner(target);
+    if (!target) {
+      btn.textContent = '绑定';
+      btn.className = 'primary';
+      btn.disabled = true;
+      if (hint) hint.textContent = '先选择或填写人格舱路径';
+      return;
+    }
+    if (own) {
+      btn.textContent = '解绑';
+      btn.className = 'unbind';
+      btn.disabled = false;
+      if (hint) hint.textContent = '已绑定到 ' + own.canonical_path + '，点击「解绑」解除';
+    } else if (owner && owner !== persona.persona_id) {
+      btn.textContent = '已被 ' + owner + ' 绑定';
+      btn.className = '';
+      btn.disabled = true;
+      if (hint) hint.textContent = '该人格舱已绑定其他人格体，先解绑那边或换一个';
+    } else {
+      btn.textContent = '绑定';
+      btn.className = 'primary';
+      btn.disabled = false;
+      if (hint) hint.textContent = '点击「绑定」把 ' + target + ' 绑给 ' + persona.name;
+    }
   }
 
   function renderPersonas() {
@@ -107,67 +174,89 @@
       box.appendChild(el('div', 'status', '还没有人格体。右侧创建一个，然后绑定到人格舱。'));
       return;
     }
+    var list = candidates();
     state.personas.forEach(function (p) {
+      if (!drafts[p.persona_id]) drafts[p.persona_id] = { target: defaultTarget(), manual: '' };
+      var d = drafts[p.persona_id];
+      var known = list.some(function (w) { return norm(w.workspace_root) === norm(d.target); });
+      if (!known) d.target = defaultTarget();
+
       var card = el('div', 'persona');
+      var head = el('div', 'persona-head');
       var h = el('h3');
       h.appendChild(document.createTextNode(p.name + ' '));
       h.appendChild(el('span', 'tag', p.persona_id));
-      card.appendChild(h);
+      head.appendChild(h);
+      var btn = el('button', 'primary', '绑定');
+      head.appendChild(btn);
+      card.appendChild(head);
       card.appendChild(el('div', 'summary', p.summary || '（无摘要）'));
-      var ul = el('ul', 'bindings');
+
+      var chips = el('div', 'chips');
       if (!p.bindings.length) {
-        ul.appendChild(el('li', null, '未绑定任何人格舱'));
+        chips.appendChild(el('span', 'chip', '未绑定任何人格舱'));
       } else {
         p.bindings.forEach(function (b) {
-          var li = el('li');
-          li.appendChild(el('code', null, b.canonical_path));
-          li.appendChild(el('span', 'tag bound', '已绑定'));
-          var btn = el('button', 'danger', '解绑');
-          btn.addEventListener('click', function () {
-            if (!window.confirm('解绑后该人格舱将不再加载任何人格（记忆保留）。确定？')) return;
-            api(API.unbind, {
-              method: 'POST', headers: { 'content-type': 'application/json' },
-              body: JSON.stringify({ workspace_root: b.canonical_path }),
-            }).then(function () { return refresh(); }).then(function () {
-              $('status').textContent = '已解绑 ' + b.canonical_path;
-            }).catch(function (e) { $('status').textContent = '解绑失败：' + e.message; });
-          });
-          li.appendChild(btn);
-          ul.appendChild(li);
+          chips.appendChild(el('span', 'chip bound', b.canonical_path));
         });
       }
-      card.appendChild(ul);
-      // 绑定区：候选只显示真实存在的路径（避免扫描噪声）+ 手填路径兜底（不依赖扫描）
+      card.appendChild(chips);
+
       var row = el('div', 'bind-row');
-      var cands = unboundWorkspaces().filter(function (w) { return w.exists; });
-      if (cands.length) {
-        var sel = el('select');
-        cands.forEach(function (w) {
+      var sel = null;
+      if (list.length) {
+        sel = el('select');
+        list.forEach(function (w) {
           var opt = el('option');
           opt.value = w.workspace_root;
           opt.textContent = workspaceLabel(w);
           sel.appendChild(opt);
         });
+        if (d.target) sel.value = d.target;
+        sel.addEventListener('change', function () {
+          d.target = sel.value;
+          d.manual = '';
+          manual.value = '';
+          syncToggle(p, d, btn, hint);
+        });
         row.appendChild(sel);
       }
       var manual = el('input');
-      manual.placeholder = '或手填人格舱路径，如 D:\\qq鲸鱼';
-      manual.style.minWidth = '260px';
-      row.appendChild(manual);
-      var btn = el('button', 'primary', '绑定到人格舱');
-      btn.addEventListener('click', function () {
-        var selEl = row.querySelector('select');
-        var target = manual.value.trim() || (selEl ? selEl.value : '');
-        if (!target) { $('status').textContent = '请选择或填写人格舱路径'; return; }
-        api(API.bind, {
-          method: 'POST', headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ persona_id: p.persona_id, workspace_root: target }),
-        }).then(function () { return refresh(); }).then(function () {
-          $('status').textContent = '已绑定：' + target + ' → ' + p.name;
-        }).catch(function (e) { $('status').textContent = '绑定失败：' + e.message; });
+      manual.placeholder = '或手填人格舱路径，如 D:\\qq鲸鱼（优先）';
+      manual.value = d.manual || '';
+      manual.style.minWidth = '220px';
+      manual.addEventListener('input', function () {
+        d.manual = manual.value;
+        syncToggle(p, d, btn, hint);
       });
-      row.appendChild(btn);
+      row.appendChild(manual);
       card.appendChild(row);
+
+      var hint = el('div', 'hintline', '');
+      card.appendChild(hint);
+      syncToggle(p, d, btn, hint);
+
+      btn.addEventListener('click', function () {
+        var target = effectiveTarget(d);
+        if (!target || btn.disabled) return;
+        var own = bindingOf(p, target);
+        var isUnbind = Boolean(own);
+        if (isUnbind && !window.confirm('解绑后该人格舱将不再加载任何人格（记忆保留）。确定？')) return;
+        btn.disabled = true;
+        api(isUnbind ? API.unbind : API.bind, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(isUnbind
+            ? { workspace_root: target }
+            : { persona_id: p.persona_id, workspace_root: target }),
+        }).then(function () { return refresh(); }).then(function () {
+          $('status').textContent = (isUnbind ? '已解绑：' : '已绑定：') + target + ' → ' + p.name;
+        }).catch(function (e) {
+          btn.disabled = false;
+          $('status').textContent = (isUnbind ? '解绑失败：' : '绑定失败：') + e.message;
+        });
+      });
+
       box.appendChild(card);
     });
   }
@@ -179,10 +268,8 @@
     ]).then(function () {
       renderPersonas();
       var bound = state.workspaces.filter(function (w) { return w.bound_persona_id; }).length;
-      var total = state.workspaces.length;
-      $('status').textContent = '人格体 ' + state.personas.length + ' 个 ｜ 人格舱候选 ' + total
-        + ' 个（已绑定 ' + bound + '）｜ 当前人格舱：'
-        + (state.workspaces[0] ? state.workspaces[0].workspace_root : '未知');
+      $('status').textContent = '人格体 ' + state.personas.length + ' 个 ｜ 人格舱候选 '
+        + candidates().length + ' 个（已绑定 ' + bound + '）｜ 当前人格舱：' + defaultTarget();
     }).catch(function (e) {
       var s = $('status');
       s.className = 'error';
