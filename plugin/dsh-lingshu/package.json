@@ -15,6 +15,8 @@
     "control.js",
     "goalrelation.js",
     "memorywriter.js",
+    "memory-paths.js",
+    "tool-gateway.js",
     "workspace.js",
     "workspace-api.js",
     "workspace-policy.js",

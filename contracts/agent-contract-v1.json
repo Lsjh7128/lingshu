@@ -27,7 +27,7 @@
     "config_source": "engine/config.py（与 rules/decay-params.yaml 必须一致）",
     "param_version": "852fbe81"
   },
-  "digest": "87ffa73ef45de11b66238cbe7d695990b4db4e3da92e6479b420a8b59a53e362",
+  "digest": "93f0627fcea4f6b800bbd9e01e2768d0265cd5e5bc4e3392317428112a65720e",
   "frozen": [
     "docs/01-宪法层.md",
     "rules/compose-matrix.yaml",
@@ -91,13 +91,14 @@
   "profile": "lingshu-cognitive-plugins",
   "revision": 1,
   "rules": {
-    "candidate_patch.yaml": "2680d33f42c6b993fdc5a3959e95639ec5a02f6b835502666768bf5c430d09c7",
+    "candidate_patch.yaml": "6fc4360db44287a3f58ab6280961ba95731f3ccbb75468283bd90ad4b423b99f",
     "capabilities.yaml": "6622d7fe859cd8f1dbeb5928a9f0f7184d67d22047c8f80ec266b7d7a28f2553",
     "compose-matrix.yaml": "c5e9dc30333282ce3e91226feb28df458440a755e80c2cc0d8ccc383be7bb8ea",
     "decay-params.yaml": "efeb47c434ec8e6487e990463ed5fbf0e31fd5c37d09bc77fc19726490978497",
     "degradation-matrix.yaml": "45576621520f33a15faecf2c415fdec5b3115dce9aa254a3c612bebc03e26350",
     "frozen-manifest.yaml": "d68785a63a8993ef4d772256f1cf17f2a2f50f6c11ca21326255d4f80d3c397c",
-    "learning-params.yaml": "86e0f0d399032c9e8e22e8a1dfb226995efe5678e51b4caab30e86c1436c3057"
+    "learning-params.yaml": "86e0f0d399032c9e8e22e8a1dfb226995efe5678e51b4caab30e86c1436c3057",
+    "sandbox-baseline.yaml": "86a386a344cc120c1f8d62e16e45b71997eb6df7fcc23526b07ffbe00ce221a4"
   },
   "status": "designed-not-implemented"
 }

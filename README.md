@@ -1,6 +1,6 @@
 # LINGSHU · Agent Cognition Plugin System
 
-> Version: **v1.0.0** (tag `v1.0.0-paper-baseline`) ｜ Status: contracts and prompt set finalized; `engine/` is a runnable reference implementation (control-theoretic layer wired in, separately verified) ｜ Host: DSH
+> Version: **v1.1.0** (tag `v1.1.0`) ｜ Status: contracts and prompt set finalized; `engine/` is a runnable reference implementation (control-theoretic layer wired in, separately verified) ｜ Host: DSH
 > This document set is the result of several consolidation passes. Version history and corrections: [CHANGELOG](CHANGELOG.md). ｜ [简体中文](README.zh-CN.md)
 
 > **Tagline: 灵为行为，枢为边界 — behavior is the spirit; boundaries are the pivot.**

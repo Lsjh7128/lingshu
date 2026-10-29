@@ -1,6 +1,6 @@
 # LINGSHU（灵枢）· Agent 认知插件体系
 
-> 版本：**v1.0.0**（tag `v1.0.0-paper-baseline`）｜ 状态：契约与提示词定稿；`engine/` 为可跑参考实现（含控制论层，已接线、有专项验收）｜ 目标宿主：DSH
+> 版本：**v1.1.0**（tag `v1.1.0`）｜ 状态：契约与提示词定稿；`engine/` 为可跑参考实现（含控制论层，已接线、有专项验收）｜ 目标宿主：DSH
 > 本文档集经多轮整合而成，版本史与修正见 [CHANGELOG](CHANGELOG.md)。｜ [English](README.md)
 
 > **Tagline：灵为行为，枢为边界。**
@@ -80,6 +80,95 @@ It never writes `$DSH_HOME/plugins/dsh-lingshu` and never touches your `desktop`
 - Flags: `--clean` (wipe sandbox data + profile), `--fresh` (rebuild sandbox state), `--window <tokens>` (default 3000), `--no-window-override`, `--dry-run` (read-only preflight: checks environment/isolation and prints the commands, writes nothing, no model calls), `--help`.
 
 Full runbook: [`docs/demo-sandbox.md`](docs/demo-sandbox.md) · Plugin internals, audit events and rollback: [`plugin/README.md`](plugin/README.md).
+
+---
+
+## 🚀 Installation · 安装
+
+> 三条路径，按你想做的事选。**不需要联网安装依赖**：Python 侧零第三方库，插件侧不发布 npm 包。
+> ⚠️ 本项目的硬边界：**只装进可丢弃的 profile，不要装进日常 `desktop` profile**（见文末说明）。
+
+### 路径 A · 只想跑起来看看（零安装，推荐第一次）
+
+要求：**Python ≥ 3.8**，只用标准库。
+
+```bash
+git clone https://github.com/Lsjh7128/lingshu.git
+cd lingshu
+
+python scripts/quickstart.py --no-open   # 冻结回放 → 生成 console/demo.html（不打开浏览器）
+```
+
+然后双击 `console/demo.html`。它单文件、内联 CSS/SVG、无外部请求；**不安装任何东西，也不读写你的 DSH profile**。
+只想看脱敏演示页也可以：`python tools/gen_demo_report.py --no-real`。
+
+### 路径 B · 装进 DSH 宿主（可丢弃 profile）
+
+要求：
+
+- **DSH 桌面端 ≥ 0.2.0-rc.2**（见 `plugin/dsh-lingshu/package.json` 的 `dsh.engines`）
+- **Node.js ≥ 20.10**，或直接使用 DSH 自带的 node
+- `plugin add` 会用到 **pnpm**；若提示找不到，先 `npm i -g pnpm`（或把 DSH 自带 pnpm 加进 `PATH`）
+
+下面以 Windows 默认安装位置为例（其他平台把 `$dshBin` / `$node` 换成你的实际路径）：
+
+```powershell
+# 0) 定位 DSH CLI 与 node（Windows 默认位置）
+$dshBin = "$env:USERPROFILE\.dsh\profiles\node_modules\@deepseek-ai\dsh\lib\bin.js"
+$node   = "$env:USERPROFILE\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\node\bin\node.exe"
+# 若 node 已在 PATH，可用 node 代替 & $node
+
+# 1) 建一个可丢弃的实验 profile（不要用 desktop）
+& $node "$dshBin" lingshu-lab-headless --from-default-profile headless --dump-config
+
+# 2) 官方安装：link: 指向你 clone 下来的仓库
+#    不要手建 junction、不要手改 package.json
+& $node "$dshBin" plugin --profile lingshu-lab-headless add "link:<你的仓库路径>/plugin/dsh-lingshu"
+
+# 3) 跑一轮真实会话（headless，跑完即退）
+& $node "$dshBin" lingshu-lab-headless "用一句话回答：项目代号是什么？"
+
+# 4) 查看审计事件
+Get-Content "$env:USERPROFILE\.dsh\plugins\dsh-lingshu\audit.jsonl" -Tail 20
+```
+
+安装后插件自动挂载：本包在 `package.json` 里声明了 `dsh.bundle.patch`，`cordis.patch.yml`
+会被 loader 自动接上，**不需要手改 profile 的补丁**。
+
+> **两条红线**
+> 1. **不要把插件装进 `desktop` profile。** 日常 profile 一旦挂上插件，记忆 / 审计就会写进真实数据目录；
+>    本项目所有实验只在**可丢弃** profile 里跑（`docs/21-开源发布清单.md` §B2）。
+> 2. 插件数据落在 `$DSH_HOME/plugins/dsh-lingshu/`（`state.json` / `memory.jsonl` / `audit.jsonl`），
+>    那是**本机真实数据**，**不要提交进仓库、不要外发**。
+
+### 路径 C · 跑验收 / 复现论文
+
+```bash
+pdfinfo paper/main-en.pdf 2>/dev/null || echo "PDF 见 paper/"   # 论文
+python tests/test_learning.py                                   # 单个验收文件
+node plugin/dsh-lingshu/host-sim.mjs --assert                   # 插件 mock 宿主断言（不碰 DSH）
+node plugin/dsh-lingshu/control-sim.mjs --assert                # 控制论层纯函数断言
+```
+
+完整命令、逐文件期望与 CI 口径见下方 **§七 快速开始** 与 [`docs/21-开源发布清单.md`](docs/21-开源发布清单.md)。
+
+### 卸载 / 回滚（约三分钟）
+
+```powershell
+# 1) 从实验 profile 卸载插件
+& $node "$dshBin" plugin --profile lingshu-lab-headless remove dsh-lingshu
+
+# 2) 删掉可丢弃 profile
+Remove-Item -Recurse -Force "$env:USERPROFILE\.dsh\profiles\lingshu-lab-headless"
+
+# 3) 删掉插件数据（state / memory / audit）
+Remove-Item -Recurse -Force "$env:USERPROFILE\.dsh\plugins\dsh-lingshu"
+```
+
+更细的说明（含三条真机踩过的契约坑、observe 静默模式、记忆唯一写入口）见
+[`plugin/README.md`](plugin/README.md)。
+
+> 平台说明：本项目在 **Windows** 上实测；macOS / Linux 路径换成 `~/.dsh/...` 同理，但尚未做真机验证。
 
 ---
 
@@ -548,7 +637,19 @@ python tools/run_actuator_demo.py
 
 ## 八、许可证与发布
 
-- 代码与文档以 **MIT** 许可发布，全文见 [LICENSE](LICENSE)；插件 `plugin/dsh-lingshu/package.json` 的 `license` 同为 `MIT`（`private: true`，不发布到 npm）。
+本项目**双许可**：
+
+- **源代码 / Source code** — [MIT License](LICENSE)：`engine/`、`plugin/`、`tests/`、`tools/`、`scripts/`、`console/` 等。
+- **学术论文与文档 / Academic paper and documentation** — [CC BY-NC-ND 4.0](paper/LICENSE)：`paper/` 目录下的论文、图表、数据与文档（署名—非商业性使用—禁止演绎 4.0 国际）。
+
+许可范围以根目录 [LICENSE](LICENSE) 与 [paper/LICENSE](paper/LICENSE) 为准；CC BY-NC-ND 4.0 的约束性文本见 <https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.en>。
+
+### 论文 PDF 下载（Paper PDFs）
+
+- [English version — `paper/main-en.pdf`](paper/main-en.pdf)
+- [Bilingual (English / 中文) — `paper/main-bilingual.pdf`](paper/main-bilingual.pdf)
+- [中文版 / Chinese version — `paper/main-zh.pdf`](paper/main-zh.pdf)
+
 - 发布前检查表：[`docs/21-开源发布清单.md`](docs/21-开源发布清单.md)——依赖、密钥扫描、数据脱敏、profile 隔离声明、版本号、CI 命令、issue/PR 模板、许可证，逐项可勾选。
 - **数据与 profile 边界**：仓库不含任何真实运行数据（`$DSH_HOME/plugins/dsh-lingshu/` 的 `state.json` / `memory.jsonl` / `audit.jsonl` 属于本机数据，不入库）；`console/demo.html` 是**可重复生成**的演示产物，只保留脱敏后的字段级统计（无原始消息文本 / 本机路径 / 用户名）。本仓库**不安装**插件、**不改**任何 DSH profile；实验一律用可丢弃 profile（见 [`plugin/README.md`](plugin/README.md)）。
 - 一句话提醒：`replay-set/` 全合成、参数 `provenance: guess`、控制论真实收益未验证。发布文案与 issue 里不要把它们说成"已验证的线上效果"。

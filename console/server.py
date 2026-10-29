@@ -46,7 +46,7 @@ if _ROOT not in sys.path:
 from console.redact import (ERROR_KINDS, FORBIDDEN_KEYS,  # noqa: E402
                             iso_of, redact_event, safe_kind)
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 SERVICE = "lingshu-console"
 DEFAULT_PORT = 3000
 MAX_LINES = 200_000          # 单文件最多解析行数（超出标 truncated，不静默）

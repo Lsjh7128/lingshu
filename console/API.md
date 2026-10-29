@@ -37,7 +37,7 @@
 ### §2.1 `GET /api/health`
 
 ```json
-{"ok":true,"service":"lingshu-console","version":"1.0.0","uptime_s":42,
+{"ok":true,"service":"lingshu-console","version":"1.1.0","uptime_s":42,
  "read_only":true,"bind":"127.0.0.1:3000","profile_count":4,"streams":0}
 ```
 

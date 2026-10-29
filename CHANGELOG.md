@@ -2,6 +2,39 @@
 
 ---
 
+## v1.1.0 · 开源发布：沙盒命名空间 + 人格体路由 + 双语 README（2026-10-29）
+
+> **版本轴说明**：`v1.x` 是与 git tag 对齐的**开源发布版本**；其下的 `v5.x / v3.0` 是**内部开发版本历史**。两者不同轴、不可换算；历史条目保持原样，不再新增内部版本号。
+
+**新增**
+
+- **沙盒命名空间**：数据根下按 `sandboxes/{sandboxId}/{personaId}/` 隔离记忆与状态；`layout.json`（`schema_version: layout-0.2`）是唯一开关，缺失时旧布局逐字节不变（加法，非破坏性）。
+- **人格体绑定路由**：绑定是唯一身份来源，无绑定 = 不加载人格；人格锁定（默认锁）、回收站、按条恢复与彻底删除（redact）。
+- **人格体中枢面板**（插件 UI）：绑定 / 切换 / 编辑（自称、语气、边界 + 预览）/ 回收站；人格记忆抽屉（全局 / 各工作区 / 回收站）。
+- **双语 README**：`README.md` 改为英文入口，中文重写为 `README.zh-CN.md`；对外只保留发布版本号。
+- **安装文档**：三条路径（零安装试跑 / 装进可丢弃 profile / 跑验收复现论文）+ 卸载回滚；论文 PDF 直达链接与双许可声明。
+
+**修复**
+
+- 版本口径收敛：README / 项目简介 顶部不再出现内部开发版本号。
+- `docs/16-实现状态.md` 按代码重新生成（插件 `index.js` 行数同步）。
+- 合并 `main` 上的安装说明、论文 PDF 与双许可声明，并统一到新版 README。
+
+**Breaking Change**
+
+- **无。** v0.2 布局是加法：没有 `layout.json` 时插件行为与旧版逐字节一致；删除该文件即回到旧布局。旧数据不迁移仍可读（但无隔离与面板能力）；迁移工具 `tools/migrate_layout_v02.py` 默认 dry-run、只复制不改写。
+
+**Known limitations（不得当作已解决）**
+
+1. **多租户未定义**：本版是"单用户 × 多人格 × 多工作区"的目录隔离，**不是**多租户，也**不是**权限隔离（见 `plugin/README.md` 边界声明）。
+2. **Skeleton 仅预留**：`lingshu:skeleton` 段落恒返回空串，`skeleton_generated/rejected/rebuilt` 审计事件预留但不产生；生成器本体未实现。
+3. **混沌 v2 自检未通过**：2026-10-29 运行 19/20 不变量、4 条 FINDING（`acceptance/chaos/v2/2026-10-29-report.md`），不计入本版判定，需单独修。
+4. **Docker 未验证**：`demo/Dockerfile` / `docker-compose.demo.yml` 未在本机构建或运行。
+5. **截图未入库**：`acceptance/v2-refactor/*.png` 含真实路径与人格体正文，未提交；README 暂不放截图。
+6. **本机门禁环境限制（非代码缺陷）**：本机 `%TEMP%` 对当前进程不可写，导致 `test_demo_scripts` 的"仓库外目录"断言与 chaos F6 落入仓库内临时目录而失败；`.venv-neural` 未装 Pillow，`test_plot_coevolution_curve` 的 `render_png` 段失败；`check_plugin_pack` 对 `workspaces` / `ui/` 两个**目录**条目按文件判定而误报（已补 `memory-paths.js` / `tool-gateway.js` 两个真实漏项）。在正常桌面环境应全绿。
+
+---
+
 ## v5.10 · 开源体验入口：一键沙盒实验舱（Sandbox Demo）（2026-10-28）
 
 **做了什么**：给克隆仓库的体验者一个「无需手动配置环境变量」的入口——`bash demo.sh` / `demo.bat` /
