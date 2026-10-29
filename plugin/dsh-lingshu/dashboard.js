@@ -35,6 +35,7 @@ const PERSONAS_ROUTE = '/dsh-lingshu/api/personas';
 const BINDINGS_ROUTE = '/dsh-lingshu/api/bindings';
 const AVAILABLE_ROUTE = '/dsh-lingshu/api/workspaces/available';
 const PERSONAS_PAGE_ROUTE = '/dsh-lingshu/dashboard/personas';
+const PERSONAS_PAGE_FILE = fileURLToPath(new URL('./ui/personas.html', import.meta.url));
 // 与 workspace-api.js 的 persona 上限一致：面板请求体 64KB。
 const JSON_BODY_MAX_BYTES = 64 * 1024;
 
@@ -440,12 +441,22 @@ export function registerDashboardRoutes(ctx, options = {}) {
       sendJson(res, 500, { ok: false, error: String(error?.message || error) });
     }
   }, ['GET', 'HEAD']);
-  // 独立绑定页已废弃：绑定/解绑统一收口到人格体中枢主页（卡片右上角按钮）。
   registerExact(PERSONAS_PAGE_ROUTE, (_req, res) => {
-    res.statusCode = 302;
-    res.setHeader('location', ROUTE);
+    let html;
+    try {
+      html = fs.readFileSync(PERSONAS_PAGE_FILE);
+    } catch (error) {
+      sendText(res, 503, `LINGSHU 人格体面板未随插件安装：${String(error?.message || error)}`);
+      return;
+    }
+    res.statusCode = 200;
+    res.setHeader('content-type', 'text/html; charset=utf-8');
+    res.setHeader('content-length', String(html.byteLength));
     res.setHeader('cache-control', 'no-store');
-    res.end();
+    res.setHeader('x-content-type-options', 'nosniff');
+    res.setHeader('content-security-policy',
+      "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors 'self' dsh-app:;");
+    res.end(html);
   });
 
   return () => {
