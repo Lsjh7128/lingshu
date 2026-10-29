@@ -271,6 +271,82 @@ export function detectLayout(dataRoot) {
   return { kind: sources.length ? 'legacy' : 'empty', layout: null, sources };
 }
 
+// ── 3b. sandbox_mapping.yaml（人格舱 ↔ 人格体绑定）──────────
+// 新模型：绑定是唯一身份来源；没有绑定 = 不加载人格、不读不写记忆（fail-closed）。
+// 与 engine/layout.py 的 read_mapping_bindings / write_mapping_bindings / resolve_binding 逐函数镜像。
+
+export function readMappingBindings(dataRoot) {
+  const file = path.join(_abspath(dataRoot), 'sandbox_mapping.yaml');
+  let raw = '';
+  try {
+    raw = fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '');
+  } catch {
+    return [];
+  }
+  const out = [];
+  let cur = null;
+  for (const line of raw.split(/\r?\n/)) {
+    const item = /^\s*-\s*canonical_path:\s*"?(.+?)"?\s*$/.exec(line);
+    if (item) {
+      cur = { canonical_path: item[1] };
+      out.push(cur);
+      continue;
+    }
+    if (!cur) continue;
+    const kv = /^\s*(sandbox_id|default_persona|label|bound_at):\s*"?(.*?)"?\s*$/.exec(line);
+    if (kv) cur[kv[1]] = kv[2];
+  }
+  return out;
+}
+
+function _yamlQuote(value) {
+  return `"${String(value ?? '').replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+}
+
+/** 整份重写（原子）；绑定按 canonical_path 排序，保证 diff 稳定。 */
+export function writeMappingBindings(dataRoot, bindings = []) {
+  const root = _abspath(dataRoot);
+  const rows = [];
+  for (const b of bindings || []) {
+    const cp = String(b?.canonical_path ?? '').trim();
+    if (!cp) continue;
+    rows.push({
+      canonical_path: canonicalizePath(cp),
+      sandbox_id: String(b.sandbox_id ?? ''),
+      default_persona: String(b.default_persona ?? ''),
+      label: String(b.label ?? ''),
+      bound_at: String(b.bound_at ?? ''),
+    });
+  }
+  rows.sort((a, b) => (a.canonical_path < b.canonical_path ? -1 : a.canonical_path > b.canonical_path ? 1 : 0));
+  const lines = ['schema_version: mapping-0.1', 'bindings:'];
+  for (const b of rows) {
+    lines.push(`  - canonical_path: ${_yamlQuote(b.canonical_path)}`);
+    for (const key of ['sandbox_id', 'default_persona', 'label', 'bound_at']) {
+      if (b[key] !== '') lines.push(`    ${key}: ${_yamlQuote(b[key])}`);
+    }
+  }
+  const file = path.join(root, 'sandbox_mapping.yaml');
+  try {
+    fs.mkdirSync(root, { recursive: true });
+    const tmp = `${file}.tmp-${process.pid}-${crypto.randomBytes(4).toString('hex')}`;
+    fs.writeFileSync(tmp, lines.join('\n') + '\n', 'utf8');
+    fs.renameSync(tmp, file);
+    return { ok: true, bindings: rows };
+  } catch (err) {
+    return { ok: false, error: String(err?.code || 'io_error') };
+  }
+}
+
+/** 工作区 → 绑定；没有绑定返回 null（调用方必须进入"无人格"模式）。 */
+export function resolveBinding(dataRoot, canonicalPath) {
+  const target = canonicalizePath(canonicalPath);
+  for (const b of readMappingBindings(dataRoot)) {
+    if (canonicalizePath(String(b.canonical_path ?? '')) === target) return b;
+  }
+  return null;
+}
+
 // ── 4. JSONL 与墓碑折叠（D8 / §4.5）──────────────────────
 
 /** 读 JSONL：坏行跳过、BOM 容错、非对象行丢弃；文件缺失返回 []。 */

@@ -242,6 +242,87 @@ def detect_layout(data_root: Any) -> dict[str, Any]:
     return {"kind": ("legacy" if sources else "empty"), "layout": None, "sources": sources}
 
 
+# ── 3b. sandbox_mapping.yaml：人格舱（工作区）↔ 人格体绑定 ──────
+# 新模型（2026-10-29 H0 定）：绑定是唯一身份来源。没有绑定 = 不加载任何人格、
+# 不读不写记忆（fail-closed），不再有"单绑定/单沙盒兜底"。
+
+MAPPING_FILE = "sandbox_mapping.yaml"
+_BINDING_KEYS = ("sandbox_id", "default_persona", "label", "bound_at")
+
+
+def _yaml_quote(v: Any) -> str:
+    s = str(v if v is not None else "")
+    s = s.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{s}"'
+
+
+def read_mapping_bindings(data_root: Any) -> list[dict[str, str]]:
+    path = os.path.join(os.path.abspath(os.fspath(data_root)), MAPPING_FILE)
+    try:
+        with open(path, "r", encoding="utf-8-sig") as f:
+            raw = f.read()
+    except OSError:
+        return []
+    out: list[dict[str, str]] = []
+    cur: dict[str, str] | None = None
+    for line in raw.splitlines():
+        item = re.match(r'^\s*-\s*canonical_path:\s*"?(.+?)"?\s*$', line)
+        if item:
+            cur = {"canonical_path": item.group(1)}
+            out.append(cur)
+            continue
+        if cur is None:
+            continue
+        kv = re.match(r'^\s*(sandbox_id|default_persona|label|bound_at):\s*"?(.*?)"?\s*$', line)
+        if kv:
+            cur[kv.group(1)] = kv.group(2)
+    return out
+
+
+def write_mapping_bindings(data_root: Any, bindings: Iterable[dict[str, Any]]) -> dict[str, Any]:
+    """整份重写（原子）。绑定列表按 canonical_path 排序，保证 diff 稳定。"""
+    root = os.path.abspath(os.fspath(data_root))
+    rows = []
+    for b in bindings:
+        cp = str(b.get("canonical_path") or "").strip()
+        if not cp:
+            continue
+        rows.append({
+            "canonical_path": canonicalize_path(cp),
+            "sandbox_id": str(b.get("sandbox_id") or ""),
+            "default_persona": str(b.get("default_persona") or ""),
+            "label": str(b.get("label") or ""),
+            "bound_at": str(b.get("bound_at") or ""),
+        })
+    rows.sort(key=lambda x: x["canonical_path"])
+    lines = [f"schema_version: {MAPPING_SCHEMA}", "bindings:"]
+    for b in rows:
+        lines.append(f"  - canonical_path: {_yaml_quote(b['canonical_path'])}")
+        for key in _BINDING_KEYS:
+            if b[key] != "":
+                lines.append(f"    {key}: {_yaml_quote(b[key])}")
+    body = "\n".join(lines) + "\n"
+    path = os.path.join(root, MAPPING_FILE)
+    try:
+        os.makedirs(root, exist_ok=True)
+        tmp = f"{path}.tmp-{os.getpid()}-{uuid.uuid4().hex[:8]}"
+        with open(tmp, "w", encoding="utf-8") as f:
+            f.write(body)
+        os.replace(tmp, path)
+        return {"ok": True, "bindings": rows}
+    except OSError as err:
+        return {"ok": False, "error": str(getattr(err, "code", "io_error"))}
+
+
+def resolve_binding(data_root: Any, canonical_path: Any) -> dict[str, str] | None:
+    """工作区 → 绑定；没有绑定返回 None（调用方必须进入"无人格"模式）。"""
+    target = canonicalize_path(canonical_path)
+    for b in read_mapping_bindings(data_root):
+        if canonicalize_path(b.get("canonical_path", "")) == target:
+            return b
+    return None
+
+
 # ── 4. JSONL 与墓碑折叠（D8 / §4.5）──────────────────────
 
 def load_jsonl(path: Any) -> list[dict[str, Any]]:

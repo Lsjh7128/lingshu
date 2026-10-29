@@ -30,6 +30,9 @@ import { describeWorkspacePolicy, loadWorkspacePolicy } from './workspace-policy
 // v0.2（施工单 v2）：数据根存在 layout.json 时，工作区 = 沙盒（sandboxId），
 // 行内数据在 sandboxes/<sid>/<pid>/ 与 personas/<pid>/，不再用 workspace_<id>/ 目录寻址。
 import { readLayout, foldRows } from './memory-paths.js';
+import {
+  readMappingBindings, writeMappingBindings, canonicalizePath, sandboxId,
+} from './memory-paths.js';
 
 export const API_SCHEMA_VERSION = 'workspace-api-0.2';
 // legacy 伪工作区的展示 id；若真的存在 workspace_legacy/ 则以真实工作区优先（见 list/detail）。
@@ -316,7 +319,11 @@ function normalizeOptions(options = {}) {
     ? path.resolve(options.policyDir.trim()) : '';
   // 审计回调（index.js 注入；写路径用它把事件记到**当前**工作区账本）。
   const audit = typeof options.audit === 'function' ? options.audit : null;
-  return { base, profileTag, pathProfileTag, currentId, coldTurns, warmTurns, rejected, policyDir, audit };
+  const workspaceRoot = typeof options.workspaceRoot === 'string' && options.workspaceRoot.trim()
+    ? path.resolve(options.workspaceRoot.trim()) : '';
+  const dsHome = typeof options.dsHome === 'string' && options.dsHome.trim()
+    ? path.resolve(options.dsHome.trim()) : '';
+  return { base, profileTag, pathProfileTag, currentId, coldTurns, warmTurns, rejected, policyDir, audit, workspaceRoot, dsHome };
 }
 
 /** 工作区的数据目录：workspace 外层 + （可选）profile 内层；越界/非法返回 null。 */
@@ -1007,11 +1014,231 @@ export function createWorkspace(options = {}, rawPayload) {
   };
 }
 
+// ── v0.2 人格体 ↔ 人格舱（绑定）：创建/列表/绑定/解绑/可选工作区 ────
+function personaRoot(o) {
+  return path.join(path.resolve(o.base), 'personas');
+}
+
+function personaExists(o, pid) {
+  return V02_PERSONA_RE.test(pid) && isRealFile(path.join(personaRoot(o), pid, 'persona.json'));
+}
+
+/** 列出所有有效人格体（有 persona.json）+ 各自的绑定。 */
+export function listPersonas(options = {}) {
+  const o = normalizeOptions(options);
+  if (!o.base) return { ok: false, status: 503, error: 'data_root_unavailable' };
+  const bindings = readMappingBindings(o.base);
+  let dirs = [];
+  try {
+    dirs = fs.readdirSync(personaRoot(o), { withFileTypes: true });
+  } catch { dirs = []; }
+  const personas = [];
+  for (const entry of dirs) {
+    if (!entry.isDirectory() || !V02_PERSONA_RE.test(entry.name)) continue;
+    const p = readPersona(path.join(personaRoot(o), entry.name, 'persona.json'));
+    if (!p) continue;                    // 无 persona.json 的孤儿目录不展示
+    personas.push({
+      persona_id: entry.name,
+      name: p.name,
+      summary: p.summary,
+      traits: p.traits,
+      bindings: bindings.filter((b) => b.default_persona === entry.name).map((b) => ({ ...b })),
+    });
+  }
+  personas.sort((a, b) => (a.persona_id < b.persona_id ? -1 : a.persona_id > b.persona_id ? 1 : 0));
+  return { ok: true, schemaVersion: 'persona-panel-0.1', personas, bindings };
+}
+
+/** 创建人格体：persona.json + 全局记忆空文件 + persona_state 默认值。 */
+export function createPersona(options = {}, raw = {}) {
+  const o = normalizeOptions(options);
+  if (!o.base) return { ok: false, status: 503, error: 'data_root_unavailable' };
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return { ok: false, status: 400, error: 'invalid_body' };
+  }
+  const allowed = new Set(['persona_id', 'name', 'summary', 'traits']);
+  for (const key of Object.keys(raw)) {
+    if (!allowed.has(key)) return { ok: false, status: 400, error: 'unknown_field', field: key.slice(0, 32) };
+  }
+  const pid = String(raw.persona_id || `pe_${crypto.randomBytes(4).toString('hex')}`).trim();
+  if (!V02_PERSONA_RE.test(pid)) return { ok: false, status: 400, error: 'bad_persona_id' };
+  if (personaExists(o, pid)) return { ok: false, status: 409, error: 'persona_exists', persona_id: pid };
+  const validated = validatePersonaPayload({
+    schema_version: PERSONA_SCHEMA_VERSION,
+    persona_id: pid,
+    name: raw.name,
+    summary: raw.summary === undefined ? '' : raw.summary,
+    traits: raw.traits === undefined ? {} : raw.traits,
+    confirmed_by_user: true,
+  });
+  if (!validated.ok) {
+    return { ok: false, status: 400, error: validated.error, field: validated.field };
+  }
+  const dir = path.join(personaRoot(o), pid);
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+    atomicWriteJson(path.join(dir, 'persona.json'), validated.value);
+    for (const name of ['global_memory.jsonl', 'global_pending.jsonl']) {
+      const file = path.join(dir, name);
+      if (!fs.existsSync(file)) fs.writeFileSync(file, '', 'utf8');
+    }
+    const psFile = path.join(dir, 'persona_state.json');
+    if (!fs.existsSync(psFile)) {
+      atomicWriteJson(psFile, {
+        schema_version: 'persona-state-0.1',
+        integral_baseline: {}, emotion_baseline: {}, relations: {},
+      });
+    }
+  } catch {
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch { /* noop */ }
+    return { ok: false, status: 500, error: 'persona_create_failed' };
+  }
+  const persona = {
+    persona_id: pid, name: validated.value.name,
+    summary: validated.value.summary, traits: validated.value.traits, bindings: [],
+  };
+  safeAudit(o.audit, 'persona_created', {
+    persona_id: pid, name_len: persona.name.length, source: 'api', layout: 'v0.2',
+  });
+  return { ok: true, status: 201, persona };
+}
+
+/** 把一个人格体绑定到一个 DSH 工作区（人格舱）。1 工作区 ≤ 1 人格体。 */
+export function bindWorkspace(options = {}, raw = {}) {
+  const o = normalizeOptions(options);
+  if (!o.base) return { ok: false, status: 503, error: 'data_root_unavailable' };
+  const pid = String(raw.persona_id || '').trim();
+  const wsRoot = String(raw.workspace_root || '').trim();
+  if (!pid || !wsRoot) return { ok: false, status: 400, error: 'invalid_body' };
+  if (!personaExists(o, pid)) return { ok: false, status: 404, error: 'persona_not_found', persona_id: pid };
+  if (!isRealDir(wsRoot)) {
+    return { ok: false, status: 400, error: 'workspace_not_found', workspace_root: wsRoot };
+  }
+  const canonical = canonicalizePath(wsRoot);
+  const bindings = readMappingBindings(o.base);
+  const existing = bindings.find((b) => canonicalizePath(b.canonical_path) === canonical);
+  if (existing && existing.default_persona !== pid) {
+    return {
+      ok: false, status: 409, error: 'workspace_already_bound',
+      workspace_root: canonical, current_persona_id: existing.default_persona,
+    };
+  }
+  if (existing) return { ok: true, status: 200, already_bound: true, binding: existing };
+
+  const sid = sandboxId(canonical);
+  const label = String(raw.label || path.basename(canonical) || '').slice(0, 64);
+  const binding = {
+    canonical_path: canonical, sandbox_id: sid, default_persona: pid,
+    label, bound_at: new Date().toISOString(),
+  };
+  const written = writeMappingBindings(o.base,
+    bindings.filter((b) => canonicalizePath(b.canonical_path) !== canonical).concat([binding]));
+  if (!written.ok) return { ok: false, status: 500, error: 'binding_write_failed' };
+  try {
+    const sdir = path.join(path.resolve(o.base), 'sandboxes', sid);
+    fs.mkdirSync(sdir, { recursive: true });
+    atomicWriteJson(path.join(sdir, 'sandbox.json'), {
+      schema_version: 'sandbox-0.1', sandbox_id: sid, canonical_path: canonical,
+      label, created_at: Math.trunc(Date.now() / 1000), profile_tag: null,
+    });
+    const idxFile = path.join(path.resolve(o.base), 'sandboxes', 'index.json');
+    let idx = { schema_version: 'sandbox-index-0.1', sandboxes: {} };
+    try {
+      idx = JSON.parse(fs.readFileSync(idxFile, 'utf8').replace(/^\uFEFF/, '')) || idx;
+    } catch { /* 新建 */ }
+    if (!idx.sandboxes || typeof idx.sandboxes !== 'object') idx.sandboxes = {};
+    idx.sandboxes[sid] = {
+      canonical_path: canonical, label,
+      created_at: Math.trunc(Date.now() / 1000), last_active_at: Math.trunc(Date.now() / 1000),
+    };
+    atomicWriteJson(idxFile, idx);
+  } catch {
+    return { ok: false, status: 500, error: 'sandbox_metadata_failed' };
+  }
+  safeAudit(o.audit, 'sandbox_bound', {
+    sandbox_id: sid, persona_id: pid, canonical_path: canonical,
+    label, source: 'api', layout: 'v0.2',
+  });
+  return { ok: true, status: 200, binding };
+}
+
+/** 解绑（人格舱回到"无人格"）；沙盒数据保留，不删除。 */
+export function unbindWorkspace(options = {}, raw = {}) {
+  const o = normalizeOptions(options);
+  if (!o.base) return { ok: false, status: 503, error: 'data_root_unavailable' };
+  const wsRoot = String(raw.workspace_root || '').trim();
+  if (!wsRoot) return { ok: false, status: 400, error: 'invalid_body' };
+  const canonical = canonicalizePath(wsRoot);
+  const bindings = readMappingBindings(o.base);
+  const hit = bindings.find((b) => canonicalizePath(b.canonical_path) === canonical);
+  if (!hit) return { ok: false, status: 404, error: 'binding_not_found', workspace_root: canonical };
+  const written = writeMappingBindings(o.base,
+    bindings.filter((b) => canonicalizePath(b.canonical_path) !== canonical));
+  if (!written.ok) return { ok: false, status: 500, error: 'binding_write_failed' };
+  safeAudit(o.audit, 'sandbox_unbound', {
+    sandbox_id: hit.sandbox_id, persona_id: hit.default_persona,
+    canonical_path: canonical, source: 'api', layout: 'v0.2',
+  });
+  return { ok: true, status: 200, removed: hit };
+}
+
+/** DSH 会话目录名（--D-LSJH-- / --C-Users-~9648~5CA9-.dsh-x--）→ 工作区路径。 */
+function decodeSessionDir(name) {
+  if (typeof name !== 'string' || !name.startsWith('--') || !name.endsWith('--')) return null;
+  let s = name.slice(2, -2);
+  s = s.replace(/~([0-9A-Fa-f]{4})~/g, (_m, hex) => String.fromCharCode(parseInt(hex, 16)));
+  const m = /^([A-Za-z])-(.*)$/.exec(s);
+  if (!m) return null;
+  return `${m[1]}:\\${m[2].replace(/-/g, '\\')}`;
+}
+
+/** 可绑定的人格舱候选：当前会话工作区 + DSH sessions 目录（best-effort，失败就只给当前）。 */
+export function availableWorkspaces(options = {}) {
+  const o = normalizeOptions(options);
+  const bindings = o.base ? readMappingBindings(o.base) : [];
+  const out = [];
+  const seen = new Set();
+  const push = (root, source) => {
+    let canonical;
+    try {
+      canonical = canonicalizePath(root);
+    } catch { return; }
+    if (seen.has(canonical)) return;
+    seen.add(canonical);
+    const b = bindings.find((x) => canonicalizePath(x.canonical_path) === canonical);
+    out.push({
+      workspace_root: canonical,
+      label: path.basename(canonical) || canonical,
+      exists: isRealDir(root),
+      source,
+      bound_persona_id: b ? b.default_persona : null,
+      sandbox_id: b ? b.sandbox_id : null,
+    });
+  };
+  if (o.workspaceRoot) push(o.workspaceRoot, 'current');
+  const sessionsRoot = path.join(o.dsHome || '', 'sessions');
+  try {
+    for (const entry of fs.readdirSync(sessionsRoot, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const p = decodeSessionDir(entry.name);
+      if (p) push(p, 'sessions');
+    }
+  } catch { /* 宿主目录不存在：只返回当前工作区 */ }
+  out.sort((a, b) => (Number(b.source === 'current') - Number(a.source === 'current'))
+    || (a.workspace_root < b.workspace_root ? -1 : a.workspace_root > b.workspace_root ? 1 : 0));
+  return { ok: true, workspaces: out };
+}
+
 export default {
   listWorkspaces,
   readWorkspace,
   writePersona,
   createWorkspace,
+  listPersonas,
+  createPersona,
+  bindWorkspace,
+  unbindWorkspace,
+  availableWorkspaces,
   validatePersonaPayload,
   API_SCHEMA_VERSION,
   LEGACY_ID,

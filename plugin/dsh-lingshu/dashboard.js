@@ -30,6 +30,12 @@ const MEMORY_PAGE_ROUTE = '/dsh-lingshu/dashboard/memory';
 const STATUS_ROUTE = '/dsh-lingshu/api/status';
 const WORKSPACES_ROUTE = '/dsh-lingshu/api/workspaces';
 const MEMORY_ROUTE = '/dsh-lingshu/api/memory';
+// v0.2 人格体 / 绑定（人格舱）
+const PERSONAS_ROUTE = '/dsh-lingshu/api/personas';
+const BINDINGS_ROUTE = '/dsh-lingshu/api/bindings';
+const AVAILABLE_ROUTE = '/dsh-lingshu/api/workspaces/available';
+const PERSONAS_PAGE_ROUTE = '/dsh-lingshu/dashboard/personas';
+const PERSONAS_PAGE_FILE = fileURLToPath(new URL('./ui/personas.html', import.meta.url));
 // 与 workspace-api.js 的 persona 上限一致：面板请求体 64KB。
 const JSON_BODY_MAX_BYTES = 64 * 1024;
 
@@ -393,6 +399,65 @@ export function registerDashboardRoutes(ctx, options = {}) {
   registerExact(`${MEMORY_ROUTE}/forget`, memoryWriteHandler('forgetMemory'), ['POST']);
   registerExact(`${MEMORY_ROUTE}/trash/restore`, memoryWriteHandler('restoreMemory'), ['POST']);
   registerExact(`${MEMORY_ROUTE}/trash/purge`, memoryWriteHandler('purgeMemory'), ['POST']);
+
+  // ── 人格体 / 人格舱（绑定）面板 ────────────────────────────────
+  const personasGet = (_req, res) => {
+    try {
+      const out = typeof options.getPersonas === 'function'
+        ? options.getPersonas() : { ok: false, status: 503, error: 'personas_api_unavailable' };
+      sendProviderResult(res, out, 'personas_api_failed');
+    } catch (error) {
+      sendJson(res, 500, { ok: false, error: String(error?.message || error) });
+    }
+  };
+  const personasWrite = (provider, fallback) => async (req, res) => {
+    if (typeof options[provider] !== 'function') {
+      sendJson(res, 503, { ok: false, error: fallback });
+      return;
+    }
+    const body = await readJsonBody(req, JSON_BODY_MAX_BYTES);
+    if (!body.ok) {
+      sendJson(res, body.status, { ok: false, error: body.error });
+      return;
+    }
+    try {
+      sendProviderResult(res, options[provider](body.value), fallback);
+    } catch (error) {
+      sendJson(res, 500, { ok: false, error: String(error?.message || error) });
+    }
+  };
+  const createPersonaHandler = personasWrite('createPersona', 'persona_create_failed');
+  registerExact(PERSONAS_ROUTE, (req, res) => (
+    req.method === 'POST' ? createPersonaHandler(req, res) : personasGet(req, res)
+  ), ['GET', 'HEAD', 'POST']);
+  registerExact(BINDINGS_ROUTE, personasWrite('bindWorkspace', 'binding_failed'), ['POST']);
+  registerExact(`${BINDINGS_ROUTE}/unbind`, personasWrite('unbindWorkspace', 'unbind_failed'), ['POST']);
+  registerExact(AVAILABLE_ROUTE, (_req, res) => {
+    try {
+      const out = typeof options.getAvailableWorkspaces === 'function'
+        ? options.getAvailableWorkspaces() : { ok: false, status: 503, error: 'available_api_unavailable' };
+      sendProviderResult(res, out, 'available_api_failed');
+    } catch (error) {
+      sendJson(res, 500, { ok: false, error: String(error?.message || error) });
+    }
+  }, ['GET', 'HEAD']);
+  registerExact(PERSONAS_PAGE_ROUTE, (_req, res) => {
+    let html;
+    try {
+      html = fs.readFileSync(PERSONAS_PAGE_FILE);
+    } catch (error) {
+      sendText(res, 503, `LINGSHU 人格体面板未随插件安装：${String(error?.message || error)}`);
+      return;
+    }
+    res.statusCode = 200;
+    res.setHeader('content-type', 'text/html; charset=utf-8');
+    res.setHeader('content-length', String(html.byteLength));
+    res.setHeader('cache-control', 'no-store');
+    res.setHeader('x-content-type-options', 'nosniff');
+    res.setHeader('content-security-policy',
+      "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors 'self' dsh-app:;");
+    res.end(html);
+  });
 
   return () => {
     for (const dispose of disposers) {

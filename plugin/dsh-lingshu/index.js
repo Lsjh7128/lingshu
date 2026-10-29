@@ -45,6 +45,12 @@ import {
   readPersona as readPersonaSnapshot,
   writePersona as writeWorkspacePersona,
   createWorkspace as createWorkspaceRecord,
+  // v0.2 新绑定模型（人格体 ↔ 人格舱）
+  listPersonas as listPersonaStore,
+  createPersona as createPersonaRecord,
+  bindWorkspace as bindWorkspaceRecord,
+  unbindWorkspace as unbindWorkspaceRecord,
+  availableWorkspaces as listAvailableWorkspaces,
 } from './workspace-api.js';
 // P2 工作区策略（deny-only）：读 workspaces/<id>.json，派生"只收紧"的有效策略喂给工具网关。
 import {
@@ -56,7 +62,7 @@ import {
 // 只有数据根存在 layout.json（layout-0.2）时才启用；缺省 legacy 路径逐字节不变。
 import {
   LAYOUT_SCHEMA, SKELETON_SECTION, resolveMemoryPaths, readLayout, canonicalizePath,
-  sandboxId as sandboxIdOf, decideScope, MemoryRuntime,
+  sandboxId as sandboxIdOf, decideScope, MemoryRuntime, resolveBinding,
 } from './memory-paths.js';
 
 export const name = 'dsh-lingshu';
@@ -356,23 +362,9 @@ function readStartupSelection(base, profileTag) {
   if (normalized.workspaceId === '') {
     return { selected: '', notice: null };   // 显式 legacy
   }
-  // v0.2：选择里存的是 sandboxId；存在性看 sandboxes/<sid>，不能再用 workspace_<id>。
-  // 旧 workspaceId（如 qq）在 v0.2 下已无寻址意义：忽略并留痕，由 v0.2 绑定逻辑回退。
+  // v0.2 新模型：绑定是唯一身份来源，active-workspace.json 不再参与选择（文件保留但忽略）。
   if (readLayout(base)) {
-    const sid = String(normalized.workspaceId);
-    if (/^[0-9a-f]{8}$/.test(sid)) {
-      if (isRealDir(path.join(path.resolve(base), 'sandboxes', sid))) {
-        return { selected: sid, notice: null };
-      }
-      return {
-        selected: undefined,
-        notice: { reason: 'workspace_missing', workspaceId: sid, source: 'active-workspace.json', applied: false },
-      };
-    }
-    return {
-      selected: undefined,
-      notice: { reason: 'legacy_workspace_id_ignored', workspaceId: sid, source: 'active-workspace.json', applied: false },
-    };
+    return { selected: undefined, notice: null };
   }
   // 选择指向的工作区必须还在（否则不隐式创建/不静默落到别的 workspace）。
   const target = stateDir(profileTag, normalized.workspaceId);
@@ -676,66 +668,43 @@ export function apply(ctx, config = {}) {
   // 当前工作区的人格体快照：只读、只用于风格段；读取时按文件 mtime 重读，
   // 因此面板保存 persona 后，下一条消息即可生效（无需重启；热切换后读新目录）。
   let personaFile = path.join(dir, 'persona.json');
-  // ── v0.2 布局（施工单 v2 §2 / D6）：`layout.json` 是唯一开关 ─────────────────
-  // 为什么用数据根上的文件当开关而不是 config：915/0 基线与全部 JS sim 都跑在 legacy
-  // 布局上，只有显式迁移过的数据根才走新路径；回滚 = 删掉 layout.json（旧文件从未被改写）。
+﻿  // ── v0.2 身份解析（2026-10-29 H0 新模型）：绑定是唯一来源，无绑定 = 无人格 ──
+  // 绑定：sandbox_mapping.yaml 的 canonical_path → sandbox_id + default_persona。
+  // 不再有"单绑定/单沙盒/cwd"兜底：没绑定必须显式进入 unbound（不注入人格、不读不写记忆）。
+  // layout.json 是 v0.2 唯一开关（缺省 legacy 布局逐字节不变）
   const layoutDoc = readLayout(roots.base);
-  const v02 = layoutDoc ? (() => {
-    // 沙盒 ↔ 人格绑定（施工单 §3.2 / G2）。优先级（部署实测后定）：
-    //   ① 持久化选择是 sandboxId（面板 v0.2 切换写回的就是它）
-    //   ② 宿主 workspaceRoot 命中 mapping
-    //   ③ mapping 只有一条绑定 → 用它兜底（宿主 workspaceRoot 常是会话目录而非项目根）
-    //   ④ 只有一条沙盒索引 → 用它兜底（旧 workspaceId 选择被忽略时仍能落到唯一沙盒）
-    //   ⑤ 都没有 → 用宿主 workspaceRoot（未迁移数据根的兼容路径）
-    const bindings = readMappingBindings(roots.base);
-    const index = readSandboxIndex(roots.base);
-    const explicitRoot = String(process.env.LINGSHU_SANDBOX_ROOT || cfg.workspaceRoot || '').trim();
-    const selected = String(ws.id || '').trim();
-    const isSid = (x) => /^[0-9a-f]{8}$/.test(x) && Boolean(index[x]);
-
-    let binding = null;
-    let sid = '';
-    let canonical = '';
-    if (isSid(selected)) {
-      sid = selected;
-      canonical = canonicalizePath(String(index[selected].canonical_path || ''));
-      binding = bindings.find(
-        (b) => canonicalizePath(String(b.canonical_path || '')) === canonical) || null;
-    } else if (explicitRoot) {
-      canonical = canonicalizePath(explicitRoot);
-      binding = bindings.find(
-        (b) => canonicalizePath(String(b.canonical_path || '')) === canonical) || null;
-      if (binding) sid = sandboxIdOf(canonical);
+  const resolveV02 = () => {
+    const workspaceRoot = String(process.env.LINGSHU_SANDBOX_ROOT || cfg.workspaceRoot || process.cwd());
+    const canonical = canonicalizePath(workspaceRoot);
+    const binding = resolveBinding(roots.base, canonical);
+    const sid = String((binding && binding.sandbox_id) || '');
+    const pid = String((binding && binding.default_persona) || '');
+    if (!binding || !/^[0-9a-f]{8}$/.test(sid) || !pid) {
+      return {
+        bound: false, workspaceRoot, canonical,
+        reason: !binding ? 'workspace_not_bound'
+          : (!/^[0-9a-f]{8}$/.test(sid) ? 'bad_sandbox_id' : 'bad_persona_id'),
+        bindingLabel: binding ? (binding.label || null) : null,
+      };
     }
-    if (!sid && bindings.length === 1) {
-      binding = bindings[0];
-      canonical = canonicalizePath(String(binding.canonical_path || ''));
-      sid = sandboxIdOf(canonical);
-    }
-    if (!sid && Object.keys(index).length === 1) {
-      const only = Object.keys(index)[0];
-      sid = only;
-      canonical = canonicalizePath(String(index[only].canonical_path || ''));
-      binding = bindings.find(
-        (b) => canonicalizePath(String(b.canonical_path || '')) === canonical) || null;
-    }
-    if (!sid) {
-      canonical = canonicalizePath(explicitRoot || process.cwd());
-      sid = sandboxIdOf(canonical);
-    }
-    const personaId = String((binding && binding.default_persona) || cfg.personaId || 'butler');
-    const workspaceRoot = canonical || explicitRoot || process.cwd();
     return {
-      personaId, workspaceRoot, canonical, sandboxId: sid,
-      bindingLabel: binding ? (binding.label || null) : null,
-      selected: isSid(selected) ? selected : null,
-      personaStateFile: path.join(roots.base, 'personas', personaId, 'persona_state.json'),
-      paths: resolveMemoryPaths(roots.base, sid, personaId),
+      bound: true, workspaceRoot, canonical, sandboxId: sid, personaId: pid,
+      bindingLabel: binding.label || null,
+      personaStateFile: path.join(roots.base, 'personas', pid, 'persona_state.json'),
+      paths: resolveMemoryPaths(roots.base, sid, pid),
     };
-  })() : null;
+  };
+  const mappingSig = () => {
+    try {
+      const s = fs.statSync(path.join(roots.base, 'sandbox_mapping.yaml'));
+      return `${s.mtimeMs}:${s.size}`;
+    } catch { return 'missing'; }
+  };
+  let v02 = layoutDoc ? resolveV02() : null;
+  let v02Sig = v02 ? mappingSig() : '';
   let v02Runtime = null;
   const getV02Runtime = () => {
-    if (!v02) return null;
+    if (!v02 || !v02.bound) return null;
     if (!v02Runtime) {
       v02Runtime = new MemoryRuntime({
         dataRoot: roots.base, sandboxId: v02.sandboxId, personaId: v02.personaId,
@@ -743,27 +712,33 @@ export function apply(ctx, config = {}) {
     }
     return v02Runtime;
   };
-  if (v02) {
-    dir = path.dirname(v02.paths.localMemory);
-    memFile = v02.paths.localMemory;
+  /** 把当前身份落到运行时路径/身份字段；bound/unbound 两种形态。 */
+  const applyV02Paths = () => {
     auditFile = path.join(roots.base, 'audit', 'audit.jsonl');
-    stateFile = v02.paths.state;
-    personaFile = path.join(roots.base, 'personas', v02.personaId, 'persona.json');
-    // 运行时身份统一用 sandboxId（面板/审计/切换都看它），旧 workspaceId 语义在 v0.2 不再使用。
-    ws.id = v02.sandboxId;
-    ws.source = 'v02';
-  }
-  // v0.2 自愈：把旧 workspaceId 选择（如 "qq"）改写成 sandboxId，下次启动直接命中优先级①。
-  if (v02 && startupSelection.selected !== v02.sandboxId) {
-    try {
-      writeActiveSelection(roots.base, { workspaceId: v02.sandboxId, profileTag });
-    } catch { /* 选择文件写失败不影响启动 */ }
-  }
+    if (v02.bound) {
+      dir = path.dirname(v02.paths.localMemory);
+      memFile = v02.paths.localMemory;
+      stateFile = v02.paths.state;
+      personaFile = path.join(roots.base, 'personas', v02.personaId, 'persona.json');
+      ws.id = v02.sandboxId;
+      ws.source = 'v02';
+    } else {
+      // 无人格舱：只留一份"无归属"运行态，不碰 personas/sandboxes 下的任何数据。
+      dir = path.join(roots.base, '.unbound');
+      memFile = '';
+      stateFile = path.join(dir, 'state.json');
+      personaFile = '';
+      ws.id = '';
+      ws.source = 'v02-unbound';
+    }
+  };
+  if (v02) applyV02Paths();
   // 读全量：legacy = 单文件 last-wins；v0.2 = local + global 两个文件各自折叠后合并。
   // pending（待定区）**不参与检索**（§4.2），所以不在这里返回。
   const readAllEntries = () => {
+    if (!v02) return readMemories(memFile);
+    if (!v02.bound) return [];              // 无人格舱：不召回任何记忆
     const rt = getV02Runtime();
-    if (!rt) return readMemories(memFile);
     const all = rt.readAll();
     return [...all.local, ...all.global];
   };
@@ -791,11 +766,62 @@ export function apply(ctx, config = {}) {
   let monitor = new PhaseShiftMonitor(cfg.control);
   let variety = new RequisiteVarietyGuard();
 
+  /**
+   * 绑定热更新：sandbox_mapping.yaml 变化后，下一轮自动重解析（绑定/解绑无需重启）。
+   * 只有"目标沙盒/人格"真的变了才整体重载；同一绑定只更新引用。
+   */
+  function refreshV02Binding() {
+    if (!v02) return;
+    const sig = mappingSig();
+    if (sig === v02Sig) return;
+    v02Sig = sig;
+    const next = resolveV02();
+    const same = v02.bound && next.bound
+      && v02.sandboxId === next.sandboxId && v02.personaId === next.personaId;
+    if (same) { v02 = next; return; }
+    try { saveState(); } catch { /* noop */ }
+    v02 = next;
+    v02Runtime = null;
+    applyV02Paths();
+    st = loadRuntimeState(stateFile);
+    applyPersonaState();
+    integral = new IntegralBaseline(cfg.control);
+    integral.integral = { ...integral.integral, ...(st.control.integral || {}) };
+    monitor = new PhaseShiftMonitor(cfg.control);
+    variety = new RequisiteVarietyGuard();
+    claimedTurn = null;
+    claimedAgent = null;
+    claimedMessages = [];
+    lastPrecomputedTurn = null;
+    precomputedTurn = null;
+    precomputeAuditPending = false;
+    precomputeCall = false;
+    lastTurnSeen = null;
+    clearTurnActive();
+    saveState();
+    audit('binding_reloaded', {
+      sandbox_id: v02.bound ? v02.sandboxId : null,
+      persona_id: v02.bound ? v02.personaId : null,
+      canonical_path: v02.canonical,
+      bound: v02.bound,
+      reason: v02.bound ? null : v02.reason,
+    });
+  }
+
   // 记忆存储适配器：读全量 / 追加。只给 memorywriter 用。闭包读可变的 memFile/dir。
   // v0.2：写入统一走 MemoryRuntime（按 row.scope 路由到 local/global/pending + UCA-01 检查）。
   const memStore = {
     read: () => readAllEntries(),
     append: (entries) => {
+      // 无人格舱：fail-closed，不写任何记忆（避免产生无法归属的孤儿行）。
+      if (v02 && !v02.bound) {
+        audit('memory_write_unbound', { dropped: entries.length, turn: st.turns });
+        return {
+          written: 0, written_ids: [],
+          rejected: entries.map((e) => ({ id: e.id, reason: 'no_persona_bound' })),
+          routed: { local: 0, global: 0, pending: 0 }, uca01: [],
+        };
+      }
       const rt = getV02Runtime();
       if (!rt) {
         ensureDir(dir);
@@ -820,7 +846,7 @@ export function apply(ctx, config = {}) {
       ensureDir(dir);
       fs.writeFileSync(stateFile, JSON.stringify(st, null, 2), 'utf8');
       // D2：v0.2 同一份运行时状态拆两半——沙盒层进 state.json，人格层进 persona_state.json。
-      if (v02) {
+      if (v02 && v02.bound) {
         ensureDir(path.dirname(v02.personaStateFile));
         fs.writeFileSync(v02.personaStateFile, JSON.stringify({
           schema_version: 'persona-state-0.1',
@@ -834,7 +860,7 @@ export function apply(ctx, config = {}) {
 
   /** D2：启动/切换时把人格局状态叠回运行时（缺失 = 全新人格基线）。 */
   function applyPersonaState() {
-    if (!v02) return;
+    if (!v02 || !v02.bound) return;
     const ps = readJsonObject(v02.personaStateFile);
     if (!ps) return;
     if (ps.integral_baseline && typeof ps.integral_baseline === 'object') {
@@ -849,9 +875,11 @@ export function apply(ctx, config = {}) {
   }
 
   // D3：v0.2 审计是全局单本，每行必须带 sandbox_id + persona_id；legacy 行保持原样。
+  // 无人格舱时两个字段为 null（仍然留痕，便于诊断"为什么会话没有人格"）。
   const audit = (kind, data) => appendJsonl(auditFile, {
     ts: Date.now(), kind,
-    ...(v02 ? { sandbox_id: v02.sandboxId, persona_id: v02.personaId } : {}),
+    ...(v02 ? { sandbox_id: v02.bound ? v02.sandboxId : null,
+                persona_id: v02.bound ? v02.personaId : null } : {}),
     ...data,
   });
 
@@ -1018,8 +1046,11 @@ export function apply(ctx, config = {}) {
         currentWorkspaceId: previousId || null,
       };
     }
-    // v0.2：切换的是 sandbox（沙盒），不是旧 workspace 目录；走独立分支（§4.2 / G2）。
-    if (v02) return switchSandboxV02(id);
+    // v0.2：绑定模型下不再"切换沙盒"，activate 只作为兼容入口（目标必须是已绑定沙盒）。
+    if (v02) {
+      if (!v02.bound) return { ok: false, status: 400, error: 'persona_unbound' };
+      return switchSandboxV02(id);
+    }
     // 目标目录用启动时捕获的 roots（不重读 env：热切换只换工作区层，数据根/ profile 层不变）。
     const targetDir = dataDir({
       base: roots.base,
@@ -1798,6 +1829,12 @@ export function apply(ctx, config = {}) {
   // 预计算（synthetic 调用）。抽出命名函数是唯一的结构性改动，不改变首 step 逻辑。
   const preStepHandler = (payload, next) => {
     const now = Date.now();
+    // 绑定可能刚被面板改过：每轮开头做一次 mtime 检查，变化则重解析（无变化零开销）。
+    try {
+      refreshV02Binding();
+    } catch (err) {
+      audit('binding_reload_error', { err: String(err).slice(0, 160) });
+    }
     const text = extractUserText(payload);
     // 实测：一个 turn 里 pre-step 会触发多次（每次 step 一次）。召回/控制论观测只在首个 step 做。
     const turnKey = payload?.turn ?? payload?.turnId ?? null;
@@ -2272,7 +2309,7 @@ export function apply(ctx, config = {}) {
         // · 只有 user_fact 走 decideScope（长期偏好 vs 项目内事实 vs 待定）；
         // · goal/relation/tool 是"发生了什么"的事件流水，固定落 local（不跨项目污染全局层）；
         // · legacy 布局下这段完全不执行 → 旧行为逐字节不变。
-        if (v02 && reqs.length) {
+        if (v02 && v02.bound && reqs.length) {
           const route = decideScope(text);
           for (const req of reqs) {
             const scope = req.origin === 'user_fact' ? route.scope : 'local';
@@ -2655,6 +2692,9 @@ export function apply(ctx, config = {}) {
       pathProfileTag: roots.pathProfileTag,
       currentId: ws.id,
       rejected: ws.rejected,
+      // 新绑定模型：面板的"当前人格舱"= 当前会话工作区（canonicalPath → mapping）。
+      workspaceRoot: String(cfg.workspaceRoot || process.cwd()),
+      dsHome: home(),
       coldTurns: Number(cfg.coldTurns),
       warmTurns: Number(cfg.warmTurns),
       policyDir,
@@ -2671,6 +2711,16 @@ export function apply(ctx, config = {}) {
     // 面板不直连文件：所有操作走这里（即 MemoryRuntime），写操作一律 append-only 墓碑。
     const v02Unavailable = { ok: false, status: 503, error: 'layout_not_v02' };
     const getMemory = (query = {}) => {
+      if (!v02) return v02Unavailable;
+      if (!v02.bound) {
+        // 无人格舱：面板可用，但明确显示"未绑定"（不是 503，避免面板误判为故障）。
+        return {
+          ok: true, status: 200, unbound: true,
+          sandbox_id: null, persona_id: null,
+          global: [], local: [], pending_count: 0, trash: [],
+          retention: { auto_purge: false, note: '当前人格舱未绑定人格体：不读不写记忆' },
+        };
+      }
       const rt = getV02Runtime();
       if (!rt) return v02Unavailable;
       const view = rt.list({ query: typeof query.q === 'string' ? query.q : '' });
@@ -2692,6 +2742,25 @@ export function apply(ctx, config = {}) {
         ? { ok: true, status: 200, id, scope: res.scope ?? null }
         : { ok: false, status: 404, error: res.reason || 'not_found' };
     };
+
+    // ── v0.2 人格体 ↔ 人格舱（绑定）面板 ──
+    const getPersonas = () => listPersonaStore(workspaceOptions);
+    const makePersona = (body) => createPersonaRecord(workspaceOptions, body);
+    const bindPersona = (body) => {
+      const res = bindWorkspaceRecord(workspaceOptions, body);
+      if (res.ok) {
+        try { refreshV02Binding(); } catch { /* 内部已审计 */ }
+      }
+      return res;
+    };
+    const unbindPersona = (body) => {
+      const res = unbindWorkspaceRecord(workspaceOptions, body);
+      if (res.ok) {
+        try { refreshV02Binding(); } catch { /* 内部已审计 */ }
+      }
+      return res;
+    };
+    const availablePersonaWorkspaces = () => listAvailableWorkspaces(workspaceOptions);
 
     // 热切换后同步面板视图里的"当前工作区"（workspace-api 的 currentId/rejected 是快照）。
     onWorkspaceSwitched = (id) => {
@@ -2727,6 +2796,12 @@ export function apply(ctx, config = {}) {
         forgetMemory: (body) => memoryOp('forget', 'panel_forget', body),
         restoreMemory: (body) => memoryOp('restore', 'panel_restore', body),
         purgeMemory: (body) => memoryOp('purge', 'panel_purge', body),
+        // v0.2 人格体 ↔ 人格舱
+        getPersonas,
+        createPersona: makePersona,
+        bindWorkspace: bindPersona,
+        unbindWorkspace: unbindPersona,
+        getAvailableWorkspaces: availablePersonaWorkspaces,
       });
       scope.effect?.(() => () => {
         try { dispose(); } catch { /* noop */ }

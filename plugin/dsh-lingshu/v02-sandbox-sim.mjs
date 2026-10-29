@@ -321,22 +321,23 @@ const panelB2 = await panelGet(hB2);
 check('G4：面板在 DirB 不暴露 DirA 条目',
   panelB2.ok === true && (panelB2.local || []).length === 0 && (panelB2.global || []).length === 0);
 
-// 冷启动：无 mapping 绑定 / 无 persona 文件 / 无记忆
+// 无绑定 = 无人格、无记忆（fail-closed，不再有 butler/单绑定/单沙盒兜底）
 const hE = makeHost();
 clearSelection(DATA);
 apply(hE.ctx, { ...CFG, workspaceRoot: PROJ.E });
-check('G4：冷启动无 mapping 时回退 config 默认人格（butler）',
-  readJsonl(path.join(DATA, 'audit', 'audit.jsonl')).some(
-    (r) => r.kind === 'apply' && r.sandbox_id === sid.E && r.persona_id === 'butler'),
-  sid.E);
+const applyE = readJsonl(path.join(DATA, 'audit', 'audit.jsonl')).filter((r) => r.kind === 'apply').pop();
+check('无绑定：apply 的 sandbox_id/persona_id 均为 null',
+  applyE && applyE.sandbox_id === null && applyE.persona_id === null,
+  JSON.stringify(applyE && [applyE.sandbox_id, applyE.persona_id]));
+check('无绑定：风格段为空（不注入任何人格）', (sectionText(hE, 'lingshu:style') || '') === '');
 const coldFact = await ask(hE, '任何事');
-check('G4：冷启动无记忆时召回为空且不报错（unknown/ask_clarify）',
+check('无绑定：不召回（无记忆且不报错）',
   coldFact === '' || coldFact.includes('记忆库中无记录') || coldFact.includes('unknown'), coldFact.slice(0, 100));
-check('G4：冷启动仍注册骨架段（v0.2 8 段，skeleton 空串）',
-  hE.sections.length === 8 && (hE.sections.find((s) => s.name === 'lingshu:skeleton')?.text() === ''));
+await sendUser(hE, '本项目记住：我的资料是机密级', 90);
+check('无绑定：写入被 fail-closed（不创建沙盒目录）',
+  !fs.existsSync(path.join(DATA, 'sandboxes', sid.E)));
 
-// f) 部署兜底：宿主不给 workspaceRoot 时，单绑定 mapping 决定 sandbox/persona
-//    （真实环境 desktop profile 就是这个形态：宿主 cwd 不是项目根）
+// f) 单绑定 mapping 不再兜底：workspaceRoot 不命中 = 无人格
 const DATA2 = path.join(ROOT, 'data-single');
 const PROJ_F = path.join(ROOT, 'proj-single');
 const SID_F = sandboxId(canonicalizePath(PROJ_F));
@@ -350,16 +351,13 @@ fs.writeFileSync(path.join(DATA2, 'sandbox_mapping.yaml'),
 process.env.LINGSHU_DATA_DIR = DATA2;
 const hF = makeHost();
 clearSelection(DATA2);
-// 刻意给一个**不命中 mapping** 的 workspaceRoot（真实宿主传的是会话目录 D:\LSJH 这类）：
-// 单绑定兜底应仍然选中绑定里的项目根，而不是 workspaceRoot。
+// 刻意给不命中 mapping 的 workspaceRoot：新模型下必须"无人格"，不能拿唯一绑定兜底。
 apply(hF.ctx, { ...CFG, workspaceRoot: ROOT });
-const applyF = readJsonl(path.join(DATA2, 'audit', 'audit.jsonl')).find((r) => r.kind === 'apply');
-check('部署兜底：无 workspaceRoot + 单绑定 → sandboxId 取绑定项目根',
-  applyF && applyF.sandbox_id === SID_F, JSON.stringify(applyF && applyF.sandbox_id));
-check('部署兜底：无 workspaceRoot + 单绑定 → persona 取 default_persona',
-  applyF && applyF.persona_id === 'solo', JSON.stringify(applyF && applyF.persona_id));
-check('部署兜底：样式段加载到绑定人格（Solo）',
-  String(sectionText(hF, 'lingshu:style') || '').includes('Solo'));
+const applyF = readJsonl(path.join(DATA2, 'audit', 'audit.jsonl')).filter((r) => r.kind === 'apply').pop();
+check('无兜底：单绑定 mapping + 未命中工作区 → 无人格',
+  applyF && applyF.sandbox_id === null && applyF.persona_id === null,
+  JSON.stringify(applyF && [applyF.sandbox_id, applyF.persona_id]));
+check('无兜底：不加载任何人格（style 为空）', (sectionText(hF, 'lingshu:style') || '') === '');
 process.env.LINGSHU_DATA_DIR = DATA;
 
 // ── 汇总 ────────────────────────────────────────────────

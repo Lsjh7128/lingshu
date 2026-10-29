@@ -108,6 +108,24 @@ check("布局：layout.json 写入成功", res.get("ok") and L.read_layout(root)
 check("布局：二次迁移被拒（幂等）", L.write_layout(root)["reason"] == "layout_exists")
 check("布局：v0.2 识别", L.detect_layout(root)["kind"] == "v02")
 
+# ── C2. 绑定（sandbox_mapping）：写/读/解析，无绑定返回 None ──
+root2 = tmpdir("map")
+res = L.write_mapping_bindings(root2, [
+    {"canonical_path": "D:\\ProjB", "sandbox_id": "11112222", "default_persona": "pb", "label": "B"},
+    {"canonical_path": "D:\\ProjA", "sandbox_id": "aaaabbbb", "default_persona": "pa", "label": "A"},
+])
+check("绑定：mapping 写入成功", res.get("ok") is True)
+bindings = L.read_mapping_bindings(root2)
+check("绑定：读回条数正确且按 canonical 排序", len(bindings) == 2
+      and bindings[0]["canonical_path"] == "d:/proja", str(bindings))
+check("绑定：解析命中（大小写/尾分隔符等价）",
+      (L.resolve_binding(root2, "d:\\proja\\") or {}).get("default_persona") == "pa")
+check("绑定：解析未命中 → None（无兜底）", L.resolve_binding(root2, "d:\\not-bound") is None)
+check("绑定：缺失文件 → 空列表", L.read_mapping_bindings(tmpdir("map-empty")) == [])
+res = L.write_mapping_bindings(root2, [])
+check("绑定：清空后解析仍为 None", res.get("ok") is True
+      and L.resolve_binding(root2, "d:\\proja") is None)
+
 # ── D. 墓碑与回收站（D8 / §4.5）───────────────────────────
 rows = [row("m1", "local", "红茶"), row("m2", "global", "绿茶")]
 rows.append(dict(rows[0], status="suppressed", content="[已彻底删除]"))   # 同 id 全量墓碑

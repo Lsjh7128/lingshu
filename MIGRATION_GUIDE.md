@@ -122,6 +122,15 @@ Get-ChildItem "$data\sandboxes" -Recurse -File | Select-Object FullName,Length
      `GET /dsh-lingshu/api/memory?q=`，写操作 `POST /api/memory/forget|/trash/restore|/trash/purge`）；
    - 面板顶部显示当前 `sandbox_id` 与 `persona_id`，与 `sandboxes/index.json` 对应。
 
+### 人格体 ↔ 人格舱（绑定，2026-10-29 新模型）
+
+- **创建人格体**：`POST /dsh-lingshu/api/personas` `{name, summary, traits}` → `personas/{pid}/`（persona.json + 全局记忆空文件 + persona_state）。
+- **绑定人格舱**：`POST /dsh-lingshu/api/bindings` `{persona_id, workspace_root}` → 写 `sandbox_mapping.yaml` + `sandboxes/{sid}/sandbox.json` + `sandboxes/index.json`。
+- **解绑**：`POST /dsh-lingshu/api/bindings/unbind` `{workspace_root}`（沙盒数据保留，不删除）。
+- **面板**：`/dsh-lingshu/dashboard/personas`（创建 / 绑定 / 解绑；候选人格舱 = 当前会话工作区 + `~/.dsh/sessions` 扫描，失败可手填）。
+- **语义**：没有绑定 = **不加载任何人格、不读不写记忆**（fail-closed）；绑定/解绑**下一轮生效**（mapping 热读）。
+- `active-workspace.json` 在 v0.2 不再决定人格（文件保留但忽略）；legacy 布局不受影响。
+
 ### profileTag 的变化
 
 旧的路径级 `profiles/<tag>/` 在 v0.2 不再参与寻址；tag 被迁移进 `sandbox.json.profile_tag`（仅溯源用）。

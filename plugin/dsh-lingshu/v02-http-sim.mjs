@@ -37,8 +37,9 @@ function writeJson(file, value) {
 function makeHost() {
   const routes = [];
   const hooks = {};
+  const sections = [];
   const ctx = {
-    systemPrompt: { section() {} },
+    systemPrompt: { section(sec) { sections.push(sec); } },
     tools: { register() { return () => {}; } },
     on(evt, fn) { hooks[evt] = fn; },
     inject(_deps, fn) {
@@ -48,7 +49,7 @@ function makeHost() {
       });
     },
   };
-  return { ctx, routes, hooks };
+  return { ctx, routes, hooks, sections };
 }
 
 fs.mkdirSync(DATA, { recursive: true });
@@ -71,6 +72,9 @@ writeJson(path.join(DATA, 'personas', 'butler', 'persona.json'), {
   schema_version: 'persona-0.1', persona_id: 'butler', name: 'Butler',
   summary: '沉稳管家', confirmed_by_user: true, confirmed_at: new Date().toISOString(),
 });
+// 新绑定模型：没有绑定 = 无人格；测试数据根必须显式把 PROJ 绑给 butler。
+fs.writeFileSync(path.join(DATA, 'sandbox_mapping.yaml'),
+  `schema_version: mapping-0.1\nbindings:\n  - canonical_path: "${canonicalizePath(PROJ)}"\n    sandbox_id: "${SID}"\n    default_persona: "butler"\n    label: "http-sim"\n`, 'utf8');
 process.env.LINGSHU_DATA_DIR = DATA;
 
 const host = makeHost();
@@ -187,6 +191,51 @@ const folded = foldRows(rawLocal);
 check('HTTP：purge 后文件仍保留骨架行（append-only）',
   rawLocal.some((r) => String(r.id) === secret.id)
     && folded.suppressed.some((r) => String(r.id) === secret.id && r.content === '[已彻底删除]'));
+
+// ── 人格体 / 人格舱（绑定）真 HTTP ──────────────────────────────
+const secStyle = (name) => {
+  const s = host.sections.find((x) => x.name === name);
+  return s ? String(s.text() || '') : '';
+};
+const personas0 = await (await fetch(`${BASE}/dsh-lingshu/api/personas`)).json();
+check('HTTP：人格体列表含 butler', personas0.ok === true
+  && (personas0.personas || []).some((p) => p.persona_id === 'butler'));
+const created = await (await fetch(`${BASE}/dsh-lingshu/api/personas`, {
+  method: 'POST', headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({ name: 'Tester', summary: '测试人格', traits: { warmth: 0.4 } }),
+})).json();
+check('HTTP：创建人格体 201', created.ok === true && Boolean(created.persona?.persona_id), JSON.stringify(created));
+const PROJ2 = path.join(ROOT, 'proj2');
+fs.mkdirSync(PROJ2, { recursive: true });
+const bind2 = await (await fetch(`${BASE}/dsh-lingshu/api/bindings`, {
+  method: 'POST', headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({ persona_id: created.persona.persona_id, workspace_root: PROJ2 }),
+})).json();
+check('HTTP：绑定人格舱 200', bind2.ok === true
+  && bind2.binding?.default_persona === created.persona.persona_id, JSON.stringify(bind2));
+const avail = await (await fetch(`${BASE}/dsh-lingshu/api/workspaces/available`)).json();
+check('HTTP：可选人格舱列表含当前工作区（且已绑定可见）', avail.ok === true
+  && (avail.workspaces || []).some((w) => w.workspace_root === canonicalizePath(PROJ)
+    && w.bound_persona_id === 'butler'));
+const unbind = await (await fetch(`${BASE}/dsh-lingshu/api/bindings/unbind`, {
+  method: 'POST', headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({ workspace_root: PROJ }),
+})).json();
+check('HTTP：解绑当前人格舱 200', unbind.ok === true);
+const memUnbound = await (await fetch(`${BASE}/dsh-lingshu/api/memory`)).json();
+check('HTTP：解绑后无人格 → 不读记忆', memUnbound.ok === true && memUnbound.unbound === true
+  && (memUnbound.local || []).length === 0);
+check('HTTP：解绑后风格段为空（不注入人格）', secStyle('lingshu:style') === '');
+const rebind = await (await fetch(`${BASE}/dsh-lingshu/api/bindings`, {
+  method: 'POST', headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({ persona_id: 'butler', workspace_root: PROJ }),
+})).json();
+check('HTTP：重新绑定 200', rebind.ok === true);
+const memBack = await (await fetch(`${BASE}/dsh-lingshu/api/memory`)).json();
+check('HTTP：重绑后记忆仍可读（global 保留、回收站保留 redacted）',
+  (memBack.global || []).length === 1
+    && (memBack.trash || []).some((r) => r.redacted === true),
+  JSON.stringify({ global: (memBack.global || []).length, trash: (memBack.trash || []).length }));
 
 server.close();
 try { fs.rmSync(ROOT, { recursive: true, force: true }); } catch { /* Windows 占用时忽略 */ }
