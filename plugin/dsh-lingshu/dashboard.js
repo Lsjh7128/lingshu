@@ -35,6 +35,7 @@ const PERSONAS_ROUTE = '/dsh-lingshu/api/personas';
 const BINDINGS_ROUTE = '/dsh-lingshu/api/bindings';
 const AVAILABLE_ROUTE = '/dsh-lingshu/api/workspaces/available';
 const PERSONAS_PAGE_ROUTE = '/dsh-lingshu/dashboard/personas';
+const PERSONA_MEMORY_ROUTE = '/dsh-lingshu/api/persona-memory';
 const PERSONAS_PAGE_FILE = fileURLToPath(new URL('./ui/personas.html', import.meta.url));
 // 与 workspace-api.js 的 persona 上限一致：面板请求体 64KB。
 const JSON_BODY_MAX_BYTES = 64 * 1024;
@@ -437,6 +438,22 @@ export function registerDashboardRoutes(ctx, options = {}) {
       const out = typeof options.getAvailableWorkspaces === 'function'
         ? options.getAvailableWorkspaces() : { ok: false, status: 503, error: 'available_api_unavailable' };
       sendProviderResult(res, out, 'available_api_failed');
+    } catch (error) {
+      sendJson(res, 500, { ok: false, error: String(error?.message || error) });
+    }
+  }, ['GET', 'HEAD']);
+  registerExact(`${PERSONAS_ROUTE}/update`, personasWrite('updatePersona', 'persona_update_failed'), ['POST']);
+  registerExact(PERSONA_MEMORY_ROUTE, (req, res) => {
+    if (typeof options.getPersonaMemory !== 'function') {
+      sendJson(res, 503, { ok: false, error: 'persona_memory_api_unavailable' });
+      return;
+    }
+    let persona = '';
+    try {
+      persona = new URL(req.url ?? '/', 'http://dsh.local').searchParams.get('persona') ?? '';
+    } catch { persona = ''; }
+    try {
+      sendProviderResult(res, options.getPersonaMemory({ persona }), 'persona_memory_failed');
     } catch (error) {
       sendJson(res, 500, { ok: false, error: String(error?.message || error) });
     }

@@ -51,6 +51,8 @@ export const PERSONA_TRAITS = Object.freeze([
 const PERSONA_TRAIT_ALIASES = Object.freeze({ boundaryFirmness: 'boundary_firmness' });
 const PERSONA_KEYS = Object.freeze([
   'schema_version', 'persona_id', 'name', 'summary', 'traits', 'confirmed_by_user', 'confirmed_at',
+  // v0.2 表达层（只影响风格，不改变事实/权限）
+  'self_reference', 'tone', 'boundaries',
 ]);
 const PERSONA_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
 // 面板能力声明：canSwitch=true（热切换已接线；当前工作区由 UI 自行禁用切换按钮）。
@@ -237,7 +239,14 @@ export function readPersona(file) {
     }
   }
   if (!name && !summary && Object.keys(traits).length === 0) return null;
-  return { name, summary, traits };
+  return {
+    name,
+    summary,
+    traits,
+    self_reference: cleanString(parsed.self_reference, 40),
+    tone: cleanString(parsed.tone, 200),
+    boundaries: cleanString(parsed.boundaries, 300),
+  };
 }
 
 function summarize({
@@ -731,6 +740,19 @@ export function validatePersonaPayload(raw) {
   }
   const summary = typeof raw.summary === 'string' ? raw.summary.trim() : '';
   if (summary.length > 600) return { ok: false, error: 'summary_too_long' };
+  const readText = (key, max, label) => {
+    if (raw[key] === undefined || raw[key] === null) return { value: '' };
+    if (typeof raw[key] !== 'string') return { error: `bad_${label}` };
+    const text = raw[key].trim();
+    if (text.length > max) return { error: `${label}_too_long` };
+    return { value: text };
+  };
+  const selfReference = readText('self_reference', 40, 'self_reference');
+  if (selfReference.error) return { ok: false, error: selfReference.error };
+  const tone = readText('tone', 200, 'tone');
+  if (tone.error) return { ok: false, error: tone.error };
+  const boundaries = readText('boundaries', 300, 'boundaries');
+  if (boundaries.error) return { ok: false, error: boundaries.error };
 
   const traitsRaw = raw.traits === undefined ? {} : raw.traits;
   if (!traitsRaw || typeof traitsRaw !== 'object' || Array.isArray(traitsRaw)) {
@@ -770,6 +792,9 @@ export function validatePersonaPayload(raw) {
       name,
       summary,
       traits,
+      self_reference: selfReference.value,
+      tone: tone.value,
+      boundaries: boundaries.value,
       confirmed_by_user: true,
       confirmed_at: confirmedAt,
     },
@@ -1042,6 +1067,9 @@ export function listPersonas(options = {}) {
       name: p.name,
       summary: p.summary,
       traits: p.traits,
+      self_reference: p.self_reference,
+      tone: p.tone,
+      boundaries: p.boundaries,
       bindings: bindings.filter((b) => b.default_persona === entry.name).map((b) => ({ ...b })),
     });
   }
@@ -1231,6 +1259,39 @@ export function availableWorkspaces(options = {}) {
   return { ok: true, workspaces: out };
 }
 
+/** 更新人格体（persona 级，不经 workspace）：只写 persona.json 白名单字段。 */
+export function updatePersona(options = {}, raw = {}) {
+  const o = normalizeOptions(options);
+  if (!o.base) return { ok: false, status: 503, error: 'data_root_unavailable' };
+  const pid = String(raw.persona_id || '').trim();
+  if (!personaExists(o, pid)) {
+    return { ok: false, status: 404, error: 'persona_not_found', persona_id: pid };
+  }
+  const validated = validatePersonaPayload({
+    ...raw,
+    schema_version: PERSONA_SCHEMA_VERSION,
+    persona_id: pid,
+    confirmed_by_user: true,
+  });
+  if (!validated.ok) {
+    return { ok: false, status: 400, error: validated.error, field: validated.field };
+  }
+  const file = path.join(personaRoot(o), pid, 'persona.json');
+  try {
+    atomicWriteJson(file, validated.value);
+  } catch {
+    return { ok: false, status: 500, error: 'persona_write_failed' };
+  }
+  safeAudit(o.audit, 'persona_updated', {
+    persona_id: pid, name_len: validated.value.name.length,
+    has_tone: Boolean(validated.value.tone), source: 'api', layout: 'v0.2',
+  });
+  return {
+    ok: true, status: 200,
+    persona: { persona_id: pid, ...validated.value },
+  };
+}
+
 export default {
   listWorkspaces,
   readWorkspace,
@@ -1238,6 +1299,7 @@ export default {
   createWorkspace,
   listPersonas,
   createPersona,
+  updatePersona,
   bindWorkspace,
   unbindWorkspace,
   availableWorkspaces,
