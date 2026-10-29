@@ -74,7 +74,13 @@ MAP = [
     ("沉浸式安全：Soft Buffer / Safe_Redirect / 风险分级（ADR-014）",
      ["decisions/014-沉浸式安全表达层.md", "docs/09-合成矩阵.md", "docs/10-降级矩阵.md"],
      ["engine/compose.py"], ["tests/test_immersive_safety.py"],
-     "mild→soft（STPA_Blocked 仍 true、人设不崩）；severe/连续升级→hard；信任豁免；默认零回归"),
+     "mild→soft（STPA_Blocked 仍 true、人设不崩）；severe/连续升级→hard；信任豁免；"
+     "多轮真实宿主 52/52；soft 模板含「不得输出任何实例」加固回归；默认零回归"),
+    ("风险分级标定就绪度（沉浸式安全，v5.7）",
+     ["eval-set/README-risk-classifier.md", "docs/20-真实标定协议.md"],
+     ["tools/eval_risk_classifier.py"], ["tests/test_risk_classifier_eval.py"],
+     "合成回归语料 138 行 + 11 条盲区探针；py↔js parity；severe recall / benign FPR / parity 门禁；"
+     "0 条真实标注，禁止升级 measured"),
     ("宪法层", ["docs/01-宪法层.md"], ["engine/constitution.py"],
      ["tests/test_constitution.py"],
      "提示词为主 + 审计器规则桩（A1–A10 / C6 / FrozenGuard）"),
@@ -92,6 +98,15 @@ MAP = [
     ("宿主能力探针", ["research/02-DSH宿主能力核实.md", "probe/README.md"],
      ["probe/dsh-lingshu-probe/index.js"], ["probe/self-check.mjs"],
      "只读探针，测钩子触发顺序与 payload 形状"),
+    ("零信任供应链加载器（S-CAP，ADR-018）",
+     ["decisions/018-零信任供应链与物理沙箱.md", "docs/26-零信任供应链与物理沙箱.md",
+      "contracts/supply-chain-policy.json"],
+     ["engine/supply_chain.py", "plugin/dsh-lingshu/supply-chain.js",
+      "plugin/dsh-lingshu/sandbox-host.mjs", "plugin/dsh-lingshu/sandbox-child.mjs"],
+     ["tests/test_supply_chain.py", "plugin/dsh-lingshu/supply-chain-sim.mjs",
+      "plugin/dsh-lingshu/supply-chain-integration.mjs"],
+     "Manifest 校验 + 静态扫描 + Node permission model 子进程沙箱；fail-closed；py↔js parity；"
+     "真实逃逸实验 59/59 + index 接入 10/10；network 无 OS 级强制（如实声明）"),
 ]
 
 

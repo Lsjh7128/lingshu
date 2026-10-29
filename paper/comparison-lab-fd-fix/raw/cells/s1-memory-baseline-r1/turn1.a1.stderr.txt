@@ -1,0 +1,6 @@
+dsh: reasoning:
+The user has given a multi-turn memory scenario. U3 says the project codename changed to Beta, Alpha is void. U4 asks what the project codename is, answer only the codename.
+
+Answer: 贝塔
+
+Just answer with the codename only.

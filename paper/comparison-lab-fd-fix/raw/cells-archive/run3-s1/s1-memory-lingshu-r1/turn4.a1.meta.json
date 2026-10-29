@@ -1,0 +1,15 @@
+{
+  "invocation_id": "s1-memory-lingshu-r1-t4-a1",
+  "profile": "lingshu-lab-headless",
+  "attempt": 1,
+  "status": "ok",
+  "exit_code": 0,
+  "duration_ms": 7065,
+  "started_at": "2026-10-27T19:01:28+08:00",
+  "finished_at": "2026-10-27T19:01:35+08:00",
+  "prompt_sha256": "9601c53e0d7ef6a165a7380deafa3a368f00125d6f70ec7b8a988224a5a84e09",
+  "stdout_sha256": "bff37bb03388db7d816a8e8db020715e21f445681d92d22d20d25f95fe2958c4",
+  "stderr_sha256": "e76848e1c5e97c6f0571f8b078289c148f3bf99bfb329ef1dcf9e5ea5024ce23",
+  "data_dir": "D:\\LSJH\\lingshu\\paper\\comparison-lab\\raw\\cells\\s1-memory-lingshu-r1",
+  "error": null
+}

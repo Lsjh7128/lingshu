@@ -1,0 +1,806 @@
+// workspace-api.js —— 工作区发现 + 面板写路径（persona.json / 未激活工作区）
+//
+// 依据：decisions/017-人格体隔离-P1P2落地.md、workspace.js（id/布局的纯函数实现）。
+// 本模块回答两个问题：
+//   1) **当前 profile 数据根下有哪些工作区，各自统计摘要是什么**（只读）；
+//   2) **面板可以把 persona.json 写进已有工作区、可以创建未激活工作区**（写路径，白名单 + 原子写）。
+//
+// 边界（改这里之前先读 ADR-017，不要"顺手"放宽）：
+//   1) 读路径只读；写路径只有两个入口（PUT persona / POST create），且都落审计。
+//   2) 只返回统计摘要：绝不返回绝对路径、记忆原文、prompt、persona 之外的配置原文。
+//   3) 只扫**当前 profileTag** 的有效目录，不跨 tag 聚合：
+//        <数据根>/workspace_<id>/profiles/<tag>/   （显式 profile 层）
+//        <数据根>/profiles/<tag>/                  （legacy 平铺 + profile 层）
+//        LINGSHU_DATA_DIR 覆盖时 profile 层**不叠加**（与 index.js#stateDir 旧语义一致，
+//        由调用方传入 pathProfileTag='' 表达）。profileTag 仍原样回显，供面板识别。
+//   4) 损坏 JSONL 容错：坏行/坏 state 跳过，不炸整份摘要。
+//   5) 目录隔离 != 权限隔离（RK-1）。热切换由 index.js#switchWorkspace 负责（运行时上下文
+//      整体重赋值 + turn 保护 + 持久化选择）；本模块只把 canSwitch 标为 true，不执行切换。
+//   6) 符号链接不跟随：目录/文件都先 lstat，避免面板借道读写数据根之外的内容。
+//   7) create 不伪造 state.json：只建目录（可选 persona.json）；运行态由插件 activate/apply 落盘。
+//
+// 未实现（不要在这里补）：跨工作区迁移（显式 CLI 在 workspace-admin.mjs）、多租户、
+// persona prompt/锚点正文（persona.json 只存用户确认元数据）。
+
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { WORKSPACE_ID_RE, PROFILE_TAG_RE } from './workspace.js';
+import { describeWorkspacePolicy, loadWorkspacePolicy } from './workspace-policy.js';
+
+export const API_SCHEMA_VERSION = 'workspace-api-0.2';
+// legacy 伪工作区的展示 id；若真的存在 workspace_legacy/ 则以真实工作区优先（见 list/detail）。
+export const LEGACY_ID = 'legacy';
+
+const WS_DIR_PREFIX = 'workspace_';
+const STATE_MAX_BYTES = 4 * 1024 * 1024;
+const MEMORY_MAX_BYTES = 32 * 1024 * 1024;
+const AUDIT_MAX_BYTES = 32 * 1024 * 1024;
+const PERSONA_MAX_BYTES = 64 * 1024;
+export const PERSONA_SCHEMA_VERSION = 'persona-0.1';
+export const PERSONA_TRAITS = Object.freeze([
+  'formality', 'warmth', 'proactiveness', 'humor', 'boundary_firmness',
+]);
+// 面板历史字段名（camelCase）→ 规范 schema 键。只做这一个兼容别名，落盘永远是 canonical snake。
+const PERSONA_TRAIT_ALIASES = Object.freeze({ boundaryFirmness: 'boundary_firmness' });
+const PERSONA_KEYS = Object.freeze([
+  'schema_version', 'persona_id', 'name', 'summary', 'traits', 'confirmed_by_user', 'confirmed_at',
+]);
+const PERSONA_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
+// 面板能力声明：canSwitch=true（热切换已接线；当前工作区由 UI 自行禁用切换按钮）。
+const CAPABILITIES = Object.freeze({
+  canRead: true,
+  canSwitch: true,
+  canCreate: true,
+  canWritePersona: true,
+});
+
+// ── 文件系统小工具（全部只读、lstat 不跟链接）────────────────────────
+function lstatSafe(p) {
+  try {
+    return fs.lstatSync(p);
+  } catch {
+    return null;
+  }
+}
+
+function isRealDir(p) {
+  const st = lstatSafe(p);
+  return Boolean(st && st.isDirectory());
+}
+
+function isRealFile(p) {
+  const st = lstatSafe(p);
+  return Boolean(st && st.isFile());
+}
+
+/** 拼一个必须留在 root 内部的路径；越界返回 null（纵深防御，正则之外再挡一层）。 */
+function resolveInside(root, ...segs) {
+  const base = path.resolve(root);
+  const target = path.resolve(base, ...segs);
+  if (target !== base && !target.startsWith(base + path.sep)) return null;
+  return target;
+}
+
+/** 面向面板的相对目录（不暴露绝对路径）：分隔符统一为 '/'，数据根本身记为 '.'。 */
+function relativeDataDir(base, dir) {
+  const rel = path.relative(path.resolve(base), path.resolve(dir));
+  if (!rel) return '.';
+  return rel.split(path.sep).join('/');
+}
+
+function fileInfo(file) {
+  const st = lstatSafe(file);
+  if (!st || !st.isFile()) return { name: path.basename(file), exists: false, bytes: 0, lastModified: null };
+  return { name: path.basename(file), exists: true, bytes: st.size, lastModified: st.mtimeMs };
+}
+
+/** 读 JSONL：坏行直接跳过；超上限只读前 N 字节并标 truncated（宁可少算，不可报错）。 */
+function readJsonl(file, maxBytes) {
+  const st = lstatSafe(file);
+  if (!st || !st.isFile() || st.size === 0) return { entries: [], truncated: false };
+  let raw;
+  try {
+    if (st.size > maxBytes) {
+      const fd = fs.openSync(file, 'r');
+      try {
+        const buf = Buffer.alloc(maxBytes);
+        const n = fs.readSync(fd, buf, 0, maxBytes, 0);
+        raw = buf.subarray(0, n).toString('utf8');
+      } finally {
+        fs.closeSync(fd);
+      }
+      // 截断点可能落在行中间：丢掉最后一条不完整的行。
+      const cut = raw.lastIndexOf('\n');
+      raw = cut >= 0 ? raw.slice(0, cut + 1) : '';
+    } else {
+      raw = fs.readFileSync(file, 'utf8');
+    }
+  } catch {
+    return { entries: [], truncated: false };
+  }
+  const entries = [];
+  for (const line of raw.split('\n')) {
+    const text = line.replace(/^\uFEFF/, '').trim();
+    if (!text) continue;
+    try {
+      const value = JSON.parse(text);
+      if (value && typeof value === 'object' && !Array.isArray(value)) entries.push(value);
+    } catch {
+      // 损坏行：跳过（JSONL 是追加写，一行坏不该毁掉整份统计）。
+    }
+  }
+  return { entries, truncated: st.size > maxBytes };
+}
+
+function readStateFile(file) {
+  const st = lstatSafe(file);
+  if (!st || !st.isFile() || st.size > STATE_MAX_BYTES) return {};
+  try {
+    const parsed = JSON.parse(fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function toCount(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+}
+
+// ── 摘要计算（纯读取）────────────────────────────────────────────
+// memory：同 id 后写覆盖（last-wins，与 index.js#readMemories 同口径）。
+// warm 是**层计数**（layer === 'warm'），与 active/suppressed 是不同维度，不要相加。
+function summarizeMemory(entries, truncated) {
+  const byId = new Map();
+  let anon = 0;
+  for (const entry of entries) {
+    if (!entry || typeof entry !== 'object') continue;
+    // 缺 id 的坏条目不能被折叠成同一条：用序号各自成键。
+    const id = typeof entry.id === 'string' && entry.id ? entry.id : `#anon_${anon++}`;
+    byId.set(id, entry);
+  }
+  const values = [...byId.values()];
+  let active = 0;
+  let warm = 0;
+  for (const entry of values) {
+    if (String(entry.status ?? 'active') === 'active') active += 1;
+    if (String(entry.layer ?? '') === 'warm') warm += 1;
+  }
+  return { total: values.length, active, suppressed: values.length - active, warm, truncated: Boolean(truncated) };
+}
+
+// audit：blocked = 被前置审计/工具网关拦截的事件数（blocked===true 或 verdict==='block'）。
+// lastEventAt = 最后一条带合法 ts 的事件时间（epoch ms），供面板显示"最近活动"。
+function summarizeAudit(entries, truncated) {
+  let blocked = 0;
+  let lastEventAt = null;
+  for (const entry of entries) {
+    if (!entry || typeof entry !== 'object') continue;
+    if (entry.blocked === true || entry.verdict === 'block') blocked += 1;
+    const ts = Number(entry.ts);
+    if (Number.isFinite(ts) && ts > 0) lastEventAt = ts;
+  }
+  return { blocked, lastEventAt, truncated: Boolean(truncated) };
+}
+
+function emotionLabel(dev) {
+  // 与 index.js#emotionLabel 保持一致（纯函数；此处复制是为了避免 index->dashboard->api 的循环导入）。
+  const v = Number(dev?.valence || 0);
+  const a = Number(dev?.arousal || 0);
+  const maxAbs = Math.max(Math.abs(v), Math.abs(a), Math.abs(Number(dev?.dominance || 0)));
+  if (maxAbs < 0.05) return '中性';
+  if (v > 0) return a >= 0.1 ? '振奋' : '愉悦';
+  return a >= 0.15 ? '不满' : '低落';
+}
+
+function stageOf(turns, coldTurns, warmTurns) {
+  const t = toCount(turns);
+  if (t < coldTurns) return 'cold';
+  if (t < warmTurns) return 'warm';
+  return 'regular';
+}
+
+function cleanString(value, max) {
+  if (typeof value !== 'string') return '';
+  // 控制字符替换为空格：面板只做文本显示，绝不接受换行/转义注入。
+  return value.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, max);
+}
+
+// persona.json 不存在 / 损坏 / 形状不符 → null（绝不伪造）。存在时只白名单三个字段。
+export function readPersona(file) {
+  const st = lstatSafe(file);
+  if (!st || !st.isFile() || st.size > PERSONA_MAX_BYTES) return null;
+  let parsed;
+  try {
+    parsed = JSON.parse(fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
+  } catch {
+    return null;
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+  const name = cleanString(parsed.name, 120);
+  const summary = cleanString(parsed.summary, 600);
+  const traits = {};
+  const rawTraits = parsed.traits;
+  if (rawTraits && typeof rawTraits === 'object' && !Array.isArray(rawTraits)) {
+    for (const [key, value] of Object.entries(rawTraits).slice(0, 24)) {
+      if (!/^[A-Za-z0-9_-]{1,32}$/.test(key)) continue;
+      if (typeof value !== 'number' || !Number.isFinite(value)) continue;
+      traits[key] = value;
+    }
+  }
+  if (!name && !summary && Object.keys(traits).length === 0) return null;
+  return { name, summary, traits };
+}
+
+function summarize({
+  base, dataDir, workspaceId, isCurrent, coldTurns, warmTurns, policyDir, policyWorkspaceId,
+}) {
+  const stateFile = path.join(dataDir, 'state.json');
+  const memoryFile = path.join(dataDir, 'memory.jsonl');
+  const auditFile = path.join(dataDir, 'audit.jsonl');
+  const personaFile = path.join(dataDir, 'persona.json');
+  const policyId = policyWorkspaceId === undefined ? workspaceId : policyWorkspaceId;
+
+  const state = readStateFile(stateFile);
+  const memoryRead = readJsonl(memoryFile, MEMORY_MAX_BYTES);
+  const auditRead = readJsonl(auditFile, AUDIT_MAX_BYTES);
+  const turns = toCount(state.turns);
+  const phase = state.control?.phase?.phase;
+  const checkedAt = Number(state.frozen?.checkedAt);
+
+  const policyStatus = describeWorkspacePolicy(loadWorkspacePolicy({
+    policyDir: policyDir || '',
+    workspaceId: typeof policyId === 'string' ? policyId : '',
+  }));
+  return {
+    workspaceId,
+    relativeDataDir: relativeDataDir(base, dataDir),
+    isCurrent: Boolean(isCurrent),
+    turns,
+    stage: stageOf(turns, coldTurns, warmTurns),
+    frozen: {
+      ok: state.frozen?.ok === true,
+      checkedAt: Number.isFinite(checkedAt) && checkedAt > 0 ? checkedAt : null,
+    },
+    relation: {
+      trustLevel: typeof state.relation?.trustLevel === 'string' ? state.relation.trustLevel : 'unknown',
+      stage: typeof state.relation?.stage === 'string' ? state.relation.stage : 'unknown',
+      unresolvedConflict: Boolean(state.relation?.unresolvedConflict),
+    },
+    control: {
+      phase: typeof phase === 'string' ? phase : 'unknown',
+    },
+    emotion: {
+      // 与 /api/status 同口径：state.dev，不做额外衰减（衰减在插件运行时已落盘）。
+      label: emotionLabel(state.dev),
+    },
+    memory: summarizeMemory(memoryRead.entries, memoryRead.truncated),
+    audit: summarizeAudit(auditRead.entries, auditRead.truncated),
+    persona: readPersona(personaFile),
+    // P2 策略状态：只读展示；真正生效在 index.js 启动/网关调用路径（本模块不改任何规则）。
+    // enforced 只对"当前工作区 + loaded"为 true（非当前工作区的策略要等它成为当前工作区才生效）。
+    policy: { ...policyStatus, enforced: Boolean(isCurrent && policyStatus.status === 'loaded') },
+    capabilities: { ...CAPABILITIES },
+    // 附加字段（契约之外，面板隔离抽屉用）：只有文件名/大小/时间，没有路径。
+    files: {
+      state: fileInfo(stateFile),
+      memory: fileInfo(memoryFile),
+      audit: fileInfo(auditFile),
+      persona: fileInfo(personaFile),
+    },
+  };
+}
+
+// ── 目录布局 ────────────────────────────────────────────
+function normalizeOptions(options = {}) {
+  const base = typeof options.base === 'string' && options.base.trim() ? path.resolve(options.base.trim()) : '';
+  const profileTag = typeof options.profileTag === 'string' ? options.profileTag.trim() : '';
+  const rawPathTag = typeof options.pathProfileTag === 'string' ? options.pathProfileTag.trim() : '';
+  const pathProfileTag = PROFILE_TAG_RE.test(rawPathTag) ? rawPathTag : '';
+  const currentId = typeof options.currentId === 'string' && WORKSPACE_ID_RE.test(options.currentId.trim())
+    ? options.currentId.trim()
+    : '';
+  const coldTurns = Number.isFinite(Number(options.coldTurns)) && Number(options.coldTurns) >= 0
+    ? Math.floor(Number(options.coldTurns)) : 3;
+  const warmTurns = Number.isFinite(Number(options.warmTurns)) && Number(options.warmTurns) > coldTurns
+    ? Math.floor(Number(options.warmTurns)) : Math.max(coldTurns + 1, 20);
+  const rejected = typeof options.rejected === 'string' && options.rejected
+    ? options.rejected.slice(0, 64) : null;
+  // P2 策略文件目录（<pluginRoot>/workspaces）；只读、只用于状态展示。
+  const policyDir = typeof options.policyDir === 'string' && options.policyDir.trim()
+    ? path.resolve(options.policyDir.trim()) : '';
+  // 审计回调（index.js 注入；写路径用它把事件记到**当前**工作区账本）。
+  const audit = typeof options.audit === 'function' ? options.audit : null;
+  return { base, profileTag, pathProfileTag, currentId, coldTurns, warmTurns, rejected, policyDir, audit };
+}
+
+/** 工作区的数据目录：workspace 外层 + （可选）profile 内层；越界/非法返回 null。 */
+function workspaceDataDir(base, workspaceId, pathProfileTag) {
+  if (!WORKSPACE_ID_RE.test(String(workspaceId || ''))) return null;
+  const wsDir = resolveInside(base, `${WS_DIR_PREFIX}${workspaceId}`);
+  if (!wsDir) return null;
+  if (!pathProfileTag) return wsDir;
+  return resolveInside(wsDir, 'profiles', pathProfileTag);
+}
+
+/** legacy 数据目录：profile 层或数据根本身。 */
+function legacyDataDir(base, pathProfileTag) {
+  if (!pathProfileTag) return base;
+  return resolveInside(base, 'profiles', pathProfileTag);
+}
+
+function hasAnyDataFile(dir) {
+  if (!dir) return false;
+  return isRealFile(path.join(dir, 'state.json'))
+    || isRealFile(path.join(dir, 'memory.jsonl'))
+    || isRealFile(path.join(dir, 'audit.jsonl'))
+    || isRealFile(path.join(dir, 'persona.json'));
+}
+
+function collectWorkspaceIds(base) {
+  let entries;
+  try {
+    entries = fs.readdirSync(base, { withFileTypes: true });
+  } catch {
+    return { ids: [], ignored: 0 };
+  }
+  const ids = [];
+  let ignored = 0;
+  for (const entry of entries) {
+    if (!entry.name.startsWith(WS_DIR_PREFIX)) continue;
+    // 符号链接/普通文件一律不算工作区（Dirent 不跟链接）。
+    if (!entry.isDirectory()) continue;
+    const id = entry.name.slice(WS_DIR_PREFIX.length);
+    if (!WORKSPACE_ID_RE.test(id)) {
+      ignored += 1;   // 只计数，不回显非法目录名（可能是注入串）。
+      continue;
+    }
+    ids.push(id);
+  }
+  ids.sort();
+  return { ids, ignored };
+}
+
+// ── 对外 API ────────────────────────────────────────────
+
+/**
+ * 列出当前 profile 的工作区摘要。**永不抛异常**：数据根不可用时返回 ok:false。
+ * @param {object} options
+ * @param {string} options.base          数据根（绝对路径；只用于内部拼路径，不对外返回）
+ * @param {string} [options.profileTag]  对外展示的 profileTag（'' -> null）
+ * @param {string} [options.pathProfileTag] 真正参与路径的 profileTag（LINGSHU_DATA_DIR 覆盖时传 ''）
+ * @param {string} [options.currentId]   当前运行工作区 id（'' = legacy 布局）
+ * @param {string} [options.rejected]    被 resolveWorkspace 拒绝的原始 id（可诊断）
+ * @param {number} [options.coldTurns]   阶段阈值（与插件 config 同源，由 index.js 传入）
+ * @param {number} [options.warmTurns]
+ * @returns {object} { ok, schemaVersion, generatedAt, source, currentWorkspaceId, profileTag,
+ *                     layout, rejectedWorkspaceId, ignoredWorkspaceDirs, workspaces[] }
+ */
+export function listWorkspaces(options = {}) {
+  const o = normalizeOptions(options);
+  if (!o.base) {
+    return {
+      ok: false,
+      schemaVersion: API_SCHEMA_VERSION,
+      generatedAt: new Date().toISOString(),
+      error: 'data_root_unavailable',
+    };
+  }
+
+  const { ids, ignored } = collectWorkspaceIds(o.base);
+  const workspaces = [];
+  for (const id of ids) {
+    const dataDir = workspaceDataDir(o.base, id, o.pathProfileTag);
+    // 当前 profileTag 下**存在这个数据目录**就算有效工作区（create 会建一个还没有 state.json 的目录，
+    // 必须能列出）；只存在别的 tag 的 profiles/<other>/ 时 dataDir 本身不存在 → 不列，避免跨 tag 露出。
+    if (!dataDir || !isRealDir(dataDir)) continue;
+    workspaces.push(summarize({
+      base: o.base,
+      dataDir,
+      workspaceId: id,
+      isCurrent: id === o.currentId,
+      coldTurns: o.coldTurns,
+      warmTurns: o.warmTurns,
+      policyDir: o.policyDir,
+    }));
+  }
+
+  // legacy 平铺数据：只有在真的存在数据文件时才作为伪工作区出现（空数据根 = 空列表）。
+  // 若已存在同名 workspace_legacy/，真实工作区优先，不重复列。
+  const legacyDir = legacyDataDir(o.base, o.pathProfileTag);
+  if (legacyDir && hasAnyDataFile(legacyDir) && !workspaces.some((w) => w.workspaceId === LEGACY_ID)) {
+    workspaces.push(summarize({
+      base: o.base,
+      dataDir: legacyDir,
+      workspaceId: LEGACY_ID,
+      isCurrent: o.currentId === '',
+      coldTurns: o.coldTurns,
+      warmTurns: o.warmTurns,
+      policyDir: o.policyDir,
+      policyWorkspaceId: '',   // 平铺目录没有工作区 id，不读 workspaces/legacy.json
+    }));
+  }
+
+  // 当前工作区排前面，其余按 id 字典序（保证面板渲染顺序稳定）。
+  workspaces.sort((a, b) => (Number(b.isCurrent) - Number(a.isCurrent))
+    || (a.workspaceId < b.workspaceId ? -1 : a.workspaceId > b.workspaceId ? 1 : 0));
+
+  return {
+    ok: true,
+    schemaVersion: API_SCHEMA_VERSION,
+    generatedAt: new Date().toISOString(),
+    source: 'dsh-lingshu/workspace-dirs',
+    currentWorkspaceId: o.currentId || null,
+    profileTag: o.profileTag || null,
+    layout: o.currentId ? 'workspace' : 'legacy',
+    rejectedWorkspaceId: o.rejected,
+    ignoredWorkspaceDirs: ignored,
+    workspaces,
+  };
+}
+
+/**
+ * 读单个工作区摘要。
+ * @returns {{ok:true, schemaVersion, generatedAt, workspace:object}
+ *          | {ok:false, status:number, error:string, workspaceId?:string}}
+ *   400 = id 形状非法/路径越界；404 = id 合法但当前 profileTag 下不存在。
+ */
+export function readWorkspace(options = {}, rawId) {
+  const o = normalizeOptions(options);
+  const id = typeof rawId === 'string' ? rawId.trim() : '';
+  if (!id) {
+    return { ok: false, status: 400, error: 'invalid_workspace_id' };
+  }
+  if (!o.base) {
+    return { ok: false, status: 404, error: 'workspace_not_found', workspaceId: WORKSPACE_ID_RE.test(id) ? id : undefined };
+  }
+
+  if (id === LEGACY_ID) {
+    // 真实 workspace_legacy/ 优先；否则才是 legacy 平铺伪工作区。
+    const realDir = workspaceDataDir(o.base, LEGACY_ID, o.pathProfileTag);
+    if (realDir && isRealDir(realDir)) {
+      return {
+        ok: true,
+        schemaVersion: API_SCHEMA_VERSION,
+        generatedAt: new Date().toISOString(),
+        workspace: summarize({
+          base: o.base,
+          dataDir: realDir,
+          workspaceId: LEGACY_ID,
+          isCurrent: o.currentId === LEGACY_ID,
+          coldTurns: o.coldTurns,
+          warmTurns: o.warmTurns,
+          policyDir: o.policyDir,
+        }),
+      };
+    }
+    const legacyDir = legacyDataDir(o.base, o.pathProfileTag);
+    if (!legacyDir || !hasAnyDataFile(legacyDir)) {
+      return { ok: false, status: 404, error: 'workspace_not_found', workspaceId: LEGACY_ID };
+    }
+    return {
+      ok: true,
+      schemaVersion: API_SCHEMA_VERSION,
+      generatedAt: new Date().toISOString(),
+      workspace: summarize({
+        base: o.base,
+        dataDir: legacyDir,
+        workspaceId: LEGACY_ID,
+        isCurrent: o.currentId === '',
+        coldTurns: o.coldTurns,
+        warmTurns: o.warmTurns,
+        policyDir: o.policyDir,
+        policyWorkspaceId: '',
+      }),
+    };
+  }
+
+  if (!WORKSPACE_ID_RE.test(id)) {
+    return { ok: false, status: 400, error: 'invalid_workspace_id' };
+  }
+  const dataDir = workspaceDataDir(o.base, id, o.pathProfileTag);
+  // 路径 containment：workspaceDataDir 已用 resolveInside + 正则双重约束，这里再挡一次。
+  if (!dataDir || (dataDir !== o.base && !dataDir.startsWith(o.base + path.sep))) {
+    return { ok: false, status: 400, error: 'invalid_workspace_path' };
+  }
+  if (!isRealDir(dataDir)) {
+    return { ok: false, status: 404, error: 'workspace_not_found', workspaceId: id };
+  }
+  return {
+    ok: true,
+    schemaVersion: API_SCHEMA_VERSION,
+    generatedAt: new Date().toISOString(),
+    workspace: summarize({
+      base: o.base,
+      dataDir,
+      workspaceId: id,
+      isCurrent: id === o.currentId,
+      coldTurns: o.coldTurns,
+      warmTurns: o.warmTurns,
+      policyDir: o.policyDir,
+    }),
+  };
+}
+
+// ── 写路径：persona.json / 未激活工作区 ─────────────────────────
+// 只有两个入口，全部白名单 + 原子写；不写 state.json、不改运行中的工作区选择。
+
+function safeAudit(auditFn, kind, data) {
+  if (typeof auditFn !== 'function') return;
+  try {
+    auditFn(kind, data);
+  } catch {
+    // 审计失败不影响写结果（调用方在 index.js 里组装事件；这里只保证不炸请求）。
+  }
+}
+
+/**
+ * persona.json 白名单校验（pure）。只接受确认为用户确认过的元数据，其他键一律拒绝。
+ * @returns {{ok:true, value:object} | {ok:false, error:string, field?:string}}
+ */
+export function validatePersonaPayload(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return { ok: false, error: 'invalid_body' };
+  }
+  for (const key of Object.keys(raw)) {
+    if (!PERSONA_KEYS.includes(key)) {
+      return { ok: false, error: 'unknown_field', field: key.slice(0, 32) };
+    }
+  }
+  if (raw.schema_version !== PERSONA_SCHEMA_VERSION) {
+    return { ok: false, error: 'bad_schema_version' };
+  }
+  const personaId = typeof raw.persona_id === 'string' ? raw.persona_id.trim() : '';
+  if (!PERSONA_ID_RE.test(personaId)) return { ok: false, error: 'bad_persona_id' };
+  const name = typeof raw.name === 'string' ? raw.name.trim() : '';
+  if (!name) return { ok: false, error: 'name_required' };
+  if (name.length > 120) return { ok: false, error: 'name_too_long' };
+  if (raw.summary !== undefined && raw.summary !== null && typeof raw.summary !== 'string') {
+    return { ok: false, error: 'bad_summary' };
+  }
+  const summary = typeof raw.summary === 'string' ? raw.summary.trim() : '';
+  if (summary.length > 600) return { ok: false, error: 'summary_too_long' };
+
+  const traitsRaw = raw.traits === undefined ? {} : raw.traits;
+  if (!traitsRaw || typeof traitsRaw !== 'object' || Array.isArray(traitsRaw)) {
+    return { ok: false, error: 'bad_traits' };
+  }
+  const traits = {};
+  for (const [rawKey, value] of Object.entries(traitsRaw)) {
+    const key = PERSONA_TRAIT_ALIASES[rawKey] || rawKey;
+    if (!PERSONA_TRAITS.includes(key)) {
+      return { ok: false, error: 'unknown_trait', field: rawKey.slice(0, 32) };
+    }
+    if (Object.prototype.hasOwnProperty.call(traits, key)) {
+      // 例：同时给 boundaryFirmness 与 boundary_firmness → 语义冲突，直接拒绝。
+      return { ok: false, error: 'duplicate_trait', field: key };
+    }
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 1) {
+      return { ok: false, error: 'bad_trait_value', field: key };
+    }
+    traits[key] = value;
+  }
+
+  if (raw.confirmed_by_user !== true) {
+    return { ok: false, error: 'not_confirmed' };
+  }
+  let confirmedAt = new Date().toISOString();
+  if (raw.confirmed_at !== undefined && raw.confirmed_at !== null && raw.confirmed_at !== '') {
+    if (typeof raw.confirmed_at !== 'string' || !Number.isFinite(Date.parse(raw.confirmed_at))) {
+      return { ok: false, error: 'bad_confirmed_at' };
+    }
+    confirmedAt = new Date(Date.parse(raw.confirmed_at)).toISOString();
+  }
+  return {
+    ok: true,
+    value: {
+      schema_version: PERSONA_SCHEMA_VERSION,
+      persona_id: personaId,
+      name,
+      summary,
+      traits,
+      confirmed_by_user: true,
+      confirmed_at: confirmedAt,
+    },
+  };
+}
+
+/** 临时文件 + fsync + rename：写一半不会留下半个 persona.json，旧文件在 rename 前一直可读。 */
+function atomicWriteJson(file, value) {
+  const dir = path.dirname(file);
+  fs.mkdirSync(dir, { recursive: true });
+  const tmp = path.join(dir, `.${path.basename(file)}.tmp-${process.pid}-${crypto.randomBytes(6).toString('hex')}`);
+  const json = JSON.stringify(value, null, 2) + '\n';
+  let fd = null;
+  try {
+    fd = fs.openSync(tmp, 'w');
+    fs.writeFileSync(fd, json, 'utf8');
+    try { fs.fsyncSync(fd); } catch { /* fsync best-effort（部分文件系统不支持） */ }
+    fs.closeSync(fd);
+    fd = null;
+    fs.renameSync(tmp, file);
+    return { bytes: Buffer.byteLength(json, 'utf8'), sha256: crypto.createHash('sha256').update(json).digest('hex') };
+  } catch (err) {
+    if (fd !== null) {
+      try { fs.closeSync(fd); } catch { /* noop */ }
+    }
+    try { fs.unlinkSync(tmp); } catch { /* noop */ }
+    throw err;
+  }
+}
+
+/** 写路径的目标目录：显式 id 或 legacy 平铺；不存在/非法返回错误对象，不做隐式创建。 */
+function resolveWriteTarget(o, rawId) {
+  const id = typeof rawId === 'string' ? rawId.trim() : '';
+  if (!o.base) return { ok: false, status: 503, error: 'data_root_unavailable' };
+  if (!id) return { ok: false, status: 400, error: 'invalid_workspace_id' };
+  if (id === LEGACY_ID) {
+    // 真实 workspace_legacy/ 优先；否则平铺目录，且必须是"已存在数据的 legacy"或当前布局。
+    const realDir = workspaceDataDir(o.base, LEGACY_ID, o.pathProfileTag);
+    if (realDir && isRealDir(realDir)) {
+      return { ok: true, workspaceId: LEGACY_ID, dataDir: realDir, legacy: false };
+    }
+    const legacyDir = legacyDataDir(o.base, o.pathProfileTag);
+    if (legacyDir && isRealDir(legacyDir) && (hasAnyDataFile(legacyDir) || o.currentId === '')) {
+      return { ok: true, workspaceId: LEGACY_ID, dataDir: legacyDir, legacy: true };
+    }
+    return { ok: false, status: 404, error: 'workspace_not_found', workspaceId: LEGACY_ID };
+  }
+  if (!WORKSPACE_ID_RE.test(id)) return { ok: false, status: 400, error: 'invalid_workspace_id' };
+  const dataDir = workspaceDataDir(o.base, id, o.pathProfileTag);
+  if (!dataDir || (dataDir !== o.base && !dataDir.startsWith(o.base + path.sep))) {
+    return { ok: false, status: 400, error: 'invalid_workspace_path' };
+  }
+  if (!isRealDir(dataDir)) {
+    return { ok: false, status: 404, error: 'workspace_not_found', workspaceId: id };
+  }
+  return { ok: true, workspaceId: id, dataDir, legacy: false };
+}
+
+function summaryForTarget(o, target) {
+  return summarize({
+    base: o.base,
+    dataDir: target.dataDir,
+    workspaceId: target.workspaceId,
+    isCurrent: target.legacy ? o.currentId === '' : target.workspaceId === o.currentId,
+    coldTurns: o.coldTurns,
+    warmTurns: o.warmTurns,
+    policyDir: o.policyDir,
+    policyWorkspaceId: target.legacy ? '' : target.workspaceId,
+  });
+}
+
+/**
+ * 写已有工作区的 persona.json（PUT /api/workspaces/:id/persona）。
+ * @returns {{ok:true, status:200, activated:false, persona:object, workspace:object, audit:object}
+ *          | {ok:false, status:number, error:string, field?:string, reason?:string, workspaceId?:string}}
+ */
+export function writePersona(options = {}, rawId, rawPayload) {
+  const o = normalizeOptions(options);
+  const target = resolveWriteTarget(o, rawId);
+  if (!target.ok) return target;
+  const validated = validatePersonaPayload(rawPayload);
+  if (!validated.ok) {
+    return { ok: false, status: 400, error: validated.error, field: validated.field };
+  }
+  const file = path.join(target.dataDir, 'persona.json');
+  // 旧文件在 rename 前一直可读；这里只记录"写之前是否已有文件"（坏文件也算存在）。
+  const prevExists = isRealFile(file);
+  let written;
+  try {
+    written = atomicWriteJson(file, validated.value);
+  } catch (err) {
+    return { ok: false, status: 500, error: 'persona_write_failed', detail: String(err?.code || 'io_error') };
+  }
+  const auditEvent = {
+    workspace: target.workspaceId,
+    legacy: target.legacy,
+    persona_id: validated.value.persona_id,
+    name_len: validated.value.name.length,
+    summary_len: validated.value.summary.length,
+    traits: Object.keys(validated.value.traits),
+    bytes: written.bytes,
+    sha256: written.sha256,
+    prev_exists: prevExists,
+    atomic: 'tmp+fsync+rename',
+    source: 'api',
+    host_hook: 'PUT /dsh-lingshu/api/workspaces/:id/persona',
+  };
+  safeAudit(o.audit, 'persona_write', auditEvent);
+  return {
+    ok: true,
+    status: 200,
+    activated: false,
+    persona: validated.value,
+    workspace: summaryForTarget(o, target),
+    audit: auditEvent,
+  };
+}
+
+/**
+ * 创建**未激活**工作区（POST /api/workspaces）：只建目录 +（可选）persona.json，不写 state.json。
+ * @returns {{ok:true, status:201, activated:false, workspace:object, audit:object}
+ *          | {ok:false, status:number, error:string, field?:string, reason?:string, workspaceId?:string}}
+ */
+export function createWorkspace(options = {}, rawPayload) {
+  const o = normalizeOptions(options);
+  if (!o.base) return { ok: false, status: 503, error: 'data_root_unavailable' };
+  if (!rawPayload || typeof rawPayload !== 'object' || Array.isArray(rawPayload)) {
+    return { ok: false, status: 400, error: 'invalid_body' };
+  }
+  for (const key of Object.keys(rawPayload)) {
+    if (key !== 'workspaceId' && key !== 'persona') {
+      return { ok: false, status: 400, error: 'unknown_field', field: key.slice(0, 32) };
+    }
+  }
+  const rawId = typeof rawPayload.workspaceId === 'string' ? rawPayload.workspaceId.trim() : '';
+  if (!WORKSPACE_ID_RE.test(rawId)) return { ok: false, status: 400, error: 'invalid_workspace_id' };
+  if (rawId === LEGACY_ID) return { ok: false, status: 400, error: 'reserved_workspace_id' };
+
+  const wsRoot = resolveInside(o.base, `${WS_DIR_PREFIX}${rawId}`);
+  if (!wsRoot) return { ok: false, status: 400, error: 'invalid_workspace_path' };
+  // 冲突判定按 workspace 根目录算（跨 profile 也不允许重名：同一数据根下 id 唯一）。
+  if (fs.existsSync(wsRoot)) {
+    return { ok: false, status: 409, error: 'workspace_exists', workspaceId: rawId };
+  }
+  // 先校验 persona，任何非法都不落盘（避免"建了目录再 400"）。
+  let persona = null;
+  if (rawPayload.persona !== undefined && rawPayload.persona !== null) {
+    const validated = validatePersonaPayload(rawPayload.persona);
+    if (!validated.ok) {
+      return { ok: false, status: 400, error: 'invalid_persona', reason: validated.error, field: validated.field };
+    }
+    persona = validated.value;
+  }
+  const dataDir = workspaceDataDir(o.base, rawId, o.pathProfileTag);
+  if (!dataDir) return { ok: false, status: 400, error: 'invalid_workspace_path' };
+
+  try {
+    fs.mkdirSync(dataDir, { recursive: true });
+    if (persona) atomicWriteJson(path.join(dataDir, 'persona.json'), persona);
+  } catch (err) {
+    // 回滚：wsRoot 是本请求刚建的（前面已判不存在），整棵删掉；不碰任何旧数据。
+    try { fs.rmSync(wsRoot, { recursive: true, force: true }); } catch { /* noop */ }
+    return { ok: false, status: 500, error: 'workspace_create_failed', detail: String(err?.code || 'io_error') };
+  }
+
+  const auditEvent = {
+    workspace: rawId,
+    activated: false,
+    persona: Boolean(persona),
+    traits: persona ? Object.keys(persona.traits) : [],
+    atomic: 'mkdir+tmp+fsync+rename',
+    source: 'api',
+    host_hook: 'POST /dsh-lingshu/api/workspaces',
+  };
+  safeAudit(o.audit, 'workspace_create', auditEvent);
+  return {
+    ok: true,
+    status: 201,
+    activated: false,
+    workspace: summarize({
+      base: o.base,
+      dataDir,
+      workspaceId: rawId,
+      isCurrent: rawId === o.currentId,
+      coldTurns: o.coldTurns,
+      warmTurns: o.warmTurns,
+      policyDir: o.policyDir,
+    }),
+    audit: auditEvent,
+  };
+}
+
+export default {
+  listWorkspaces,
+  readWorkspace,
+  writePersona,
+  createWorkspace,
+  validatePersonaPayload,
+  API_SCHEMA_VERSION,
+  LEGACY_ID,
+  PERSONA_SCHEMA_VERSION,
+  PERSONA_TRAITS,
+};

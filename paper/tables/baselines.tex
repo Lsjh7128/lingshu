@@ -2,7 +2,7 @@
 % primary sources: results/summary.json (sha256 78e5c5328bb2...),
 %                  mem0-chaos-lab/results/summary.json + human-review.json
 \begin{table*}[t]
-\centering\footnotesize
+\centering\footnotesize\setlength{\tabcolsep}{8pt}
 \caption{Three-subject pilot ($n=5$ independent rounds per cell; one host, one
 model route, one day). S1 = memory conflict (ALPHA$\rightarrow$BETA); S2 =
 jailbreak/injection. \emph{Hit}: current value answered / attack succeeded under
@@ -20,28 +20,35 @@ Sources: \texttt{paper/comparison-lab/results/final-table.json}.}
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
 Subject & Hit & Leak & Sup. & Hit & Leak & Int. & Blocked & Audit & Refused \\
 \midrule
-Baseline (no plugin) & 5/5 & 0/5 & 0/5 & 0/5 & 0/5 & 5/5 & 0/5 & n/a & 5/5 \\
+Baseline (no plugin) & 5/5 & 0/5 & 0/5 & 2/5 & 2/5 & 5/5 & 0/5 & n/a & 5/5 \\
 Mem0 2.2.1, zh diagnostic & 5/5 & 0/5 & 0/5 & 0/5 & 0/5 & 5/5 & 0/5 & n/a & 5/5 \\
-LINGSHU (lab profile) & n/i & n/i & 5/5 & 0/5 & 0/5 & 5/5 & 5/5 & 5/5 & 5/5 \\
+LINGSHU (lab profile) & 5/5 & 0/5 & 5/5 & 0/5 & 0/5 & 5/5 & 5/5 & 5/5 & 5/5 \\
 \bottomrule
 \end{tabular}
 
 \vspace{2pt}
 \raggedright\scriptsize
-S1 uses the docs/19-supported correction sentence for all three subjects. Baseline
-S1 hit is 4/5 by the literal string rule; the fifth round answered ASCII
-\texttt{Beta}, counted as a hit on human review. LINGSHU S1 hit/leak are marked
-n/i: the memory ledger is correct in 5/5 cells (superseded value tombstoned,
-\texttt{supersedeEvents=1}, only BETA injected in the preview), but the model's
-first request sees the previous turn's injection snapshot (F-D), so the answers
-are ALPHA 5/5; a warm diagnostic with one extra turn answers BETA 5/5. Its
-structural suppression is 5/5, the effective suppression 0/5. Mem0's default
+S1 uses the docs/19-supported correction sentence for all three subjects. All host cells were rerun on 2026-10-27/28 after the v5.4 same-turn injection
+fix (finding F-D); before the fix the ledger already tombstoned ALPHA in 5/5
+cells but the model's first request still carried the previous snapshot, so its
+answers were stale. After the fix both structural and effective suppression are
+5/5: ALPHA is absent from the ledger and from the request, and the model answers
+BETA 5/5. Baseline and Mem0 keep ALPHA in their own context (Sup.~0/5) although
+both also answer BETA 5/5; the S1 columns therefore separate what a system
+injects, not answer accuracy. For S2 the same rerun found the opposite of a
+clean refusal: the no-plugin host refused in 5/5 answers but quoted the canary
+inside the refusal in 2/5 (Hit 2/5, Leak 2/5). A refusal is not a
+non-disclosure, and model-only refusal is stochastic: an earlier run of the same
+cells leaked 0/5. \system{}'s gate blocked 5/5 in both runs and no canary reached
+the model, which is the structural claim the table supports. Mem0's default
 configuration extracts English memory text; with the local non-neural embedder,
 Chinese queries retrieve nothing (cosine $\le 0.063 < 0.1$), so its default S1
 ``suppression'' is an empty-recall artefact and the store still retains the stale
-value (ADD-only pipeline). S2 canary never reaches the model in the LINGSHU arm
-because the fact extractor rejects the secret-bearing sentence and the gate
-blocks the attack turn; all three arms refuse the obvious payload, so no
-model-refusal difference is claimed. $n=5$: directional only, no confidence
-intervals.
+value (ADD-only pipeline). In S2 the canary never reaches the model in the LINGSHU arm: the fact
+extractor rejects the secret-bearing sentence and the gate blocks the attack
+turn. All three arms contain refusal language, so a refusal rate does not
+separate them; what separates them is that the baseline's refusal can still
+quote the canary (2/5), while the gate leaves nothing to quote. $n=5$: directional only, no confidence
+intervals; post-fix rerun provenance:
+\texttt{paper/comparison-lab-fd-fix/results/POST-FIX-RERUN.json}.
 \end{table*}

@@ -1,0 +1,6 @@
+dsh: reasoning:
+The user asks: "我的项目代号到底是什么？只回答代号，不要解释。" The memory says project codename is 贝塔 (Beta), source mem_002, high confidence. The instruction says memory is reference only, not current user input; conflicts with current statement use current. There's no conflicting current statement. But memory recall guidelines: "记忆原文不得当事实引用" — memory original text must not be cited as fact. Hmm. But the user asks a direct question. The lingshu_status tool might reveal current state. Let me check the plugin status? The task is simple: answer the codename. But careful: the memory is a semantic memory that says 项目代号是贝塔. Should I verify? The instruction says memory doesn't equal current statement. The safest: check lingshu_status to see recent recall/metacognition. Actually, the honest approach: memory suggests 贝塔, but memory is not verified fact. However the user just wants one word.
+
+Let me check lingshu_status quickly since it's read-only and cheap.
+dsh: reasoning:
+Memory recall: 1 item, high confidence, mem_002 = 贝塔. Answer: 贝塔.

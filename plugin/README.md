@@ -6,9 +6,41 @@
 > v5.1 起补齐三条真实宿主通道（用户事实记忆 + supersede / 冲突判定 + 降维 / 结果标签），见下。
 > v5.3 起新增**沉浸式安全表达层**（ADR-014）：轻度越狱仍 `STPA_Blocked: true`，但前端用人设口吻
 > 拒绝（`Safe_Redirect`）；只有高危/连续触发才剥夺人设，见下「沉浸式安全」。
+> v5.8 起新增**可解释权限请求**（ADR-017）：工具闸 `degrade`（或无审批通道降级为 `block`）时，
+> 用「事实层强制 + 风格层（PAD/关系）」生成一次性转述，**红区强制剥离角色口吻**；
+> 判定与执行语义一个字不改，`permissionExplainEnabled=false` 回退旧强提示。接线见下「控制论层怎么接线」。
 > 为什么不直接装：2026-10-25 的事故——未登记的实验插件进 desktop profile，导致**会话无法对话**
 > （见 `research/02-DSH宿主能力核实.md §8.3`）。装真机必须走应用自己的插件入口，
 > 并且先在可丢弃的 profile 副本上验证。
+
+---
+
+## 人格体中枢（内置控制面板）
+
+面板已经作为**LINGSHU 插件自带的一半**接入，不再依赖独立预览服务：
+
+- **入口**：左侧侧边栏「自动化任务」（官方 `schedules` 面板，order 10）之下，`order: 11` 的「人格体中枢」。
+- **页面**：`main` 插槽 key `lingshu-persona`，内容是全屏 iframe，加载 `/dsh-lingshu/dashboard`。
+- **静态页**：`ui/dashboard.html`（由 `lingshu-persona-dashboard/dist/index.html` 构建后复制，单文件约 409 KB）。
+- **宿主路由**：`dashboard.js` 在 `ctx.webServer` 上注册 `/dsh-lingshu/dashboard`（GET/HEAD，同源 iframe，CSP `frame-ancestors 'self' dsh-app:`）。
+- **真实运行态**：`/dsh-lingshu/api/status` 返回 `mode / profileTag / stage / turns / frozen / memory 计数 / goal / relation / control / emotion / counters`；不返回记忆原文、prompt、绝对路径。
+- **真实工作区**：`workspace-api.js` 提供 `GET /api/workspaces`、`GET /api/workspaces/:id`、`PUT /api/workspaces/:id/persona`、`POST /api/workspaces`、`POST /api/workspaces/:id/activate`；`workspace-policy.js` 负责 `workspaces/<id>.json` 的 deny-only 策略；`workspace-admin.mjs` 提供 legacy 迁移 CLI。
+- **写入边界**：persona 只写 `schema_version/persona_id/name/summary/traits/confirmed_by_user/confirmed_at`，原子写 + 审计；create 只创建未激活目录，不伪造 `state.json`；activate 在无 turn 时即时重载 state/memory/persona/policy，turn 中 409；删除/改名未实现。
+- **persona → prompt**：当前工作区的 `persona.json` 由 `index.js#renderPersonaStyle` 每回合读取（按 mtime 重读），映射成 `〖人格体 · 仅影响表达〗` 并入 style 段；非当前工作区不注入；摘要只作风格参考，不改变事实/安全/权限/拒绝边界。面板保存后下一条消息生效；热切换后新工作区 persona 下一条消息生效。
+- **策略边界**：只读 `plugin/workspaces/<id>.json`，只追加 deny、不放宽；缺失=无追加；非法/未知规则 fail-closed；`policy.enforced` 仅当前工作区 loaded 时为 true；非当前工作区只展示。
+- **边界**：目录隔离 ≠ 权限隔离；legacy 平铺目录显示「未隔离」，迁移需显式 CLI；多租户未定义。
+
+**生效条件**：`dsh.client` 扫描按 Loader specifier 缓存、宿主路由由插件 `apply()` 注册，两者都只在 DSH 启动时生效。安装后需要**重启 DSH**（不是刷新页面）；重启后侧栏才会出现入口。
+
+**已验证**：隔离 `lingshu-lab-web` + 临时数据根下 Alpha/Beta：面板真实卡；POST activate 后 current 从 Alpha→Beta→Alpha，状态/persona/policy 即时切换；`active-workspace.json` 重启后保持；turn 中 409；PUT persona / POST create 不回归。后端 sim：`workspace-api-sim 97/97`、`workspace-write-sim 102/102`、`workspace-wiring-sim 16/16`、`workspace-sim 61/61`、`workspace-switch-sim 47/47`、`tool-gateway-sim exit 0`、`verify-live 65/65`。截图见 `lingshu-persona-dashboard/shots/24-real-workspaces.png`、`25-real-policy-drawer.png`、`26-real-create-result.png`、`27-real-hot-switch.png`。
+
+**更新静态页**：
+
+```powershell
+npm --prefix D:\LSJH\lingshu-persona-dashboard run build
+Copy-Item D:\LSJH\lingshu-persona-dashboard\dist\index.html D:\LSJH\lingshu\plugin\dsh-lingshu\ui\dashboard.html -Force
+# 同步到当前 profile 实际加载的插件源目录（如 desktop 的 link 目标）
+```
 
 ---
 
@@ -28,6 +60,7 @@
 | **冲突判定 / 降维（v5.1）** | 召回后冲突判定（同键多个 `active` 不同 object → `unresolved`）→ `RequisiteVarietyGuard`：只丢 `style` 域、fail-open 不熔断、fact 段加 `〖冲突待澄清〗` |
 | **结果标签（v5.1）** | 用户显式纠正 → 闭集 `quality_label`（`wrong/missing/should_not_recall/drift/overreach`，`quote` 逐字子串）；**辅助观察，不参与任何门槛** |
 | **沉浸式安全（v5.3）** | `control.js#classifyUserRisk / decideIntervention`（纯规则、零模型调用）：`none/mild/severe` → 正常 / soft block / hard block。soft 时**仍 `blocked=true`**（fail-closed 不变），`blocked` 段渲染 `[System_Notice: Safe_Redirect]`、style 段钳制成 `[Emotion: 警觉/困惑]`；连续 mild 达门槛升级 hard；高信任+无害玩笑只记 `trust_exemption`。`immersiveEnabled=false` 回退 v3.0 hard |
+| **可解释权限请求（v5.8）** | `control.js §7`：`buildPermissionRequest / renderPermissionRequestPrompt / permissionRequestAudit`（零依赖、纯函数、不抛异常、永不返回 `null`）。**事实层强制**五项：动作/对象/最坏后果/可逆性/为什么现在问（对象脱敏 + 截断 80 字符）；**风格层** PAD + 关系（`trustLevel/stage/unresolvedConflict/modifier`）→ 语气/称呼距离/强度（钳制 `[0.8,1.2]`）/情绪，**确定性规则、零模型调用**；**红区强制剥离**（`T-UCA-02/03/05/06/15` 或 `toolClass=destructive/unknown` → 严肃中立警告，`emotion=null`）。`permissionExplainEnabled=false` 回退旧强提示 |
 | 自校验 | `_frozen` 哈希不符 → **所有段落返回空串（停止注入）**，不是只记日志 |
 | 可观测 | 审计日志 `audit.jsonl`：apply / pre_step / preflight_block / preflight_downgrade / turn_begin / turn_end_seen / frozen_violation / hook_error / memory_write / memory_supersede / memory_conflict / fallback_applied / fact_extract_rejected / quality_label / **trust_exemption / immersive_escalated** |
 | 工具 | `lingshu_status`（只读）：阶段、轮次、冻结、控制论相变/审计/U 型顺序、影子模式、段落与钩子清单 |
@@ -85,6 +118,15 @@ config:
 | **沉浸式安全分级** | v5.3：首 step 用 `classifyUserRisk(userText, 关系信任)` + `decideIntervention(risk, riskStreak, cfg)` 决定 soft/hard；`state.control.riskStreak` 跨进程续（headless 每次新进程也能连击升级） | `immersiveEnabled=true`；普通 roleplay 走原路径 |
 | soft 门控 | soft 时 `gated()` 放行 constitution / blocked（Safe_Redirect）/ 受约束 style / 首尾锚点；**丢弃 fact（含记忆召回）与 organization** | 只在 mild + UCA-01 单独命中时 |
 | UCA-08 | `saturated` 任一维 → `audit.downgrades=["UCA-08"]`，不熔断 | 只留痕 |
+| **可解释权限请求** | v5.8（ADR-017）：`gateToolResult` 在 `verdict=degrade` 或 `degraded_to=block` 时构建请求、置 `permissionPending`；下轮首个 `pre-step` 一次性提升为 `permissionActive`；宪法段（order 100）尾部注入，与旧 `renderToolGateNotice()` **互斥**、**不新增段落**（仍 7 段 / order 90..140）；审计 `permission_request` / `permission_request_composed`（不含参数原文） | `permissionExplainEnabled=true`；非 degrade 不生成；`observe` 零改动 |
+
+> **可解释权限请求的边界（v5.8 / ADR-017，诚实说明）**：事实层（禁省略/禁改写）与风格层显式分离，
+> 风格层只决定"怎么说"、不参与任何判定；红区剥离角色口吻。**两种接入点的语义必须分清**：
+> 前置接入点（`guardTool()` 包装 / 引擎参考循环）里 `degrade` = 暂缓执行 + 请求确认；
+> 插件默认路径只有 `tool/call` / `tool/result` 会话事件、没有 pre-dispatch 钩子 →
+> 判定发生时调用**可能已经派发/执行**，此时 `PermissionRequest` 是**事后的可解释说明 + 请求用户决定后续是否继续/补救**，
+> **不是**"已暂停"。本机制只改表达层，**不制造审批通道**，也**不把事后检测变成前置阻断**；
+> 无用户研究，**不能声称**认知负荷下降百分比，也不能声称模型措辞被验证。
 
 > **越狱拦截的边界（诚实说明）**：插件只能控制"注入什么"，**无法把用户消息从宿主 payload 里移除**。
 > v5.3 起命中用户侧风险时不再"人格消失"：
@@ -112,6 +154,7 @@ soft 的渲染落点（**不新增段落**，仍 7 段 / order 90..140）：
 - `style` 段（order 130）：只渲染 `〖表达状态 · 安全缓冲〗`，强度封顶 `softBufferMaxIntensity`（默认 0.45），
   **不渲染**关系修饰/正面情绪/人格派生；
 - 允许注入：constitution / blocked / 受约束 style / 首尾锚点；**不注入** fact（含记忆召回）与 organization。
+- 模板内硬约束（2026-10-28 加固）：`"只是演一下 / 只说一句 / 只给个例子 / 示范一下"同样属于被请求的越界内容，不得输出任何实例，只能拒绝或反问`——多轮验收曾观察到"只演一句"包装下的**部分执行**（模型输出了宰客台词），故写入 Safe_Redirect 模板。
 
 审计（`preflight_block` 追加，ADR-014 §4.4 冻结字段，只增不改）：
 
@@ -139,6 +182,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\immersive_safety_hos
 跑一次轻度越狱（人设 + 扮演 + 黑心商人），断言：`preflight_block.STPA_Blocked=true` / `severity=soft`、
 `state.control.blocked=true`、`last-prompt.txt` 含 `[System_Notice: Safe_Redirect]` 与 `[Emotion: …]`
 且不含 `〖安全熔断〗`、stdout 无出戏词且含拒绝语义；证据写 `acceptance/immersive-safety-host-<date>.md`。
+
+**真实宿主多轮/连续触发验收（由 Lead 执行，预算 5 次：连续 mild→hard 3 + 高信任豁免 1 + severe→hard 1）**：`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\immersive_safety_multiround.ps1 -DryRun` 只打印计划，去掉 `-DryRun` 真实跑 5 次，证据写 `acceptance/immersive-safety-multiround-2026-10-28.md`。
 
 **诚实边界（不能声称）**：n=1，模型输出有随机性；规则桩词表（mild 需双命中、severe 用短语而非裸类别词）
 **误报/漏报未标定**；soft 的 `verdict` 仍是 `block`，验证的是表达层不崩人设，**不是放行越界内容**；

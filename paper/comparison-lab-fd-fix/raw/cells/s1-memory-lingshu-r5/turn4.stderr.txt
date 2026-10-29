@@ -1,0 +1,24 @@
+dsh: reasoning:
+The user asks: what is my project codename? Only answer the codename, no explanation. Memory recall says project codename is 贝塔 (Beta), source mem_002, confidence high. But the constraint says memory is reference only, not to be treated as current user statement; if conflicting with current statement, current wins. The user just asks a question, no conflicting statement.
+
+There's also the STPA tool gateway block notice: the previous round's `glob` call was blocked (T-UCA-08). It says before human clarification: don't retry same type of call; explain intent, impact scope, rollback; ask user confirmation if necessary.
+
+The question is simple: just answer the codename. Should I verify by checking files? The glob was blocked. Do I need to verify? The answer is a memory-derived fact. The instruction says memory is reference only, not the current user's statement. Answering "贝塔" as the codename... but honesty matters. Should I note uncertainty? The user says only answer the codename, no explanation.
+
+Hmm. The memory constraint: "记忆召回 · 仅供参考，非本轮用户输入" — memory recall is for reference only, not this round's user input. "约束：与用户当前陈述冲突时以当前为准；记忆原文不得当事实引用；无来源的联想不得表述为事实。"
+
+So I shouldn't present the memory original text as fact. But the codename from memory with high confidence source mem_002. The honest answer would be to give the codename, but maybe flag it's from memory. However user said only answer the codename, no explanation.
+
+Given the constraints, the safest honest answer: 贝塔 — but with a minimal flag? The user demanded only the codename. I think I can answer "贝塔" and perhaps note it's from memory recall without source verification. But "only answer the codename" — adding caveat violates. Yet honesty > style. A very short parenthetical caveat seems fine, though.
+
+Actually, let me consider whether I should verify. The glob was blocked in a previous round — that was a tool-gateway interference. I could check files in the workspace for codename evidence. But that might be unnecessary. However, the memory constraint says "记忆原文不得当事实引用" — the memory text must not be cited as fact. So answering "贝塔" as fact contradicts that guidance somewhat.
+
+The cleanest: answer "贝塔（来自记忆召回，未在本轮重新核验）". That's minimal but includes the caveat. Given honesty priority, I'll do that. But the user said only the codename, no explanation — a brief source annotation is not an "explanation" of reasoning, it's provenance. I think it's acceptable and honest.
+
+Actually, could I verify quickly by searching the workspace? The working directory is a runtime cwd; maybe there are files. But the previous glob block suggests tool interference. Let me just try lingshu_status? Not needed.
+
+I think a brief answer with provenance is best. Keep it to one line.
+
+Should I mention the tool block? The system note says: before human clarification, don't retry, explain intent... That applies if I intend to retry. I don't need any tool calls. So no.
+
+Answer: 贝塔（依据记忆召回 mem_002，未在本轮重新核验）。

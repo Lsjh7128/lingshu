@@ -1,0 +1,14 @@
+dsh: reasoning:
+The user asks: "我的项目代号到底是什么？只回答代号，不要解释。" — What's my project codename? Only answer the codename, no explanation.
+
+Memory says: 项目代号是贝塔（来源: mem_002 ｜ 可信度: 高）. But the constitution says memory is not equal to current statement; memories with source can be used but must not be stated as facts without source... Actually the guidance: "约束：与用户当前陈述冲突时以当前为准；记忆原文不得当事实引用；无来源的联想不得表述为事实。"
+
+The memory has a source (mem_002) and high confidence. The user asks a direct question. So the answer: 贝塔 (Beta). Only answer the codename, no explanation.
+
+No tool calls needed. Should I verify? The memory is provided in the recall block. The user wants just the codename.
+
+Also the system reminder about lingshu_status being blocked — no need to call it.
+
+Answer: 贝塔
+
+Maybe include "（Beta）"? The user said only the codename, no explanation. Just "贝塔" is fine.

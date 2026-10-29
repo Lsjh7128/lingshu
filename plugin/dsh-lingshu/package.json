@@ -5,22 +5,52 @@
   "description": "LINGSHU 认知插件：记忆/元认知/情感/合成/目标/关系 + 控制论层（相变/积分/UCA 前置闸）",
   "type": "module",
   "main": "index.js",
-  "exports": { ".": "./index.js" },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
   "files": [
     "index.js",
     "control.js",
     "goalrelation.js",
     "memorywriter.js",
+    "workspace.js",
+    "workspace-api.js",
+    "workspace-policy.js",
+    "workspace-admin.mjs",
+    "workspaces",
+    "supply-chain.js",
+    "sandbox-host.mjs",
+    "sandbox-child.mjs",
+    "client.js",
+    "dashboard.js",
+    "ui/dashboard.html",
     "cordis.patch.yml"
   ],
   "scripts": {
     "sim": "node host-sim.mjs --assert",
     "stress": "node stress.mjs --assert",
-    "control": "node control-sim.mjs --assert"
+    "control": "node control-sim.mjs --assert",
+    "workspace": "node workspace-sim.mjs --assert",
+    "workspace:wiring": "node workspace-wiring-sim.mjs --assert",
+    "workspace:api": "node workspace-api-sim.mjs --assert",
+    "workspace:write": "node workspace-write-sim.mjs --assert",
+    "workspace:switch": "node workspace-switch-sim.mjs --assert",
+    "persona:prompt": "node persona-prompt-sim.mjs",
+    "supply-chain": "node supply-chain-sim.mjs --assert",
+    "supply-chain:integration": "node supply-chain-integration.mjs"
   },
   "dsh": {
     "engines": { "dsh": ">=0.2.0-rc.2" },
-    "bundle": { "patch": "./cordis.patch.yml" }
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-ui-layout"
+      ]
+    }
   },
   "license": "MIT"
 }

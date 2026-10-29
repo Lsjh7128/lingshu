@@ -1,0 +1,424 @@
+{
+  "schema": "lingshu.supply-chain-evidence/v1",
+  "generated_at": "2026-10-28T19:01:40+08:00",
+  "host": {
+    "os": "Windows",
+    "node": "v24.21.0",
+    "python": "3.12.14"
+  },
+  "commands": {
+    "sim": "C:\\Program Files\\nodejs\\node.exe D:\\LSJH\\lingshu\\plugin\\dsh-lingshu\\supply-chain-sim.mjs --assert --json",
+    "integration": "C:\\Program Files\\nodejs\\node.exe D:\\LSJH\\lingshu\\plugin\\dsh-lingshu\\supply-chain-integration.mjs --json",
+    "acceptance": "C:\\Users\\陈岩\\.dsh\\dsh-runtimes\\dsh-primary-runtime\\dependencies\\python\\python.exe D:\\LSJH\\lingshu\\tests\\test_supply_chain.py"
+  },
+  "sim": {
+    "exit": 0,
+    "total": 59,
+    "pass": 59,
+    "fail": 0,
+    "checks": [
+      {
+        "label": "policy_version === sc-1.0",
+        "cond": true,
+        "detail": "sc-1.0"
+      },
+      {
+        "label": "策略来源为契约文件（非 fallback）",
+        "cond": true,
+        "detail": "file:///D:/LSJH/lingshu/contracts/supply-chain-policy.json"
+      },
+      {
+        "label": "扫描规则 10 条",
+        "cond": true,
+        "detail": "10"
+      },
+      {
+        "label": "能力词表 10 种",
+        "cond": true,
+        "detail": "10"
+      },
+      {
+        "label": "可授予能力恰 3 种",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "network/shell/credentials/dynamic-code 永不可授予",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "错误码含 SC-E01..SC-E19",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "注释里的 fs.writeFileSync 不命中",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "块注释里的 child_process 不命中",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "字符串不剥离 → 字符串里的 API 仍命中（保守）",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "fs.writeFileSync → SC-01/fs-write",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "命中行号正确（第 2 行）",
+        "cond": true,
+        "detail": "2"
+      },
+      {
+        "label": "child_process → SC-03/shell",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "fetch → SC-04/network",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "eval → SC-06/dynamic-code",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "process.env → SC-09/env",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "Buffer.from(base64) → SC-10",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "合法 manifest 无错误",
+        "cond": true,
+        "detail": "[]"
+      },
+      {
+        "label": "错误 manifest_version → invalid",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "id 非法 → invalid",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "entry 路径穿越 → invalid",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "缺 integrity → invalid",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "声明 fs-read 但无作用域 → invalid",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "未知能力 → invalid",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "合法插件 → allow_sandboxed",
+        "cond": true,
+        "detail": "ok"
+      },
+      {
+        "label": "合法插件 granted=[llm]",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "沙箱计划含 permission 与 fs-read 白名单",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "缺 manifest → deny/SC-E02",
+        "cond": true,
+        "detail": "manifest_missing"
+      },
+      {
+        "label": "沙箱不可用 → deny（不降级）",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "sandbox_unavailable 优先级最高",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "完整性漂移 → deny/SC-E07",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "未声明 fs-write → deny/SC-E11",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "声明 network → deny/SC-E10",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "fs 作用域穿越 → deny（manifest_invalid/SC-E04）",
+        "cond": true,
+        "detail": "manifest_invalid/SC-E04"
+      },
+      {
+        "label": "resolveFsScopes 单独上报越界作用域 2 条",
+        "cond": true,
+        "detail": "{\"read\":[\"C:\\\\Users\\\\陈岩\\\\AppData\\\\Local\\\\Temp\\\\dsh-n8hHhT\\\\lingshu-sc-F0HgdP\\\\demo\\\\data\"],\"write\":[],\"escapes\":[\"../outside\",\"C:/abs\"]}"
+      },
+      {
+        "label": "宿主支持 Node permission model（v24.21.0）",
+        "cond": true,
+        "detail": "ok"
+      },
+      {
+        "label": "良性插件加载成功（allow_sandboxed）",
+        "cond": true,
+        "detail": "ok"
+      },
+      {
+        "label": "子进程 PID 与宿主不同（真隔离）",
+        "cond": true,
+        "detail": "{\"ok\":true,\"value\":6240}"
+      },
+      {
+        "label": "RPC 往返正确",
+        "cond": true,
+        "detail": "{\"ok\":true,\"value\":{\"echo\":\"lingshu\",\"plugin\":\"benign\"}}"
+      },
+      {
+        "label": "声明 fs-read 的插件可读 data/",
+        "cond": true,
+        "detail": "{\"ok\":true,\"value\":\"HELLO_FROM_PLUGIN\"}"
+      },
+      {
+        "label": "未声明方法 → method_not_allowed",
+        "cond": true,
+        "detail": "method_not_allowed"
+      },
+      {
+        "label": "close 后子进程已退出",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "越界读 → ERR_ACCESS_DENIED（permission model 兜底）",
+        "cond": true,
+        "detail": "{\"ok\":true,\"value\":{\"denied\":\"ERR_ACCESS_DENIED\"}}"
+      },
+      {
+        "label": "拼接 API 名绕过静态扫描（vectored：scan 应无 SC-01）",
+        "cond": true,
+        "detail": "[]"
+      },
+      {
+        "label": "绕过静态扫描的插件仍被放行到沙箱（不假装扫描器万能）",
+        "cond": true,
+        "detail": "ok"
+      },
+      {
+        "label": "沙箱内越界写被拒（ERR_ACCESS_DENIED）",
+        "cond": true,
+        "detail": "{\"ok\":true,\"value\":{\"wrote\":false,\"denied\":\"ERR_ACCESS_DENIED\"}}"
+      },
+      {
+        "label": "逃逸文件确实不存在（OS 层拒绝副作用）",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "声明 fs-write 的作用域内写成功",
+        "cond": true,
+        "detail": "{\"ok\":true,\"value\":{\"wrote\":true}}"
+      },
+      {
+        "label": "作用域外的同目录写被拒（ERR_ACCESS_DENIED）",
+        "cond": true,
+        "detail": "{\"ok\":true,\"value\":{\"wrote\":false,\"denied\":\"ERR_ACCESS_DENIED\"}}"
+      },
+      {
+        "label": "导入期越界写 → 加载被拒（fail-closed）",
+        "cond": true,
+        "detail": "entry_import_failed"
+      },
+      {
+        "label": "导入期越界写 → 错误码 SC-E12",
+        "cond": true,
+        "detail": "SC-E12"
+      },
+      {
+        "label": "导入期逃逸文件不存在",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "导入期失败后加载器挂起",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "慢插件加载成功",
+        "cond": true,
+        "detail": "ok"
+      },
+      {
+        "label": "调用超时 → sandbox_call_timeout",
+        "cond": true,
+        "detail": "sandbox_call_timeout"
+      },
+      {
+        "label": "超时后及时返回（<2000ms）",
+        "cond": true,
+        "detail": "310"
+      },
+      {
+        "label": "声明 network → 不 spawn 直接 deny/SC-E10",
+        "cond": true,
+        "detail": "SC-E10"
+      },
+      {
+        "label": "顺序加载：deny 后后续插件被跳过",
+        "cond": true,
+        "detail": "[{\"ok\":true,\"skipped\":false},{\"ok\":false,\"skipped\":false},{\"ok\":false,\"skipped\":true,\"reason\":\"loader_suspended\"}]"
+      },
+      {
+        "label": "sandbox state 记录 deny 与 suspended",
+        "cond": true,
+        "detail": ""
+      }
+    ],
+    "state": {
+      "policy_version": "sc-1.0",
+      "policy_source": "file:///D:/LSJH/lingshu/contracts/supply-chain-policy.json",
+      "policy_degraded": false,
+      "loaded": [
+        {
+          "id": "third-plugin",
+          "pid": 28056,
+          "exports": [
+            "ping"
+          ]
+        }
+      ],
+      "denied": [
+        {
+          "id": "net-plugin",
+          "reason": "forbidden_capability",
+          "error_code": "SC-E10",
+          "fingerprint": "45a09d9dc50370a107666311cd2cdd1a22c6b7c1e8d9863655eab00e33258d8c"
+        }
+      ],
+      "suspended": true,
+      "violations": [],
+      "probes": [],
+      "support": {
+        "supported": true,
+        "node": "v24.21.0",
+        "execPath": "C:\\Program Files\\nodejs\\node.exe",
+        "flag": "--permission",
+        "exit": 0,
+        "reason": "ok"
+      }
+    }
+  },
+  "integration": {
+    "exit": 0,
+    "total": 10,
+    "pass": 10,
+    "fail": 0,
+    "checks": [
+      {
+        "label": "apply() 后出现 supply_chain 审计事件",
+        "cond": true,
+        "detail": "[\"apply\",\"supply_chain_manifest\",\"supply_chain_manifest\",\"supply_chain\",\"supply_chain\",\"supply_chain_alert\"]"
+      },
+      {
+        "label": "两个插件的 Manifest 都被解析（2 条 supply_chain_manifest）",
+        "cond": true,
+        "detail": "2"
+      },
+      {
+        "label": "良性插件 allow_sandboxed 且有沙箱 pid",
+        "cond": true,
+        "detail": "[{\"v\":\"allow_sandboxed\",\"pid\":24876},{\"v\":\"deny\"}]"
+      },
+      {
+        "label": "良性插件真的在独立子进程里（pid ≠ 宿主）",
+        "cond": true,
+        "detail": "24876"
+      },
+      {
+        "label": "恶意插件被 deny（supply_chain verdict=deny）",
+        "cond": true,
+        "detail": "[\"allow_sandboxed\",\"deny\"]"
+      },
+      {
+        "label": "恶意插件从未执行（标记文件不存在）",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "deny 触发挂起告警（supply_chain_alert）",
+        "cond": true,
+        "detail": "1"
+      },
+      {
+        "label": "apply 审计带 supplyChain 快照",
+        "cond": true,
+        "detail": ""
+      },
+      {
+        "label": "lingshu_status 含\"供应链:\"行",
+        "cond": true,
+        "detail": "供应链: deny（配置 2 个 ｜ 沙箱 可用 ｜ 挂起=是 ｜ 策略 sc-1.0）"
+      },
+      {
+        "label": "状态行显示 deny / 挂起",
+        "cond": true,
+        "detail": "供应链: deny（配置 2 个 ｜ 沙箱 可用 ｜ 挂起=是 ｜ 策略 sc-1.0）"
+      }
+    ],
+    "evidence": {
+      "benign_pid": 24876,
+      "evil_marker_exists": false
+    },
+    "status_line": "供应链: deny（配置 2 个 ｜ 沙箱 可用 ｜ 挂起=是 ｜ 策略 sc-1.0）"
+  },
+  "acceptance": {
+    "exit": 0,
+    "counts": {
+      "ok": 174,
+      "fail": 0,
+      "total": 174
+    },
+    "parity_cases_matched": 32,
+    "stdout_tail": "ny_missing_manifest: python 裁决 == 期望（deny/manifest_missing）\n  ok   deny_missing_manifest: js 裁决 == 期望\n  ok   deny_missing_manifest: py↔js 逐字段一致\n  ok   deny_manifest_json_error: python 裁决 == 期望（deny/manifest_unreadable）\n  ok   deny_manifest_json_error: js 裁决 == 期望\n  ok   deny_manifest_json_error: py↔js 逐字段一致\n  ok   deny_manifest_version: python 裁决 == 期望（deny/manifest_invalid）\n  ok   deny_manifest_version: js 裁决 == 期望\n  ok   deny_manifest_version: py↔js 逐字段一致\n  ok   deny_entry_missing: python 裁决 == 期望（deny/entry_missing）\n  ok   deny_entry_missing: js 裁决 == 期望\n  ok   deny_entry_missing: py↔js 逐字段一致\n  ok   deny_entry_too_large: python 裁决 == 期望（deny/entry_too_large）\n  ok   deny_entry_too_large: js 裁决 == 期望\n  ok   deny_entry_too_large: py↔js 逐字段一致\n  ok   deny_integrity_mismatch: python 裁决 == 期望（deny/integrity_mismatch）\n  ok   deny_integrity_mismatch: js 裁决 == 期望\n  ok   deny_integrity_mismatch: py↔js 逐字段一致\n  ok   deny_integrity_missing: python 裁决 == 期望（deny/manifest_invalid）\n  ok   deny_integrity_missing: js 裁决 == 期望\n  ok   deny_integrity_missing: py↔js 逐字段一致\n  ok   deny_unknown_capability: python 裁决 == 期望（deny/manifest_invalid）\n  ok   deny_unknown_capability: js 裁决 == 期望\n  ok   deny_unknown_capability: py↔js 逐字段一致\n  ok   deny_sandbox_unavailable: python 裁决 == 期望（deny/sandbox_unavailable）\n  ok   deny_sandbox_unavailable: js 裁决 == 期望\n  ok   deny_sandbox_unavailable: py↔js 逐字段一致\n  ok   deny_id_invalid: python 裁决 == 期望（deny/manifest_invalid）\n  ok   deny_id_invalid: js 裁决 == 期望\n  ok   deny_id_invalid: py↔js 逐字段一致\n  ok   deny_entry_traversal: python 裁决 == 期望（deny/manifest_invalid）\n  ok   deny_entry_traversal: js 裁决 == 期望\n  ok   deny_entry_traversal: py↔js 逐字段一致\n  ok   deny_export_duplicate: python 裁决 == 期望（deny/manifest_invalid）\n  ok   deny_export_duplicate: js 裁决 == 期望\n  ok   deny_export_duplicate: py↔js 逐字段一致\n  ok   allow_multi_exports: python 裁决 == 期望（allow_sandboxed/ok）\n  ok   allow_multi_exports: js 裁决 == 期望\n  ok   allow_multi_exports: py↔js 逐字段一致\n  ok   deny_manifest_not_object: python 裁决 == 期望（deny/manifest_unreadable）\n  ok   deny_manifest_not_object: js 裁决 == 期望\n  ok   deny_manifest_not_object: py↔js 逐字段一致\n  ok   deny_export_name_invalid: python 裁决 == 期望（deny/manifest_invalid）\n  ok   deny_export_name_invalid: js 裁决 == 期望\n  ok   deny_export_name_invalid: py↔js 逐字段一致\n  ok   deny_sandbox_mode_invalid: python 裁决 == 期望（deny/manifest_invalid）\n  ok   deny_sandbox_mode_invalid: js 裁决 == 期望\n  ok   deny_sandbox_mode_invalid: py↔js 逐字段一致\n  ok   allow_optional_capability: python 裁决 == 期望（allow_sandboxed/ok）\n  ok   allow_optional_capability: js 裁决 == 期望\n  ok   allow_optional_capability: py↔js 逐字段一致\n\n[3] 物理沙箱实证（真实子进程 + Node permission model）\n  ok   sim --assert --json 退出码 0\n  ok   sim 输出可解析\n  ok   sim 断言数 ≥ 55\n  ok   sim 全部通过（fail==0）\n  ok   关键断言存在且通过：宿主支持 Node permission model\n  ok   关键断言存在且通过：良性插件加载成功\n  ok   关键断言存在且通过：子进程 PID 与宿主不同\n  ok   关键断言存在且通过：越界读 → ERR_ACCESS_DENIED\n  ok   关键断言存在且通过：拼接 API 名绕过静态扫描\n  ok   关键断言存在且通过：沙箱内越界写被拒（ERR_ACCESS_DENIED）\n  ok   关键断言存在且通过：导入期越界写 → 加载被拒（fail-closed）\n  ok   关键断言存在且通过：调用超时 → sandbox_call_timeout\n  ok   关键断言存在且通过：声明 network → 不 spawn 直接 deny/SC-E10\n  ok   state: 至少 1 个 denied\n\n[4] index.js 接入实证（真实 apply → 审计 → 挂起 → status）\n  ok   integration 退出码 0\n  ok   integration 输出可解析\n  ok   integration 断言 10 条\n  ok   integration 全部通过\n  ok   良性插件在独立子进程（pid>0 且 ≠ 宿主）\n  ok   恶意插件未执行（标记文件不存在）\n  ok   status 行含 deny 与挂起\n\n[5] 接线与文档\n  ok   sandbox-host.mjs 存在\n  ok   sandbox-child.mjs 存在\n  ok   supply-chain-sim.mjs 存在\n  ok   supply-chain-integration.mjs 存在\n  ok   index.js 引入 bootstrapSupplyChain（懒加载）\n  ok   index.js 配置项 supplyChain（enabled/plugins）\n  ok   index.js 写 supply_chain_alert 告警事件\n  ok   sandbox-host.mjs 写 supply_chain_manifest 审计\n  ok   index.js 状态可观测（供应链: 行）\n  ok   index.js 未直接 import child_process（沙箱之外不 spawn 插件）\n  ok   docs/26 存在且行数 ≥ 120\n  ok   ADR-017 存在且行数 ≥ 60\n\n============================================================\n174 ok / 0 fail（共 174 条断言）\n============================================================\n",
+    "stderr_tail": ""
+  }
+}

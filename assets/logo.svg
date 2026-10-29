@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="720" viewBox="0 0 600 720"
+     preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="ls-title ls-desc">
+  <title id="ls-title">LINGSHU · 灵枢</title>
+  <desc id="ls-desc">纯黑背景上的赛博青霓虹标志：尖顶圆角六边形、眼睛轮廓、中心顺时针循环箭头。
+    箭头匀速顺时针旋转，六边形与字标的光晕缓慢呼吸。</desc>
+
+  <defs>
+    <!-- 背景：中心一层极暗的青雾，让纯黑底有纵深 -->
+    <radialGradient id="ls-haze" cx="50%" cy="40%" r="62%">
+      <stop offset="0%"   stop-color="#00E5FF" stop-opacity=".10"/>
+      <stop offset="45%"  stop-color="#00E5FF" stop-opacity=".04"/>
+      <stop offset="100%" stop-color="#00E5FF" stop-opacity="0"/>
+    </radialGradient>
+
+    <style>
+      /* ---------- 线宽：六边形 / 眼睛 / 箭头同一粗细（参考图口径） ---------- */
+      .hex, .eye, .arc, .chev { fill: none; }
+
+      .hex  { stroke: #00E5FF; stroke-width: 8.4; stroke-linejoin: round; }
+      .eye  { stroke: #00E5FF; stroke-width: 8.4; }
+      .arc  { stroke: #00E5FF; stroke-width: 8.4; stroke-linecap: round; }
+      .chev { stroke: #00E5FF; stroke-width: 8.4; stroke-linecap: round; stroke-linejoin: round; }
+
+      /* ---------- 光晕：静态 drop-shadow，只让 opacity 呼吸（合成器可缓存） ---------- */
+      .glow  { filter: drop-shadow(0 0 5px rgba(0,229,255,.85)) drop-shadow(0 0 16px rgba(0,229,255,.45)) drop-shadow(0 0 38px rgba(0,229,255,.18)); }
+      .glow-spin { filter: drop-shadow(0 0 4px rgba(0,229,255,.9)) drop-shadow(0 0 12px rgba(0,229,255,.45)); }
+      .glow-word { filter: drop-shadow(0 0 6px rgba(0,229,255,.80)) drop-shadow(0 0 18px rgba(0,229,255,.42)) drop-shadow(0 0 40px rgba(0,229,255,.16)); }
+
+      .breathe   { animation: ls-breathe 5.4s ease-in-out infinite; will-change: opacity; }
+      .breathe-2 { animation-delay: -2.7s; }
+
+      /* ---------- 旋转：显式 transform-box / transform-origin，绕环心转 ---------- */
+      .spin { animation: ls-spin 8s linear infinite; transform-box: view-box; transform-origin: 300px 290px; }
+
+      @keyframes ls-spin    { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      @keyframes ls-breathe { 0%, 100% { opacity: .84; } 50% { opacity: 1; } }
+
+      @media (prefers-reduced-motion: reduce) {
+        .spin, .breathe { animation: none; }
+      }
+    </style>
+  </defs>
+
+  <rect width="600" height="720" fill="#000000"/>
+  <rect width="600" height="720" fill="url(#ls-haze)"/>
+
+  <!-- ================= 六边形外框：尖顶 / 竖边 / 圆角（R=225，宽 390 与字标同宽） ================= -->
+  <g class="breathe">
+    <g class="glow">
+      <path class="hex" d="M306.50 68.75
+        L488.36 173.75
+        A13 13 0 0 1 494.86 185.01
+        L494.86 394.99
+        A13 13 0 0 1 488.36 406.25
+        L306.50 511.25
+        A13 13 0 0 1 293.50 511.25
+        L111.64 406.25
+        A13 13 0 0 1 105.14 394.99
+        L105.14 185.01
+        A13 13 0 0 1 111.64 173.75
+        L293.50 68.75
+        A13 13 0 0 1 306.50 68.75
+        Z"/>
+    </g>
+  </g>
+
+  <!-- ================= 眼睛轮廓：两段圆弧组成的杏仁形（281×166） ================= -->
+  <g class="glow">
+    <path class="eye" d="M159.50 290 A160.4 160.4 0 0 1 440.50 290 A160.4 160.4 0 0 1 159.50 290 Z"/>
+  </g>
+
+  <!-- ================= 循环箭头（顺时针匀速旋转）：双弧 135° + 圆头箭头 ================= -->
+  <g class="spin glow-spin">
+    <path class="arc" d="M238.60 298.63 A62 62 0 0 1 337.31 240.48"/>
+    <path class="arc" d="M361.40 281.37 A62 62 0 0 1 262.69 339.52"/>
+    <path class="chev" d="M349.23 230.23 L347.49 250.15 L327.57 248.41"/>
+    <path class="chev" d="M250.77 349.77 L252.51 329.85 L272.43 331.59"/>
+  </g>
+
+  <!-- ================= 字标 LINGSHU（宽 390，与六边形同宽） ================= -->
+  <g class="breathe breathe-2">
+    <text class="glow-word" x="300" y="644" text-anchor="middle"
+          textLength="390" lengthAdjust="spacingAndGlyphs"
+          font-family="'Segoe UI','Helvetica Neue',Helvetica,Arial,'Noto Sans','Liberation Sans',sans-serif"
+          font-size="62" font-weight="700" fill="#00E5FF">LINGSHU</text>
+  </g>
+</svg>

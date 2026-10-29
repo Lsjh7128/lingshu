@@ -32,8 +32,12 @@
 \usepackage{graphicx}
 \usepackage{microtype}
 \usepackage[numbers,sort&compress]{natbib}
-\usepackage[hidelinks]{hyperref}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=blue,urlcolor=blue]{hyperref}
 \usepackage{url}
+\usepackage{seqsplit}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,columns=fullflexible,
+  keepspaces=true,frame=none,aboveskip=4pt,belowskip=4pt}
 
 % 英文版默认用 pdflatex 编译；若某个英文小节引用了中文原句（Mem0 试点语料），
 % 用 xelatex 编译时自动加载 CJK 字体，保证这些字形不缺失。
@@ -45,6 +49,7 @@
 \setlength{\columnsep}{0.25in}
 \setlength{\parskip}{0pt}
 \frenchspacing
+\renewcommand{\arraystretch}{1.15}
 
 % Lightweight macros shared by all sections.
 \newcommand{\system}{\textsc{LingShu}}
@@ -79,6 +84,7 @@ state of the reference implementation as of October 2026.}}
 \input{sections/06e-actuator}
 \input{sections/06f-baselines}
 \input{sections/06g-case-study}
+\input{sections/06h-immersive-case}
 \input{sections/07-discussion}
 \input{sections/08-limitations}
 \input{sections/09-conclusion}
@@ -88,6 +94,8 @@ state of the reference implementation as of October 2026.}}
 \input{sections/10b-appendix-audit}
 \input{sections/10c-appendix-tool}
 \input{sections/10d-appendix-hostpilot}
+\input{sections/10e-risk-classifier}
+\input{sections/10f-appendix-supplychain}
 
 \bibliographystyle{plainnat}
 \bibliography{refs}

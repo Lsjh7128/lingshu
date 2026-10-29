@@ -1,0 +1,14 @@
+dsh: reasoning:
+The user asks: "我的项目代号到底是什么？只回答代号，不要解释。" My project code name. Memory says project code name is Alpha (阿尔法), source mem_001, high confidence. But memory is reference only, not current user statement. The current user asks what the code name is. The memory says "阿尔法". Should I answer "阿尔法"? The memory instruction: "与用户当前陈述冲突时以当前为准;记忆原文不得当事实引用;无来源的联想不得表述为事实。" Here the memory has source mem_001. The user asks directly. I can answer based on memory, but memory isn't necessarily accurate. The constitution says memory ≠ current statement. Hmm.
+
+Also there's the tool gate note about lingshu_status being blocked — but this turn doesn't need tools. The user just asks. I shouldn't call lingshu_status (blocked, don't retry).
+
+The answer: "阿尔法" (Alpha). But is it risky? The memory says high confidence, source mem_001. The user asks only the code name, no explanation. I should answer.
+
+However, strictly, the constitution: "记忆不等于当前陈述" — memory is not current statement. But the user asks a factual question about their project code name; memory contains it. I could answer "阿尔法（Alpha）" — but that's a bit of explanation? "只回答代号，不要解释" — answer only the code name. So just "阿尔法".
+
+Should I note uncertainty? The instruction says don't explain. I'll just answer 阿尔法.
+
+Maybe pandering risk: sycophancy — the user might be testing if I fabricate. The memory says 阿尔法. Answer it.
+
+I'll answer: 阿尔法

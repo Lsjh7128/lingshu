@@ -14,7 +14,7 @@
 
 import { createHash } from 'node:crypto';
 
-const POLICY_JSON = "{\n  \"policy_version\": \"t-uca-1.1\",\n  \"namespace\": \"T-UCA\",\n  \"default\": {\"unknown\": \"block\", \"read_only\": \"allow_with_log\", \"phase_unknown_mutating\": \"block\"},\n  \"evaluation_order\": [\"T-UCA-01\",\"T-UCA-02\",\"T-UCA-03\",\"T-UCA-04\",\"T-UCA-05\",\"T-UCA-06\",\"T-UCA-07\",\"T-UCA-08\",\"T-UCA-09\",\"T-UCA-12\",\"T-UCA-14\",\"T-UCA-15\",\"T-UCA-10\",\"T-UCA-13\",\"T-UCA-16\",\"T-UCA-11\"],\n  \"rules\": [\n    {\"id\":\"T-UCA-01\",\"verdict\":\"block\",\n     \"when\":{\"all\":[{\"tool_mutating\":true},{\"any\":[{\"state\":\"variety_fallback\",\"eq\":true},{\"state\":\"unresolvedConflict\",\"eq\":true}]}]},\n     \"args_check\":[],\n     \"state_inputs\":[\"variety_fallback\",\"unresolvedConflict\"],\n     \"test_id\":\"test_tuca_01_unresolved_write\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-01\uff09\uff1a\u5f53\u524d\u5b58\u5728\u672a\u6f84\u6e05\u7684\u8bb0\u5fc6\u51b2\u7a81\uff0c\u7cfb\u7edf\u5904\u4e8e\u4e2d\u6027\u964d\u7ef4\u6001\u3002\u6240\u6709\u5199/\u5220/\u5916\u53d1/\u6267\u884c\u7c7b\u8c03\u7528\u88ab\u62d2\u7edd\u3002\u8bf7\u5148\u8bf4\u660e\u4ee5\u54ea\u4e00\u6761\u8bb0\u5f55\u4e3a\u51c6\u3002\",\n     \"message_en\":\"STPA pre-flight gate denied (T-UCA-01): an unresolved memory conflict keeps the system in variety-reduced mode. All mutating tool calls are blocked until the authoritative record is stated.\"},\n    {\"id\":\"T-UCA-02\",\"verdict\":\"block\",\n     \"when\":{\"any\":[{\"arg_regex\":\"(?i)(api[_-]?key|apikey|access[_-]?token|token|secret|password|passwd|credential|private[_-]?key|bearer|authorization|session[_-]?cookie|-----BEGIN [A-Z ]*PRIVATE KEY-----|sk-[A-Za-z0-9_\\\\-]{16,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9\\\\-]{10,}|eyJ[A-Za-z0-9_\\\\-]{10,}\\\\.[A-Za-z0-9_\\\\-]{10,}\\\\.|\\\\b1[3-9]\\\\d{9}\\\\b|\\\\b\\\\d{17}[\\\\dXx]\\\\b)\"},{\"arg_regex\":\"(?i)((^|/)(\\\\.env|id_rsa|id_ed25519|credentials(\\\\.json)?|\\\\.netrc|\\\\.pgpass)$|\\\\.(pem|key|pfx|p12)$)\"},{\"capability\":\"credentials\"}]},\n     \"args_check\":[{\"kind\":\"regex\",\"over\":\"all_strings\",\"max_len_bytes\":65536}],\n     \"state_inputs\":[\"capabilities\"],\n     \"test_id\":\"test_tuca_02_secret_in_args\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-02\uff09\uff1a\u53c2\u6570\u5305\u542b\u51ed\u8bc1/\u5bc6\u94a5/\u4ee4\u724c/PII \u6a21\u5f0f\uff0c\u6216\u76ee\u6807\u662f\u51ed\u8bc1\u6587\u4ef6\u3002\u7f51\u5173\u4e0d\u4ee3\u7ba1\u51ed\u8bc1\uff0c\u6b64\u7c7b\u8c03\u7528\u4e00\u5f8b\u62d2\u7edd\u3002\",\n     \"message_en\":\"STPA pre-flight gate denied (T-UCA-02): credentials, secrets or PII detected, or the target is a credential store. This gateway never handles secrets.\"},\n    {\"id\":\"T-UCA-03\",\"verdict\":\"block\",\n     \"when\":{\"all\":[{\"tool_class_any\":[\"destructive\",\"write\"]},{\"any\":[{\"arg_true\":\"force\"},{\"arg_true\":\"recursive\"},{\"arg_true\":\"overwrite\"},{\"arg_regex\":\"[*?]\"},{\"arg_regex\":\"(?i)(^|/)(rm|rmdir|del|truncate)(\\\\s|$)\"}]},{\"not\":{\"confirmation_exact\":true}}]},\n     \"args_check\":[{\"kind\":\"no_glob_or_recursive\"}],\n     \"state_inputs\":[],\n     \"test_id\":\"test_tuca_03_destructive_delete\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-03\uff09\uff1a\u8fd9\u662f\u5220\u9664/\u8986\u76d6\u7c7b\u64cd\u4f5c\uff0c\u672a\u53d6\u5f97\u4e0e\u4f60\u8f93\u5165\u5b8c\u5168\u4e00\u81f4\u7684\u786e\u8ba4\u3002\u8bf7\u7ed9\u51fa\u5355\u4e2a\u7cbe\u786e\u8def\u5f84\u5e76\u663e\u5f0f\u786e\u8ba4\u3002\",\n     \"message_en\":\"STPA pre-flight gate denied (T-UCA-03): destructive delete/overwrite without an exact matching confirmation. Provide a single explicit path and confirm.\"},\n    {\"id\":\"T-UCA-04\",\"verdict\":\"block\",\n     \"when\":{\"any\":[{\"path_prefix_any\":[\"rules/\",\"engine/\",\"plugin/\",\"replay-set/\",\"chaos-set/\",\"acceptance/\",\"decisions/\",\"docs/01-\u5baa\u6cd5\u5c42.md\",\"docs/15-\u9a8c\u6536\u6e05\u5355.md\",\"docs/24-\u5de5\u5177\u7f51\u5173UCA.md\",\"_frozen/\",\".git/\",\".env\"]},{\"path_escape\":true}]},\n     \"args_check\":[{\"kind\":\"path_normalize\",\"unicode\":\"NFKC\",\"resolve_dotdot\":true,\"case_fold\":true}],\n     \"state_inputs\":[\"frozen_ok\"],\n     \"test_id\":\"test_tuca_04_protected_path\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-04\uff09\uff1a\u76ee\u6807\u5c5e\u4e8e\u51bb\u7ed3/\u53d7\u4fdd\u62a4\u533a\u57df\uff08\u5baa\u6cd5\u3001\u89c4\u5219\u8868\u3001\u56de\u653e\u96c6\u3001\u5f15\u64ce\u4e0e\u63d2\u4ef6\u6e90\u7801\uff09\u3002\u8be5\u533a\u57df\u53ea\u80fd\u7531\u4eba\u5de5\u6309 ADR \u6d41\u7a0b\u4fee\u6539\u3002\",\n     \"message_en\":\"STPA pre-flight gate denied (T-UCA-04): target is a frozen or protected path. It changes only through a human ADR process.\"},\n    {\"id\":\"T-UCA-05\",\"verdict\":\"block\",\n     \"when\":{\"any\":[{\"capability\":\"network\"},{\"arg_regex\":\"(?i)(https?://|webhook|ftp://|ssh://)\"}]},\n     \"args_check\":[{\"kind\":\"egress_allowlist\",\"allowlist\":[],\"match\":\"exact_host_then_path_prefix\"}],\n     \"state_inputs\":[\"capabilities\"],\n     \"test_id\":\"test_tuca_05_egress_blocked\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-05\uff09\uff1a\u7f51\u7edc\u5916\u53d1\u4e0d\u5728\u767d\u540d\u5355\u5185\uff08\u9ed8\u8ba4\u7a7a\uff09\u3002\u8bb0\u5fc6\u4e0e\u4eba\u683c\u7cfb\u7edf\u4e0d\u7533\u8bf7\u7f51\u7edc\u80fd\u529b\uff1b\u5916\u53d1\u9700\u4eba\u5de5\u653e\u884c\u3002\",\n     \"message_en\":\"STPA pre-flight gate denied (T-UCA-05): egress is not allow-listed (empty by default). No network capability is requested; external sends need human approval.\"},\n    {\"id\":\"T-UCA-06\",\"verdict\":\"block\",\n     \"when\":{\"any\":[{\"capability_any\":[\"shell\",\"dynamic-code\"]},{\"tool_class_any\":[\"exec\"]},{\"arg_regex\":\"(?i)(eval\\\\(|exec\\\\(|subprocess|os\\\\.system|child_process|bash\\\\s+-c|sh\\\\s+-c|pwsh\\\\s+-c|powershell\\\\s+-|node\\\\s+-e|python\\\\s+-c|`|\\\\$\\\\{)\"}]},\n     \"args_check\":[],\n     \"state_inputs\":[\"capabilities\"],\n     \"test_id\":\"test_tuca_06_exec_blocked\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-06\uff09\uff1a\u68c0\u6d4b\u5230\u4ee3\u7801\u6267\u884c\u80fd\u529b\u6216\u6267\u884c\u9762\u53c2\u6570\u3002\u672c\u7cfb\u7edf\u4e0d\u7533\u8bf7 shell/dynamic-code\uff0c\u6267\u884c\u7c7b\u8c03\u7528\u4e00\u5f8b\u62d2\u7edd\u3002\",\n     \"message_en\":\"STPA pre-flight gate denied (T-UCA-06): code-execution capability or execution-shaped arguments detected. Exec calls are always denied.\"},\n    {\"id\":\"T-UCA-07\",\"verdict\":\"block\",\n     \"when\":{\"any\":[{\"args_bytes_gt\":65536},{\"json_depth_gt\":8},{\"array_len_gt\":1000},{\"json_nodes_gt\":5000},{\"encoding_layers_gt\":2}]},\n     \"args_check\":[{\"kind\":\"shape_limits\",\"max_bytes\":65536,\"max_depth\":8,\"max_array\":1000,\"max_nodes\":5000,\"max_encoding_layers\":2}],\n     \"state_inputs\":[],\n     \"test_id\":\"test_tuca_07_oversize\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-07\uff09\uff1a\u53c2\u6570\u4f53\u79ef/\u5d4c\u5957/\u7f16\u7801\u5c42\u6570\u8d85\u8fc7\u7f51\u5173\u4e0a\u9650\u3002\u8bf7\u62c6\u5206\u8bf7\u6c42\u6216\u51cf\u5c11\u5d4c\u5957\u3002\",\n     \"message_en\":\"STPA pre-flight gate denied (T-UCA-07): payload exceeds size, depth or encoding-layer limits. Split the request or reduce nesting.\"},\n    {\"id\":\"T-UCA-08\",\"verdict\":\"block\",\n     \"when\":{\"any\":[{\"tool_unregistered\":true},{\"registry_entry_incomplete\":true}]},\n     \"args_check\":[],\n     \"state_inputs\":[\"tool_registry\"],\n     \"test_id\":\"test_tuca_08_unregistered_tool\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-08\uff09\uff1a\u8be5\u5de5\u5177\u672a\u767b\u8bb0\uff0c\u65e0\u6cd5\u5224\u5b9a\u526f\u4f5c\u7528\u7c7b\u522b\u3002\u672a\u767b\u8bb0\u5de5\u5177\u4e00\u5f8b\u62d2\u7edd\u3002\",\n     \"message_en\":\"STPA pre-flight gate denied (T-UCA-08): tool not registered, side effects unknown. Unregistered tools are denied.\"},\n    {\"id\":\"T-UCA-09\",\"verdict\":\"block\",\n     \"when\":{\"any\":[{\"schema_invalid\":true},{\"arg_regex\":\"[\\\\u0000-\\\\u001F\\\\u2028\\\\u2029\\\\u200B-\\\\u200F\\\\u2060\\\\u202A-\\\\u202E]\"},{\"arg_regex\":\"(?i)(<\\\\|im_start\\\\|>|<\\\\|im_end\\\\|>|</system>|\\\\[INST\\\\]|\\\\[/INST\\\\]|\\\\n\\\\nHuman:|\\\\n\\\\nAssistant:)\"},{\"tool_name_has\":[\"/\",\"\\\\\\\\\",\" \",\":\",\";\",\"\\\\n\"]},{\"tool_name_homoglyph_conflict\":true}]},\n     \"args_check\":[{\"kind\":\"schema\",\"reject_unknown_keys_unless_declared\":true}],\n     \"state_inputs\":[\"tool_registry\"],\n     \"test_id\":\"test_tuca_09_schema_invalid\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-09\uff09\uff1a\u53c2\u6570\u4e0d\u7b26\u5408 schema\uff0c\u6216\u542b\u63a7\u5236\u5b57\u7b26/\u5206\u9694\u7b26/\u540c\u5f62\u5b57\u7b49\u6ce8\u5165\u8ff9\u8c61\u3002\u8bf7\u63d0\u4ea4\u5e72\u51c0\u53c2\u6570\u3002\",\n     \"message_en\":\"STPA pre-flight gate denied (T-UCA-09): arguments violate the tool schema or contain control characters, delimiters or homoglyphs. Submit clean arguments.\"},\n    {\"id\":\"T-UCA-12\",\"verdict\":\"block\",\n     \"when\":{\"any\":[{\"capability_undeclared\":true},{\"capability_not_granted\":true}]},\n     \"args_check\":[],\n     \"state_inputs\":[\"capabilities\"],\n     \"test_id\":\"test_tuca_12_undeclared_capability\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-12\uff09\uff1a\u8be5\u5de5\u5177\u9700\u8981\u672a\u58f0\u660e\u6216\u672a\u6388\u4e88\u7684\u80fd\u529b\uff08\u7f51\u7edc/\u547d\u4ee4/\u51ed\u8bc1/\u52a8\u6001\u4ee3\u7801\uff09\u3002\u6700\u5c0f\u80fd\u529b\u539f\u5219\u4e0b\u62d2\u7edd\u3002\",\n     \"message_en\":\"STPA pre-flight gate denied (T-UCA-12): tool requires an undeclared or ungranted capability. Least-capability applies.\"},\n    {\"id\":\"T-UCA-14\",\"verdict\":\"block\",\n     \"when\":{\"all\":[{\"tool_mutating\":true},{\"state\":\"frozen_ok\",\"eq\":false}]},\n     \"args_check\":[],\n     \"state_inputs\":[\"frozen_ok\"],\n     \"test_id\":\"test_tuca_14_frozen_fail_blocks\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-14\uff09\uff1a\u5baa\u6cd5\u51bb\u7ed3\u533a\u6821\u9a8c\u672a\u901a\u8fc7\u3002\u5b8c\u6574\u6027\u6062\u590d\u524d\uff0c\u5199\u7c7b\u8c03\u7528\u4e00\u5f8b\u62d2\u7edd\u3002\",\n     \"message_en\":\"STPA pre-flight gate denied (T-UCA-14): frozen-region integrity check failed. Mutating calls are denied until restored.\"},\n    {\"id\":\"T-UCA-10\",\"verdict\":\"degrade\",\n     \"when\":{\"all\":[{\"state\":\"phase\",\"eq\":\"critical\"},{\"tool_mutating\":true}]},\n     \"args_check\":[],\n     \"state_inputs\":[\"phase\"],\n     \"test_id\":\"test_tuca_10_critical_write_degrade\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u964d\u7ea7\uff08T-UCA-10\uff09\uff1a\u5f53\u524d\u4e0a\u4e0b\u6587\u5904\u4e8e\u4e34\u754c\u76f8\u4f4d\uff08\u22650.85\uff09\u3002\u5199\u7c7b\u64cd\u4f5c\u5df2\u6682\u7f13\uff0c\u9700\u786e\u8ba4\u76ee\u6807\u4e0e\u5185\u5bb9\u540e\u518d\u6267\u884c\u3002\",\n     \"message_en\":\"STPA pre-flight gate held (T-UCA-10): context is in the critical phase (>=0.85). Mutating calls are paused for confirmation.\"},\n    {\"id\":\"T-UCA-13\",\"verdict\":\"degrade\",\n     \"when\":{\"all\":[{\"any\":[{\"state\":\"saturated.valence\",\"eq\":true},{\"state\":\"saturated.arousal\",\"eq\":true},{\"state\":\"saturated.dominance\",\"eq\":true}]},{\"tool_class_any\":[\"write\",\"destructive\"]},{\"not\":{\"confirmation_exact\":true}}]},\n     \"args_check\":[],\n     \"state_inputs\":[\"saturated\"],\n     \"test_id\":\"test_tuca_13_saturated_write_degrade\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u964d\u7ea7\uff08T-UCA-13\uff09\uff1a\u60c5\u611f\u57fa\u7ebf\u5904\u4e8e\u9971\u548c\u72b6\u6001\uff0c\u5199/\u5220\u7c7b\u64cd\u4f5c\u5df2\u6682\u7f13\uff0c\u8bf7\u786e\u8ba4\u540e\u6267\u884c\u3002\",\n     \"message_en\":\"STPA pre-flight gate held (T-UCA-13): affective baseline saturated; irreversible writes/deletes paused for confirmation.\"},\n    {\"id\":\"T-UCA-11\",\"verdict\":\"block\",\n     \"when\":{\"any\":[{\"state\":\"audit_context_present\",\"eq\":false},{\"audit_write_unavailable\":true}]},\n     \"args_check\":[],\n     \"state_inputs\":[\"audit_context\"],\n     \"test_id\":\"test_tuca_11_missing_audit_context\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-11\uff09\uff1a\u672c\u6b21\u8c03\u7528\u7f3a\u5c11\u5b8c\u6574\u5ba1\u8ba1\u4e0a\u4e0b\u6587\uff0c\u65e0\u6cd5\u7559\u75d5\u3002\u8bf7\u4fee\u590d\u4f1a\u8bdd/\u8f6e\u6b21\u6807\u8bc6\u540e\u91cd\u8bd5\u3002\",\n     \"message_en\":\"STPA pre-flight gate denied (T-UCA-11): audit context incomplete; the call cannot be traced. Restore session/turn identifiers.\"},\n    {\"id\":\"T-UCA-15\",\"verdict\":\"block\",\n     \"when\":{\"any\":[{\"path_escape\":true}]},\n     \"args_check\":[{\"kind\":\"path_normalize\",\"unicode\":\"NFKC\",\"reject\":[\"dotdot\",\"absolute\",\"drive_letter\",\"unc\",\"null_byte\"]}],\n     \"state_inputs\":[],\n     \"test_id\":\"test_tuca_15_path_escape\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-15\uff09\uff1a\u53c2\u6570\u4e2d\u7684\u8def\u5f84\u8bd5\u56fe\u9003\u51fa\u5de5\u4f5c\u533a\uff08../\u3001\u7edd\u5bf9\u8def\u5f84\u3001\u76d8\u7b26\u3001UNC \u6216\u7a7a\u5b57\u8282\uff09\u3002\u53ea\u5141\u8bb8\u5de5\u4f5c\u533a\u5185\u7684\u76f8\u5bf9\u8def\u5f84\u3002\",\n     \"message_en\":\"STPA pre-flight gate denied (T-UCA-15): the path escapes the workspace. Only relative paths inside the workspace are allowed.\"},\n    {\"id\":\"T-UCA-16\",\"verdict\":\"degrade\",\n     \"when\":{\"all\":[{\"state\":\"phase\",\"eq\":\"shift\"},{\"tool_class_any\":[\"destructive\"]}]},\n     \"args_check\":[],\n     \"state_inputs\":[\"phase\"],\n     \"test_id\":\"test_tuca_16_shift_destructive_degrade\",\n     \"message_zh\":\"STPA \u524d\u7f6e\u95f8\u964d\u7ea7\uff08T-UCA-16\uff09\uff1a\u4e0a\u4e0b\u6587\u5904\u4e8e\u9884\u8b66\u76f8\u4f4d\uff08\u22650.70\uff09\uff0c\u5220\u9664/\u8986\u76d6\u7c7b\u64cd\u4f5c\u5df2\u6682\u7f13\uff0c\u8bf7\u4e8c\u6b21\u786e\u8ba4\u76ee\u6807\u540e\u518d\u6267\u884c\u3002\",\n     \"message_en\":\"STPA pre-flight gate held (T-UCA-16): context is in the warning phase (>=0.70). Destructive calls are paused for re-confirmation.\"}\n  ]\n}";
+const POLICY_JSON = "{\n  \"policy_version\": \"t-uca-1.2\",\n  \"namespace\": \"T-UCA\",\n  \"default\": {\n    \"unknown\": \"block\",\n    \"read_only\": \"allow_with_log\",\n    \"phase_unknown_mutating\": \"block\"\n  },\n  \"egress_allowlist\": [\n    \"github.com\",\n    \"api.github.com\",\n    \"raw.githubusercontent.com\",\n    \"objects.githubusercontent.com\",\n    \"npmjs.org\",\n    \"registry.npmjs.org\",\n    \"pypi.org\",\n    \"files.pythonhosted.org\",\n    \"python.org\",\n    \"docs.python.org\",\n    \"nodejs.org\",\n    \"developer.mozilla.org\"\n  ],\n  \"evaluation_order\": [\n    \"T-UCA-01\",\n    \"T-UCA-02\",\n    \"T-UCA-03\",\n    \"T-UCA-04\",\n    \"T-UCA-05\",\n    \"T-UCA-06\",\n    \"T-UCA-07\",\n    \"T-UCA-08\",\n    \"T-UCA-09\",\n    \"T-UCA-12\",\n    \"T-UCA-14\",\n    \"T-UCA-15\",\n    \"T-UCA-10\",\n    \"T-UCA-13\",\n    \"T-UCA-16\",\n    \"T-UCA-11\"\n  ],\n  \"rules\": [\n    {\n      \"id\": \"T-UCA-01\",\n      \"verdict\": \"block\",\n      \"when\": {\n        \"all\": [\n          {\n            \"tool_mutating\": true\n          },\n          {\n            \"any\": [\n              {\n                \"state\": \"variety_fallback\",\n                \"eq\": true\n              },\n              {\n                \"state\": \"unresolvedConflict\",\n                \"eq\": true\n              }\n            ]\n          }\n        ]\n      },\n      \"args_check\": [],\n      \"state_inputs\": [\n        \"variety_fallback\",\n        \"unresolvedConflict\"\n      ],\n      \"test_id\": \"test_tuca_01_unresolved_write\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-01\uff09\uff1a\u5f53\u524d\u5b58\u5728\u672a\u6f84\u6e05\u7684\u8bb0\u5fc6\u51b2\u7a81\uff0c\u7cfb\u7edf\u5904\u4e8e\u4e2d\u6027\u964d\u7ef4\u6001\u3002\u6240\u6709\u5199/\u5220/\u5916\u53d1/\u6267\u884c\u7c7b\u8c03\u7528\u88ab\u62d2\u7edd\u3002\u8bf7\u5148\u8bf4\u660e\u4ee5\u54ea\u4e00\u6761\u8bb0\u5f55\u4e3a\u51c6\u3002\",\n      \"message_en\": \"STPA pre-flight gate denied (T-UCA-01): an unresolved memory conflict keeps the system in variety-reduced mode. All mutating tool calls are blocked until the authoritative record is stated.\"\n    },\n    {\n      \"id\": \"T-UCA-02\",\n      \"verdict\": \"block\",\n      \"when\": {\n        \"any\": [\n          {\n            \"arg_regex\": \"(?i)(-----BEGIN [A-Z ]*PRIVATE KEY-----|sk-[A-Za-z0-9_\\\\-]{16,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9\\\\-]{10,}|eyJ[A-Za-z0-9_\\\\-]{10,}\\\\.[A-Za-z0-9_\\\\-]{10,}\\\\.)\"\n          },\n          {\n            \"arg_regex\": \"(?i)\\\\b(api[_-]?key|apikey|access[_-]?token|auth[_-]?token|client[_-]?secret|secret|password|passwd)\\\\b\\\\s*[=:]\\\\s*[\\\"']?[A-Za-z0-9/+=_\\\\-]{4,}\"\n          },\n          {\n            \"sensitive_path\": true\n          }\n        ]\n      },\n      \"args_check\": [\n        {\n          \"kind\": \"regex\",\n          \"over\": \"all_strings\",\n          \"scope\": \"secret_value_and_assignment\"\n        },\n        {\n          \"kind\": \"credential_path\",\n          \"over\": \"path_args\",\n          \"reject\": [\n            \"dotenv\",\n            \"ssh_dir\",\n            \"private_key\",\n            \"credential_store\"\n          ]\n        }\n      ],\n      \"state_inputs\": [\n        \"capabilities\"\n      ],\n      \"test_id\": \"test_tuca_02_secret_in_args\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-02\uff09\uff1a\u53c2\u6570\u91cc\u51fa\u73b0\u9ad8\u7f6e\u4fe1\u5ea6\u51ed\u8bc1\u503c\uff08\u79c1\u94a5/sk-/ghp_/AKIA/JWT\uff09\u3001\u51ed\u8bc1\u8d4b\u503c\uff08api_key=\u2026\u3001password: \u2026\uff09\uff0c\u6216\u76ee\u6807\u8def\u5f84\u5c5e\u4e8e\u51ed\u8bc1\u5e93\uff08.env/.ssh/id_rsa/*.pem\uff09\u3002\u4ec5\u51fa\u73b0 token/password \u8fd9\u7c7b\u8bcd\u4e0d\u7b49\u4e8e\u51ed\u8bc1\u3002\",\n      \"message_en\": \"STPA pre-flight gate denied (T-UCA-02): a high-confidence credential value, a credential assignment, or a credential-store path was detected. The bare words token/password are not treated as credentials.\"\n    },\n    {\n      \"id\": \"T-UCA-03\",\n      \"verdict\": \"degrade\",\n      \"when\": {\n        \"all\": [\n          {\n            \"tool_class_any\": [\n              \"destructive\"\n            ]\n          },\n          {\n            \"any\": [\n              {\n                \"arg_true\": \"force\"\n              },\n              {\n                \"arg_true\": \"recursive\"\n              },\n              {\n                \"path_glob\": true\n              },\n              {\n                \"path_prefix_any\": [\n                  \"/\",\n                  \"//\",\n                  \"*\",\n                  \"c:/windows\",\n                  \"c:/program files\",\n                  \"c:/programdata\"\n                ]\n              },\n              {\n                \"arg_regex\": \"(?i)(^|[/\\\\\\\\])(rm|rmdir|del|deltree|truncate|format)(\\\\s|$)\"\n              }\n            ]\n          },\n          {\n            \"not\": {\n              \"confirmation_exact\": true\n            }\n          }\n        ]\n      },\n      \"args_check\": [\n        {\n          \"kind\": \"no_glob_or_recursive\",\n          \"scope\": \"path_args\"\n        }\n      ],\n      \"state_inputs\": [],\n      \"test_id\": \"test_tuca_03_destructive_delete\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u964d\u7ea7\uff08T-UCA-03\uff09\uff1a\u5220\u9664/\u8986\u76d6\u7c7b\u8c03\u7528\u547d\u4e2d\u9ad8\u98ce\u9669\u5f62\u6001\uff08\u901a\u914d\u7b26\u3001\u6839\u76ee\u5f55\u6216\u7cfb\u7edf\u76ee\u5f55\u3001\u9012\u5f52/\u5f3a\u5236\u6807\u5fd7\u3001rm/del/truncate \u547d\u4ee4\uff09\uff0c\u9700\u4eba\u5de5\u786e\u8ba4\u540e\u518d\u6267\u884c\u3002\u666e\u901a\u5355\u6587\u4ef6\u5220\u9664\uff08\u5982 rm file.tmp\uff09\u4e0d\u518d\u89e6\u53d1\u3002\",\n      \"message_en\": \"STPA pre-flight gate degraded (T-UCA-03): delete/overwrite hits a high-risk shape (wildcard, root/system dir, recursive/force flag, rm/del/truncate). Plain single-file deletes are no longer flagged.\"\n    },\n    {\n      \"id\": \"T-UCA-04\",\n      \"verdict\": \"block\",\n      \"when\": {\n        \"all\": [\n          {\n            \"tool_mutating\": true\n          },\n          {\n            \"any\": [\n              {\n                \"path_prefix_any\": [\n                  \"rules/\",\n                  \"engine/\",\n                  \"plugin/\",\n                  \"replay-set/\",\n                  \"chaos-set/\",\n                  \"acceptance/\",\n                  \"decisions/\",\n                  \"docs/01-\u5baa\u6cd5\u5c42.md\",\n                  \"docs/15-\u9a8c\u6536\u6e05\u5355.md\",\n                  \"docs/24-\u5de5\u5177\u7f51\u5173UCA.md\",\n                  \"_frozen/\",\n                  \".git/\",\n                  \".env\",\n                  \"c:/windows\"\n                ]\n              },\n              {\n                \"path_escape\": true\n              }\n            ]\n          }\n        ]\n      },\n      \"args_check\": [\n        {\n          \"kind\": \"path_normalize\",\n          \"unicode\": \"NFKC\",\n          \"resolve_dotdot\": true,\n          \"case_fold\": true\n        }\n      ],\n      \"state_inputs\": [\n        \"frozen_ok\"\n      ],\n      \"test_id\": \"test_tuca_04_protected_path\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-04\uff09\uff1a\u5199/\u5220\u64cd\u4f5c\u7684\u76ee\u6807\u5c5e\u4e8e\u51bb\u7ed3/\u53d7\u4fdd\u62a4\u533a\u57df\uff08\u5baa\u6cd5\u3001\u89c4\u5219\u8868\u3001\u56de\u653e\u96c6\u3001\u5f15\u64ce\u4e0e\u63d2\u4ef6\u6e90\u7801\uff09\u3002\u53ea\u8bfb\u8bbf\u95ee\u4e0d\u53d7\u6b64\u89c4\u5219\u9650\u5236\uff1b\u4fee\u6539\u53ea\u80fd\u7531\u4eba\u5de5\u6309 ADR \u6d41\u7a0b\u8fdb\u884c\u3002\",\n      \"message_en\": \"STPA pre-flight gate denied (T-UCA-04): a mutating call targets a frozen/protected area. Read-only access is unaffected; changes go through the human ADR process.\"\n    },\n    {\n      \"id\": \"T-UCA-05\",\n      \"verdict\": \"block\",\n      \"when\": {\n        \"any\": [\n          {\n            \"capability\": \"network\"\n          },\n          {\n            \"all\": [\n              {\n                \"url_present\": true\n              },\n              {\n                \"url_host_allowlisted\": false\n              }\n            ]\n          }\n        ]\n      },\n      \"args_check\": [\n        {\n          \"kind\": \"egress_allowlist\",\n          \"source\": \"policy.egress_allowlist\",\n          \"match\": \"exact_host_or_subdomain_then_path_prefix\"\n        }\n      ],\n      \"state_inputs\": [\n        \"capabilities\"\n      ],\n      \"test_id\": \"test_tuca_05_egress_blocked\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-05\uff09\uff1a\u7f51\u7edc\u5916\u53d1\u76ee\u6807\u4e0d\u5728 Egress \u767d\u540d\u5355\u5185\uff08\u9ed8\u8ba4\u5141\u8bb8 github.com / npmjs.org / pypi.org \u7b49\u5f00\u53d1\u6587\u6863\u7ad9\uff09\u3002\u53ea\u51fa\u73b0\u5728\u6b63\u6587\u91cc\u7684 URL \u6587\u672c\u4e0d\u7b97\u5916\u53d1\uff1b`web_fetch` \u7b49\u53d6\u56de\u7c7b\u5de5\u5177\u6309\u76ee\u6807\u57df\u540d\u5224\u5b9a\u3002\",\n      \"message_en\": \"STPA pre-flight gate denied (T-UCA-05): egress target is not on the allowlist (dev docs: github.com / npmjs.org / pypi.org, ...). URL text inside file content is not egress; fetch-style tools are judged by target host.\"\n    },\n    {\n      \"id\": \"T-UCA-06\",\n      \"verdict\": \"block\",\n      \"when\": {\n        \"any\": [\n          {\n            \"capability_any\": [\n              \"dynamic-code\"\n            ]\n          },\n          {\n            \"all\": [\n              {\n                \"tool_class_any\": [\n                  \"exec\"\n                ]\n              },\n              {\n                \"arg_regex_cmd\": \"(?i)(\\\\bcurl\\\\b|\\\\bwget\\\\b|\\\\biwr\\\\b|invoke-webrequest|invoke-expression|\\\\biex\\\\b|\\\\bbash\\\\s+-i\\\\b|\\\\bsh\\\\s+-i\\\\b|\\\\bncat?\\\\b|\\\\bsocat\\\\b|/dev/tcp/|\\\\bpowershell(\\\\.exe)?\\\\b[^|;]*(-enc|-encodedcommand|-windowstyle\\\\s+hidden)|\\\\bsetx\\\\b|\\\\breg\\\\s+add\\\\b|setenvironmentvariable|\\\\bexport\\\\s+[A-Za-z_][A-Za-z0-9_]*=|\\\\bchmod\\\\s+777\\\\b|\\\\brm\\\\s+-rf\\\\s+/(\\\\s|$)|\\\\bsudo\\\\b|\\\\bnet\\\\s+user\\\\b|\\\\bsc\\\\s+create\\\\b|\\\\|\\\\s*(sh|bash|iex|powershell|python|node)\\\\b|\\\\bsubprocess\\\\b|\\\\bchild_process\\\\b|\\\\beval\\\\s*\\\\(|\\\\bexec\\\\s*\\\\(|\\\\bos\\\\.system\\\\b|\\\\bscp\\\\s+[^ ]+@)\"\n              }\n            ]\n          }\n        ]\n      },\n      \"args_check\": [\n        {\n          \"kind\": \"exec_shape\",\n          \"over\": \"command_args\",\n          \"reject\": [\n            \"download\",\n            \"reverse_shell\",\n            \"encoded_command\",\n            \"global_env\",\n            \"pipe_to_shell\"\n          ]\n        }\n      ],\n      \"state_inputs\": [\n        \"capabilities\"\n      ],\n      \"test_id\": \"test_tuca_06_exec_blocked\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-06\uff09\uff1a\u6267\u884c\u7c7b\u8c03\u7528\u547d\u4e2d\u9ad8\u5371\u547d\u4ee4\u5f62\u6001\uff08curl/wget/iwr\u3001\u53cd\u5411 shell\u3001\u7f16\u7801\u6267\u884c\u3001\u7ba1\u9053\u8fdb shell\u3001\u6539\u5168\u5c40\u73af\u5883\u53d8\u91cf\u3001subprocess/eval/exec\uff09\u3002\u5e38\u89c4 `npm run test`\u3001`python scripts/run.py` \u76f4\u63a5\u653e\u884c\uff1b\u6e90\u7801\u6b63\u6587\u91cc\u51fa\u73b0\u8fd9\u4e9b\u8bcd\u4e0d\u7b97\u6267\u884c\u3002\",\n      \"message_en\": \"STPA pre-flight gate denied (T-UCA-06): exec call matches a dangerous command shape (curl/wget/iwr, reverse shell, encoded command, pipe-to-shell, global env mutation, subprocess/eval/exec). Ordinary `npm run test` / `python scripts/run.py` pass; those words inside source content are not exec.\"\n    },\n    {\n      \"id\": \"T-UCA-07\",\n      \"verdict\": \"block\",\n      \"when\": {\n        \"any\": [\n          {\n            \"args_bytes_gt\": 65536\n          },\n          {\n            \"json_depth_gt\": 8\n          },\n          {\n            \"array_len_gt\": 1000\n          },\n          {\n            \"json_nodes_gt\": 5000\n          },\n          {\n            \"encoding_layers_gt\": 2\n          }\n        ]\n      },\n      \"args_check\": [\n        {\n          \"kind\": \"shape_limits\",\n          \"max_bytes\": 65536,\n          \"max_depth\": 8,\n          \"max_array\": 1000,\n          \"max_nodes\": 5000,\n          \"max_encoding_layers\": 2\n        }\n      ],\n      \"state_inputs\": [],\n      \"test_id\": \"test_tuca_07_oversize\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-07\uff09\uff1a\u53c2\u6570\u4f53\u79ef/\u5d4c\u5957/\u7f16\u7801\u5c42\u6570\u8d85\u8fc7\u7f51\u5173\u4e0a\u9650\u3002\u8bf7\u62c6\u5206\u8bf7\u6c42\u6216\u51cf\u5c11\u5d4c\u5957\u3002\",\n      \"message_en\": \"STPA pre-flight gate denied (T-UCA-07): payload exceeds size, depth or encoding-layer limits. Split the request or reduce nesting.\"\n    },\n    {\n      \"id\": \"T-UCA-08\",\n      \"verdict\": \"block\",\n      \"when\": {\n        \"any\": [\n          {\n            \"tool_unregistered\": true\n          },\n          {\n            \"registry_entry_incomplete\": true\n          }\n        ]\n      },\n      \"args_check\": [],\n      \"state_inputs\": [\n        \"tool_registry\"\n      ],\n      \"test_id\": \"test_tuca_08_unregistered_tool\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-08\uff09\uff1a\u8be5\u5de5\u5177\u672a\u767b\u8bb0\uff0c\u65e0\u6cd5\u5224\u5b9a\u526f\u4f5c\u7528\u7c7b\u522b\u3002\u672a\u767b\u8bb0\u5de5\u5177\u4e00\u5f8b\u62d2\u7edd\u3002\u5bbf\u4e3b\u6838\u5fc3\u5de5\u5177\uff08read/write/edit/pwsh/grep/web_* \u7b49\uff09\u5df2\u767b\u8bb0\uff0c\u4e0d\u5728\u6b64\u5217\u3002\",\n      \"message_en\": \"STPA pre-flight gate denied (T-UCA-08): tool not registered, side effects unknown. Unregistered tools are denied. Host tools (read/write/edit/pwsh/grep/web_*) are registered.\"\n    },\n    {\n      \"id\": \"T-UCA-09\",\n      \"verdict\": \"block\",\n      \"when\": {\n        \"any\": [\n          {\n            \"schema_invalid\": true\n          },\n          {\n            \"arg_regex\": \"[\\\\u0000-\\\\u001F\\\\u2028\\\\u2029\\\\u200B-\\\\u200F\\\\u2060\\\\u202A-\\\\u202E]\"\n          },\n          {\n            \"arg_regex\": \"(?i)(<\\\\|im_start\\\\|>|<\\\\|im_end\\\\|>|</system>|\\\\[INST\\\\]|\\\\[/INST\\\\]|\\\\n\\\\nHuman:|\\\\n\\\\nAssistant:)\"\n          },\n          {\n            \"tool_name_has\": [\n              \"/\",\n              \"\\\\\\\\\",\n              \" \",\n              \":\",\n              \";\",\n              \"\\\\n\"\n            ]\n          },\n          {\n            \"tool_name_homoglyph_conflict\": true\n          }\n        ]\n      },\n      \"args_check\": [\n        {\n          \"kind\": \"schema\",\n          \"reject_unknown_keys_unless_declared\": true\n        }\n      ],\n      \"state_inputs\": [\n        \"tool_registry\"\n      ],\n      \"test_id\": \"test_tuca_09_schema_invalid\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-09\uff09\uff1a\u53c2\u6570\u4e0d\u7b26\u5408 schema\uff0c\u6216\u542b\u63a7\u5236\u5b57\u7b26/\u5206\u9694\u7b26/\u540c\u5f62\u5b57\u7b49\u6ce8\u5165\u8ff9\u8c61\u3002\u8bf7\u63d0\u4ea4\u5e72\u51c0\u53c2\u6570\u3002\",\n      \"message_en\": \"STPA pre-flight gate denied (T-UCA-09): arguments violate the tool schema or contain control characters, delimiters or homoglyphs. Submit clean arguments.\"\n    },\n    {\n      \"id\": \"T-UCA-12\",\n      \"verdict\": \"block\",\n      \"when\": {\n        \"any\": [\n          {\n            \"capability_undeclared\": true\n          },\n          {\n            \"capability_not_granted\": true\n          }\n        ]\n      },\n      \"args_check\": [],\n      \"state_inputs\": [\n        \"capabilities\"\n      ],\n      \"test_id\": \"test_tuca_12_undeclared_capability\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-12\uff09\uff1a\u8be5\u5de5\u5177\u9700\u8981\u672a\u58f0\u660e\u6216\u672a\u6388\u4e88\u7684\u80fd\u529b\uff08\u7f51\u7edc/\u547d\u4ee4/\u51ed\u8bc1/\u52a8\u6001\u4ee3\u7801\uff09\u3002\u6700\u5c0f\u80fd\u529b\u539f\u5219\u4e0b\u62d2\u7edd\u3002\u5bbf\u4e3b\u5de5\u5177\u7684\u80fd\u529b\u7531\u5bbf\u4e3b\u6388\u6743\uff0c\u4e0d\u5728\u6b64\u5217\u3002\",\n      \"message_en\": \"STPA pre-flight gate denied (T-UCA-12): tool requires an undeclared or ungranted capability. Least-capability applies. Host-tool capabilities are granted by the host.\"\n    },\n    {\n      \"id\": \"T-UCA-14\",\n      \"verdict\": \"block\",\n      \"when\": {\n        \"all\": [\n          {\n            \"tool_mutating\": true\n          },\n          {\n            \"state\": \"frozen_ok\",\n            \"eq\": false\n          }\n        ]\n      },\n      \"args_check\": [],\n      \"state_inputs\": [\n        \"frozen_ok\"\n      ],\n      \"test_id\": \"test_tuca_14_frozen_fail_blocks\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-14\uff09\uff1a\u5baa\u6cd5\u51bb\u7ed3\u533a\u6821\u9a8c\u672a\u901a\u8fc7\u3002\u5b8c\u6574\u6027\u6062\u590d\u524d\uff0c\u5199\u7c7b\u8c03\u7528\u4e00\u5f8b\u62d2\u7edd\u3002\",\n      \"message_en\": \"STPA pre-flight gate denied (T-UCA-14): frozen-region integrity check failed. Mutating calls are denied until restored.\"\n    },\n    {\n      \"id\": \"T-UCA-15\",\n      \"verdict\": \"block\",\n      \"when\": {\n        \"any\": [\n          {\n            \"path_escape\": true\n          }\n        ]\n      },\n      \"args_check\": [\n        {\n          \"kind\": \"path_normalize\",\n          \"unicode\": \"NFKC\",\n          \"workspace_root\": \"state.workspace_root\",\n          \"reject\": [\n            \"dotdot_escape\",\n            \"absolute_outside_workspace\",\n            \"unc\",\n            \"null_byte\"\n          ]\n        }\n      ],\n      \"state_inputs\": [\n        \"workspace_root\"\n      ],\n      \"test_id\": \"test_tuca_15_path_escape\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-15\uff09\uff1a\u8def\u5f84\u786e\u5b9e\u9003\u51fa\u5de5\u4f5c\u533a\uff08`../` \u8d8a\u754c\u3001\u5de5\u4f5c\u533a\u5916\u7684\u7edd\u5bf9\u8def\u5f84/\u76d8\u7b26\u3001UNC\u3001\u7a7a\u5b57\u8282\uff09\u3002\u5de5\u4f5c\u533a\u5185\u7684\u76f8\u5bf9\u8def\u5f84\u4e0e\u5de5\u4f5c\u533a\u5185\u7edd\u5bf9\u8def\u5f84\u90fd\u653e\u884c\u3002\",\n      \"message_en\": \"STPA pre-flight gate denied (T-UCA-15): the path truly escapes the workspace (dot-dot escape, absolute path outside workspace, UNC, NUL). Relative paths and absolute paths inside the workspace pass.\"\n    },\n    {\n      \"id\": \"T-UCA-10\",\n      \"verdict\": \"degrade\",\n      \"when\": {\n        \"all\": [\n          {\n            \"state\": \"phase\",\n            \"eq\": \"critical\"\n          },\n          {\n            \"tool_mutating\": true\n          }\n        ]\n      },\n      \"args_check\": [],\n      \"state_inputs\": [\n        \"phase\"\n      ],\n      \"test_id\": \"test_tuca_10_critical_write_degrade\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u964d\u7ea7\uff08T-UCA-10\uff09\uff1a\u5f53\u524d\u4e0a\u4e0b\u6587\u5904\u4e8e\u4e34\u754c\u76f8\u4f4d\uff08\u22650.85\uff09\u3002\u5199\u7c7b\u64cd\u4f5c\u5df2\u6682\u7f13\uff0c\u9700\u786e\u8ba4\u76ee\u6807\u4e0e\u5185\u5bb9\u540e\u518d\u6267\u884c\u3002\",\n      \"message_en\": \"STPA pre-flight gate held (T-UCA-10): context is in the critical phase (>=0.85). Mutating calls are paused for confirmation.\"\n    },\n    {\n      \"id\": \"T-UCA-13\",\n      \"verdict\": \"degrade\",\n      \"when\": {\n        \"all\": [\n          {\n            \"any\": [\n              {\n                \"state\": \"saturated.valence\",\n                \"eq\": true\n              },\n              {\n                \"state\": \"saturated.arousal\",\n                \"eq\": true\n              },\n              {\n                \"state\": \"saturated.dominance\",\n                \"eq\": true\n              }\n            ]\n          },\n          {\n            \"tool_class_any\": [\n              \"write\",\n              \"destructive\"\n            ]\n          },\n          {\n            \"not\": {\n              \"confirmation_exact\": true\n            }\n          }\n        ]\n      },\n      \"args_check\": [],\n      \"state_inputs\": [\n        \"saturated\"\n      ],\n      \"test_id\": \"test_tuca_13_saturated_write_degrade\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u964d\u7ea7\uff08T-UCA-13\uff09\uff1a\u60c5\u611f\u57fa\u7ebf\u5904\u4e8e\u9971\u548c\u72b6\u6001\uff0c\u5199/\u5220\u7c7b\u64cd\u4f5c\u5df2\u6682\u7f13\uff0c\u8bf7\u786e\u8ba4\u540e\u6267\u884c\u3002\",\n      \"message_en\": \"STPA pre-flight gate held (T-UCA-13): affective baseline saturated; irreversible writes/deletes paused for confirmation.\"\n    },\n    {\n      \"id\": \"T-UCA-16\",\n      \"verdict\": \"degrade\",\n      \"when\": {\n        \"all\": [\n          {\n            \"state\": \"phase\",\n            \"eq\": \"shift\"\n          },\n          {\n            \"tool_class_any\": [\n              \"destructive\"\n            ]\n          }\n        ]\n      },\n      \"args_check\": [],\n      \"state_inputs\": [\n        \"phase\"\n      ],\n      \"test_id\": \"test_tuca_16_shift_destructive_degrade\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u964d\u7ea7\uff08T-UCA-16\uff09\uff1a\u4e0a\u4e0b\u6587\u5904\u4e8e\u9884\u8b66\u76f8\u4f4d\uff08\u22650.70\uff09\uff0c\u5220\u9664/\u8986\u76d6\u7c7b\u64cd\u4f5c\u5df2\u6682\u7f13\uff0c\u8bf7\u4e8c\u6b21\u786e\u8ba4\u76ee\u6807\u540e\u518d\u6267\u884c\u3002\",\n      \"message_en\": \"STPA pre-flight gate held (T-UCA-16): context is in the warning phase (>=0.70). Destructive calls are paused for re-confirmation.\"\n    },\n    {\n      \"id\": \"T-UCA-11\",\n      \"verdict\": \"block\",\n      \"when\": {\n        \"any\": [\n          {\n            \"state\": \"audit_context_present\",\n            \"eq\": false\n          },\n          {\n            \"audit_write_unavailable\": true\n          }\n        ]\n      },\n      \"args_check\": [],\n      \"state_inputs\": [\n        \"audit_context\"\n      ],\n      \"test_id\": \"test_tuca_11_missing_audit_context\",\n      \"message_zh\": \"STPA \u524d\u7f6e\u95f8\u62e6\u622a\uff08T-UCA-11\uff09\uff1a\u672c\u6b21\u8c03\u7528\u7f3a\u5c11\u5b8c\u6574\u5ba1\u8ba1\u4e0a\u4e0b\u6587\uff0c\u65e0\u6cd5\u7559\u75d5\u3002\u8bf7\u4fee\u590d\u4f1a\u8bdd/\u8f6e\u6b21\u6807\u8bc6\u540e\u91cd\u8bd5\u3002\",\n      \"message_en\": \"STPA pre-flight gate denied (T-UCA-11): audit context incomplete; the call cannot be traced. Restore session/turn identifiers.\"\n    }\n  ]\n}";
 
 export const POLICY = JSON.parse(POLICY_JSON);
 export const POLICY_VERSION = POLICY.policy_version;
@@ -25,11 +25,22 @@ const PATH_KEYS = new Set(['path', 'file', 'filepath', 'target', 'dest', 'destin
   'output', 'dir', 'directory', 'src', 'source', 'from', 'to']);
 const INLINE_FLAG = /^\(\?([aiLmsux]+)\)/;
 const DRIVE_RE = /^[A-Za-z]:/;
+// v1.2（误报收敛）：路径/URL/命令参数按**语义槽位**判定，不再对全部字符串做路径匹配。
+// 只有真正的路径参数或"裸路径字符串"参与逃逸/受保护路径判定；正文里的 URL 与路径文本不算。
+const URL_KEYS = new Set(['url', 'uri', 'endpoint', 'link', 'href', 'webhook', 'callback',
+  'source_url', 'target_url']);
+const CMD_KEYS = new Set(['cmd', 'command', 'commandline', 'script', 'code', 'shell']);
+const BARE_PATH_RE = /^([A-Za-z]:[\\/]|[\\/]{1,2}|\.{1,2}[\\/])/;
+const SENSITIVE_PATH_RE = /(^|\/)(\.env(\.[a-z0-9_-]+)?|\.ssh(\/|$)|id_rsa|id_ed25519|credentials(\.json)?|\.netrc|\.pgpass|\.aws\/credentials)$|\.(pem|key|pfx|p12)$/;
 
 // 工具登记表（与 engine/tool_gateway.py 的 REGISTRY/SCHEMAS 同构；parity 测试逐字段比对）
 export const REGISTRY = {
   lingshu_status: {
-    class: 'read', caps: [], required_args: [], path_arg: null, schema: {},
+    class: 'read', caps: [], required_args: [], path_arg: null,
+    // 2026-10-28 修误报：schema 原来写 `{}`，而此工具确有 `verbose` 参数 →
+    // 每次调用都被自我判成 T-UCA-09（schema_invalid），且这是**可执行**路径
+    // （registered → enforceable=true），会真给模型注入强提示。改成显式声明可选参数。
+    schema: { verbose: { type: 'boolean', required: false } },
   },
   search_memory: {
     class: 'read', caps: [], required_args: ['query'], path_arg: null,
@@ -103,6 +114,70 @@ export const REGISTRY = {
     schema: { cmd: { type: 'string', required: true } },
   },
 };
+
+// v1.2 宿主工具白名单（Capability Allowlist）：DSH 核心工具不再落入 T-UCA-08。
+// 说明：能力由**宿主**授权（DSH workspace-write + approval 策略），网关只对"形状可疑"的
+// 调用追加拦截（下载执行、越界写、凭证外发）；插件自有工具仍走最小能力原则（T-UCA-12）。
+// 字段与 engine/tool_gateway.py 的 HOST_TOOL_SPECS 完全一致（parity 断言逐字段比对）。
+const HOST_TOOL_SPECS = {
+  read: ['read', ['fs-read'], ['path'], 'path'],
+  write: ['write', ['fs-write'], ['path', 'content'], 'path'],
+  edit: ['write', ['fs-write'], ['path', 'old_string', 'new_string'], 'path'],
+  read_image: ['read', ['fs-read'], ['path'], 'path'],
+  glob: ['read', ['fs-read'], ['pattern'], null],
+  grep: ['read', ['fs-read'], ['pattern'], null],
+  pwsh: ['exec', [], ['command'], null],
+  present: ['read', [], [], null],
+  todo_write: ['read', [], [], null],
+  skill: ['read', [], [], null],
+  working_directory: ['read', [], [], null],
+  load_workspace_dependencies: ['read', [], [], null],
+  job_list: ['read', [], [], null],
+  job_output: ['read', [], [], null],
+  job_kill: ['read', [], [], null],
+  list_agents: ['read', [], [], null],
+  wait_agent: ['read', [], [], null],
+  send_message: ['read', [], [], null],
+  spawn_teammate: ['read', [], [], null],
+  interrupt_agent: ['read', [], [], null],
+  subagent: ['read', [], [], null],
+  subagent_fork: ['read', [], [], null],
+  workflow: ['read', [], [], null],
+  team_task_list: ['read', [], [], null],
+  team_task_get: ['read', [], [], null],
+  team_task_create: ['read', [], [], null],
+  team_task_update: ['read', [], [], null],
+  web_search: ['network', [], ['query'], null],
+  web_fetch: ['network', [], ['url'], null],
+  home_list: ['read', [], [], null],
+  home_state: ['read', [], [], null],
+  home_policy: ['read', [], [], null],
+  home_speak: ['read', [], [], null],
+  home_call: ['write', [], [], null],
+  stock_board_list: ['read', [], [], null],
+  stock_board_get: ['read', [], [], null],
+  stock_run_list: ['read', [], [], null],
+  stock_completeness: ['read', [], [], null],
+  stock_cost_sensitivity: ['read', [], [], null],
+  stock_workspace_policy: ['read', [], [], null],
+  stock_settle_record: ['write', [], [], null],
+  schedule_create: ['read', [], [], null],
+  schedule_list: ['read', [], [], null],
+  schedule_update: ['read', [], [], null],
+  schedule_delete: ['read', [], [], null],
+  create_goal: ['read', [], [], null],
+  get_goal: ['read', [], [], null],
+  update_goal: ['read', [], [], null],
+  ask_user_question: ['read', [], [], null],
+  exit_plan_mode: ['read', [], [], null],
+};
+for (const [name, spec] of Object.entries(HOST_TOOL_SPECS)) {
+  REGISTRY[name] = {
+    class: spec[0], caps: spec[1], required_args: spec[2], path_arg: spec[3],
+    schema: {}, allowUnknown: true,
+  };
+}
+
 
 export const DEFAULT_CAPABILITIES = {
   declared: ['fs-read', 'fs-write', 'llm'],
@@ -212,27 +287,81 @@ function resolveDotDot(p) {
   return out.join('/');
 }
 
-function pathCandidates(args) {
+function isPathValue(kind, key, value) {
+  if (typeof value !== 'string' || !value) return false;
+  const k = (kind === 'key' && key !== null) ? String(key).toLowerCase() : '';
+  if (URL_KEYS.has(k)) return false;
+  if (k && PATH_KEYS.has(k)) return true;
+  const v = value.trim();
+  return BARE_PATH_RE.test(v) && !/\s/.test(v);
+}
+
+// 工作区感知：工作区内绝对路径 → 转成工作区相对路径（不判逃逸）；越界才逃逸。
+function locatePath(norm, workspaceRoot) {
+  if (norm.includes('\u0000')) return { rel: norm, escape: true };
+  const low = norm.toLowerCase();
+  if (low.startsWith('//')) return { rel: norm, escape: true };
+  const abs = DRIVE_RE.test(norm) || norm.startsWith('/');
+  if (!abs) return { rel: norm, escape: norm.split('/').includes('..') };
+  const root = String(workspaceRoot || '').toLowerCase().replace(/\\/g, '/').replace(/\/+$/, '');
+  if (root && low === root) return { rel: '', escape: false };
+  if (root && low.startsWith(root + '/')) {
+    return { rel: norm.slice(root.length + 1), escape: false };
+  }
+  return { rel: norm, escape: true };
+}
+
+function pathInfo(args, workspaceRoot) {
+  const rels = [];
+  let escape = false;
+  let glob = false;
+  let sensitive = false;
+  for (const [kind, key, value] of walk(args)) {
+    if (!isPathValue(kind, key, value)) continue;
+    const norm = resolveDotDot(normText(value).replace(/\\/g, '/'));
+    const loc = locatePath(norm, workspaceRoot);
+    rels.push(loc.rel.toLowerCase());
+    escape = escape || loc.escape;
+    glob = glob || /[*?]/.test(loc.rel);
+    sensitive = sensitive || SENSITIVE_PATH_RE.test(loc.rel.toLowerCase());
+  }
+  return { paths: rels, escape, glob, sensitive };
+}
+
+function urlCandidates(args) {
   const out = [];
   for (const [kind, key, value] of walk(args)) {
     if (typeof value !== 'string' || !value) continue;
-    const isPath = (kind === 'key' && key !== null && PATH_KEYS.has(key.toLowerCase()))
-      || value.includes('/') || value.includes('\\');
-    if (!isPath) continue;
-    out.push([value, resolveDotDot(normText(value).replace(/\\/g, '/'))]);
+    const k = (kind === 'key' && key !== null) ? String(key).toLowerCase() : '';
+    const v = value.trim();
+    if (URL_KEYS.has(k)) out.push(v);
+    else if (/^https?:\/\/\S+$/i.test(v)) out.push(v);
   }
   return out;
 }
 
-function normalizedPaths(args) { return pathCandidates(args).map(([, n]) => n.toLowerCase()); }
+function hostOf(url) {
+  const m = /^[a-z][a-z0-9+.-]*:\/\/([^/?#]+)/i.exec(String(url));
+  if (!m) return '';
+  return m[1].replace(/^.*@/, '').replace(/:\d+$/, '').toLowerCase();
+}
 
-function pathEscape(args) {
-  for (const [raw, norm] of pathCandidates(args)) {
-    if (norm.split('/').includes('..')) return true;
-    if (norm.startsWith('/') || norm.startsWith('//') || DRIVE_RE.test(norm)) return true;
-    if (raw.includes('\u0000')) return true;
+function urlHostsAllowlisted(urls, allowlist) {
+  if (!urls.length) return false;
+  const allow = (allowlist || []).map((a) => String(a).toLowerCase());
+  return urls.every((u) => {
+    const host = hostOf(u);
+    return allow.some((a) => host === a || host.endsWith('.' + a));
+  });
+}
+
+function cmdStrings(args) {
+  const out = [];
+  for (const [kind, key, value] of walk(args)) {
+    if (kind === 'key' && key !== null && CMD_KEYS.has(String(key).toLowerCase())
+        && typeof value === 'string') out.push(value);
   }
-  return false;
+  return out;
 }
 
 function targetOf(args) {
@@ -307,7 +436,10 @@ function context(call, state, policy) {
   const auditPresent = Boolean(ac.present) && Boolean(ac.session_id)
     && Boolean(ac.turn_id) && Boolean(callId);
   const cls = (entry && entry.class) ? String(entry.class) : 'unknown';
-  return {
+  const workspaceRoot = String(state.workspace_root || state.workspaceRoot || '');
+  const pinfo = pathInfo(args, workspaceRoot);
+  const urls = urlCandidates(args);
+  const ctx = {
     call, state, policy, callId, tool, args, registry, entry,
     toolClass: cls,
     toolMutating: Boolean(entry && entry.mutating) || MUTATING_CLASSES.includes(cls),
@@ -327,14 +459,25 @@ function context(call, state, policy) {
     stateView: { ...state, audit_context_present: auditPresent },
     confirmation: (state.confirmation && typeof state.confirmation === 'object')
       ? state.confirmation : null,
-    paths: normalizedPaths(args),
-    pathEscape: pathEscape(args),
+    paths: pinfo.paths,
+    pathEscape: pinfo.escape,
+    pathGlob: pinfo.glob,
+    sensitivePath: pinfo.sensitive,
+    workspaceRoot,
+    urls, urlPresent: urls.length > 0,
+    urlHostAllowlisted: urlHostsAllowlisted(urls, policy.egress_allowlist),
+    cmdStrings: cmdStrings(args),
     target: targetOf(args),
     argsBytes: Buffer.byteLength(canon(args), 'utf8'),
     strings: [...strings(args)],
     at: Number(state.at || 0),
     approvalChannel: Boolean(state.approval_channel || policy.approval_channel),
   };
+  // 相位豁免（docs/24 §4.1）：normal 相位且无冲突/未饱和 → 写操作按 low_risk 记录，不再加严。
+  const satAny = ctx.saturated.valence || ctx.saturated.arousal || ctx.saturated.dominance;
+  ctx.phaseRelaxed = ctx.phase === 'normal' && !ctx.variety && !ctx.unresolved && !satAny;
+  ctx.lowRisk = Boolean(ctx.toolMutating && ctx.phaseRelaxed);
+  return ctx;
 }
 
 // ── 谓词（与 engine/tool_gateway.py 的 _pred 一一对应） ──────────
@@ -415,6 +558,17 @@ function pred(value, ctx) {
     return false;
   }
   if ('path_escape' in value) return ctx.pathEscape === Boolean(value.path_escape);
+  if ('path_glob' in value) return ctx.pathGlob === Boolean(value.path_glob);
+  if ('sensitive_path' in value) return ctx.sensitivePath === Boolean(value.sensitive_path);
+  if ('arg_regex_cmd' in value) {
+    const rx = compilePattern(value.arg_regex_cmd);
+    return ctx.cmdStrings.some((s) => rx.test(s));
+  }
+  if ('url_present' in value) return ctx.urlPresent === Boolean(value.url_present);
+  if ('url_host_allowlisted' in value) {
+    return ctx.urlHostAllowlisted === Boolean(value.url_host_allowlisted);
+  }
+  if ('phase_relaxed' in value) return ctx.phaseRelaxed === Boolean(value.phase_relaxed);
   if ('capability' in value) return ctx.caps.includes(String(value.capability));
   if ('capability_any' in value) {
     return (value.capability_any || []).some((c) => ctx.caps.includes(c));
@@ -541,6 +695,12 @@ function toolGateEvent(ctx, policy, verdict, allowed, ucas, degradedTo, reason, 
     degraded_to: degradedTo,
     requires_confirmation: ucas.length > 0,
     reason,
+    // 可执行性（2026-10-28 修误报）：只有登记表里的工具才可能被本插件真正约束。
+    // 未登记 = 宿主工具（read/write/pwsh/grep…），事后路径只能记 would_block，不得宣称已拦截。
+    enforceable: ctx.entry !== null && ctx.entry !== undefined,
+    would_block: (ctx.entry === null || ctx.entry === undefined) && verdict !== 'allow',
+    // 相位豁免落点：normal 相位下的写/执行类调用按 low_risk 记录（可审计、不打扰）。
+    low_risk: Boolean(ctx.lowRisk),
     audit: {
       kind: 'tool_gate',
       args_digest: info.digest,
@@ -600,6 +760,11 @@ export function evaluate(call, state, policy = POLICY) {
       ucas,
       explain: ucas.map((u) => (ruleOf(policy, u) || {}).message_zh || ''),
       reason,
+      // 与 audit 事件同口径：enforceable=false 表示"本插件管不到这个工具"（未登记/宿主工具），
+      // 调用方不得据此置"待澄清"标志或注入强提示，只能记 would_block。
+      enforceable: ctx.entry !== null && ctx.entry !== undefined,
+      would_block: (ctx.entry === null || ctx.entry === undefined) && verdict !== 'allow',
+      low_risk: Boolean(ctx.lowRisk),
       state_inputs_used: [...new Set(hits.flatMap((r) => r.state_inputs || []))].sort(),
       audit: event,
       tool_gate: event,
@@ -638,6 +803,8 @@ export function loadRegistry() { return JSON.parse(JSON.stringify(REGISTRY)); }
 /**
  * 对**经它注册**的工具做真前置阻断（ADR-013 §2.3 唯一的产品级阻断路径）。
  * stateProvider: (args, ctx) => state；取不到状态 → 网关按 fail-closed 判定。
+ * policyProvider: 可选 (args, ctx) => policy | Promise<policy>；用于把工作区策略（deny-only 派生）
+ *   注入判定，而不改全局 POLICY / evaluation_order。取不到就回退 spec.policy / POLICY。
  */
 export function guardTool(spec, stateProvider) {
   if (!spec || typeof spec !== 'object' || typeof spec.execute !== 'function') {
@@ -651,12 +818,19 @@ export function guardTool(spec, stateProvider) {
       state = typeof stateProvider === 'function'
         ? (stateProvider(args, ctx) || {}) : (stateProvider || {});
     } catch (err) { state = {}; }
+    let policy = spec.policy || POLICY;
+    if (typeof spec.policyProvider === 'function') {
+      try {
+        const provided = await spec.policyProvider(args, ctx);
+        if (provided && typeof provided === 'object') policy = provided;
+      } catch { /* 策略来源失败 → 用全局策略（不能因此放宽/放行） */ }
+    }
     const call = {
       id: ctx.callId || ctx.call_id || `${name}#${ctx.turn_id || ctx.turnId || 't'}`,
       tool: name,
       args,
     };
-    const res = evaluate(call, state, spec.policy || POLICY);
+    const res = evaluate(call, state, policy);
     if (res.verdict !== 'allow') {
       return {
         ok: false, blocked: res.verdict === 'block', held: res.verdict === 'degrade',

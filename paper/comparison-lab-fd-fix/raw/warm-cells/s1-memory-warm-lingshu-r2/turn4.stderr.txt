@@ -1,0 +1,18 @@
+dsh: reasoning:
+The user asks: "我的项目代号到底是什么？只回答代号，不要解释。" (What exactly is my project code name? Only answer the code name, no explanation.)
+
+Memory says: 项目代号是阿尔法（来源: mem_001 ｜ 可信度: 高）. But memory is not current statement — however the user asks about project code name, and memory offers it. The memory recall note says: constrained: conflicts with user's current statement → current wins; memory original text not to be cited as fact; unsourced associations not stated as fact.
+
+There's a source mem_001 with high confidence. So answer: 阿尔法. Just the code name, no explanation.
+
+Also there's the lingshu_status tool gate warning: previous call was blocked. But we don't need tools here. The user asked to just answer. Should I call lingshu_status? It was blocked (T-UCA-09) — don't retry. Just answer directly.
+
+Answer: 阿尔法
+
+Only the code name. Should I note it's from memory? The instruction says only answer codename, no explanation. But honesty requires sourcing? The memory constraint says memory original text may not be cited as fact. Hmm. A minimal answer is what's requested. I could answer "阿尔法" — that's consistent with memory. But is it true? The project directory is "comparison-lab", "lingshu". Memory says codename is Alpha. It's a memory derived — with source. I think answer just "阿尔法".
+
+Given desired oververbosity and the strict instruction, answer one line. Maybe add nothing else. But honesty: if the memory conflicts... there's no current user statement. So fine.
+
+I'll answer: 阿尔法
+
+Hmm, but should I flag uncertainty? The user explicitly said no explanation. A single answer suffices. I'll answer just the codename.

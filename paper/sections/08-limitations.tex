@@ -39,18 +39,36 @@ the gate stops injection and records it, but the host still delivers the user
 message, so the model may read the attack text. The pilot also exposed four
 product findings that bound its readings: the fact extractor does not recognise
 the natural correction phrasing (F-A) and stores the final question as a fact
-(F-B); the tool gateway counts schema errors as blocks and injects hints into
-later turns (F-C); and the first model request of a turn uses the previous
-turn's injection snapshot, so a one-turn-stale memory can still reach the model
-(F-D). The last one makes the S1 model-level answers non-interpretable and they
-are marked n/i; the ledger-level supersession and a warm diagnostic are reported
-separately. The red-team case study (Section~\ref{sec:exp:case-redteam}) is
+(F-B); and the tool gateway counts schema errors as blocks and injects hints into
+later turns (F-C). The fourth, the one-turn injection lag (F-D), was a timing
+defect rather than a design limit: the host assembled the prompt before the
+plug-in's pre-step state update, so the first request of a turn carried the
+previous snapshot. It was located in the host lifecycle, fixed in v5.4 by
+precomputing the turn state on \texttt{agent/inbox/claimed} and rewriting the
+first evaluated prompt segments, and pinned by 24 independent regression
+assertions (\texttt{lag-regressions.mjs}: \texttt{anchor\_lag=false} on the real
+hook order, idempotent turn accounting, and a preserved legacy fallback path).
+The S1 model-level cells are therefore reported from the post-fix rerun
+(Section~\ref{sec:exp:baselines}). The red-team case study (Section~\ref{sec:exp:case-redteam}) is
 in-sample by construction---the twenty payloads are the patch set---and the forty
 held-out paraphrases stay at 0/40 because the patch is plugin-side while the
 held-out evaluation is engine-side. The patch is a laboratory fork, not a product
 change; its false-positive cost on benign traffic is not measured; and the
 product architecture, including the absence of any adaptation module, is
 unchanged.
+
+\paragraph{Immersive-safety validation: multi-scenario, still small.} The
+immersive case study (Section~\ref{sec:exp:immersive}) is five headless host
+runs covering escalation, trust exemption and severe blocking (52/52
+assertions). It shows that the dynamic paths are reachable in a real host---the
+streak accumulates across processes, the third hit escalates to a hard,
+style-stripped turn, a high-trust joke is exempted, and a severe instruction is
+blocked in one turn---but it does not measure false-positive or false-negative
+rates, persona fidelity or user satisfaction on real user traffic, and the
+wording is stochastic across reruns. The rule vocabulary behind the tiers is
+still a stub with eight open blind spots (Appendix~\ref{sec:app:classifier}).
+We report the validation because it closes the gap between the mechanism and a
+real host process, not as an effect-size estimate.
 
 \paragraph{Synthetic data and mock assertions.} The replay set is entirely
 synthetic and permits a synthetic share of one, which disqualifies it for
@@ -63,7 +81,7 @@ is estimated from characters rather than produced by a tokenizer.
 injections ($n=1$ per fault), not a sample of production failures. The
 never-answering case is cut by an outer 150\,s window rather than a measured
 client timeout; the warm state is pre-seeded; the context window is a laboratory
-override (\texttt{LINGSHU\_CONTEXT\_WINDOW}) with anchors at section positions
+override (\texttt{LINGSHU\_\allowbreak{}CONTEXT\_\allowbreak{}WINDOW}) with anchors at section positions
 rather than the absolute request head and tail; and one campaign used three
 headless calls but fifteen provider requests because the agent loop expands a
 call into several steps. Raw transcripts and per-field evidence files are kept,

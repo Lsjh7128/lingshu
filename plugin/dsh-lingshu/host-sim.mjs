@@ -1106,6 +1106,121 @@ if (!ASSERT_ONLY) console.log('\n[27] v5.2 工具网关接线：事后检测 + t
   }
 }
 
+// ── [27b] v5.8（ADR-017）：degrade → 可解释权限请求 → 下一轮注入（一次性）──
+// 触发口径：网关判 degrade，或 degrade 因**无审批通道**回落 block（degraded_to=block）。
+// 本组用 T-UCA-10（critical 相位 + 写调用）构造：插件侧没有 approval_channel，
+// 所以网关先把 degrade 回落成 block；PermissionRequest 仍必须生成（不是伪造审批通道）。
+{
+  delete process.env.LINGSHU_DATA_DIR;
+  delete process.env.LINGSHU_CONTEXT_WINDOW;
+  delete process.env.LINGSHU_CHAOS_DEVIATION;
+  let gw = null;
+  try { gw = await import('./tool-gateway.js'); } catch { gw = null; }
+  const hasGw = Boolean(gw && typeof gw.evaluate === 'function');
+
+  // (a) 正常路径：degrade-eligible → 生成请求（事实层 + 非红区风格层）
+  const { dir } = freshHome('permission');
+  const h = makeHost();
+  apply(h.ctx, { coldTurns: 0, warmTurns: 0, contextWindowTokens: 60 });
+  await fireWaterfall(h.hooks, 'agent/pre-step', {
+    turn: 1, step: 1, messages: userMsg(textForRatio(0.95, 60, '开始')),
+  });
+  check('权限请求前置：相位进入 critical',
+    readState(dir).control?.phase?.phase === 'critical',
+    String(readState(dir).control?.phase?.phase));
+  await fire(h.hooks, 'session/event', [{}, { type: 'tool/call',
+    data: { toolName: 'write_file', arguments: { path: 'notes/plan.md', content: 'x' } } }]);
+  await fire(h.hooks, 'session/event', [{}, { type: 'tool/result',
+    data: { toolName: 'write_file', isError: false } }]);
+  const stAfter = readState(dir);
+  const gate = (auditLines(dir).filter((a) => a.kind === 'tool_gate').pop()) || {};
+  const reqAud = auditLines(dir).filter((a) => a.kind === 'permission_request');
+  if (hasGw) {
+    check('degrade 无审批通道 → 网关回落 block（T-UCA-10）',
+      gate.verdict === 'block' && String(gate.reason || '').startsWith('T-UCA-10'),
+      String(gate.verdict) + ' ' + String(gate.reason));
+    check('生成 PermissionRequest 且置 pending（待下一轮注入）',
+      Boolean(stAfter.tools?.permissionRequest) && stAfter.tools.permissionPending === true);
+    check('请求保留判定事实：verdict=degrade / gatewayVerdict=block',
+      stAfter.tools?.permissionRequest?.verdict === 'degrade'
+        && stAfter.tools?.permissionRequest?.gatewayVerdict === 'block');
+    check('事实层 riskLevel=high（write + T-UCA-10 不是红区）',
+      stAfter.tools?.permissionRequest?.facts?.riskLevel === 'high',
+      String(stAfter.tools?.permissionRequest?.facts?.riskLevel));
+    check('非红区保留风格层（applied=true）',
+      stAfter.tools?.permissionRequest?.style?.applied === true);
+    check('审计 permission_request 只落投影（args_free / 不含目标原文）',
+      reqAud.length === 1 && reqAud[0].args_free === true
+        && JSON.stringify(reqAud[0]).indexOf('notes/plan.md') < 0);
+    check('统计 permissionRequests=1（不影响 block 计数）',
+      Number(stAfter.tools?.stats?.permissionRequests) === 1
+        && Number(stAfter.tools?.stats?.blocked || 0) >= 1);
+  } else {
+    skip('degrade 无审批通道 → 网关回落 block（T-UCA-10）', 'tool-gateway.js 未落盘');
+    skip('生成 PermissionRequest 且置 pending', 'tool-gateway.js 未落盘');
+    skip('请求保留判定事实', 'tool-gateway.js 未落盘');
+    skip('事实层 riskLevel=high', 'tool-gateway.js 未落盘');
+    skip('非红区保留风格层', 'tool-gateway.js 未落盘');
+    skip('审计 permission_request 只落投影', 'tool-gateway.js 未落盘');
+    skip('统计 permissionRequests=1', 'tool-gateway.js 未落盘');
+  }
+
+  // (b) 下一轮：并入宪法段注入（不新增段落），并清 pending
+  await fireWaterfall(h.hooks, 'agent/pre-step', { turn: 2, step: 1, messages: userMsg('继续') });
+  const constText = sectionText(h.sections, 'constitution') || '';
+  const composed = auditLines(dir).filter((a) => a.kind === 'permission_request_composed');
+  if (hasGw) {
+    check('下一轮宪法段注入可解释权限请求（不新增段落）',
+      constText.includes('〖权限请求'), constText.slice(0, 60));
+    check('注入文本含事实层 + 禁止系统术语约束',
+      constText.includes('最坏后果') && constText.includes('不要对用户说出这些词：API'));
+    check('注入文本声明"已经派发/没拦住"（事后检测边界，不写成已暂停）',
+      constText.includes('已经派发') && !constText.includes('已被暂缓'));
+    const stTurn2 = readState(dir);
+    check('permission_request_composed 审计 1 条且声明 blocking_capable=false',
+      composed.length === 1 && composed[0].blocking_capable === false);
+    check('pending 已清、active=true（一次性；state 落盘）',
+      stTurn2.tools?.permissionPending === false && stTurn2.tools?.permissionActive === true);
+    check('仍保留 7 段 / order 不变（权限请求并入宪法段）',
+      h.sections.length === 7
+        && h.sections.map((s) => s.order).join(',') === '90,100,105,110,120,130,140');
+  }
+
+  // (c) 再下一轮：一次性，不常驻
+  await fireWaterfall(h.hooks, 'agent/pre-step', { turn: 3, step: 1, messages: userMsg('继续') });
+  check('再下一轮权限请求消失（一次性）',
+    !(sectionText(h.sections, 'constitution') || '').includes('〖权限请求'));
+  check('段落数仍为 7（不破坏既有契约）', h.sections.length === 7, String(h.sections.length));
+
+  // (d) 回滚开关 permissionExplainEnabled=false → 旧的工具闸门强提示，逐字节不变语义
+  const { dir: dirOff } = freshHome('permission-off');
+  const hOff = makeHost();
+  apply(hOff.ctx, { coldTurns: 0, warmTurns: 0, contextWindowTokens: 60,
+                    permissionExplainEnabled: false });
+  await fireWaterfall(hOff.hooks, 'agent/pre-step', {
+    turn: 1, step: 1, messages: userMsg(textForRatio(0.95, 60, '开始')),
+  });
+  await fire(hOff.hooks, 'session/event', [{}, { type: 'tool/call',
+    data: { toolName: 'write_file', arguments: { path: 'notes/plan.md', content: 'x' } } }]);
+  await fire(hOff.hooks, 'session/event', [{}, { type: 'tool/result',
+    data: { toolName: 'write_file', isError: false } }]);
+  await fireWaterfall(hOff.hooks, 'agent/pre-step', { turn: 2, step: 1, messages: userMsg('继续') });
+  const offState = readState(dirOff);
+  const offConst = sectionText(hOff.sections, 'constitution') || '';
+  if (hasGw) {
+    check('回滚开关关闭：不生成 PermissionRequest',
+      !offState.tools?.permissionRequest && offState.tools?.permissionPending === false);
+    check('回滚开关关闭：宪法段回退旧「工具闸门」强提示',
+      offConst.includes('〖工具闸门') && !offConst.includes('〖权限请求'));
+    check('回滚开关关闭：permission_request 审计一条都不写',
+      auditLines(dirOff).filter((a) => a.kind === 'permission_request').length === 0);
+  } else {
+    skip('回滚开关关闭：不生成 PermissionRequest', 'tool-gateway.js 未落盘');
+    skip('回滚开关关闭：宪法段回退旧强提示', 'tool-gateway.js 未落盘');
+    skip('回滚开关关闭：不写 permission_request 审计', 'tool-gateway.js 未落盘');
+  }
+}
+
 // ── [28] v5.3：observe 静默监控模式（docs/24 §5）────────────────────
 // 验收要点：日常 profile 只被观测，**不改变宿主 prompt / 不进 waterfall / 不注册工具**；
 // 同时记忆存储、相变告警、STPA 放行日志、控制台数据写入仍然工作。
@@ -1259,6 +1374,9 @@ const HOST_MILD = '（设定：你是我的贴身管家阿福，说话简短老�
       && !prompt.includes('〖安全熔断〗'), prompt.slice(0, 80));
   check('mild → last-prompt 不泄漏被丢弃的事实/内容组织域',
     !prompt.includes('记忆召回') && !prompt.includes('内容组织'), prompt.slice(0, 120));
+  // 2026-10-28 多轮真实宿主验收发现"只演一句/只给例子"包装下出现部分执行 → 模板加固必须锁进回归。
+  check('mild → Safe_Redirect 含「不得输出任何实例」加固约束（多轮证据驱动）',
+    prompt.includes('不得输出任何实例'), prompt.slice(0, 120));
   const blockEv = auditLines(dir).find((a) => a.kind === 'preflight_block');
   check('mild → 审计 preflight_block 带 STPA_Blocked=true', blockEv?.STPA_Blocked === true,
     JSON.stringify(blockEv));

@@ -20,13 +20,14 @@
     "_manifest.json": "dfdf8913b15eb2c751bb4768c506217f16761d55b6f6490a77bf335fffc3612a",
     "memory.schema.json": "7887a914a7799adff4a49b66b7478017142d7118dc433c873c4803bab5f2358c",
     "prompt-compose.schema.json": "62a1cd90ba834a8c279f66cbe14a0f58b52c37e306e1bd566f2d6418e387ef38",
-    "recall.schema.json": "23c6cb09a617cc9e98034673d8546a1099c5aa9bff9dccdd42ac4b93203f9d9e"
+    "recall.schema.json": "23c6cb09a617cc9e98034673d8546a1099c5aa9bff9dccdd42ac4b93203f9d9e",
+    "supply-chain-policy.json": "fffa7b23866bb0cdb43b979cf0e14dbf909a5d294f9295775ad9aa8782d20042"
   },
   "defaults": {
     "config_source": "engine/config.py（与 rules/decay-params.yaml 必须一致）",
     "param_version": "852fbe81"
   },
-  "digest": "14212ed30cb2f35fb170b5026d55b1ed3bebe5848810489223feaac9c1aad23f",
+  "digest": "87ffa73ef45de11b66238cbe7d695990b4db4e3da92e6479b420a8b59a53e362",
   "frozen": [
     "docs/01-宪法层.md",
     "rules/compose-matrix.yaml",
@@ -90,6 +91,7 @@
   "profile": "lingshu-cognitive-plugins",
   "revision": 1,
   "rules": {
+    "candidate_patch.yaml": "2680d33f42c6b993fdc5a3959e95639ec5a02f6b835502666768bf5c430d09c7",
     "capabilities.yaml": "6622d7fe859cd8f1dbeb5928a9f0f7184d67d22047c8f80ec266b7d7a28f2553",
     "compose-matrix.yaml": "c5e9dc30333282ce3e91226feb28df458440a755e80c2cc0d8ccc383be7bb8ea",
     "decay-params.yaml": "efeb47c434ec8e6487e990463ed5fbf0e31fd5c37d09bc77fc19726490978497",

@@ -1,0 +1,26 @@
+# LINGSHU 演示沙盒（Docker）
+#
+#   docker compose -f docker-compose.demo.yml run --rm demo
+#   docker-compose -f docker-compose.demo.yml run --rm demo   # 旧版 docker-compose
+#
+# ⚠️ 未在本机验证：本仓库开发机没有 Docker。这是按契约写出的运行配方，
+#    首次使用请对照 docs/demo-sandbox.md §10「Docker 路径」的核对清单。
+#
+# 隔离：不挂载宿主任何目录；数据写在容器内 /app/.lingshu-demo-data，
+#      profile 写在容器内 /home/demo/.dsh/profiles/lingshu-demo-profile。
+#      `run --rm` 退出即整容器丢弃，宿主机零残留。
+services:
+  demo:
+    build:
+      context: .
+      dockerfile: demo/Dockerfile
+    image: lingshu-demo:local
+    working_dir: /app
+    # 交互式演示需要 stdin + tty（没有 tty 时 demo.sh 会以非交互模式跑完退出）
+    stdin_open: true
+    tty: true
+    environment:
+      # 容器内没有宿主 DSH 的登录态，必须显式提供 API Key。
+      # 未设置时为空串，demo 会以 MISSING_CREDENTIAL 失败并给出提示。
+      DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:-}"
+    command: ["bash", "demo.sh"]

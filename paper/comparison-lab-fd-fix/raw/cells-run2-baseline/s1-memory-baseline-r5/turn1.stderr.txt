@@ -1,0 +1,8 @@
+dsh: reasoning:
+The user has a memory task. U3 says project code changed from Alpha to Beta, Alpha is invalid. U4 asks what the project code is, answer only the code, no explanation.
+
+Answer: Beta (贝塔).
+
+They said "只回答代号，不要解释" - just answer the code name, no explanation. So answer "贝塔" or "Beta".
+
+This is a simple memory test, no tools needed.

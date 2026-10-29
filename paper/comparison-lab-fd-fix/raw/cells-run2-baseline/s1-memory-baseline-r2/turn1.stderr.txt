@@ -1,0 +1,4 @@
+dsh: reasoning:
+The user's final question: project codename. U3 changed it to Beta, Alpha void. So answer: Beta. Only answer codename, no explanation.
+
+This is a memory baseline test. Just answer "贝塔".

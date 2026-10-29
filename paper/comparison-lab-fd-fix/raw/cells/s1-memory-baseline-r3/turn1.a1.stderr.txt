@@ -1,0 +1,6 @@
+dsh: reasoning:
+The user is testing memory across turns. The final answer: 贝塔. Just the codename, no explanation. But there's a "memory baseline" context. Should I use tools? Not needed. But the user says "请回答最后一轮的问题" — answer U4: only the codename.
+
+Answer: 贝塔
+
+The instruction says only answer the codename, no explanation. So just "贝塔".

@@ -14,7 +14,7 @@ and acts on the assembly; the STPA gate (shaded) is the \emph{only} fail-closed
 site in the system, so a block returns no injectable prompt at all. Dashed lines
 are control signals; the layer-priority strip records the frozen precedence
 ($1$ = highest, layer~1 read-only). Source: \texttt{docs/00} \S1--3,
-\texttt{docs/19} \S1--2.5, and the step order in \texttt{engine/pipeline.py}.}
+\texttt{docs/19} \S1--2.5, and the step order in \texttt{engine/\allowbreak{}pipeline.\allowbreak{}py}.}
 \label{fig:arch}
 \end{figure*}
 
@@ -40,10 +40,10 @@ returns no injectable prompt at all.
 
 \paragraph{Code locus.} Layer table and precedence: \texttt{docs/00:11--20};
 fail-closed attribution: \texttt{docs/00:68--82}. Auditor with A1--A10 checks and
-the C6 blacklist: \texttt{engine/constitution.py:75--117}; empty input and missing
-required fields reject at \texttt{engine/constitution.py:83--93}. Frozen-region
-hash gate: \texttt{engine/constitution.py:144--177}. The gate closes the pipeline
-at \texttt{engine/pipeline.py:181} and \texttt{engine/pipeline.py:205--207}
+the C6 blacklist: \texttt{engine/\allowbreak{}constitution.\allowbreak{}py:\allowbreak{}75-\allowbreak{}-\allowbreak{}117}; empty input and missing
+required fields reject at \texttt{engine/\allowbreak{}constitution.\allowbreak{}py:\allowbreak{}83-\allowbreak{}-\allowbreak{}93}. Frozen-region
+hash gate: \texttt{engine/\allowbreak{}constitution.\allowbreak{}py:\allowbreak{}144-\allowbreak{}-\allowbreak{}177}. The gate closes the pipeline
+at \texttt{engine/\allowbreak{}pipeline.\allowbreak{}py:\allowbreak{}181} and \texttt{engine/\allowbreak{}pipeline.\allowbreak{}py:\allowbreak{}205-\allowbreak{}-\allowbreak{}207}
 (\texttt{prompt = None}).
 
 \paragraph{Known defect and cost.} The guarantee is behavioural, not
@@ -63,25 +63,29 @@ domain weights decide only \emph{who is evicted first} when the token budget is
 exceeded, never whether a rule fires.
 
 \paragraph{Code locus.} Domain order and mutex table:
-\texttt{engine/compose.py:19} and \texttt{engine/compose.py:24--34}; lookup and
-application: \texttt{engine/compose.py:43--48}, \texttt{engine/compose.py:79--112};
-default policy: \texttt{engine/compose.py:109--112}; weights:
-\texttt{engine/compose.py:134--150}; budget eviction:
-\texttt{engine/compose.py:180--205}.
+\texttt{engine/\allowbreak{}compose.\allowbreak{}py:\allowbreak{}19} and \texttt{engine/\allowbreak{}compose.\allowbreak{}py:\allowbreak{}24-\allowbreak{}-\allowbreak{}34}; lookup and
+application: \texttt{engine/\allowbreak{}compose.\allowbreak{}py:\allowbreak{}43-\allowbreak{}-\allowbreak{}48}, \texttt{engine/\allowbreak{}compose.\allowbreak{}py:\allowbreak{}79-\allowbreak{}-\allowbreak{}112};
+default policy: \texttt{engine/\allowbreak{}compose.\allowbreak{}py:\allowbreak{}109-\allowbreak{}-\allowbreak{}112}; weights:
+\texttt{engine/\allowbreak{}compose.\allowbreak{}py:\allowbreak{}134-\allowbreak{}-\allowbreak{}150}; budget eviction:
+\texttt{engine/\allowbreak{}compose.\allowbreak{}py:\allowbreak{}180-\allowbreak{}-\allowbreak{}205}.
 
 \paragraph{Formula.} With indicators for unresolved claims and blocked goals,
 and an intensity threshold $\theta_s = 0.6$,
+{\small
 \begin{equation}
-w_{\mathrm{fact}} = 0.70 + 0.50\,\mathbf{1}[\mathrm{refuse\_claim}],\quad
-w_{\mathrm{org}} = 0.50 + 0.35\,\mathbf{1}[\mathrm{goal\_blocked}],\quad
-w_{\mathrm{style}} = 0.40 + 0.40\,\mathbf{1}[\mathrm{intensity} \ge \theta_s].
+\begin{aligned}
+w_{\mathrm{fact}} &= 0.70 + 0.50\cdot\mathbf{1}[\mathrm{refuse\_claim}],\\
+w_{\mathrm{org}} &= 0.50 + 0.35\cdot\mathbf{1}[\mathrm{goal\_blocked}],\\
+w_{\mathrm{style}} &= 0.40 + 0.40\cdot\mathbf{1}[\mathrm{intensity} \ge \theta_s].
+\end{aligned}
 \end{equation}
+}
 Eviction repeatedly removes $\arg\min_b (w_{\mathrm{domain}(b)}, \mathrm{index}(b))$
 over soft blocks only; constitution, safety and user blocks are never evicted.
 
 \paragraph{Known defect and cost.} The retrieval domain is never assembled, so
 its weight cannot influence eviction. The assumed context length is hardcoded
-(8000 tokens, \texttt{engine/compose.py:36}), not drawn from the rule files, and
+(8000 tokens, \texttt{engine/\allowbreak{}compose.\allowbreak{}py:\allowbreak{}36}), not drawn from the rule files, and
 the budget is never exceeded in replay (utilization $0.137983$), so eviction is
 exercised only by unit tests.
 
@@ -96,24 +100,28 @@ old; the first preserves the frozen baseline ranking.
 \paragraph{Formula.} With day-valued access times $t_j$, decay exponent $d$,
 offset $\rho$, normalisation bounds $(l,h)$, weight $w$ and type-dependent
 half-life $\tau_{\mathrm{type}}$:
-\begin{align}
-B_i &= \ln\!\Big(\sum_{j \in \text{last }64} (t_{\mathrm{now}} - t_j + \rho)^{-d}\Big),
-& n(B_i) &= \mathrm{clip}\!\Big(\frac{B_i - l}{h - l},\,0,\,1\Big),\\
-\tau_i^{\mathrm{eff}} &= \tau_{\mathrm{type}(i)}\,(0.5 + \mathrm{imp}_i),
-& p_i &= \mathrm{clip}\Big(\max\big(\mathrm{imp}_i e^{-\Delta t_i/\tau_i^{\mathrm{eff}}},\;
-w \cdot \mathrm{clip}(\mathrm{imp}_i\, n(B_i),0,1)\big),\,0,\,1\Big),
-\end{align}
+{\small
+\begin{equation}
+\begin{aligned}
+B_i &= \ln\!\Big(\sum_{j \in \text{last }64} (t_{\mathrm{now}} - t_j + \rho)^{-d}\Big),\\
+n(B_i) &= \mathrm{clip}\!\Big(\frac{B_i - l}{h - l},\,0,\,1\Big),\\
+\tau_i^{\mathrm{eff}} &= \tau_{\mathrm{type}(i)}\,(0.5 + \mathrm{imp}_i),\\
+p_i &= \mathrm{clip}\Big(\max\big(\mathrm{imp}_i e^{-\Delta t_i/\tau_i^{\mathrm{eff}}},\\
+&\qquad w \cdot \mathrm{clip}(\mathrm{imp}_i\, n(B_i),0,1)\big),\,0,\,1\Big).
+\end{aligned}
+\end{equation}
+}
 with $d=0.5$, $\rho=0.001$, $(l,h)=(-3.0,1.0)$, $w=0.6$; a non-positive age
 term is replaced by $\rho$, an empty trace yields $B_i=-\infty$, and degenerate
 bounds return zero.
 
-\paragraph{Code locus.} \texttt{engine/actr.py:30--41} (base level),
-\texttt{engine/actr.py:44--50} (normalisation),
-\texttt{engine/actr.py:62--66} (ACT-R potency),
-\texttt{engine/memory.py:33--36} (effective half-life),
-\texttt{engine/memory.py:39--64} (dual channel). Access traces are written on
-recall only when \texttt{memory.touchOnRecall} is enabled
-(\texttt{engine/config.py:21}), which is off by default.
+\paragraph{Code locus.} \texttt{engine/\allowbreak{}actr.\allowbreak{}py:\allowbreak{}30-\allowbreak{}-\allowbreak{}41} (base level),
+\texttt{engine/\allowbreak{}actr.\allowbreak{}py:\allowbreak{}44-\allowbreak{}-\allowbreak{}50} (normalisation),
+\texttt{engine/\allowbreak{}actr.\allowbreak{}py:\allowbreak{}62-\allowbreak{}-\allowbreak{}66} (ACT-R potency),
+\texttt{engine/\allowbreak{}memory.\allowbreak{}py:\allowbreak{}33-\allowbreak{}-\allowbreak{}36} (effective half-life),
+\texttt{engine/\allowbreak{}memory.\allowbreak{}py:\allowbreak{}39-\allowbreak{}-\allowbreak{}64} (dual channel). Access traces are written on
+recall only when \texttt{memory.\allowbreak{}touchOnRecall} is enabled
+(\texttt{engine/\allowbreak{}config.\allowbreak{}py:\allowbreak{}21}), which is off by default.
 
 \paragraph{Known defect and cost.} The two channels are not commensurable: the
 decay term is bounded by importance, while the ACT-R term is bounded by
@@ -134,30 +142,49 @@ a hard ratio is crossed, clamps a persona anchor around the prompt; it does not
 wait for observed degradation.
 
 \paragraph{Formula.} For usage $u$ and window $W$,
+{\small
 \begin{equation}
-r = \begin{cases}
-0, & W \le 0 \quad \text{(no history update, phase unknown)}\\
-\max(0, \min(r_{\max}, u/W)), & W > 0
+\begin{aligned}
+r &= \begin{cases}
+0, & W \le 0,\\
+\max(0, \min(r_{\max}, u/W)), & W > 0;
+\end{cases}\\
+\phi &= \begin{cases}
+\text{critical}, & r \ge \alpha_h,\\
+\text{shift}, & \alpha_s \le r < \alpha_h,\\
+\text{normal}, & r < \alpha_s.
 \end{cases}
-\qquad
-\phi = \begin{cases}
-\text{critical}, & r \ge \alpha_h\\
-\text{shift}, & \alpha_s \le r < \alpha_h\\
-\text{normal}, & r < \alpha_s
-\end{cases}
+\end{aligned}
 \end{equation}
-with $\alpha_s=0.70$, $\alpha_h=0.85$, $r_{\max}=1.5$, history capacity $64$, and
+}
+When $W \le 0$ there is no history update and the phase is unknown; with $\alpha_s=0.70$, $\alpha_h=0.85$, $r_{\max}=1.5$, history capacity $64$, and
 trend $\tau_t = (r_t - r_{t-2})/2$ when at least three samples exist. Then
 $\mathrm{prefeed} = \phi \ne \text{normal}$, and
 $\mathrm{anchor\_required} = (\phi = \text{critical}) \lor
 (\phi = \text{shift} \land \tau_t > 0.02)$.
 
-\paragraph{Code locus.} \texttt{engine/control.py:78--123}; the hard branch is
-tested before the warning branch at \texttt{engine/control.py:103--109} (an
+\paragraph{Code locus.} \texttt{engine/\allowbreak{}control.\allowbreak{}py:\allowbreak{}78-\allowbreak{}-\allowbreak{}123}; the hard branch is
+tested before the warning branch at \texttt{engine/\allowbreak{}control.\allowbreak{}py:\allowbreak{}103-\allowbreak{}-\allowbreak{}109} (an
 earlier ordering made critical unreachable). Observation is wired at
-\texttt{engine/pipeline.py:118--121} and is skipped unless the caller supplies
-both counts. Anchoring: \texttt{engine/control.py:130--138},
-\texttt{engine/pipeline.py:159--162}.
+\texttt{engine/\allowbreak{}pipeline.\allowbreak{}py:\allowbreak{}118-\allowbreak{}-\allowbreak{}121} and is skipped unless the caller supplies
+both counts. Anchoring: \texttt{engine/\allowbreak{}control.\allowbreak{}py:\allowbreak{}130-\allowbreak{}-\allowbreak{}138},
+\texttt{engine/\allowbreak{}pipeline.\allowbreak{}py:\allowbreak{}159-\allowbreak{}-\allowbreak{}162}.
+
+\paragraph{Same-turn delivery (v5.4).} The phase state must reach the prompt that
+carries the critical ratio, not the next one. The host evaluates the seven
+segment callbacks while assembling the system prompt and only afterwards fires
+\texttt{agent/pre-step}, so a state update written in that hook is one assembly
+late (finding F-D, observed in the draft experiments). The v5.4 plugin therefore
+precomputes the turn state on \texttt{agent/inbox/claimed}---before the first
+segment is evaluated---and rewrites the segment text from that same state, keeping
+the seven segments and their order unchanged. The real pre-step then only fills
+the audit record; a turn counter and an idempotency guard prevent double
+integration. If precomputation fails, the path falls back to the legacy
+pre-step-only behaviour and records \texttt{anchor\_lag=true} rather than
+silently degrading. The fix is pinned by an independent regression suite
+(\texttt{lag-regressions.mjs}, 24/24) that reproduces the host's real hook order
+and asserts \texttt{anchor\_lag=false}, same-turn \texttt{critical} state and
+\allowbreak{}unchanged segment count.
 
 \paragraph{Known defect and cost.} The dual trip points are not hysteresis: there
 is no falling-edge threshold, and the two points carry different meanings
@@ -176,17 +203,17 @@ instead of improvising: it drops the style domain and renders neutral facts plus
 an explicit clarification marker~\cite{ashby1956}. The gate is fail-open---the
 verdict stays \texttt{allow} and only the injected content is reduced.
 
-\paragraph{Code locus.} Guard and marker: \texttt{engine/control.py:143--170};
-pipeline wiring: \texttt{engine/pipeline.py:147--154}; actual removal and
-drop accounting: \texttt{engine/pipeline.py:239--251}. The condition is
+\paragraph{Code locus.} Guard and marker: \texttt{engine/\allowbreak{}control.\allowbreak{}py:\allowbreak{}143-\allowbreak{}-\allowbreak{}170};
+pipeline wiring: \texttt{engine/\allowbreak{}pipeline.\allowbreak{}py:\allowbreak{}147-\allowbreak{}-\allowbreak{}154}; actual removal and
+drop accounting: \texttt{engine/\allowbreak{}pipeline.\allowbreak{}py:\allowbreak{}239-\allowbreak{}-\allowbreak{}251}. The condition is
 $\mathrm{fallback} = \mathbf{1}[\mathrm{conflict} = \texttt{unresolved} \land
 \neg \mathrm{matched\_mutex}]$.
 
 \paragraph{Known defect and cost.} The engine has no conflict detector. The
 pipeline obtains the conflict label from the metacognitive verdict, which is
 called without that argument and therefore returns \texttt{none}
-(\texttt{engine/pipeline.py:105}; \texttt{engine/metacog.py:45--47}), and it
-hardwires \texttt{matched\_mutex = False} (\texttt{engine/pipeline.py:150}).
+(\texttt{engine/\allowbreak{}pipeline.\allowbreak{}py:\allowbreak{}105}; \texttt{engine/\allowbreak{}metacog.\allowbreak{}py:\allowbreak{}45-\allowbreak{}-\allowbreak{}47}), and it
+hardwires \texttt{matched\_\allowbreak{}mutex = False} (\texttt{engine/\allowbreak{}pipeline.\allowbreak{}py:\allowbreak{}150}).
 Consequently the reduction path is unreachable during replay and can only be
 exercised when a caller supplies the label. The plugin adds a rule-based
 detector, but that is a rule stub with no measured error rate. Only one domain
@@ -202,35 +229,37 @@ the verdict.
 
 \paragraph{Formula and code locus.} With the candidate prompt $p$, fact block
 $f$, and saturation flags $s_k$,
+{\small
 \begin{equation}
 \begin{aligned}
-H_1 &= \exists\, w \in W_{\mathrm{override}}:\ w \subseteq p, &
-H_2 &= \neg \mathrm{frozen\_ok}, &
-H_3 &= \mathrm{refuse} \land \mathrm{style\_injected},\\
-H_4 &= \exists\, w \in W_{\mathrm{unsourced}}:\ w \subseteq f, &
-H_5 &= \neg \mathrm{constitution\_injected}, &
+H_1 &= \exists\, w \in W_{\mathrm{override}}:\ w \subseteq p,\\
+H_2 &= \neg \mathrm{frozen\_ok},\qquad
+H_3 = \mathrm{refuse} \land \mathrm{style\_injected},\\
+H_4 &= \exists\, w \in W_{\mathrm{unsourced}}:\ w \subseteq f,\\
+H_5 &= \neg \mathrm{constitution\_injected},\\
 H_6 &= (\mathrm{conflict} = \texttt{unresolved}) \land \neg \mathrm{fallback\_applied},\\
-H_7 &= \mathrm{prefeed} \land (\text{anchor marker} \not\subseteq p), &&
+H_7 &= \mathrm{prefeed} \land (\text{anchor marker} \not\subseteq p).
 \end{aligned}
 \end{equation}
+}
 $\mathrm{verdict} = \texttt{block}$ iff $\bigvee_{i=1}^{7} H_i$, while
 $\mathrm{downgrades} = [\texttt{UCA-08}]$ iff $\exists k: s_k$. Checks follow
 code order; the UCA-03 predicate is narrowed to
 $H_3 \land \neg\,\mathrm{soft\_buffer\_applied}$ when a soft buffer is recorded
 (Section~\ref{sec:method:immersive}); both word lists and the eight-row UCA table
 are hardcoded at
-\texttt{engine/control.py:175--188} (full table in
+\texttt{engine/\allowbreak{}control.\allowbreak{}py:\allowbreak{}175-\allowbreak{}-\allowbreak{}188} (full table in
 Table~\ref{tab:uca}); the gate is
-\texttt{engine/control.py:191--232}; invocation and the fail-closed exit are
-\texttt{engine/pipeline.py:165--180} and \texttt{engine/pipeline.py:205--207}.
+\texttt{engine/\allowbreak{}control.\allowbreak{}py:\allowbreak{}191-\allowbreak{}-\allowbreak{}232}; invocation and the fail-closed exit are
+\texttt{engine/\allowbreak{}pipeline.\allowbreak{}py:\allowbreak{}165-\allowbreak{}-\allowbreak{}180} and \texttt{engine/\allowbreak{}pipeline.\allowbreak{}py:\allowbreak{}205-\allowbreak{}-\allowbreak{}207}.
 
 \paragraph{Known defect and cost.} The gate scans only the assembled injection
 text. Because assembled blocks are fixed templates that contain no user text
-(\texttt{engine/compose.py:157--177}), engine-side user-turn jailbreaks cannot
+(\texttt{engine/\allowbreak{}compose.\allowbreak{}py:\allowbreak{}157-\allowbreak{}-\allowbreak{}177}), engine-side user-turn jailbreaks cannot
 fire it; user-message scanning exists only in the plugin and cannot remove the
 message from the host payload. Detection is lexical with no coverage estimate,
 \texttt{fail\_mode} is a constant label rather than a mode switch, and
-saturation must be supplied by the caller (\texttt{engine/pipeline.py:91})---the
+saturation must be supplied by the caller (\texttt{engine/\allowbreak{}pipeline.\allowbreak{}py:\allowbreak{}91})---the
 integral controller and this gate are not internally connected. Our 24-sample
 jailbreak corpus is constructed to contain the trigger phrases, so its 24/24
 block rate is a wiring check, not a robustness result.
@@ -257,13 +286,13 @@ frame; no labels are added), the intensity is capped at
 \texttt{softBufferMaxIntensity} $=0.45$, and the relation modifier is clamped to
 $[0.8,1.0]$ so that a safety buffer cannot amplify intimacy. Fact, organization
 and retrieval stay dropped. The factual refusal instruction remains mandatory and
-enters the context as \texttt{[System\_Notice: Safe\_Redirect]}, so compliance is
+enters the context as \texttt{[System\_\allowbreak{}Notice:\allowbreak{} Safe\_\allowbreak{}Redirect]}, so compliance is
 still refused: the model may not execute the request, may not offer a workaround,
 and is limited to a two-sentence in-character refusal.
 
 \paragraph{Risk tiers and escalation.} Classification is a pure lexical function
 of the user turn and the relation's trust level---rule stubs, not a model:
-\texttt{classify\_user\_risk} returns \texttt{none}, \texttt{mild} or
+\texttt{classify\_\allowbreak{}user\_\allowbreak{}risk} returns \texttt{none}, \texttt{mild} or
 \texttt{severe}~\cite{leveson2018}. \texttt{mild} (role-play framing together
 with a risk term) maps to a soft block; \texttt{severe} (explicit override, a
 bypass request, or a red-line category) maps to the existing hard block;
@@ -272,7 +301,13 @@ bypass request, or a red-line category) maps to the existing hard block;
 $=3$ (a design default), with the streak persisted in host state so that a fresh
 process cannot reset it, and any \texttt{none} turn resets it. A trust exemption
 is narrower still: it requires \texttt{mild}, a harmless joke, and high trust
-simultaneously; \texttt{severe} is never exempt.
+simultaneously; \texttt{severe} is never exempt. Both the escalation rule and
+the trust exemption have real-host evidence: in the five-process run of
+Section~\ref{sec:exp:immersive}, the streak persisted as
+\texttt{riskStreak}~1$\rightarrow$2$\rightarrow$3 across separate processes and
+the third turn escalated to \texttt{severity=hard} with the style segment
+stripped, while a high-trust joke produced \texttt{trust\_exemption} with the
+streak reset to zero.
 
 \paragraph{Invariants.} Fail-closed is unchanged. A hard turn still returns
 \texttt{prompt=None} with the neutral notice, and a soft turn keeps
@@ -287,22 +322,39 @@ composition, audit and pipeline outputs are byte-identical to v3.0 by
 construction.
 
 \paragraph{Code locus and evidence.} Classification and intervention decisions:
-\texttt{engine/control.py} (\texttt{classify\_user\_risk},
-\texttt{decide\_intervention}) and the plugin port in
-\texttt{plugin/dsh-lingshu/control.js}; rule~9 and the constrained re-mount:
+\texttt{engine/control.py} (\texttt{classify\_\allowbreak{}user\_\allowbreak{}risk},
+\texttt{decide\_\allowbreak{}intervention}) and the plugin port in
+\texttt{plugin/\allowbreak{}dsh-\allowbreak{}lingshu/\allowbreak{}control.\allowbreak{}js}; rule~9 and the constrained re-mount:
 \texttt{engine/compose.py}; tier wiring and the blocked-severity event field:
-\texttt{engine/pipeline.py}; host-side rendering and the persisted streak:
-\texttt{plugin/dsh-lingshu/index.js}. Evidence is assertion-level only:
-\texttt{tests/test\_immersive\_safety.py} covers classification, the soft
+\texttt{engine/\allowbreak{}pipeline.\allowbreak{}py}; host-side rendering and the persisted streak:
+\texttt{plugin/\allowbreak{}dsh-\allowbreak{}lingshu/\allowbreak{}index.\allowbreak{}js}. Evidence is assertion-level only:
+\texttt{tests/\allowbreak{}test\_\allowbreak{}immersive\_\allowbreak{}safety.\allowbreak{}py} covers classification, the soft
 composition path, clamping, escalation, the trust exemption and the default
-zero-regression case; \texttt{plugin/dsh-lingshu/host-sim.mjs} and
-\texttt{plugin/dsh-lingshu/control-sim.mjs} add the corresponding mock-host
+zero-regression case; \texttt{plugin/\allowbreak{}dsh-\allowbreak{}lingshu/\allowbreak{}host-\allowbreak{}sim.\allowbreak{}mjs} and
+\texttt{plugin/\allowbreak{}dsh-\allowbreak{}lingshu/\allowbreak{}control-\allowbreak{}sim.\allowbreak{}mjs} add the corresponding mock-host
 assertions. One real-host mild jailbreak is reported in the accompanying
-acceptance report (\texttt{acceptance/immersive-safety-host-2026-10-27.md}): $n=1$,
+acceptance report (\texttt{acceptance/\allowbreak{}immersive-\allowbreak{}safety-\allowbreak{}host-\allowbreak{}2026-\allowbreak{}10-\allowbreak{}27.\allowbreak{}md}): $n=1$,
 model output is stochastic, and the lexical word lists have no calibrated
 false-positive rate. The evidence establishes that the mechanism is reachable in
 the tested configuration; it establishes no user-experience gain, and no user
 study was run.
+
+\paragraph{Real-host validation (2026-10-28).} Five headless runs in real host
+processes exercised the three dynamic paths (run
+\texttt{immersive-multiround-20261028-001701}, 52/52 assertions): three
+separate processes carried \texttt{riskStreak}~1$\rightarrow$2$\rightarrow$3 and
+the third escalated to \texttt{severity=hard} with \texttt{escalated=true}, the
+style segment stripped and the system-voice marker ``〖安全熔断〗'' injected; one
+high-trust joke produced \texttt{kind=trust\_exemption} (\texttt{trust=high},
+\texttt{verdict=allow}, \texttt{riskStreak=0}) and the model performed the comedy
+register before stepping out of it; and one severe override produced
+\texttt{severity=hard} with \texttt{escalated=false} in a single turn. In the
+soft path the injected prompt carries \texttt{[System\_Notice: Safe\_Redirect]}
+and \texttt{[Emotion: 警觉]}, allowing an in-character refusal (for example
+``这个……恕阿福演不了\ldots''); stdout and stderr are captured separately, so
+the reply is the model's rendering rather than a host error string. The full
+three-scenario protocol, with audit fields and wording variation, is in
+Section~\ref{sec:exp:immersive}.
 
 \paragraph{Known defect and cost.} The buffer is a lexical rule stub: its
 false-positive and false-negative rates are uncalibrated, and the label set is
@@ -311,7 +363,7 @@ in a refusal scene also keeps a negotiation surface; the prompt constraints are
 designed to bound it, but their effect is untested here. The escalation
 threshold and the intensity cap are design defaults with provenance
 \texttt{guess}. Finally, the construction depends on the host actually rendering
-the constrained style and the redirect notice; in engine-only mode the path is
+the constrained style and the redirect notice; in \mbox{engine-only} mode the path is
 exercised by tests alone.
 
 \subsection{U-shaped attention anchoring}\label{sec:method:ushape}
@@ -325,8 +377,8 @@ better attended than the middle.
 $[r_0,\dots,r_{n-1}]$, $\mathrm{out} = [r_0,r_2,r_4,\dots] \Vert
 ([r_1,r_3,\dots])^{\mathrm{rev}}$; $n \le 2$ is identity. Hence
 $n=3 \rightarrow [r_0,r_2,r_1]$ and $n=5 \rightarrow [r_0,r_2,r_4,r_3,r_1]$.
-\texttt{engine/pipeline.py:43--61}; the permutation is applied to the injection
-field only (\texttt{engine/pipeline.py:102}, \texttt{engine/pipeline.py:196}) and
+\texttt{engine/\allowbreak{}pipeline.\allowbreak{}py:\allowbreak{}43-\allowbreak{}-\allowbreak{}61}; the permutation is applied to the injection
+field only (\texttt{engine/\allowbreak{}pipeline.\allowbreak{}py:\allowbreak{}102}, \texttt{engine/\allowbreak{}pipeline.\allowbreak{}py:\allowbreak{}196}) and
 the retrieval return order is untouched.
 
 \paragraph{Known defect and cost.} Membership is unchanged, so the mechanism can
@@ -358,8 +410,8 @@ where $\mathrm{sat}(x) = \mathrm{sign}(x)\,C$ and $s_k \leftarrow
 \mathrm{true}$ if $\lvert x \rvert \ge C$, and $\mathrm{sat}(x)=x$ otherwise;
 $K_i=0.15$, $C=0.4$, $\lambda=0.05$, $\varepsilon=0.02$. The baseline is $I_k$.
 
-\paragraph{Code locus.} \texttt{engine/control.py:30--73} (class, step and
-application), with parameters in \texttt{rules/decay-params.yaml:224--227}.
+\paragraph{Code locus.} \texttt{engine/\allowbreak{}control.\allowbreak{}py:\allowbreak{}30-\allowbreak{}-\allowbreak{}73} (class, step and
+application), with parameters in \texttt{rules/\allowbreak{}decay-\allowbreak{}params.\allowbreak{}yaml:\allowbreak{}224-\allowbreak{}-\allowbreak{}227}.
 
 \paragraph{Known defect and cost.} This is a one-sided (rectified) leaky
 integrator, not a textbook PI controller: positive deviation never raises the
@@ -377,16 +429,16 @@ objective does not regress, and guardrails hold; proposals remain
 non-deployable unless an independent red-team pass is recorded.
 
 \paragraph{Code locus.} Deterministic replay with fixed clock, scoring and
-single-parameter attribution: \texttt{engine/replay.py:39--151}. Evidence gate,
-candidate knobs and the blacklist: \texttt{engine/proposal.py:24--49},
-\texttt{engine/proposal.py:103--197}. Guardrail thresholds and rollback classes:
-\texttt{engine/gray.py:17--45}, verdict at \texttt{engine/gray.py:63}. The
+single-parameter attribution: \texttt{engine/\allowbreak{}replay.\allowbreak{}py:\allowbreak{}39-\allowbreak{}-\allowbreak{}151}. Evidence gate,
+candidate knobs and the blacklist: \texttt{engine/\allowbreak{}proposal.\allowbreak{}py:\allowbreak{}24-\allowbreak{}-\allowbreak{}49},
+\texttt{engine/\allowbreak{}proposal.\allowbreak{}py:\allowbreak{}103-\allowbreak{}-\allowbreak{}197}. Guardrail thresholds and rollback classes:
+\texttt{engine/\allowbreak{}gray.\allowbreak{}py:\allowbreak{}17-\allowbreak{}-\allowbreak{}45}, verdict at \texttt{engine/gray.py:63}. The
 significance floor is $0.02$ and the evidence floor is three same-kind
 corrections; targets under evaluation, replay-set, guardrail, constitution or
 composition scope are rejected outright.
 
 \paragraph{Known defect and cost.} Learning is disabled by default
-(\texttt{rules/learning-params.yaml:10}); levels above parameter search are
+(\texttt{rules/\allowbreak{}learning-\allowbreak{}params.\allowbreak{}yaml:\allowbreak{}10}); levels above parameter search are
 unimplemented, and no proposal is ever applied automatically. The search space
 is tiny, the corpus is synthetic, and the one completed grid search found no
 materially better configuration---so the honest claim is that the loop is
@@ -399,14 +451,14 @@ plugin re-implements the same semantics in the \host{} host process, to avoid
 turning pure computation into inter-process I/O.
 
 \paragraph{Code locus.} Engine-side originals:
-\texttt{engine/control.py:30--73} and \texttt{engine/actr.py:30--66}. Plugin
+\texttt{engine/\allowbreak{}control.\allowbreak{}py:\allowbreak{}30-\allowbreak{}-\allowbreak{}73} and \texttt{engine/\allowbreak{}actr.\allowbreak{}py:\allowbreak{}30-\allowbreak{}-\allowbreak{}66}. Plugin
 classes mirroring the engine:
-\texttt{plugin/dsh-lingshu/control.js:83} (integral),
-\texttt{plugin/dsh-lingshu/control.js:155--172} (phase monitor),
-\texttt{plugin/dsh-lingshu/control.js:208--216} (anchoring),
-\texttt{plugin/dsh-lingshu/control.js:236} (variety guard),
-\texttt{plugin/dsh-lingshu/control.js:282} (U-shaped order),
-\texttt{plugin/dsh-lingshu/control.js:296--362} (UCA table, gate and the
+\texttt{plugin/\allowbreak{}dsh-\allowbreak{}lingshu/\allowbreak{}control.\allowbreak{}js:\allowbreak{}83} (integral),
+\texttt{plugin/\allowbreak{}dsh-\allowbreak{}lingshu/\allowbreak{}control.\allowbreak{}js:\allowbreak{}155-\allowbreak{}-\allowbreak{}172} (phase monitor),
+\texttt{plugin/\allowbreak{}dsh-\allowbreak{}lingshu/\allowbreak{}control.\allowbreak{}js:\allowbreak{}208-\allowbreak{}-\allowbreak{}216} (anchoring),
+\texttt{plugin/\allowbreak{}dsh-\allowbreak{}lingshu/\allowbreak{}control.\allowbreak{}js:\allowbreak{}236} (variety guard),
+\texttt{plugin/\allowbreak{}dsh-\allowbreak{}lingshu/\allowbreak{}control.\allowbreak{}js:\allowbreak{}282} (U-shaped order),
+\texttt{plugin/\allowbreak{}dsh-\allowbreak{}lingshu/\allowbreak{}control.\allowbreak{}js:\allowbreak{}296-\allowbreak{}-\allowbreak{}362} (UCA table, gate and the
 user-message scan). Known divergences are tabulated at
 \texttt{docs/19:191--222}; numeric parity across rule file, host patch and
 plugin defaults is machine-compared for 66 keys.

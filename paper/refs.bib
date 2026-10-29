@@ -1,60 +1,65 @@
 % =====================================================================
-% refs.bib -- only entries whose metadata was verified against the arXiv
-% API (title, authors, year, version) or that are canonical books/articles.
-% Verified on 2026-10-27 via export.arxiv.org/api/query.
-% Do NOT add entries whose bibliographic data cannot be checked.
+% refs.bib -- LINGSHU paper references
+%
+% Verification status (2026-10-28):
+%   * arXiv preprints: every eprint ID below resolves through the arXiv API
+%     (export.arxiv.org/api/query?id_list=...) with a matching title and
+%     author list. Query executed 2026-10-28.
+%   * Peer-reviewed versions were added where Crossref returned a DOI
+%     (sentipolis -> Findings of ACL 2026; mem0 -> ECAI 2025 / FAIA).
+%   * Canonical books/articles: metadata checked against publisher records.
+%   Do NOT add entries whose bibliographic data cannot be checked.
 % =====================================================================
 
-% ---------- arXiv preprints (repository-verified + API-verified) ----------
+% ---------- arXiv preprints (arXiv-API-verified 2026-10-28) ----------
 
 @misc{zenbrain2026,
   author       = {Bering, Alexander},
-  title        = {{ZenBrain}: A Neuroscience-Inspired 7-Layer Memory Architecture for Autonomous {AI} Systems},
+  title        = {{ZenBrain: A Neuroscience-Inspired 7-Layer Memory Architecture for Autonomous AI Systems}},
   year         = {2026},
   eprint       = {2604.23878},
   archivePrefix= {arXiv},
   primaryClass = {cs.AI},
-  note         = {arXiv:2604.23878v3}
+  note         = {arXiv:2604.23878v3. \url{https://arxiv.org/abs/2604.23878}}
 }
 
 @misc{fsfm2026,
   author       = {Gu, Yingjie and Xiong, Wenjian and Wang, Liqiang and Ren, Pengcheng and Li, Chao and Zhang, Xiaojing and Guo, Yijuan and Sun, Qi and Ma, Jingyao and Shi, Shidang},
-  title        = {{FSFM}: A Biologically-Inspired Framework for Selective Forgetting of Agent Memory},
+  title        = {{FSFM: A Biologically-Inspired Framework for Selective Forgetting of Agent Memory}},
   year         = {2026},
   eprint       = {2604.20300},
   archivePrefix= {arXiv},
   primaryClass = {cs.AI},
-  note         = {arXiv:2604.20300v2}
+  note         = {arXiv:2604.20300v2. \url{https://arxiv.org/abs/2604.20300}}
 }
 
 @misc{himemory2026,
   author       = {Kerestecioglu, Doga and Robsky, Alexei and Vasters, Clemens and Sharma, Anshul and Kesselman, Yitzhak},
-  title        = {Human-Inspired Memory Architecture for {LLM} Agents},
+  title        = {{Human-Inspired Memory Architecture for LLM Agents}},
   year         = {2026},
   eprint       = {2605.08538},
   archivePrefix= {arXiv},
   primaryClass = {cs.AI},
-  note         = {arXiv:2605.08538v1}
+  note         = {arXiv:2605.08538v1. \url{https://arxiv.org/abs/2605.08538}}
 }
 
-@misc{sentipolis2026,
-  author       = {Fu, Chiyuan and Chen, Lyuhao and Xiao, Yunze and Xuan, Weihao and Busso, Carlos and Diab, Mona},
-  title        = {Sentipolis: Emotion-Aware Agents for Social Simulations},
+@inproceedings{sentipolis2026,
+  author       = {Fu, Chiyuan and Chen, Lyuhao and Xiao, Yunze and Xuan, Weihao and Busso, Carlos and Diab, Mona T.},
+  title        = {{Sentipolis: Emotion-Aware Agents for Social Simulations}},
+  booktitle    = {Findings of the Association for Computational Linguistics: ACL 2026},
   year         = {2026},
-  eprint       = {2601.18027},
-  archivePrefix= {arXiv},
-  primaryClass = {cs.AI},
-  note         = {arXiv:2601.18027v2}
+  doi          = {10.18653/v1/2026.findings-acl.368},
+  note         = {arXiv:2601.18027. \url{https://doi.org/10.18653/v1/2026.findings-acl.368}}
 }
 
 @misc{persmem2026,
   author       = {Zhang, Hanzhong and Xiang, Ziwei and Xie, Weicheng and Liu, Shizhe and Song, Siyang},
-  title        = {{PersMem}: Internalizing Personality into Dual-Pathway Memory for {LLM} Agents},
+  title        = {{PersMem: Internalizing Personality into Dual-Pathway Memory for LLM Agents}},
   year         = {2026},
   eprint       = {2609.34372},
   archivePrefix= {arXiv},
   primaryClass = {cs.AI},
-  note         = {arXiv:2609.34372v1}
+  note         = {arXiv:2609.34372v1. \url{https://arxiv.org/abs/2609.34372}}
 }
 
 % ---------- Canonical sources for adapted mechanisms ----------
@@ -134,14 +139,13 @@
   year      = {1975}
 }
 
-% ---------- External memory baseline (arXiv API-verified 2026-10-27) ----------
+% ---------- External memory baseline (arXiv + Crossref verified) ----------
 
-@misc{mem0_2025,
+@inproceedings{mem0_2025,
   author       = {Chhikara, Prateek and Khant, Dev and Aryan, Saket and Singh, Taranjeet and Yadav, Deshraj},
-  title        = {{Mem0}: Building Production-Ready {AI} Agents with Scalable Long-Term Memory},
+  title        = {{Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory}},
+  booktitle    = {ECAI 2025: Frontiers in Artificial Intelligence and Applications},
   year         = {2025},
-  eprint       = {2504.19413},
-  archivePrefix= {arXiv},
-  primaryClass = {cs.CL},
-  note         = {arXiv:2504.19413v1}
+  doi          = {10.3233/faia251160},
+  note         = {arXiv:2504.19413. \url{https://doi.org/10.3233/faia251160}}
 }

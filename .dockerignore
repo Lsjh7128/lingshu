@@ -1,0 +1,20 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# LINGSHU · Docker 构建上下文白名单（UTF-8 无 BOM）
+# 默认忽略整个仓库，再逐项放行 —— 镜像只需要 demo 运行时 + 插件源码 + 入口脚本。
+# 等价地排除了：.git/、paper/、build/、_release/、acceptance/、node_modules/、*.pdf、
+# 运行现场（.chaos-data*/ 等）。用白名单而不是排除清单，避免仓库新增目录时被误打进镜像。
+# ─────────────────────────────────────────────────────────────────────────────
+*
+!demo
+!demo/**
+!plugin
+!plugin/README.md
+!plugin/dsh-lingshu
+!plugin/dsh-lingshu/**
+!demo.sh
+!demo.bat
+
+# 显式排除：Windows 的 junction（plugin/node_modules/dsh-lingshu）不应进镜像；
+# 运行时由 demo bootstrap 在容器内补建。
+plugin/node_modules
+**/node_modules

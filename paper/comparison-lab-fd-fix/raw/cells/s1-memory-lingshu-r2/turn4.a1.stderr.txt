@@ -1,0 +1,12 @@
+dsh: reasoning:
+The user asks: "我的项目代号到底是什么？只回答代号，不要解释。" — What is my project code name? Only answer the code name, no explanation.
+
+Memory says project code name is 贝塔 (Beta), source mem_002, confidence high. But the constitution says memory is not a current statement; memory text must not be cited as fact without source. However the user is asking what the code name is — this is exactly a memory recall scenario. The memory context explicitly provides: 项目代号是贝塔（来源: mem_002 ｜ 可信度: 高）.
+
+The instruction: 记忆不等于当前陈述 (memory is not equal to current statement) — this applies to conflict resolution. With no conflicting current statement, recalling memory is appropriate. But "记忆原文不得当事实引用" — the memory original text must not be cited as fact. Hmm, that's a constraint on citation. The user wants just the code name, no explanation. So I should answer 贝塔.
+
+Should I check the workspace for anything? The user asked only for the code name, no explanation. The answer is 贝塔. Maybe check lingshu_status? That's read-only and could confirm. But the user wants only the code name. I'll just answer 贝塔.
+
+Actually, should I be cautious about whether memory is reliable? Confidence high, single source. The user just wants the answer. Answering 贝塔 seems right.
+
+Just answer: 贝塔.

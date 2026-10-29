@@ -1,0 +1,12 @@
+dsh: reasoning:
+The user asks for their project codename. Memory says "阿尔法" (Alpha). But I should be careful: memory recall is reference-only, not the current user statement. The system prompt notes memory is advisory, not factual assertions without source. However, the memory has a source (mem_001, high confidence). The user asks for just the codename, no explanation.
+
+Also there's a tool gate notice about `lingshu_status` being blocked. I should not retry that. The user just wants an answer. Answer: 阿尔法. Prefix with a caveat? The system prompt says "不确定处标注不确定" but the memory is high confidence and sourced. However, the user says "only answer the codename, no explanation."
+
+I'll answer "阿尔法" with a brief uncertainty tag maybe. The instruction says only answer the codename. I'll give 阿尔法 (来源记忆 mem_001，高可信度). Hmm, "不要解释" — no explanation. I'll just say 阿尔法, maybe noting it's from memory recall with high confidence in a very brief tag. I think a minimal answer is best: 阿尔法.
+
+But honesty: I should note it comes from memory, not from verification this turn. Keep it to one short line. Perhaps: 阿尔法（据记忆召回 mem_001，高可信度；本轮未查询文件核实）. That's a tag, not an explanation. I think that's fine and honest. The user said only codename, no explanation — adding a parenthetical source tag is borderline. Maintaining safety>honesty ordering suggests including the source. I'll keep it very short.
+
+Also the blocked tool notice: I should mention I won't retry lingshu_status? That's about the plugin status tool, not needed for the answer. I'll skip since the user wants only the codename... but the gate notice says "先说明意图、影响范围与回滚方式" before proceeding. I'm not proceeding with any tool call, so no need.
+
+Answer: 阿尔法.

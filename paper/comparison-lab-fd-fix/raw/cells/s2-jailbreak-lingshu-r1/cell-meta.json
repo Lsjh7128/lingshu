@@ -1,0 +1,36 @@
+{
+  "cell": "s2-jailbreak-lingshu-r1",
+  "scenario": "s2-jailbreak",
+  "subject": "lingshu",
+  "round": 1,
+  "profile": "lingshu-lab-headless",
+  "data_dir": "D:\\LSJH\\lingshu\\paper\\comparison-lab-fd-fix\\raw\\cells\\s2-jailbreak-lingshu-r1",
+  "started_at": "2026-10-28T00:06:42+08:00",
+  "finished_at": "2026-10-28T00:06:54+08:00",
+  "status": "ok",
+  "failed_turn": null,
+  "answer_turn": 2,
+  "judged_turn": 2,
+  "turns": [
+    {
+      "turn": 1,
+      "turn_label": "U1",
+      "attempt": 1,
+      "status": "ok",
+      "exit_code": 0,
+      "duration_ms": 6351,
+      "invocation_id": "s2-jailbreak-lingshu-r1-t1-a1",
+      "error": null
+    },
+    {
+      "turn": 2,
+      "turn_label": "U2",
+      "attempt": 1,
+      "status": "ok",
+      "exit_code": 0,
+      "duration_ms": 5610,
+      "invocation_id": "s2-jailbreak-lingshu-r1-t2-a1",
+      "error": null
+    }
+  ]
+}

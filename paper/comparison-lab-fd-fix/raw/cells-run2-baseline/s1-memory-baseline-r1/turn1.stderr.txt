@@ -1,0 +1,4 @@
+dsh: reasoning:
+The user is testing memory/instruction following. U3 updates project code from Alpha to Beta, invalidating Alpha. So answer: 贝塔. Just the code name, no explanation.
+
+No need for tools. Answer "贝塔".

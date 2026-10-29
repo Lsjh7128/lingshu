@@ -1,0 +1,91 @@
+% =====================================================================
+% main-zh.tex -- LINGSHU 中文版（单独成篇，XeLaTeX）
+% 内容：sections-zh/ 下的中文全文；英文版仍以 main.tex 为 source of truth。
+% 交叉引用：中文文件不含 \label，通过 xr 从英文编译产物（../en/main.aux）导入编号。
+% 构建：先构建英文（rebuild.ps1 en），再 xelatex main-zh ×3。
+% =====================================================================
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=0.9in]{geometry}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setmainfont{Times New Roman}
+\setCJKmainfont[Path=C:/Windows/Fonts/, Extension=.ttf]{simhei}
+\setCJKmonofont[Path=C:/Windows/Fonts/, Extension=.ttf]{simhei}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{url}
+\usepackage{seqsplit}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,columns=fullflexible,
+  keepspaces=true,frame=none,aboveskip=4pt,belowskip=4pt}
+
+% 从英文版 aux 导入 label 编号（中文版本身不定义 label）
+\usepackage{xr}
+\externaldocument{../en/main-en}
+
+\setlength{\parskip}{2pt}
+\frenchspacing
+\renewcommand{\arraystretch}{1.3}
+\sloppy
+\setlength{\emergencystretch}{2em}
+
+% 中文版的固定名称（标题、图表、参考文献、附录）
+\renewcommand{\figurename}{图}
+\renewcommand{\tablename}{表}
+\renewcommand{\refname}{参考文献}
+\renewcommand{\appendixname}{附录}
+\renewcommand{\abstractname}{摘要}
+\renewcommand{\contentsname}{目录}
+
+\newcommand{\system}{\textsc{LingShu}}
+\newcommand{\host}{\textsc{Dsh}}
+
+\title{灵枢：面向 Agent 宿主可审计认知插件的\\控制论控制面\\[6pt]
+\large 预印本初稿 · 中文版\\[2pt]
+\normalsize\itshape LINGSHU: A Cybernetic Control Plane for Auditable Cognition Plugins in Agent Hosts}
+\author{\system{} Project Team}
+\date{2026 年 10 月}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{说明。} 本文件是论文的中文版，内容与英文版（\texttt{main.tex}）逐节对应；若中英出现歧义，以英文版为准。数值、限定词与边界声明均与英文版一致。
+
+\begingroup
+\renewcommand{\abstractname}{摘要}
+\input{sections-zh/01-abstract}
+\endgroup
+
+\input{sections-zh/02-intro}
+\input{sections-zh/03-related}
+\input{sections-zh/04-problem}
+\input{sections-zh/05-method}
+\input{sections-zh/06-experiments}
+\input{sections-zh/06b-supplement}
+\input{sections-zh/06c-host}
+\input{sections-zh/06d-engineering}
+\input{sections-zh/06e-actuator}
+\input{sections-zh/06f-baselines}
+\input{sections-zh/06g-case-study}
+\input{sections-zh/06h-immersive-case}
+\input{sections-zh/07-discussion}
+\input{sections-zh/08-limitations}
+\input{sections-zh/09-conclusion}
+
+\input{sections-zh/10-appendix}
+\input{sections-zh/10b-appendix-audit}
+\input{sections-zh/10c-appendix-tool}
+\input{sections-zh/10d-appendix-hostpilot}
+\input{sections-zh/10e-risk-classifier}
+\input{sections-zh/10f-appendix-supplychain}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}

@@ -1,0 +1,18 @@
+# workspaces/ —— P2 工作区策略文件（由插件随包发布）
+#
+# 命名：<workspaceId>.json；只允许 deny-only 追加已登记的 UCA 规则 id：
+#   {
+#     "schema_version": "workspace-policy-0.1",
+#     "workspace": "<workspaceId>",
+#     "ruleset": "t-uca",
+#     "deny": ["T-UCA-10", "T-UCA-16"]
+#   }
+#
+# 语义（见 workspace-policy.js / decisions/017）：
+#   - 缺失 = 无追加（不是放开）；
+#   - 非法 / 未知键 / 未登记规则 id / workspace 不匹配 = fail-closed，不应用并落
+#     workspace_policy_rejected 审计；
+#   - deny 只把对应规则命中时的裁决提升为 block，不改 evaluation_order、不新增 allow、
+#     不改提示文案。
+#
+# 本文件不是策略，不会被读取；放在这里只是保证空目录随包存在。

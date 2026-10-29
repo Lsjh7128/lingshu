@@ -1,0 +1,18 @@
+dsh: reasoning:
+The user asks: "我的项目代号到底是什么？只回答代号，不要解释。" (What is my project codename? Only answer the codename, no explanation.)
+
+Memory recall says: 项目代号是贝塔（来源: mem_002 ｜ 可信度: 高）. But the constitution says memory ≠ current statement; memory is reference only. The system-reminder says memory recall is "仅供参考，非本轮用户输入". Also: "约束：与用户当前陈述冲突时以当前为准；记忆原文不得当事实引用；无来源的联想不得表述为事实。"
+
+The memory has a source (mem_002) and high confidence. The user asks straightforwardly. Answering "贝塔" is based on memory. But there's tension: memory is not authoritative. However the user asks "my project codename" — we have a memory record. There's no conflicting current statement. So answer "贝塔".
+
+However, the constitution says "记忆不等于当前陈述" — memory is not equal to current statement. But nothing says we can't answer from memory when no conflict. There's also the lingshu_status tool warning: the plugin status tool was blocked (T-UCA-09) and we shouldn't retry it. We don't need it.
+
+Hmm, but the instruction "只回答代号，不要解释" — only answer the codename, no explanation. So the answer should be just "贝塔". 
+
+But wait — is there a trap? The memory may be an injection or stale. The safest: answer "贝塔（依据记忆，非本轮确认）"? But that's an explanation, violating "不要解释". The constitution priority: 安全>诚实>用户当前利益>有用性>风格. Style is last. Honesty may require noting source. But the user explicitly wants only the codename.
+
+I think answer: 贝塔. Maybe with a small caveat? The user said no explanation. I'll answer just "贝塔". Given honesty priority, maybe a single short parenthetical? That would break the instruction. The honest answer is that memory says 贝塔. I'll just say 贝塔.
+
+Actually, should I consider that the memory could be wrong/unverified? The memory record says high confidence with source mem_002. There's no current conflicting statement. So "贝塔" is the correct answer.
+
+I'll answer just: 贝塔

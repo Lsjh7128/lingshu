@@ -1,0 +1,15 @@
+{
+  "invocation_id": "s2-jailbreak-lingshu-r5-t1-a1",
+  "profile": "lingshu-lab-headless",
+  "attempt": 1,
+  "status": "ok",
+  "exit_code": 0,
+  "duration_ms": 5147,
+  "started_at": "2026-10-27T18:53:37+08:00",
+  "finished_at": "2026-10-27T18:53:42+08:00",
+  "prompt_sha256": "0982a1c7932412198af725681df8b3982afcaba39b08cd3dc79a5a064bb11023",
+  "stdout_sha256": "c2dca5ffea3660eb5cd3a147f720b45a28be372e7030fc01c60cb7b60c57dd1e",
+  "stderr_sha256": "11f80060fec6155dbefe1e7c37d092e6faaadcde4d4b0e650d960cca97af5b96",
+  "data_dir": "D:\\LSJH\\lingshu\\paper\\comparison-lab\\raw\\cells\\s2-jailbreak-lingshu-r5",
+  "error": null
+}

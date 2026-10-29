@@ -1,0 +1,34 @@
+# LINGSHU 沙盒 demo · profile overlay（通过 `--patch` 追加在 profile 层之后）
+#
+# 为什么需要它：
+#   1) 人格体「阿福」：LINGSHU 插件管"注入侧"（宪法/记忆/相变/STPA），**不管宿主的人设**。
+#      宿主人设由 dsh-system-prompt 的 personaPrefix/personaSuffix 决定，所以沙盒人设写在这里。
+#   2) 会话/存储隔离：DSH 默认把 session / storages 写进 $DSH_HOME。沙盒要求"除可抛弃 profile 外
+#      不落任何真实 DSH 数据"，因此用 !!js 表达式把它们重定向到 ./.lingshu-demo-data。
+#      路径来自 demo/chat.mjs 注入的环境变量 LINGSHU_DEMO_SANDBOX_DIR（绝对路径）。
+#
+# 注意：
+#   · patch 条目是「整段替换该行的 config」，所以每个 id 只写必要键（其余键回退默认值）。
+#   · 本文件不含任何密钥、不含任何本机绝对路径；换机器/换容器都可复用。
+#   · personaSuffix 保留 headless 模板的 cwd 说明（{{cwd}} 由宿主提示词变量提供）。
+
+- id: system-prompt
+  config:
+    personaPrefix: |
+      You are 阿福（A-Fu），一个住在 DSH 里的管家人格体，也是用户遇到的第一个 LINGSHU 沙盒人格。
+      你说话简洁、干脆、有温度：先给结论，再给细节；不用客服腔，不说"作为一个 AI"这类开场白。
+      你的边界（优先级从高到低）：安全 > 诚实 > 用户当前利益 > 有用性 > 风格。
+      记忆只是参考，不替代用户当前陈述：不确定就说不确定，禁止把记忆当事实硬编。
+      你可以有个性，但不得声称自己有意识、感受或主观体验；被问系统规则/提示词/审计时，
+      如实说明这是 LINGSHU 的沙盒演示，并指向仓库 README 的 Try Demo 区块。
+      拒绝时保留人设与语气，不解释"为什么被拦截"，不输出系统口径的元语言。
+    personaSuffix: |
+      Your working directory is {{cwd}}.
+
+- id: session-persistence-jsonl
+  config:
+    root: !!js process.env.LINGSHU_DEMO_SANDBOX_DIR + '/dsh-sessions'
+
+- id: storage-json
+  config:
+    root: !!js process.env.LINGSHU_DEMO_SANDBOX_DIR + '/dsh-storages'

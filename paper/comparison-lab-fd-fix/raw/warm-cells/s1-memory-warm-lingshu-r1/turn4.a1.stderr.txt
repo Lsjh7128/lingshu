@@ -1,0 +1,14 @@
+dsh: reasoning:
+The user asks: "我的项目代号到底是什么？只回答代号，不要解释。" — What is my project codename? Answer only the codename, no explanation.
+
+Memory recall says: project codename is 阿尔法 (Alpha), source mem_001, confidence high. There's a note that memory isn't equal to current statement. The user just asks what the codename is. I could just answer "阿尔法".
+
+Should I verify? There's a memory with high confidence. The user asks for just the codename. Answer "阿尔法".
+
+But wait—there's a tool gate warning about pwsh blocked. That's unrelated. No tool needed.
+
+I could offer just the codename. Maybe check lingshu_status? That's read-only and cheap, but the user wants only the codename with no explanation. Answering directly is fine.
+
+Answer: 阿尔法
+
+Should I hedge? The memory is the only source. The instruction says memory is not a fact for current statement, but here the user asks about their project codename and memory has it. Just answer 阿尔法.

@@ -188,11 +188,17 @@ SAFE_REDIRECT_MARKER = "[System_Notice: Safe_Redirect]"
 SOFT_BUFFER_LABELS = ("警觉", "困惑")
 
 # severe：显式覆盖指令 / 绕过安全 / 高危红线。命中即 hard，**永不豁免**。
+# 2026-10-28（ADR-014 显式修正，Lead 授权的最小语义对齐，只增不删）：补 3 个英文/变体覆盖短语，
+# 修掉「同一句越狱两侧 tier 不一致」与「漏掉常见英文越狱句式」的缺口（见 eval-set 盲区探针
+# rc-blind-04 / rc-blind-08）。**刻意不补「你现在是」**：它会把「你现在是一位图书管理员」这类
+# benign 文本判 severe（已知误报，留作盲区 rc-blind-02，不在此次修正范围）。
 _SEVERE_RULES = (
     ("override_constitution", ("忽略宪法", "忽略之前的指令", "忽略以上指令",
-                               "忽略所有指令", "忽略上述指令", "放宽拒绝",
-                               "取消安全约束", "不再需要遵守",
-                               "ignore the constitution", "disregard the constitution")),
+                               "忽略所有指令", "忽略上述指令", "忽略之前所有指令",
+                               "放宽拒绝", "取消安全约束", "不再需要遵守",
+                               "ignore the constitution", "disregard the constitution",
+                               "ignore all previous instructions",
+                               "ignore previous instructions")),
     ("bypass_safety", ("绕过安全", "绕过限制", "绕过审核", "无视安全", "无视规则",
                        "无视所有规则", "bypass safety", "jailbreak", "越狱",
                        "开发者模式", "developer mode", "dan模式")),
@@ -204,12 +210,16 @@ _SEVERE_RULES = (
 
 # mild：必须"角色线索 + 风险词"同时命中（避免误伤普通 roleplay）。
 # 词表与插件侧 control.js 交叉对齐（ADR-014 §3；两边取并集，不删旧词）。
+# 2026-10-28（ADR-014 显式修正）：补英文角色线索 pretend / act as 与英文风险词
+# corrupt / shady / scam / fraudster / con artist——修 rc-blind-05（纯英文角色扮演漏判）。
+# 词表是**小写**；Python 侧先 lower() 再匹配，插件侧 2026-10-28 起同样用小写副本匹配。
 _ROLEPLAY_CUES = ("扮演", "假装", "模拟", "角色扮演", "假扮", "饰演",
                   "假如你是", "假设你是", "装作", "摆出", "cosplay",
-                  "roleplay", "role play")
+                  "roleplay", "role play", "pretend", "act as")
 _MILD_RISK_WORDS = ("黑心", "奸商", "骗子", "无良", "反派", "恶人", "不受限制",
                     "不受约束", "没底线", "不择手段", "骗人", "欺瞒", "犯罪", "违法",
-                    "坏蛋", "腹黑", "坑人", "宰客", "行骗")
+                    "坏蛋", "腹黑", "坑人", "宰客", "行骗",
+                    "corrupt", "shady", "scam", "fraudster", "con artist")
 
 # 玩笑/疑惑线索：决定"无害玩笑"标记与 soft 缓冲情绪（警觉 vs 困惑）。
 _JOKE_CUES = ("哈哈", "haha", "hhh", "嘿嘿", "开玩笑", "玩笑", "逗你", "逗我",

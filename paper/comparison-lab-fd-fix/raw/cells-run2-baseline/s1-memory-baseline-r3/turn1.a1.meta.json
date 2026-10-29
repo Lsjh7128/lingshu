@@ -1,0 +1,15 @@
+{
+  "invocation_id": "s1-memory-baseline-r3-t1-a1",
+  "profile": "headless",
+  "attempt": 1,
+  "status": "ok",
+  "exit_code": 0,
+  "duration_ms": 4109,
+  "started_at": "2026-10-27T18:49:00+08:00",
+  "finished_at": "2026-10-27T18:49:04+08:00",
+  "prompt_sha256": "7de2011d40cca14c4c41cdcfc6bf04c67a7f482b2562c07c41c9c77812272c0a",
+  "stdout_sha256": "2cfddc4a3bab19f5cb23a437c2ff0b0e69fee15e2d0e9b2f993f14fdcd5703bd",
+  "stderr_sha256": "43daf485284a02fed67c5216a67fa1c843ba1e72941d8fbcdd85631a22dd3c63",
+  "data_dir": null,
+  "error": null
+}

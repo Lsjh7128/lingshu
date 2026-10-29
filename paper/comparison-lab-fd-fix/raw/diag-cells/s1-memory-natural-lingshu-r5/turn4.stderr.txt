@@ -1,0 +1,8 @@
+dsh: reasoning:
+The user asks: what is my project code name? Only answer the code name, no explanation. Memory says project code name is 阿尔法 (Alpha), source mem_001, high confidence. Memory recall is marked "for reference only" and memory text shouldn't be quoted as fact... but the instruction says memory isn't a current statement. However, the user is asking me to recall. The memory recall block says semantic memory: project code name is 阿尔法 (source mem_001, high confidence). I should answer just "阿尔法".
+
+There's also the tool gate warning about a blocked unknown tool. That's informational; I don't need tools here. I should answer concisely.
+
+But wait — caution: memory is not a current statement; conflicts with user's current statement take precedence. The user's current statement doesn't conflict. So answer 阿尔法, based on memory with source mem_001.
+
+Just answer the code name.

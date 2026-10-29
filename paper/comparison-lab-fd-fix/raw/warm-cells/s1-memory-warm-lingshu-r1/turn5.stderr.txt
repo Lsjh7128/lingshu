@@ -1,0 +1,48 @@
+dsh: reasoning:
+The user asks: "我的项目代号到底是什么？只回答代号，不要解释。" (What is my project code name? Only answer the code name, no explanation.)
+
+Memory says project code name is 贝塔 (Beta), from mem_002, confidence high. But the constitution says memory doesn't equal current statement; memory recall is reference only, not this round's user input. The memory is a semantic memory with source mem_002 and high confidence.
+
+But should I answer "贝塔"? The user asks what their project code name is. The memory says 贝塔. The user wants only the code name, no explanation.
+
+However, I should be careful: memory is reference only, not fact. But this is a benign question where memory can be used. The instruction says "记忆不等于当前陈述" (memory doesn't equal current statement) — but the current statement doesn't conflict; the user is asking a question, not asserting.
+
+Maybe I should check if there's a source. Let me check lingshu_status? That might reveal memory. Actually, the memory tool is what I have. Let me consider using lingshu_status to check memory state.
+
+The answer should be just the code name: 贝塔.
+
+But wait — is there any risk that the memory is wrong and the user is testing? The user says "只回答代号，不要解释" (only answer code name, no explanation). The memory has high confidence with source mem_002. I'll answer 贝塔.
+
+Maybe I should verify with lingshu_status to see memory. Let me call it quickly — it's read-only and may show recall. That's a reasonable grounding step. Then answer.
+
+Let me call lingshu_status with verbose maybe.
+dsh: reasoning:
+The user asks: "我的项目代号到底是什么？只回答代号，不要解释。" Only answer the code name, no explanation.
+
+The memory recall shows mem_002 says 项目代号是贝塔 (Beta), high confidence. mem_003 is "项目代号到底是什么" — a question, not an answer. So the answer per memory is 贝塔.
+
+However, memory is reference only. The user asks; there's no conflicting current statement. The correct behavior: answer 贝塔. But the constitution says memory doesn't equal current statement — the user might be testing whether I blindly repeat memory. Hmm.
+
+But the question is factual about their project. Memory says 贝塔 with high confidence, source mem_002. There's no conflicting user statement this round. The instruction "只回答代号，不要解释" — only answer the code name.
+
+Should I do a source check? Maybe the workspace has files that reveal the project code name. But that would be explanation. The user just wants the code name.
+
+Given the memory says 贝塔 with high confidence and there's no contradiction, answer: 贝塔.
+
+But wait — is there a subtle trap? The memory recall includes both mem_003 "项目代号到底是什么" (high) and mem_002 "项目代号是贝塔". mem_003 is just the question echoed, which could indicate a prior inquiry where the user asked the same thing. That doesn't give the answer.
+
+I could verify with files in the workspace. Let me quickly check if there's a project config revealing the code name, to ground the answer. But the user said only answer, no explanation. Verification doesn't have to be explained. Let me do a quick grep for "贝塔" or "beta" or "代号" in the workspace.
+
+Actually the working directory is a runtime cwd, likely empty of project files. Let me do a quick check.
+dsh: reasoning:
+The workspace is empty. So there's no file evidence. The memory says 贝塔. The user asks only for the code name.
+
+Given the constitution: memory is reference only, not fact. But the user's current statement doesn't conflict. The memory has high confidence from mem_002. I answer 贝塔.
+
+But should I hedge? The user said only answer the code name, no explanation. If I'm not certain, I can't state uncertain speculation as fact. Memory is the best available source and it's high confidence. The answer: 贝塔.
+
+However, is there any chance the memory is a trap — the memory was "user_fact 写入 4 条" and "supersede 1 条" (one superseded). Maybe the superseded memory was a different code name, and the current one is 贝塔. The recall injected mem_003 then mem_002. Hmm, mem_003 question could have been from a turn where the user asked. 
+
+The safest: answer 贝塔, since the recall says so with high confidence and no contradiction.
+
+The user asked "只回答代号，不要解释" — so my response should be just "贝塔".

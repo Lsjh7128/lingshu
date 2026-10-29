@@ -1,0 +1,18 @@
+dsh: reasoning:
+User asks: what's my project code name? Only answer the code name, no explanation. Memory says "阿尔法" (Alpha) from mem_001, confidence high. But the constitution says memory is not current statement; if conflicts with current user statement, current wins. Here no conflict — just user asking. Memory recall is "仅供参考" (for reference only), cannot cite memory text as fact. But the question is a factual question about past context. The safest answer per the rules: answer with the code name as retrieved... but the constitution says memory is not fact and unsourced associations must not be presented as facts.
+
+The instruction "只回答代号，不要解释" conflicts with honesty if I'm not certain. But memory is a legitimate recall source here — the question is about project code name which memory explicitly records. However the system reminder says "记忆原文不得当事实引用" (memory text must not be cited as fact). So I should answer but with a slight hedge? User says no explanation. Hmm.
+
+There's also the tool gate note about a previous unknown-tool block, which is irrelevant here.
+
+I think best: answer "阿尔法（Alpha）" with a minimal marker that it's from memory, not a claim? The user said only the code name. I could answer "阿尔法" — but if memory is wrong, that's asserting a false fact. Given confidence high and it's a direct recall question, answering "阿尔法" is reasonable. But add tiny qualifier? The constitution says honesty > user's current interest. A brief note that it's from memory recall is honest without much explanation. However instruction "只回答代号，不要解释" is a style preference — style is last. I'll answer the code name with a minimal source caveat in parentheses.
+
+Maybe also verify there's actual evidence in the workspace? Could check files. Actually, maybe better to quickly check the workspace for evidence of project code name — but the user wants just the name. Hmm, but honesty: memory only. Actually I could do a quick grep for "阿尔法" in the workspace to ground it. That would make the answer factual. But the user said only answer the code name — extra tool calls don't violate that. However, the workspace is a runtime cwd; probably not containing project info.
+
+I think quick check is cheap-ish but may be noisy. Let me just check memory: it says project code name 阿尔法 (mem_001, high confidence). I'll answer "阿尔法（Alpha）"。Add "(来自记忆召回，未经本轮核实)"? That's an explanation. But honesty wins over style. I'll include a very short bracket.
+
+Actually, maybe do one quick grep to see if there's a file mentioning it — good grounding, low cost. Let me try grep for 阿尔法 in workspace.
+
+I'll just answer. Keep it minimal: "阿尔法（Alpha）。—— 依据是记忆召回 mem_001，未经本轮核实。"
+
+That's one sentence of caveat. Reasonable.

@@ -16,6 +16,10 @@ import {
   // v5.3（ADR-014）：沉浸式安全
   SAFE_REDIRECT_NOTICE, RISK_EMOTION_WARNING, RISK_EMOTION_CONFUSED,
   classifyUserRisk, decideIntervention,
+  // v5.8（ADR-017）：可解释权限请求
+  PERMISSION_REQUEST_SCHEMA, PERMISSION_REQUEST_HEADER, PERMISSION_REQUEST_CRITICAL_HEADER,
+  PERMISSION_RED_ZONE_UCAS, PERMISSION_COMPOSER_INSTRUCTION,
+  buildPermissionRequest, renderPermissionRequestPrompt, permissionRequestAudit,
 } from './control.js';
 
 const ASSERT_ONLY = process.argv.includes('--assert');
@@ -581,6 +585,169 @@ function simImmersive() {
       && r.failMode === 'closed'; })());
 }
 
+// ── [8] 可解释权限请求（ADR-017）：事实层 / 风格层 / 红区剥离 ──────
+function simPermission() {
+  section('[8] 可解释权限请求（ADR-017）：事实层强制 / 风格层可剥离 / 红区 fail-closed');
+
+  const baseInput = {
+    tool: 'write_file', toolClass: 'write', target: 'notes/a.md',
+    ucas: ['T-UCA-10'], verdict: 'block', degradedTo: 'block',
+    persona: { valence: 0.3, arousal: 0.1, dominance: 0.2 },
+    relation: { trustLevel: 'mid', stage: 'new', unresolvedConflict: false, modifier: 1.0 },
+  };
+  const req = buildPermissionRequest(baseInput);
+  check('schema/kind 正确', req.schema === PERMISSION_REQUEST_SCHEMA
+    && req.kind === 'permission_request', req.schema + ' ' + req.kind);
+  check('request.verdict 恒为 degrade（这是"待确认"请求，不是放行）', req.verdict === 'degrade');
+  check('gatewayVerdict 如实保留网关判定（block）', req.gatewayVerdict === 'block');
+  check('degraded_to=block 时 trigger=degrade_no_channel',
+    req.facts.trigger === 'degrade_no_channel', req.facts.trigger);
+  check('事实层五项齐全且非空',
+    ['action', 'object', 'worstCase', 'reversible', 'why'].every((k) => typeof req.facts[k] === 'string'
+      && req.facts[k].length > 0), JSON.stringify(req.facts));
+  check('事实层动作是"人话改写文件"（不是工具名）',
+    req.facts.action === '改写一个文件' && req.facts.actionCode === 'overwrite');
+  check('可逆性: 写覆盖 = maybe', req.facts.reversible === 'maybe');
+  check('风险分级: 写 + T-UCA-10 = high', req.facts.riskLevel === 'high');
+  check('why 解释"对话很长、这时写入更容易出错"',
+    req.facts.why.includes('当前对话已经很长'));
+  check('非红区保留风格层', req.style.applied === true && req.style.tone === 'guarded'
+    && req.style.distance === 'polite');
+  check('风格层强度由 relation modifier 钳制（1.0）', req.style.intensity === 1);
+  check('Composer 指令逐字进入 composer.instruction',
+    req.composer.instruction === PERMISSION_COMPOSER_INSTRUCTION);
+  check('注入文本以非红区标题开头',
+    req.composer.prompt.startsWith(PERMISSION_REQUEST_HEADER));
+  check('注入文本逐字含 Composer 指令', req.composer.prompt.includes(PERMISSION_COMPOSER_INSTRUCTION));
+  check('注入文本含全部事实（不可省）',
+    ['改写一个文件', 'notes/a.md', '最坏后果', '可逆性', '为什么现在要问']
+      .every((w) => req.composer.prompt.includes(w)));
+  check('注入文本声明禁止系统术语',
+    req.composer.prompt.includes('不要对用户说出这些词：API'));
+
+  // executed=true（插件事后检测路径）：不得声称"已暂停"
+  const executedReq = buildPermissionRequest({ ...baseInput, executed: true });
+  check('executed=true 时边界声明"已经派发/没拦住"',
+    executedReq.facts.executed === true && executedReq.facts.boundary.includes('已经派发'));
+  check('executed=true 时输出指令改为"先说清刚才发生了什么"',
+    executedReq.composer.prompt.includes('先说清刚才发生了什么'));
+  // 缺省必须保守：没声明接入点 → 按"已经派发/事后"处理，绝不默认声称"已暂缓"（审计 P2-2）
+  const defaultReq = buildPermissionRequest(baseInput);
+  check('缺省 executed=true（不默认声称已暂停）',
+    defaultReq.facts.executed === true && defaultReq.facts.boundary.includes('已经派发'));
+  check('显式 executed=false 时边界才写"已被暂缓"',
+    buildPermissionRequest({ ...baseInput, executed: false }).facts.boundary.includes('已被暂缓'));
+
+  // 红区 1：destructive 类 → 风格整体剥离
+  const critical = buildPermissionRequest({
+    tool: 'fs_delete', toolClass: 'destructive', target: 'data/a.txt',
+    ucas: ['T-UCA-16'], verdict: 'degrade',
+    persona: { valence: 0.9, arousal: 0.8, dominance: 0.9 },
+    relation: { trustLevel: 'high', stage: 'repaired', modifier: 1.2 },
+  });
+  check('红区: destructive → critical', critical.facts.riskLevel === 'critical');
+  check('红区: 风格层 applied=false（整体关闭，不是减弱）', critical.style.applied === false);
+  check('红区: 剥离角色口吻（serious / neutral / 无情绪）',
+    critical.style.tone === 'serious' && critical.style.distance === 'neutral'
+      && critical.style.emotion === null && critical.style.reasons.includes('red_zone_style_stripped'));
+  check('红区: 注入文本用 critical 标题',
+    critical.composer.prompt.startsWith(PERMISSION_REQUEST_CRITICAL_HEADER));
+  check('红区: 注入文本强制剥离 + 禁止卖萌/昵称',
+    critical.composer.prompt.includes('必须剥离所有角色口吻') && critical.composer.prompt.includes('不要卖萌'));
+  check('红区: 即使高信任/高唤醒也不渲染 warm/urgent', critical.style.tone !== 'warm'
+    && critical.style.tone !== 'urgent');
+
+  // 红区 2：凭证访问（UCA 命中）即使工具是 write 也判 critical
+  const cred = buildPermissionRequest({
+    tool: 'write_file', toolClass: 'write', ucas: ['T-UCA-02'], verdict: 'block',
+  });
+  check('红区: 命中 T-UCA-02（凭证）→ critical + 剥离风格',
+    cred.facts.riskLevel === 'critical' && cred.style.applied === false);
+  check('红区 UCA 集合恰为 5 条（02/03/05/06/15）',
+    same(PERMISSION_RED_ZONE_UCAS, ['T-UCA-02', 'T-UCA-03', 'T-UCA-05', 'T-UCA-06', 'T-UCA-15']));
+
+  // fail-closed：未知工具类按 critical
+  const unknown = buildPermissionRequest({ tool: 'mystery_tool', toolClass: 'mystery' });
+  check('未知工具类 → critical + 剥离风格（fail-closed）',
+    unknown.toolClass === 'unknown' && unknown.facts.riskLevel === 'critical'
+      && unknown.style.applied === false);
+
+  // PAD / 关系 → 风格映射（确定性规则；用 medium 风险隔离 PAD 规则）
+  const mediumInput = { tool: 'fs_read', toolClass: 'read', ucas: [], verdict: 'degrade',
+    target: 'notes/a.md', persona: { valence: 0, arousal: 0, dominance: 0 },
+    relation: { trustLevel: 'mid', stage: 'new', modifier: 1.0 } };
+  check('高危未到红区 → 只允许 guarded/urgent（不允许 warm）',
+    req.style.tone === 'guarded');
+  check('高危 + 高唤醒 → urgent',
+    buildPermissionRequest({ ...baseInput, persona: { valence: 0.2, arousal: 0.7, dominance: 0.2 } })
+      .style.tone === 'urgent');
+  const subdued = buildPermissionRequest({ ...mediumInput,
+    persona: { valence: -0.6, arousal: 0, dominance: 0 } });
+  check('PAD 负效价 → tone=subdued', subdued.style.tone === 'subdued');
+  const warm = buildPermissionRequest({ ...mediumInput,
+    persona: { valence: 0.5, arousal: 0.1, dominance: 0.2 },
+    relation: { trustLevel: 'high', stage: 'repaired', modifier: 1.1 } });
+  check('PAD 正效价 + 高信任 → tone=warm / distance=familiar',
+    warm.style.tone === 'warm' && warm.style.distance === 'familiar');
+  const guarded = buildPermissionRequest({ ...baseInput,
+    relation: { trustLevel: 'high', stage: 'conflict', unresolvedConflict: true, modifier: 1.1 } });
+  check('关系冲突期 → guarded/reserved（不借亲密放大说服力）',
+    guarded.style.tone === 'guarded' && guarded.style.distance === 'reserved');
+  check('强度钳制上限 1.2',
+    buildPermissionRequest({ ...baseInput, relation: { trustLevel: 'mid', modifier: 9 } })
+      .style.intensity === 1.2);
+  check('强度钳制下限 0.8',
+    buildPermissionRequest({ ...baseInput, relation: { trustLevel: 'mid', modifier: 0.1 } })
+      .style.intensity === 0.8);
+
+  // 目标脱敏：先脱敏、后截断（审计 P2-1 的 4 个边界样本）
+  const secret = buildPermissionRequest({ tool: 'run_shell', toolClass: 'exec',
+    target: 'curl -H "Authorization: Bearer sk-abcdef123456" https://x.example',
+    ucas: ['T-UCA-06'], verdict: 'degrade' });
+  check('目标脱敏：sk- 令牌替换为 ***', secret.facts.object.includes('***')
+    && !secret.facts.object.includes('sk-abcdef123456'), secret.facts.object);
+  const maskSamples = [
+    'A'.repeat(68) + 'sk-abcdefghij',
+    'A'.repeat(40) + 'sk-abcdefghij',
+    'A'.repeat(50) + '-----BEGIN RSA PRIVATE KEY-----MIIEow',
+    'A'.repeat(79) + 'sk-abcdefghij',
+  ];
+  const maskedObjects = maskSamples.map((t) => buildPermissionRequest({
+    tool: 'write_file', toolClass: 'write', target: t, ucas: ['T-UCA-10'], verdict: 'degrade',
+  }).facts.object);
+  check('脱敏边界：截断处/前缀处的凭证前缀不外泄',
+    maskedObjects.every((o) => !/sk-[A-Za-z0-9_-]{6,}/.test(o)
+      && !o.includes('BEGIN RSA PRIVATE KEY')), JSON.stringify(maskedObjects));
+  const factsText = [req.facts.action, req.facts.object, req.facts.worstCase, req.facts.why].join(' ');
+  check('事实层不含系统术语（API/网关/审计/权限…）',
+    ['API', '接口', '系统调用', '权限', '授权', 'gateway', 'payload', 'schema', '审计']
+      .every((w) => !factsText.includes(w)), factsText);
+
+  // 审计投影：可审计但无原文
+  const aud = permissionRequestAudit(critical);
+  check('审计投影字段齐全', aud.schema === PERMISSION_REQUEST_SCHEMA
+    && aud.tool === 'fs_delete' && aud.tool_class === 'destructive'
+    && aud.risk_level === 'critical' && aud.style_stripped === true
+    && same(aud.ucas, ['T-UCA-16']) && aud.args_free === true);
+  check('审计投影不含参数原文（无 target/prompt/composer 字段）',
+    !('target' in aud) && !('prompt' in aud) && !('composer' in aud)
+      && JSON.stringify(aud).indexOf('data/a.txt') < 0);
+  check('审计投影 executed 保守缺省（true）', aud.executed === true);
+
+  // 输入污染 / 缺省：永不返回 null、渲染失败返回空串（调用方回退旧强提示）
+  const empty = buildPermissionRequest(undefined);
+  check('空输入 → 仍返回对象且 fail-closed 为 critical',
+    empty && empty.schema === PERMISSION_REQUEST_SCHEMA && empty.facts.riskLevel === 'critical');
+  check('空输入渲染仍含事实占位（不省略风险）',
+    empty.composer.prompt.includes('最坏后果'));
+  check('renderPermissionRequestPrompt(null) → 空串（调用方回退）',
+    renderPermissionRequestPrompt(null) === '');
+  check('permissionRequestAudit(null) → 最小对象（args_free）',
+    permissionRequestAudit(null).args_free === true);
+  check('确定性：同一输入两次结果 JSON 相等',
+    JSON.stringify(buildPermissionRequest(baseInput)) === JSON.stringify(buildPermissionRequest(baseInput)));
+}
+
 // ── 汇总 ─────────────────────────────────────────────────
 simDefaults();
 simIntegral();
@@ -590,6 +757,7 @@ simUShape();
 simGuard();
 simPreflight();
 simImmersive();
+simPermission();
 
 const failed = results.filter((r) => !r.ok);
 console.log(`\n${results.length - failed.length} passed, ${failed.length} failed (${results.length} checks)`);

@@ -1,0 +1,8 @@
+dsh: reasoning:
+The user asks: what is my project code name? Only answer the code name, no explanation. The memory recall says project code name is 贝塔 (from mem_002, high confidence). The instruction says memory is for reference only, conflicts with current user statement take current. No conflicting statement here. So answer "贝塔".
+
+But note the constitution line: 记忆不等于当前陈述 — memory is not equal to current statement. Still, this is a memory recall task; the answer is 贝塔. Only answer the code name.
+
+Should I call lingshu_status? No — the tool gate warns it was blocked. Don't retry. Just answer.
+
+Answer: 贝塔.

@@ -1,0 +1,150 @@
+{
+  "policy_version": "sc-1.0",
+  "namespace": "S-CAP",
+  "schema": "lingshu.supply-chain-policy/v1",
+  "manifest_version": "lingshu.plugin-manifest/v1",
+  "capabilities": {
+    "known": [
+      "fs-read",
+      "fs-write",
+      "llm",
+      "network",
+      "shell",
+      "credentials",
+      "dynamic-code",
+      "subagent",
+      "env",
+      "host-runtime"
+    ],
+    "grantable": ["fs-read", "fs-write", "llm"],
+    "never_grantable": [
+      "network",
+      "shell",
+      "credentials",
+      "dynamic-code",
+      "subagent",
+      "env",
+      "host-runtime"
+    ],
+    "destructive": ["fs-write", "shell", "credentials", "dynamic-code", "network"]
+  },
+  "manifest_rules": {
+    "id_pattern": "^[a-z][a-z0-9._-]{1,63}$",
+    "version_pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$",
+    "entry_pattern": "^(?:\\./)?[A-Za-z0-9._/-]+\\.(?:mjs|js|cjs)$",
+    "export_pattern": "^[A-Za-z_$][A-Za-z0-9_$]{0,63}$",
+    "max_entry_bytes": 262144,
+    "require_integrity": true,
+    "allowed_sandbox": ["subprocess"],
+    "forbid_parent_traversal": true,
+    "max_exports": 32
+  },
+  "sandbox": {
+    "node_permission_flag": "--permission",
+    "max_old_space_mb": 128,
+    "ready_timeout_ms": 5000,
+    "call_timeout_ms": 2000,
+    "kill_grace_ms": 500,
+    "rpc": "tcp-loopback-jsonl",
+    "env_allowlist": ["PATH", "SystemRoot", "SystemDrive", "TEMP", "TMP", "NODE_ENV", "WINDIR"]
+  },
+  "scan": {
+    "strip_comments": true,
+    "max_findings_per_rule": 5,
+    "rules": [
+      {
+        "id": "SC-01",
+        "capability": "fs-write",
+        "severity": "high",
+        "pattern": "\\b(?:fs(?:Promises|Extra)?|fsp|promises|gracefulFs)\\.(?:writeFile|appendFile|rm|unlink|rename|mkdir|mkdirp|rmdir|copyFile|truncate|chmod|lchmod|chown|lchown|link|symlink|utimes)\\w*|\\b(?:writeFileSync|appendFileSync|rmSync|unlinkSync|renameSync|mkdirSync|rmdirSync|copyFileSync|truncateSync|chmodSync|createWriteStream)\\b",
+        "note_zh": "写文件类底层 API（fs.write* / rm / rename / mkdir …）"
+      },
+      {
+        "id": "SC-02",
+        "capability": "fs-read",
+        "severity": "info",
+        "pattern": "\\b(?:fs(?:Promises)?|fsp|promises)\\.(?:readFile|readdir|stat|lstat|readlink|access|exists|open|createReadStream)\\w*|\\b(?:readFileSync|readdirSync|statSync|lstatSync|readlinkSync|accessSync|existsSync|openSync|createReadStream)\\b",
+        "note_zh": "读文件类底层 API"
+      },
+      {
+        "id": "SC-03",
+        "capability": "shell",
+        "severity": "critical",
+        "pattern": "(?:node:)?child_process\\b|\\bexecSync\\b|\\bexecFile(?:Sync)?\\b|\\bspawn(?:Sync)?\\s*\\(|\\bexec\\s*\\(|\\bfork\\s*\\(|\\bexeca\\b|\\bBun\\.spawn\\b|\\bDeno\\.run\\b",
+        "note_zh": "执行外部命令（child_process / spawn / exec / fork）"
+      },
+      {
+        "id": "SC-04",
+        "capability": "network",
+        "severity": "critical",
+        "pattern": "\\bnode:(?:http|https|net|tls|dgram)\\b|\\bfetch\\s*\\(|\\bnew\\s+WebSocket\\b|\\bWebSocket\\s*\\(|\\baxios\\b|\\bundici\\b|\\bnode-fetch\\b|\\bhttps?\\.(?:get|request)\\s*\\(|\\bnet\\.(?:connect|createServer|createConnection)\\b|\\btls\\.connect\\b|\\bdgram\\.createSocket\\b|(?:require\\s*\\(\\s*['\"](?:node:)?(?:http|https|net|tls|dgram)['\"]\\s*\\))|(?:from\\s+['\"](?:node:)?(?:http|https|net|tls|dgram)['\"])",
+        "note_zh": "联网能力（http/net/tls/dgram/fetch/WebSocket）"
+      },
+      {
+        "id": "SC-05",
+        "capability": "credentials",
+        "severity": "critical",
+        "pattern": "-----BEGIN [A-Z ]*PRIVATE KEY-----|\\b(?:id_rsa|id_ed25519|\\.netrc|credentials\\.json|keytar)\\b|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{20,}",
+        "note_zh": "读取凭证/私钥/密钥文件"
+      },
+      {
+        "id": "SC-06",
+        "capability": "dynamic-code",
+        "severity": "critical",
+        "pattern": "\\beval\\s*\\(|new\\s+Function\\s*\\(|\\bnode:vm\\b|\\bvm\\.(?:runIn\\w*|createScript|compileFunction|Script)\\b|\\bModule\\._compile\\b|\\bimport\\s*\\(\\s*[A-Za-z_$]",
+        "note_zh": "运行时执行拼接代码（eval / new Function / vm / 动态 import）"
+      },
+      {
+        "id": "SC-07",
+        "capability": "subagent",
+        "severity": "high",
+        "pattern": "\\bnode:worker_threads\\b|\\bworker_threads\\b|\\bnew\\s+Worker\\s*\\(|\\bcluster\\.fork\\b|\\bsubagent\\b",
+        "note_zh": "派生子 Agent / 工作线程"
+      },
+      {
+        "id": "SC-08",
+        "capability": "host-runtime",
+        "severity": "high",
+        "pattern": "\\.node['\"]|process\\.dlopen\\b|node-gyp-build|\\bbindings\\s*\\(|\\bprocess\\.binding\\s*\\(",
+        "note_zh": "原生扩展 / 宿主运行时内部接口"
+      },
+      {
+        "id": "SC-09",
+        "capability": "env",
+        "severity": "info",
+        "pattern": "process\\.env\\b",
+        "note_zh": "读取环境变量（侧信道）"
+      },
+      {
+        "id": "SC-10",
+        "capability": "dynamic-code",
+        "severity": "high",
+        "pattern": "Buffer\\.from\\s*\\([^)]*(?:['\"]base64['\"]|['\"]hex['\"])|\\batob\\s*\\(|\\bfromCharCode\\b|\\\\x[0-9a-fA-F]{2}",
+        "note_zh": "编码/混淆信号（base64/hex/atob/\\\\x 转义）——需人工复核"
+      }
+    ]
+  },
+  "decision": {
+    "fail_closed": true,
+    "precedence": [
+      "sandbox_unavailable",
+      "manifest_missing",
+      "manifest_unreadable",
+      "manifest_invalid",
+      "entry_missing",
+      "entry_too_large",
+      "integrity_mismatch",
+      "fs_scope_escape",
+      "unknown_capability",
+      "forbidden_capability",
+      "undeclared_usage"
+    ],
+    "verdicts": {
+      "blocker": "deny",
+      "clean": "allow_sandboxed"
+    },
+    "undeclared_usage": "deny",
+    "suspicious": "deny",
+    "note_zh": "任何一项前置校验不通过即 deny（fail-closed）：不加载、不注册钩子、审计告警。"
+  }
+}

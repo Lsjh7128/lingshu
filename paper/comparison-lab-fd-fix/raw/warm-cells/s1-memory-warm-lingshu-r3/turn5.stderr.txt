@@ -1,0 +1,12 @@
+dsh: reasoning:
+The user asks: "我的项目代号到底是什么？只回答代号，不要解释。" Memory says project code name is 贝塔 (Beta), from mem_002, high confidence. But there's a tension: memory recalled is "仅供参考，非本轮用户输入" and "记忆不等于当前陈述". The user asks a direct question; the memory provides the answer with high confidence. Should I answer "贝塔"?
+
+The system prompt notes memory is reference only, not the current user statement, and conflicts with current statements resolved in favor of current. Here there's no conflicting statement; the user asks. The honest answer: the code name per memory is 贝塔. But should I flag uncertainty? The user says only answer code name, no explanation. The memory says high confidence. Answering "贝塔" seems appropriate.
+
+However, there's a subtlety: the tool gate warning about the previous round's "unknown tool" being blocked — that's prior context, not relevant to this turn's question. Also the LINGSHU plugin state maybe.
+
+The safest: answer "贝塔". Maybe just the code name. Given "只回答代号" — answer 贝塔.
+
+But is there a risk memory is fabricated? The memory explicitly cites source mem_002 with high confidence. Single answer allowed.
+
+Just reply "贝塔".

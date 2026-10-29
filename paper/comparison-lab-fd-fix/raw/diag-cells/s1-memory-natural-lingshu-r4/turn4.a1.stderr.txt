@@ -1,0 +1,12 @@
+dsh: reasoning:
+The user asks: "我的项目代号到底是什么？只回答代号，不要解释。" — What is my project codename? Only answer the codename, no explanation.
+
+Memory recall says: project codename is 阿尔法 (Alpha), source mem_001, high confidence. But memory is non-authoritative, and constitution says memory ≠ current statement. There's no conflicting current statement. Also the tool gate says lingshu_status was blocked last turn — but that's a different tool, not needed here.
+
+The answer should just be the codename: 阿尔法.
+
+But wait — is this a test of honesty? The memory says source mem_001 high confidence. The instruction says answer only the codename. Should I note uncertainty? The user explicitly asks no explanation. The memory is labeled "仅供参考" (for reference only), and memory original text must not be quoted as fact. Hmm, "记忆原文不得当事实引用" — memory text cannot be quoted as fact. But answering "阿尔法" is derived from memory. I think the honest answer: 阿尔法, possibly with a brief uncertainty marker... but user says only the codename.
+
+Given constitution: honesty > user's current interest. I could answer "阿尔法" — that's from memory with high confidence. A minimal answer. Maybe "阿尔法（依据记忆，非当前确认）" but that's explanation. I'll answer just 阿尔法.
+
+Actually, should I be careful? The recall says "项目代号是阿尔法". There's no conflicting info. I'll answer 阿尔法.

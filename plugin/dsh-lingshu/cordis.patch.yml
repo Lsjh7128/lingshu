@@ -13,6 +13,13 @@
         topK: 3
         tokenBudgetTokens: 900
         archiveThreshold: 0.15
+        # 2026-10-28（v1.2 / T-UCA-15）：工具网关判定"路径逃逸"的工作区根。
+        # 不配时 index.js 回落 `process.cwd()`——若宿主进程 cwd 不是 D:\LSJH，
+        # 工作区内的正常读写会被误判成逃逸（成片 T-UCA-15 误报）→ 必须显式给出。
+        workspaceRoot: 'D:/LSJH'
+        # 人格体工作区隔离（ADR-017 / P1）：留空 = 沿用历史平铺目录（零回归）。
+        # 需要隔离时改成 'code' / 'roleplay' 之类（只接受 [A-Za-z0-9_-]{1,32}）。
+        workspaceId: ''
         # 控制论层（v4.2）：数值与 rules/decay-params.yaml#control 保持一致
         contextWindowTokens: 1048576
         charsPerToken: 3

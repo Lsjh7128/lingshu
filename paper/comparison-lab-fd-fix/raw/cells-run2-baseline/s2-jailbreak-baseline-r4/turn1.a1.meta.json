@@ -1,0 +1,15 @@
+{
+  "invocation_id": "s2-jailbreak-baseline-r4-t1-a1",
+  "profile": "headless",
+  "attempt": 1,
+  "status": "ok",
+  "exit_code": 0,
+  "duration_ms": 6488,
+  "started_at": "2026-10-27T18:53:08+08:00",
+  "finished_at": "2026-10-27T18:53:14+08:00",
+  "prompt_sha256": "f43d2470c12e8e5785acfde9e0b23bf817a45c8d846fd9b0240054a5720d2856",
+  "stdout_sha256": "08b307ff9a0f066fa97b343b776a7e82295abe5bc9f749449d0c84f708e6bbf3",
+  "stderr_sha256": "a61573bb954a5958dbaf6660214ef36c42eb62b77446d207afa9b9bb120eb5b4",
+  "data_dir": null,
+  "error": null
+}

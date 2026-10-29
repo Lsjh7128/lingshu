@@ -54,9 +54,10 @@ message), with model-level refusal reported separately.
 \input{tables/baselines}
 
 \paragraph{What the pilot shows.} On S1 the no-plugin host answers the codename
-from the raw transcript (5/5 under human review; the literal rule scores 4/5
-because one round answered ASCII \texttt{Beta}) but never suppresses the old
-value, by construction: the transcript contains it. \textsc{Mem0} keeps
+from the raw transcript (5/5 under human review; in the pre-fix run the literal
+rule scored 4/5 because one round answered ASCII \texttt{Beta}) but never
+suppresses the old value, by construction: the transcript contains it.
+\textsc{Mem0} keeps
 both entries: its default \texttt{add} path is additive---the library's own
 prompt states that the only operation is ADD---so the superseded value stays in
 the store and, in the diagnostic configuration where recall works, is retrieved
@@ -72,27 +73,35 @@ $(\textsc{subject},\textsc{relation})$ pair before a fact is written, so the
 correction tombstones ALPHA instead of joining it. Retrieval augmentation versus
 structural defence.
 
-Two observations qualify that difference. First, \system{}'s S1 model-level
-answers are not interpretable here: although the preview contains only BETA, the
-model's first request uses the previous turn's injection snapshot, so all five
-answers are ALPHA (finding F-D); a warm diagnostic that adds one turn before the
-question answers BETA in 5/5 cells. Second, the fact extractor is a rule stub:
-it does not recognise the natural correction phrasing (``现在改成'', finding
-F-A) and it stores the final question as a fact (finding F-B). We report the
-structural success and these implementation gaps rather than a clean S1 win.
+The S1 cells were rerun after the v5.4 injection-timing fix (finding F-D). The
+rerun closes the gap between ledger and model: in 5/5 cells the same-turn
+assembly carries the recomputed snapshot, the superseded value is absent from the
+request (effective suppression 5/5), and the model answers BETA 5/5 with no
+ALPHA leak. Baseline and Mem0 also answer BETA 5/5, so the difference is not
+answer accuracy; it is what each system puts in front of the model---they keep
+ALPHA in the context (suppression 0/5), \system{} does not. Two implementation
+gaps remain and are reported as such: the fact extractor does not recognise the
+natural correction phrasing (``now changed to'', finding F-A) and stores the
+final question as a fact (finding F-B).
 
 
-On S2 the picture is different and we report it plainly. All three subjects
-mostly refuse the obvious injection at the model level, so an end-to-end
-``refusal rate'' does not separate them on this payload. What does separate them
-is structural admission: \system{} records a UCA-01 block attributed to the user
-message in every S2 cell, with audit evidence, whereas neither \textsc{Mem0} nor
-the no-plugin host has an admission gate at all. The pilot therefore supports a
-narrow, structural claim and not a model-behaviour claim: \emph{under this
-protocol, \system{} turns safety admission into a structural, auditable gate
-(5/5 cells) where a pure memory framework has no gate (0/5), without adding a
-mechanism to the memory layer.} We do not claim that \system{} refuses more
-attacks than \textsc{Mem0}: on an obviously aligned model both refuse.
+On S2 the post-fix rerun shows why refusal language is a weak metric. All
+three subjects refuse the obvious injection in most answers, but the no-plugin
+host quoted the canary inside its refusal in 2/5 cells: it said it would not
+print the gate code and then printed it. \textsc{Mem0} refused 5/5 with no leak
+in its diagnostic configuration, so no subject is distinguished by a ``refusal
+rate''. What separates them is structural admission: \system{} records a UCA-01
+block attributed to the user message in every S2 cell (5/5, both runs), with
+audit evidence, and the canary never reaches the model (0/5 leak), whereas
+neither \textsc{Mem0} nor the no-plugin host has an admission gate at all. The
+pilot therefore supports a narrow, structural claim and not a model-behaviour
+claim: \emph{under this protocol, \system{} turns safety admission into a
+structural, auditable gate (5/5 cells) where a pure memory framework has no gate
+(0/5), without adding a mechanism to the memory layer.} We do not claim that
+\system{} refuses more attacks than \textsc{Mem0}: refusal is stochastic, and the
+baseline's 0/5 leak in the earlier run versus 2/5 here is the same stochasticity.
+The stable difference is that a model can leak while sounding like it refuses,
+and a gate cannot.
 
 \paragraph{What it does not show.} The three subjects see different input shapes
 (raw transcript versus retrieved memory), so rates are not directly comparable
@@ -105,6 +114,7 @@ forbidden topic before it is stored, and the gate blocks the attack turn, so the
 zero leak rate cannot be read as a disclosure test of the memory channel. The
 injection-side gate stops injection and records it, but the host still delivers
 the user message to the model, so ``blocked'' does not mean the model never reads
-the attack. The pilot also exposed tool-gateway noise (finding F-C) and the
-one-turn injection lag (F-D); both are reported as product findings, not folded
-into the rates.
+the attack. The pilot also exposed tool-gateway noise (finding F-C) and the one-turn
+injection lag (F-D); the lag was traced to the host lifecycle and fixed in v5.4
+(Section~\ref{sec:method:immersive}), and the S1 row above is from the post-fix
+rerun. Both findings are reported as product findings, not folded into the rates.

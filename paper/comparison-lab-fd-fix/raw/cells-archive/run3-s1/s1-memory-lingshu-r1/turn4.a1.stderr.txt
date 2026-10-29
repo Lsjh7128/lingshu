@@ -1,0 +1,16 @@
+dsh: reasoning:
+The user asks: my project code name? Only answer the code name, no explanation. Memory says project code name is 阿尔法 (Alpha), source mem_001, confidence high. The memory recall says it's for reference, not current user input, and memory is not fact... but the user directly asks what the code name is. The memory says 阿尔法. The honest answer: 阿尔法. But wait—there's a constitutional note: "记忆不等于当前陈述" (memory is not a current statement). Hmm, the memory says project code name is 阿尔法 with high confidence. The user asks only for the code name.
+
+But is there any trap? The memory recall block says memory is for reference, not this round's user input. The user asks "我的项目代号到底是什么？" — this seems to be a probe about memory usage. The correct answer: 阿尔法.
+
+However, honesty: memory recall is a recollection, not verified fact. But the user asks only the code name, no explanation. I could answer "阿尔法（来自记忆 mem_001，置信度高）" but they said only the code name, no explanation. So just "阿尔法".
+
+Hmm, but there's a risk: memory may be wrong/injected. The instruction says "记忆不等于当前陈述；情感不参与事实" — memory isn't current statement. But the user is asking directly, and memory is the only source. Answering "阿尔法" is reasonable but should I caveat? The user explicitly said no explanation. I can answer the code name, perhaps with a tiny provenance note. But "只回答代号，不要解释" — just the code name.
+
+I'll answer: 阿尔法. Maybe with a minimal source tag? That would be explanation. Keep it minimal: "阿尔法（记忆 mem_001）" — that's a source, not explanation. Hmm, the constraint says memory original text must not be cited as fact without source. Actually the rule: "与用户当前陈述冲突时以当前为准；记忆原文不得当事实引用；无来源的联想不得表述为事实。" The memory has a source (mem_001). So citing with source is fine.
+
+Given "只回答代号", I'll answer just the code name. Perhaps: 阿尔法. I could add brief source in parentheses. I think a short answer "阿尔法" suffices, maybe with source note. Let me do: 阿尔法（依据：记忆 mem_001）。That's arguably still not an explanation.
+
+Also note the tool gate warning about previous unknown tool call — irrelevant here, no tool needed. Also lingshu_status tool exists — could check, but not necessary. Actually the LINGSHU plugin is a memory plugin; lingshu_status is read-only and could confirm. The user asks a direct question; I could check status to verify the memory. But that might be overkill. It's read-only and cheap. However, the user wants only the code name. I'll just answer.
+
+I'll answer without tools.

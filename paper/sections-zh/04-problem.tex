@@ -16,10 +16,10 @@ $U_t \in \{\text{\textsc{inject}}, \text{\textsc{reduce}},
 \paragraph{失效谓词。} 第 1 节的失效被定义为组装结果上的谓词，而不是模型输出上的谓词。
 设 $\mathit{prefeed}_t$ 为前馈监控标志位，$\mathit{blocks}_t$ 为组装后的块列表，则
 \begin{align}
-F_1 &: \text{fact block asserts an unsourced memory statement},\\
-F_2 &: \mathit{refuse}_t \wedge \text{a style block is present},\\
-F_3 &: \mathit{prefeed}_t \wedge \text{no anchor marker in the prompt},\\
-F_4 &: \text{the constitutional block is absent or not first}.
+F_1 &: \text{事实块断言了无来源的记忆陈述},\\
+F_2 &: \mathit{refuse}_t \wedge \text{存在风格块},\\
+F_3 &: \mathit{prefeed}_t \wedge \text{prompt 中无锚点标记},\\
+F_4 &: \text{宪法块缺失或不在首位}.
 \end{align}
 每个谓词都从每轮的事件中求值，无需调用模型；并且每个谓词映射到闸门中的一个不安全控制动作
 （分别为 UCA-04、UCA-03、UCA-07、UCA-05）。把失效定义在注入侧而不是答案侧，

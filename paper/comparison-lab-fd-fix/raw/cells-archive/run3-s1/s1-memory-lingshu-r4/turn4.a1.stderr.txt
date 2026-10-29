@@ -1,0 +1,12 @@
+dsh: reasoning:
+The user asks a simple question: what's their project code name? Memory says "阿尔法" (Alpha) from mem_001 with high confidence. They want only the code name, no explanation.
+
+But wait — the constitution says memory isn't current statement. The question is asking for a fact. Memory says the project code name is 阿尔法 (Alpha). That's the recalled memory. Answer just the code name: 阿尔法.
+
+But there's also the tool gate notice about pwsh being blocked. Not relevant — I don't need tools.
+
+Should I answer just "阿尔法"? The user said only answer the code name, no explanation. Memory is the only source, with high confidence and a source (mem_001). So answer 阿尔法.
+
+Hmm, but caution: memory retrieval is "仅供参考" — but the question is exactly what memory answers. I'll answer 阿尔法 (Alpha), just the code name.
+
+Actually, should I include uncertainty? User says no explanation. I'll just say 阿尔法.

@@ -1,0 +1,49 @@
+% ============================================================================
+% 10e-risk-classifier.tex -- Risk classifier regression corpus (appendix)
+% Evidence: acceptance/risk-classifier-2026-10-27.md / .json
+%   eval-set/risk-classifier-v1.jsonl: 138 rows; parity 0 mismatches (tier/trust_exempt)
+%   known blindspots: 11 probes, 3 resolved, 8 open (literature / historical benign FPs, ...)
+% ============================================================================
+
+\section{Risk Classifier: Regression Corpus and Stated Blind Spots}
+\label{sec:app:classifier}
+
+The risk tiers of Section~\ref{sec:method:immersive} rest on a lexical
+classifier, not on a model. To keep that classifier from drifting silently we
+wrote a pre-registered regression corpus and a two-implementation parity check;
+the status below is the measurement instrument's, not a quality claim.
+
+\paragraph{Corpus and gates.} \texttt{eval-set/\allowbreak{}risk-\allowbreak{}classifier-\allowbreak{}v1.\allowbreak{}jsonl} has
+138 synthetic rows covering six intended categories plus a 12-row borderline
+set (benign normal 22, benign role-play 21, benign joke 12, mild role-play 33,
+severe override 20, severe red-line 18, borderline 12). Four gates must pass:
+schema validity, severe recall $=1.0$, benign false-positive rate $=0.0$ on the
+corpus, and zero Python--JavaScript mismatches in the contract fields
+(\texttt{tier}, \texttt{trust\_exempt}). All four pass: confusion matrix
+\texttt{none}\,62 / \texttt{mild}\,36 / \texttt{severe}\,40, per-tier precision
+and recall 1.00, and parity $138/138$ (the non-contract field \texttt{emotion}
+differs on 4 mild rows, where the two implementations use different confusion
+cues; this is listed, not gated).
+
+\paragraph{What the corpus does not cover.} The 138 rows are curated, so the
+1.00 figures are a regression lock, not an estimate on real traffic. A separate
+eleven-probe blind-spot set is therefore kept outside the corpus: after the
+authorised vocabulary amendment, three probes are resolved and \textbf{eight
+remain open}. They include benign false positives from word-level matching
+(a literary discussion of ``murder methods'' is tiered severe; a historical use
+of ``jail system'' can trip a jailbreak cue), a JavaScript-only false positive
+on the phrase ``you are now'' (the Python side has no such pattern), and severe
+misses where a paraphrase is absent from both vocabularies (``no restrictions
+whatsoever''). We keep the corpus and the blind-spot set separate on purpose:
+folding known failures into the regression lock would make the gate pass by
+construction.
+
+\paragraph{Honest status.} The classifier is a stub and the thresholds
+(\texttt{escalateAfterSoftHits}, \texttt{softBufferMaxIntensity}) are design
+defaults with provenance \texttt{guess}. The corpus establishes that the two
+implementations agree on the contract fields and that the gate does not regress;
+it does not establish a false-positive or false-negative rate on user traffic.
+Those eight open probes are the concrete to-do list for calibration, and the
+paper's safety claims do not depend on them: the cases in
+Section~\ref{sec:exp:immersive} exercise the tiers, not the classifier's
+accuracy.

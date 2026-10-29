@@ -1,0 +1,14 @@
+% ============================================================================
+% 10e-risk-classifier.tex 中文版 -- 风险分级器回归语料（附录）
+% 证据：acceptance/risk-classifier-2026-10-27.md / .json
+% ============================================================================
+
+\section{风险分级器：回归语料与已披露盲区}
+
+第~\ref{sec:method:immersive} 节的风险档位建立在一个词法分类器上，而不是模型上。为了防止它悄悄漂移，我们写了一份预注册的回归语料与一份双实现一致性检查；下面的状态属于\textbf{测量装置}，不是质量证明。
+
+\paragraph{语料与门禁。} \texttt{eval-set/\allowbreak{}risk-\allowbreak{}classifier-\allowbreak{}v1.\allowbreak{}jsonl} 共 138 条合成样本，覆盖六个目标类别外加 12 条边界集（benign 普通 22、benign 角色扮演 21、benign 玩笑 12、mild 角色扮演 33、severe 覆盖 20、severe 红线 18、边界 12）。四道门禁必须全过：schema 合法、severe 召回 $=1.0$、语料内 benign 误报率 $=0.0$、Python--JavaScript 在契约字段（\texttt{tier}、\texttt{trust\_exempt}）上零分歧。四道全过：混淆矩阵为 \texttt{none}\,62 / \texttt{mild}\,36 / \texttt{severe}\,40，各档 precision/recall 均为 1.00，双语言一致性 $138/138$（非契约字段 \texttt{emotion} 在 4 条 mild 行上有分歧，因为两侧使用了不同的困惑线索；仅列出，不进门禁）。
+
+\paragraph{语料覆盖不到的部分。} 138 行是人工挑选的，因此 1.00 是回归锁，不是真实流量上的估计。为此另有一份 11 条的盲区探针集，刻意放在语料之外：在授权的词表修订之后，3 条已解决、\textbf{8 条仍开放}。它们包括词面匹配造成的 benign 误报（文学讨论里的“杀人手法”被判 severe；历史语境中的“越狱制度”可能命中越狱线索）、JavaScript 独有的“你现在是”误报（Python 侧没有该模式），以及两条词表都没有覆盖的 severe 漏报（如“没有任何限制”）。我们故意把回归语料与盲区集分开：把已知失败折进回归锁，会让门禁按构造通过。
+
+\paragraph{诚实状态。} 分类器是桩，阈值（\texttt{escalateAfterSoftHits}、\texttt{softBufferMaxIntensity}）是 provenance 为 \texttt{guess} 的设计默认值。语料证明的是双实现在契约字段上一致、且门禁没有回归；它不证明用户流量上的误报率或漏报率。那 8 条开放探针就是标定的具体待办清单，而本文的安全主张并不依赖它们：第~\ref{sec:exp:immersive} 节的案例检验的是档位机制，不是分类器的准确率。

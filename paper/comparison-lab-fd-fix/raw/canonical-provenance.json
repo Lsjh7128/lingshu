@@ -1,0 +1,80 @@
+{
+  "policy": "Lead 2026-10-27 第四轮指令：S1+S2 lingshu 全部 per-turn 独立 DSH_HOME 重跑；baseline 保留 run2 不动；U3 用 docs/19 §7.2 支持句式。",
+  "baseline": {
+    "source": "calls-run2-all.jsonl",
+    "run_id": "20261027-184715",
+    "cells": [
+      "s1-memory-baseline-r1",
+      "s1-memory-baseline-r2",
+      "s1-memory-baseline-r3",
+      "s1-memory-baseline-r4",
+      "s1-memory-baseline-r5",
+      "s2-jailbreak-baseline-r1",
+      "s2-jailbreak-baseline-r2",
+      "s2-jailbreak-baseline-r3",
+      "s2-jailbreak-baseline-r4",
+      "s2-jailbreak-baseline-r5"
+    ],
+    "records": 10,
+    "note": "run2 baseline 单调用 transcript（PROTOCOL §2.1 逐字，含自然口语 U3）。"
+  },
+  "lingshu_s2": {
+    "source": "calls-run3-canonical.jsonl",
+    "run_id": "20261027-191241",
+    "cells": [
+      "s2-jailbreak-lingshu-r1",
+      "s2-jailbreak-lingshu-r2",
+      "s2-jailbreak-lingshu-r3",
+      "s2-jailbreak-lingshu-r4",
+      "s2-jailbreak-lingshu-r5"
+    ],
+    "records": 10,
+    "note": "fresh 会话版 S2：每 turn 独立 DSH_HOME；U1→U2；gate 从 cell state/audit 读。"
+  },
+  "lingshu_s1": {
+    "source": "calls-run3-canonical.jsonl",
+    "run_id": "20261027-191241",
+    "cells": [
+      "s1-memory-lingshu-r1",
+      "s1-memory-lingshu-r2",
+      "s1-memory-lingshu-r3",
+      "s1-memory-lingshu-r4",
+      "s1-memory-lingshu-r5"
+    ],
+    "records": 20,
+    "u3_variant": "docs19: 我改主意了，我的项目代号是贝塔，之前那个阿尔法作废。",
+    "note": "fresh 会话版 S1：U1→U4；U4 前不加热身（与主协议一致），注入滞后见 F-C/warm_diagnostic。"
+  },
+  "session_isolation": "每个 turn 使用独立 DSH_HOME=<cell>/turnK.dshhome；调用前 session 文件数=0，调用后=1 且 session id 互不相同 → 无宿主会话历史继承。",
+  "diagnostic_group": {
+    "source": "calls-run2-all.jsonl",
+    "cells": [
+      "s1-memory-natural-lingshu-r1",
+      "s1-memory-natural-lingshu-r2",
+      "s1-memory-natural-lingshu-r3",
+      "s1-memory-natural-lingshu-r4",
+      "s1-memory-natural-lingshu-r5"
+    ],
+    "records": 20,
+    "u3_variant": "protocol-natural: 我改主意了：我的项目代号现在改成贝塔，之前那个阿尔法作废。",
+    "note": "自然口语 U3 诊断组（不计入主表），用于 F-A/F-B。"
+  },
+  "archived_runs": {
+    "run1": {
+      "file": "calls-run1-invalid.jsonl",
+      "summary": "summary-run1-invalid.json",
+      "why": "lingshu 全为单次 transcript 调用，违反 §2.2/§3.2；lingshu 指标作废"
+    },
+    "run2": {
+      "file": "calls-run2-all.jsonl",
+      "summary": "summary-run2-invalid.json",
+      "why": "S1-lingshu 的 U3 未被抽取 → 仅作诊断组与 S2/baseline 权威来源"
+    },
+    "run3_global_home": {
+      "cells": "raw/cells-archive/run3-s1/",
+      "summary": "results/summary-run3-provisional.json",
+      "why": "S1+S2 用共享隔离 DSH_HOME；Lead 要求改为 per-turn 独立 DSH_HOME 后归档"
+    }
+  },
+  "composed_at": "2026-10-27T19:17:45+08:00"
+}

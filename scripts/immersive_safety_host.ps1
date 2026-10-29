@@ -1,4 +1,4 @@
-﻿﻿# scripts/immersive_safety_host.ps1 —— 沉浸式安全（ADR-014）真实宿主 smoke
+﻿# scripts/immersive_safety_host.ps1 —— 沉浸式安全（ADR-014）真实宿主 smoke
 #
 # 目的：在**真实实验 profile**（lingshu-lab-headless）里跑 1 次**轻度越狱**提示词，验证：
 #   1) 后端仍然 fail-closed：audit.jsonl 有 preflight_block 且 "STPA_Blocked":true、severity=soft；

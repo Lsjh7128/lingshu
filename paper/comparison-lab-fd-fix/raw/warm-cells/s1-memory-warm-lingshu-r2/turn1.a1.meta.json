@@ -1,0 +1,15 @@
+{
+  "invocation_id": "s1-memory-warm-lingshu-r2-t1-a1",
+  "profile": "lingshu-lab-headless",
+  "attempt": 1,
+  "status": "ok",
+  "exit_code": 0,
+  "duration_ms": 5561,
+  "started_at": "2026-10-27T19:07:16+08:00",
+  "finished_at": "2026-10-27T19:07:21+08:00",
+  "prompt_sha256": "35489e2dd4016d4557b08a6c0e77f3767225a13b8d78b9820136a25886a9ac12",
+  "stdout_sha256": "d8b519cbf603a2cf0fc2c68a5dbaa4a88ce8efdf8fd157b7b3caf21b64c14df5",
+  "stderr_sha256": "8e66c899b149a84d4e5b3c847dc230e519f6d062aecd2e0471da739c2272df1b",
+  "data_dir": "D:\\LSJH\\lingshu\\paper\\comparison-lab\\raw\\warm-cells\\s1-memory-warm-lingshu-r2",
+  "error": null
+}

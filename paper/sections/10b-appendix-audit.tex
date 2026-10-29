@@ -22,10 +22,10 @@ behavioural ones.}
 Region & Mutants & Killed & Rate & Survivors & After supplement \\
 \midrule
 \texttt{plugin/control.js}      & 16 & 15 & 93.8\% & 1 equivalent      & 15/15 non-equivalent \\
-\texttt{plugin/memorywriter.js} &  5 &  3 & 60.0\% & 2 real blind spots & 5/5 \\
+\texttt{plugin/\allowbreak{}memorywriter.\allowbreak{}js} &  5 &  3 & 60.0\% & 2 real blind spots & 5/5 \\
 \texttt{plugin/index.js}        &  8 &  6 & 75.0\% & 2 real blind spots & 8/8 \\
 \texttt{engine/control.py}      & 11 & 10 & 90.9\% & 1 equivalent      & 10/10 non-equivalent \\
-\texttt{rules/decay-params.yaml}&  4 &  4 & 100\%  & 0                 & 4/4 \\
+\texttt{rules/\allowbreak{}decay-\allowbreak{}params.\allowbreak{}yaml}&  4 &  4 & 100\%  & 0                 & 4/4 \\
 \midrule
 Total                           & 44 & 38 & 86.4\% & 4 real + 2 equiv. & 42/44 (95.5\%); 42/42 non-equivalent \\
 \bottomrule
@@ -66,13 +66,13 @@ Total                    & 1{,}789 & 1{,}701 & 95.08 & 66.22 \\
 \bottomrule
 \end{tabular}\\[6pt]
 \textbf{(c) Assertion strength and exception paths}\\[2pt]
-\begin{tabular}{lrrrr}
+\begin{tabular}{@{}l r r r p{0.28\textwidth}@{}}
 \toprule
 Quantity & Python & JavaScript & Sample & Note \\
 \midrule
 Sampled assertions            & 165 &  73 & 238 & fixed seed; tautologies = 0 \\
 Strong / weak (sample)        & 125 / 40 & 54 / 19 & 238 & 179 strong (75.2\%), 59 weak \\
-Full heuristic scan           & 597 strong, 227 weak, 1 tautology & 278 strong, 89 weak & 1{,}192 & 26.6\% weak-or-tautological \\
+Full heuristic scan           & 597 / 227 / 1 & 278 / 89 / 0 & 1{,}192 & strong/weak/tautology; 26.6\% weak-or-tautological \\
 Strict exception share        & 199/825 = 24.1\% & 82/367 = 22.3\% & -- & relaxed upper bounds 43.3\% / 54.2\% \\
 \bottomrule
 \end{tabular}
@@ -91,9 +91,9 @@ no version-control history, so the audit can certify the current state but
 cannot certify that no assertion was weakened at an earlier time.
 
 \paragraph{Reproduction.} The bundled files are
-\texttt{acceptance/audit/mutation-results-2026-10-27.json} (per-mutant outcomes,
+\texttt{acceptance/\allowbreak{}audit/\allowbreak{}mutation-\allowbreak{}results-\allowbreak{}2026-\allowbreak{}10-\allowbreak{}27.\allowbreak{}json} (per-mutant outcomes,
 survivor analysis, and the before/after SHA-256 lists) and
-\texttt{acceptance/audit/coverage-summary-2026-10-27.json} (per-file line and
+\texttt{acceptance/\allowbreak{}audit/\allowbreak{}coverage-\allowbreak{}summary-\allowbreak{}2026-\allowbreak{}10-\allowbreak{}27.\allowbreak{}json} (per-file line and
 branch data), with the human-readable reports alongside them. Full suites:
 fourteen Python test files (892 assertions) and four JavaScript suites (396
 assertions). Mutation replay uses a full copy of the repository; the mutation
@@ -101,5 +101,5 @@ driver, per-round raw output, and the independent re-run log are archived in the
 audit bundle and available from the authors, since they sit outside the
 repository so that no reviewer-run artefact can alter the submitted tree. On
 Windows, three Python test files require a temporary-directory shim because the
-sandbox blocks \texttt{tempfile.mkdtemp()}; the shim replaces temporary-directory
+sandbox blocks \texttt{tempfile.\allowbreak{}mkdtemp()}; the shim replaces temporary-directory
 creation only and changes no assertion and no line of implementation code.

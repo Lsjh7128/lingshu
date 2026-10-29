@@ -1,7 +1,8 @@
 # 24 · 工具网关 UCA 矩阵（T-UCA，v5.2 增量）
 
-> **状态**：**v1.1 冻结（权威版，2026-10-27）**；**实现已三向对齐（2026-10-27 06:28，见 §10.4）**。本文件是 ADR-013 指定的**唯一规则语义来源**；实现（`engine/tool_gateway.py`、`plugin/dsh-lingshu/tool-gateway.js`、测试）必须与之逐条一致，冲突时**以本文件为准**。
-> **`policy_version = "t-uca-1.1"`**（v1.0 的 14 条 → v1.1 增补 2 条，见 §10；engine 早期实现自称 `tool-gateway-1.0` 的编号体系作废）。
+> **状态**：**v1.2（权威版，2026-10-28 误报收敛）**；v1.1 的 16 条语义保留，**只收窄触发面**，越狱/越权用例拦截率不降（见 §10.5）。
+> **`policy_version = "t-uca-1.2"`**（v1.0 14 条 → v1.1 +15/16 → v1.2 不改条数，改判定边界与登记表）。
+> **v1.2 一句话**：把"命中即拦"改成"**按语义槽位命中才拦**"——正文里出现 `token`/`webhook`/`child_process`/URL 文本不再算攻击；宿主工具（read/write/edit/pwsh/grep/web_*）进登记表；工作区内绝对路径不判逃逸；删除/执行/外网按**形状**降级或放行。
 > **命名空间独立**：本文所有编号为 **T-UCA-xx**，与注入侧 `UCA-01..08`（`engine/control.py:175-184`）**并列、不合并、不互相改写**。
 > **不可改**：本文件不修改 `engine/`、`plugin/`、`rules/` 的任何既有语义；注入侧 8 类 UCA 一字不动（ADR-013 §3 不变量 3）。
 > **默认姿态**：fail-closed。未知工具、不可判定状态、缺审计上下文 → **block**；只读且无状态风险 → **allow + 记录**。`degrade` = **不执行**，返回强提示并请求确认；无审批通道 → **block**。
@@ -194,6 +195,8 @@
 | 多规则命中 | **取最高严重度**（block > degrade > allow） | 所有命中 id 全部入 `ucas[]`（**不截断**） |
 | `degrade` 且无 `approval` 通道 | **降级为 block** | `verdict=block`、`degraded_to=block`（**degrade 绝不等于放行执行**） |
 | 参数解析失败（非法 JSON / 非法 UTF-8） | **block** | `reason=parse_error`（不猜测意图） |
+| **v1.2 相位豁免**：`phase=normal` 且无 `variety_fallback`/`unresolvedConflict`/`saturated`，且调用形状本身无风险 | **allow**，事件里记 `low_risk=true` | 写/执行类照常留 `tool_gate` 审计，只是不打扰模型；进入 `shift`/`critical`/饱和后才按 T-UCA-10/13/16 收紧 |
+| **v1.2 语义槽位**：规则只看**路径参数**（`path/file/target/dir/...` 或裸路径串）、**命令参数**（`cmd/command/script/code`）、**URL 参数**（`url/uri/endpoint/...` 或整串 URL） | 正文 `content/body/text/pattern` 里的关键词/URL/代码片段**不参与** T-UCA-02/05/06/15 判定 | 这是 v1.1 误报的主要根因（`usedTokens` 命中 `token`、README 里的 URL 命中外发、正文 `child_process` 命中执行） |
 
 **判定顺序**：`T-UCA-01,02,03,04,05,06,07,08,09,12,14,15,10,13,16,11`（先硬 block 与静态检查，再状态相关 degrade，最后审计）；每步短路，但**已命中项仍并入 `ucas[]`**。
 
@@ -232,6 +235,7 @@
   "ucas": ["T-UCA-04"],                // 工具侧编号；全部命中，按判定顺序。字段名就是 ucas
   "degraded_to": "block",              // 仅 degrade 且无审批通道时
   "requires_confirmation": true,       // degrade 或 block 时 true
+  "low_risk": false,                   // v1.2：normal 相位下 mutating 且放行 → true（相位豁免留痕）
   "reason": "T-UCA-04:protected_path_write",
   "audit": {                           // 只抄所需字段，用于事后复盘
     "kind": "tool_gate",
@@ -256,123 +260,582 @@
 
 ```json
 {
-  "policy_version": "t-uca-1.1",
+  "policy_version": "t-uca-1.2",
   "namespace": "T-UCA",
-  "default": {"unknown": "block", "read_only": "allow_with_log", "phase_unknown_mutating": "block"},
-  "evaluation_order": ["T-UCA-01","T-UCA-02","T-UCA-03","T-UCA-04","T-UCA-05","T-UCA-06","T-UCA-07","T-UCA-08","T-UCA-09","T-UCA-12","T-UCA-14","T-UCA-15","T-UCA-10","T-UCA-13","T-UCA-16","T-UCA-11"],
+  "default": {
+    "unknown": "block",
+    "read_only": "allow_with_log",
+    "phase_unknown_mutating": "block"
+  },
+  "egress_allowlist": [
+    "github.com",
+    "api.github.com",
+    "raw.githubusercontent.com",
+    "objects.githubusercontent.com",
+    "npmjs.org",
+    "registry.npmjs.org",
+    "pypi.org",
+    "files.pythonhosted.org",
+    "python.org",
+    "docs.python.org",
+    "nodejs.org",
+    "developer.mozilla.org"
+  ],
+  "evaluation_order": [
+    "T-UCA-01",
+    "T-UCA-02",
+    "T-UCA-03",
+    "T-UCA-04",
+    "T-UCA-05",
+    "T-UCA-06",
+    "T-UCA-07",
+    "T-UCA-08",
+    "T-UCA-09",
+    "T-UCA-12",
+    "T-UCA-14",
+    "T-UCA-15",
+    "T-UCA-10",
+    "T-UCA-13",
+    "T-UCA-16",
+    "T-UCA-11"
+  ],
   "rules": [
-    {"id":"T-UCA-01","verdict":"block",
-     "when":{"all":[{"tool_mutating":true},{"any":[{"state":"variety_fallback","eq":true},{"state":"unresolvedConflict","eq":true}]}]},
-     "args_check":[],
-     "state_inputs":["variety_fallback","unresolvedConflict"],
-     "test_id":"test_tuca_01_unresolved_write",
-     "message_zh":"STPA 前置闸拦截（T-UCA-01）：当前存在未澄清的记忆冲突，系统处于中性降维态。所有写/删/外发/执行类调用被拒绝。请先说明以哪一条记录为准。",
-     "message_en":"STPA pre-flight gate denied (T-UCA-01): an unresolved memory conflict keeps the system in variety-reduced mode. All mutating tool calls are blocked until the authoritative record is stated."},
-    {"id":"T-UCA-02","verdict":"block",
-     "when":{"any":[{"arg_regex":"(?i)(api[_-]?key|apikey|access[_-]?token|token|secret|password|passwd|credential|private[_-]?key|bearer|authorization|session[_-]?cookie|-----BEGIN [A-Z ]*PRIVATE KEY-----|sk-[A-Za-z0-9_\\-]{16,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9\\-]{10,}|eyJ[A-Za-z0-9_\\-]{10,}\\.[A-Za-z0-9_\\-]{10,}\\.|\\b1[3-9]\\d{9}\\b|\\b\\d{17}[\\dXx]\\b)"},{"arg_regex":"(?i)((^|/)(\\.env|id_rsa|id_ed25519|credentials(\\.json)?|\\.netrc|\\.pgpass)$|\\.(pem|key|pfx|p12)$)"},{"capability":"credentials"}]},
-     "args_check":[{"kind":"regex","over":"all_strings","max_len_bytes":65536}],
-     "state_inputs":["capabilities"],
-     "test_id":"test_tuca_02_secret_in_args",
-     "message_zh":"STPA 前置闸拦截（T-UCA-02）：参数包含凭证/密钥/令牌/PII 模式，或目标是凭证文件。网关不代管凭证，此类调用一律拒绝。",
-     "message_en":"STPA pre-flight gate denied (T-UCA-02): credentials, secrets or PII detected, or the target is a credential store. This gateway never handles secrets."},
-    {"id":"T-UCA-03","verdict":"block",
-     "when":{"all":[{"tool_class_any":["destructive","write"]},{"any":[{"arg_true":"force"},{"arg_true":"recursive"},{"arg_true":"overwrite"},{"arg_regex":"[*?]"},{"arg_regex":"(?i)(^|/)(rm|rmdir|del|truncate)(\\s|$)"}]},{"not":{"confirmation_exact":true}}]},
-     "args_check":[{"kind":"no_glob_or_recursive"}],
-     "state_inputs":[],
-     "test_id":"test_tuca_03_destructive_delete",
-     "message_zh":"STPA 前置闸拦截（T-UCA-03）：这是删除/覆盖类操作，未取得与你输入完全一致的确认。请给出单个精确路径并显式确认。",
-     "message_en":"STPA pre-flight gate denied (T-UCA-03): destructive delete/overwrite without an exact matching confirmation. Provide a single explicit path and confirm."},
-    {"id":"T-UCA-04","verdict":"block",
-     "when":{"any":[{"path_prefix_any":["rules/","engine/","plugin/","replay-set/","chaos-set/","acceptance/","decisions/","docs/01-宪法层.md","docs/15-验收清单.md","docs/24-工具网关UCA.md","_frozen/",".git/",".env"]},{"path_escape":true}]},
-     "args_check":[{"kind":"path_normalize","unicode":"NFKC","resolve_dotdot":true,"case_fold":true}],
-     "state_inputs":["frozen_ok"],
-     "test_id":"test_tuca_04_protected_path",
-     "message_zh":"STPA 前置闸拦截（T-UCA-04）：目标属于冻结/受保护区域（宪法、规则表、回放集、引擎与插件源码）。该区域只能由人工按 ADR 流程修改。",
-     "message_en":"STPA pre-flight gate denied (T-UCA-04): target is a frozen or protected path. It changes only through a human ADR process."},
-    {"id":"T-UCA-05","verdict":"block",
-     "when":{"any":[{"capability":"network"},{"arg_regex":"(?i)(https?://|webhook|ftp://|ssh://)"}]},
-     "args_check":[{"kind":"egress_allowlist","allowlist":[],"match":"exact_host_then_path_prefix"}],
-     "state_inputs":["capabilities"],
-     "test_id":"test_tuca_05_egress_blocked",
-     "message_zh":"STPA 前置闸拦截（T-UCA-05）：网络外发不在白名单内（默认空）。记忆与人格系统不申请网络能力；外发需人工放行。",
-     "message_en":"STPA pre-flight gate denied (T-UCA-05): egress is not allow-listed (empty by default). No network capability is requested; external sends need human approval."},
-    {"id":"T-UCA-06","verdict":"block",
-     "when":{"any":[{"capability_any":["shell","dynamic-code"]},{"tool_class_any":["exec"]},{"arg_regex":"(?i)(eval\\(|exec\\(|subprocess|os\\.system|child_process|bash\\s+-c|sh\\s+-c|pwsh\\s+-c|powershell\\s+-|node\\s+-e|python\\s+-c|`|\\$\\{)"}]},
-     "args_check":[],
-     "state_inputs":["capabilities"],
-     "test_id":"test_tuca_06_exec_blocked",
-     "message_zh":"STPA 前置闸拦截（T-UCA-06）：检测到代码执行能力或执行面参数。本系统不申请 shell/dynamic-code，执行类调用一律拒绝。",
-     "message_en":"STPA pre-flight gate denied (T-UCA-06): code-execution capability or execution-shaped arguments detected. Exec calls are always denied."},
-    {"id":"T-UCA-07","verdict":"block",
-     "when":{"any":[{"args_bytes_gt":65536},{"json_depth_gt":8},{"array_len_gt":1000},{"json_nodes_gt":5000},{"encoding_layers_gt":2}]},
-     "args_check":[{"kind":"shape_limits","max_bytes":65536,"max_depth":8,"max_array":1000,"max_nodes":5000,"max_encoding_layers":2}],
-     "state_inputs":[],
-     "test_id":"test_tuca_07_oversize",
-     "message_zh":"STPA 前置闸拦截（T-UCA-07）：参数体积/嵌套/编码层数超过网关上限。请拆分请求或减少嵌套。",
-     "message_en":"STPA pre-flight gate denied (T-UCA-07): payload exceeds size, depth or encoding-layer limits. Split the request or reduce nesting."},
-    {"id":"T-UCA-08","verdict":"block",
-     "when":{"any":[{"tool_unregistered":true},{"registry_entry_incomplete":true}]},
-     "args_check":[],
-     "state_inputs":["tool_registry"],
-     "test_id":"test_tuca_08_unregistered_tool",
-     "message_zh":"STPA 前置闸拦截（T-UCA-08）：该工具未登记，无法判定副作用类别。未登记工具一律拒绝。",
-     "message_en":"STPA pre-flight gate denied (T-UCA-08): tool not registered, side effects unknown. Unregistered tools are denied."},
-    {"id":"T-UCA-09","verdict":"block",
-     "when":{"any":[{"schema_invalid":true},{"arg_regex":"[\\u0000-\\u001F\\u2028\\u2029\\u200B-\\u200F\\u2060\\u202A-\\u202E]"},{"arg_regex":"(?i)(<\\|im_start\\|>|<\\|im_end\\|>|</system>|\\[INST\\]|\\[/INST\\]|\\n\\nHuman:|\\n\\nAssistant:)"},{"tool_name_has":["/","\\\\"," ",":",";","\\n"]},{"tool_name_homoglyph_conflict":true}]},
-     "args_check":[{"kind":"schema","reject_unknown_keys_unless_declared":true}],
-     "state_inputs":["tool_registry"],
-     "test_id":"test_tuca_09_schema_invalid",
-     "message_zh":"STPA 前置闸拦截（T-UCA-09）：参数不符合 schema，或含控制字符/分隔符/同形字等注入迹象。请提交干净参数。",
-     "message_en":"STPA pre-flight gate denied (T-UCA-09): arguments violate the tool schema or contain control characters, delimiters or homoglyphs. Submit clean arguments."},
-    {"id":"T-UCA-12","verdict":"block",
-     "when":{"any":[{"capability_undeclared":true},{"capability_not_granted":true}]},
-     "args_check":[],
-     "state_inputs":["capabilities"],
-     "test_id":"test_tuca_12_undeclared_capability",
-     "message_zh":"STPA 前置闸拦截（T-UCA-12）：该工具需要未声明或未授予的能力（网络/命令/凭证/动态代码）。最小能力原则下拒绝。",
-     "message_en":"STPA pre-flight gate denied (T-UCA-12): tool requires an undeclared or ungranted capability. Least-capability applies."},
-    {"id":"T-UCA-14","verdict":"block",
-     "when":{"all":[{"tool_mutating":true},{"state":"frozen_ok","eq":false}]},
-     "args_check":[],
-     "state_inputs":["frozen_ok"],
-     "test_id":"test_tuca_14_frozen_fail_blocks",
-     "message_zh":"STPA 前置闸拦截（T-UCA-14）：宪法冻结区校验未通过。完整性恢复前，写类调用一律拒绝。",
-     "message_en":"STPA pre-flight gate denied (T-UCA-14): frozen-region integrity check failed. Mutating calls are denied until restored."},
-    {"id":"T-UCA-10","verdict":"degrade",
-     "when":{"all":[{"state":"phase","eq":"critical"},{"tool_mutating":true}]},
-     "args_check":[],
-     "state_inputs":["phase"],
-     "test_id":"test_tuca_10_critical_write_degrade",
-     "message_zh":"STPA 前置闸降级（T-UCA-10）：当前上下文处于临界相位（≥0.85）。写类操作已暂缓，需确认目标与内容后再执行。",
-     "message_en":"STPA pre-flight gate held (T-UCA-10): context is in the critical phase (>=0.85). Mutating calls are paused for confirmation."},
-    {"id":"T-UCA-13","verdict":"degrade",
-     "when":{"all":[{"any":[{"state":"saturated.valence","eq":true},{"state":"saturated.arousal","eq":true},{"state":"saturated.dominance","eq":true}]},{"tool_class_any":["write","destructive"]},{"not":{"confirmation_exact":true}}]},
-     "args_check":[],
-     "state_inputs":["saturated"],
-     "test_id":"test_tuca_13_saturated_write_degrade",
-     "message_zh":"STPA 前置闸降级（T-UCA-13）：情感基线处于饱和状态，写/删类操作已暂缓，请确认后执行。",
-     "message_en":"STPA pre-flight gate held (T-UCA-13): affective baseline saturated; irreversible writes/deletes paused for confirmation."},
-    {"id":"T-UCA-11","verdict":"block",
-     "when":{"any":[{"state":"audit_context_present","eq":false},{"audit_write_unavailable":true}]},
-     "args_check":[],
-     "state_inputs":["audit_context"],
-     "test_id":"test_tuca_11_missing_audit_context",
-     "message_zh":"STPA 前置闸拦截（T-UCA-11）：本次调用缺少完整审计上下文，无法留痕。请修复会话/轮次标识后重试。",
-     "message_en":"STPA pre-flight gate denied (T-UCA-11): audit context incomplete; the call cannot be traced. Restore session/turn identifiers."},
-    {"id":"T-UCA-15","verdict":"block",
-     "when":{"any":[{"path_escape":true}]},
-     "args_check":[{"kind":"path_normalize","unicode":"NFKC","reject":["dotdot","absolute","drive_letter","unc","null_byte"]}],
-     "state_inputs":[],
-     "test_id":"test_tuca_15_path_escape",
-     "message_zh":"STPA 前置闸拦截（T-UCA-15）：参数中的路径试图逃出工作区（../、绝对路径、盘符、UNC 或空字节）。只允许工作区内的相对路径。",
-     "message_en":"STPA pre-flight gate denied (T-UCA-15): the path escapes the workspace. Only relative paths inside the workspace are allowed."},
-    {"id":"T-UCA-16","verdict":"degrade",
-     "when":{"all":[{"state":"phase","eq":"shift"},{"tool_class_any":["destructive"]}]},
-     "args_check":[],
-     "state_inputs":["phase"],
-     "test_id":"test_tuca_16_shift_destructive_degrade",
-     "message_zh":"STPA 前置闸降级（T-UCA-16）：上下文处于预警相位（≥0.70），删除/覆盖类操作已暂缓，请二次确认目标后再执行。",
-     "message_en":"STPA pre-flight gate held (T-UCA-16): context is in the warning phase (>=0.70). Destructive calls are paused for re-confirmation."}
+    {
+      "id": "T-UCA-01",
+      "verdict": "block",
+      "when": {
+        "all": [
+          {
+            "tool_mutating": true
+          },
+          {
+            "any": [
+              {
+                "state": "variety_fallback",
+                "eq": true
+              },
+              {
+                "state": "unresolvedConflict",
+                "eq": true
+              }
+            ]
+          }
+        ]
+      },
+      "args_check": [],
+      "state_inputs": [
+        "variety_fallback",
+        "unresolvedConflict"
+      ],
+      "test_id": "test_tuca_01_unresolved_write",
+      "message_zh": "STPA 前置闸拦截（T-UCA-01）：当前存在未澄清的记忆冲突，系统处于中性降维态。所有写/删/外发/执行类调用被拒绝。请先说明以哪一条记录为准。",
+      "message_en": "STPA pre-flight gate denied (T-UCA-01): an unresolved memory conflict keeps the system in variety-reduced mode. All mutating tool calls are blocked until the authoritative record is stated."
+    },
+    {
+      "id": "T-UCA-02",
+      "verdict": "block",
+      "when": {
+        "any": [
+          {
+            "arg_regex": "(?i)(-----BEGIN [A-Z ]*PRIVATE KEY-----|sk-[A-Za-z0-9_\\-]{16,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9\\-]{10,}|eyJ[A-Za-z0-9_\\-]{10,}\\.[A-Za-z0-9_\\-]{10,}\\.)"
+          },
+          {
+            "arg_regex": "(?i)\\b(api[_-]?key|apikey|access[_-]?token|auth[_-]?token|client[_-]?secret|secret|password|passwd)\\b\\s*[=:]\\s*[\"']?[A-Za-z0-9/+=_\\-]{4,}"
+          },
+          {
+            "sensitive_path": true
+          }
+        ]
+      },
+      "args_check": [
+        {
+          "kind": "regex",
+          "over": "all_strings",
+          "scope": "secret_value_and_assignment"
+        },
+        {
+          "kind": "credential_path",
+          "over": "path_args",
+          "reject": [
+            "dotenv",
+            "ssh_dir",
+            "private_key",
+            "credential_store"
+          ]
+        }
+      ],
+      "state_inputs": [
+        "capabilities"
+      ],
+      "test_id": "test_tuca_02_secret_in_args",
+      "message_zh": "STPA 前置闸拦截（T-UCA-02）：参数里出现高置信度凭证值（私钥/sk-/ghp_/AKIA/JWT）、凭证赋值（api_key=…、password: …），或目标路径属于凭证库（.env/.ssh/id_rsa/*.pem）。仅出现 token/password 这类词不等于凭证。",
+      "message_en": "STPA pre-flight gate denied (T-UCA-02): a high-confidence credential value, a credential assignment, or a credential-store path was detected. The bare words token/password are not treated as credentials."
+    },
+    {
+      "id": "T-UCA-03",
+      "verdict": "degrade",
+      "when": {
+        "all": [
+          {
+            "tool_class_any": [
+              "destructive"
+            ]
+          },
+          {
+            "any": [
+              {
+                "arg_true": "force"
+              },
+              {
+                "arg_true": "recursive"
+              },
+              {
+                "path_glob": true
+              },
+              {
+                "path_prefix_any": [
+                  "/",
+                  "//",
+                  "*",
+                  "c:/windows",
+                  "c:/program files",
+                  "c:/programdata"
+                ]
+              },
+              {
+                "arg_regex": "(?i)(^|[/\\\\])(rm|rmdir|del|deltree|truncate|format)(\\s|$)"
+              }
+            ]
+          },
+          {
+            "not": {
+              "confirmation_exact": true
+            }
+          }
+        ]
+      },
+      "args_check": [
+        {
+          "kind": "no_glob_or_recursive",
+          "scope": "path_args"
+        }
+      ],
+      "state_inputs": [],
+      "test_id": "test_tuca_03_destructive_delete",
+      "message_zh": "STPA 前置闸降级（T-UCA-03）：删除/覆盖类调用命中高风险形态（通配符、根目录或系统目录、递归/强制标志、rm/del/truncate 命令），需人工确认后再执行。普通单文件删除（如 rm file.tmp）不再触发。",
+      "message_en": "STPA pre-flight gate degraded (T-UCA-03): delete/overwrite hits a high-risk shape (wildcard, root/system dir, recursive/force flag, rm/del/truncate). Plain single-file deletes are no longer flagged."
+    },
+    {
+      "id": "T-UCA-04",
+      "verdict": "block",
+      "when": {
+        "all": [
+          {
+            "tool_mutating": true
+          },
+          {
+            "any": [
+              {
+                "path_prefix_any": [
+                  "rules/",
+                  "engine/",
+                  "plugin/",
+                  "replay-set/",
+                  "chaos-set/",
+                  "acceptance/",
+                  "decisions/",
+                  "docs/01-宪法层.md",
+                  "docs/15-验收清单.md",
+                  "docs/24-工具网关UCA.md",
+                  "_frozen/",
+                  ".git/",
+                  ".env",
+                  "c:/windows"
+                ]
+              },
+              {
+                "path_escape": true
+              }
+            ]
+          }
+        ]
+      },
+      "args_check": [
+        {
+          "kind": "path_normalize",
+          "unicode": "NFKC",
+          "resolve_dotdot": true,
+          "case_fold": true
+        }
+      ],
+      "state_inputs": [
+        "frozen_ok"
+      ],
+      "test_id": "test_tuca_04_protected_path",
+      "message_zh": "STPA 前置闸拦截（T-UCA-04）：写/删操作的目标属于冻结/受保护区域（宪法、规则表、回放集、引擎与插件源码）。只读访问不受此规则限制；修改只能由人工按 ADR 流程进行。",
+      "message_en": "STPA pre-flight gate denied (T-UCA-04): a mutating call targets a frozen/protected area. Read-only access is unaffected; changes go through the human ADR process."
+    },
+    {
+      "id": "T-UCA-05",
+      "verdict": "block",
+      "when": {
+        "any": [
+          {
+            "capability": "network"
+          },
+          {
+            "all": [
+              {
+                "url_present": true
+              },
+              {
+                "url_host_allowlisted": false
+              }
+            ]
+          }
+        ]
+      },
+      "args_check": [
+        {
+          "kind": "egress_allowlist",
+          "source": "policy.egress_allowlist",
+          "match": "exact_host_or_subdomain_then_path_prefix"
+        }
+      ],
+      "state_inputs": [
+        "capabilities"
+      ],
+      "test_id": "test_tuca_05_egress_blocked",
+      "message_zh": "STPA 前置闸拦截（T-UCA-05）：网络外发目标不在 Egress 白名单内（默认允许 github.com / npmjs.org / pypi.org 等开发文档站）。只出现在正文里的 URL 文本不算外发；`web_fetch` 等取回类工具按目标域名判定。",
+      "message_en": "STPA pre-flight gate denied (T-UCA-05): egress target is not on the allowlist (dev docs: github.com / npmjs.org / pypi.org, ...). URL text inside file content is not egress; fetch-style tools are judged by target host."
+    },
+    {
+      "id": "T-UCA-06",
+      "verdict": "block",
+      "when": {
+        "any": [
+          {
+            "capability_any": [
+              "dynamic-code"
+            ]
+          },
+          {
+            "all": [
+              {
+                "tool_class_any": [
+                  "exec"
+                ]
+              },
+              {
+                "arg_regex_cmd": "(?i)(\\bcurl\\b|\\bwget\\b|\\biwr\\b|invoke-webrequest|invoke-expression|\\biex\\b|\\bbash\\s+-i\\b|\\bsh\\s+-i\\b|\\bncat?\\b|\\bsocat\\b|/dev/tcp/|\\bpowershell(\\.exe)?\\b[^|;]*(-enc|-encodedcommand|-windowstyle\\s+hidden)|\\bsetx\\b|\\breg\\s+add\\b|setenvironmentvariable|\\bexport\\s+[A-Za-z_][A-Za-z0-9_]*=|\\bchmod\\s+777\\b|\\brm\\s+-rf\\s+/(\\s|$)|\\bsudo\\b|\\bnet\\s+user\\b|\\bsc\\s+create\\b|\\|\\s*(sh|bash|iex|powershell|python|node)\\b|\\bsubprocess\\b|\\bchild_process\\b|\\beval\\s*\\(|\\bexec\\s*\\(|\\bos\\.system\\b|\\bscp\\s+[^ ]+@)"
+              }
+            ]
+          }
+        ]
+      },
+      "args_check": [
+        {
+          "kind": "exec_shape",
+          "over": "command_args",
+          "reject": [
+            "download",
+            "reverse_shell",
+            "encoded_command",
+            "global_env",
+            "pipe_to_shell"
+          ]
+        }
+      ],
+      "state_inputs": [
+        "capabilities"
+      ],
+      "test_id": "test_tuca_06_exec_blocked",
+      "message_zh": "STPA 前置闸拦截（T-UCA-06）：执行类调用命中高危命令形态（curl/wget/iwr、反向 shell、编码执行、管道进 shell、改全局环境变量、subprocess/eval/exec）。常规 `npm run test`、`python scripts/run.py` 直接放行；源码正文里出现这些词不算执行。",
+      "message_en": "STPA pre-flight gate denied (T-UCA-06): exec call matches a dangerous command shape (curl/wget/iwr, reverse shell, encoded command, pipe-to-shell, global env mutation, subprocess/eval/exec). Ordinary `npm run test` / `python scripts/run.py` pass; those words inside source content are not exec."
+    },
+    {
+      "id": "T-UCA-07",
+      "verdict": "block",
+      "when": {
+        "any": [
+          {
+            "args_bytes_gt": 65536
+          },
+          {
+            "json_depth_gt": 8
+          },
+          {
+            "array_len_gt": 1000
+          },
+          {
+            "json_nodes_gt": 5000
+          },
+          {
+            "encoding_layers_gt": 2
+          }
+        ]
+      },
+      "args_check": [
+        {
+          "kind": "shape_limits",
+          "max_bytes": 65536,
+          "max_depth": 8,
+          "max_array": 1000,
+          "max_nodes": 5000,
+          "max_encoding_layers": 2
+        }
+      ],
+      "state_inputs": [],
+      "test_id": "test_tuca_07_oversize",
+      "message_zh": "STPA 前置闸拦截（T-UCA-07）：参数体积/嵌套/编码层数超过网关上限。请拆分请求或减少嵌套。",
+      "message_en": "STPA pre-flight gate denied (T-UCA-07): payload exceeds size, depth or encoding-layer limits. Split the request or reduce nesting."
+    },
+    {
+      "id": "T-UCA-08",
+      "verdict": "block",
+      "when": {
+        "any": [
+          {
+            "tool_unregistered": true
+          },
+          {
+            "registry_entry_incomplete": true
+          }
+        ]
+      },
+      "args_check": [],
+      "state_inputs": [
+        "tool_registry"
+      ],
+      "test_id": "test_tuca_08_unregistered_tool",
+      "message_zh": "STPA 前置闸拦截（T-UCA-08）：该工具未登记，无法判定副作用类别。未登记工具一律拒绝。宿主核心工具（read/write/edit/pwsh/grep/web_* 等）已登记，不在此列。",
+      "message_en": "STPA pre-flight gate denied (T-UCA-08): tool not registered, side effects unknown. Unregistered tools are denied. Host tools (read/write/edit/pwsh/grep/web_*) are registered."
+    },
+    {
+      "id": "T-UCA-09",
+      "verdict": "block",
+      "when": {
+        "any": [
+          {
+            "schema_invalid": true
+          },
+          {
+            "arg_regex": "[\\u0000-\\u001F\\u2028\\u2029\\u200B-\\u200F\\u2060\\u202A-\\u202E]"
+          },
+          {
+            "arg_regex": "(?i)(<\\|im_start\\|>|<\\|im_end\\|>|</system>|\\[INST\\]|\\[/INST\\]|\\n\\nHuman:|\\n\\nAssistant:)"
+          },
+          {
+            "tool_name_has": [
+              "/",
+              "\\\\",
+              " ",
+              ":",
+              ";",
+              "\\n"
+            ]
+          },
+          {
+            "tool_name_homoglyph_conflict": true
+          }
+        ]
+      },
+      "args_check": [
+        {
+          "kind": "schema",
+          "reject_unknown_keys_unless_declared": true
+        }
+      ],
+      "state_inputs": [
+        "tool_registry"
+      ],
+      "test_id": "test_tuca_09_schema_invalid",
+      "message_zh": "STPA 前置闸拦截（T-UCA-09）：参数不符合 schema，或含控制字符/分隔符/同形字等注入迹象。请提交干净参数。",
+      "message_en": "STPA pre-flight gate denied (T-UCA-09): arguments violate the tool schema or contain control characters, delimiters or homoglyphs. Submit clean arguments."
+    },
+    {
+      "id": "T-UCA-12",
+      "verdict": "block",
+      "when": {
+        "any": [
+          {
+            "capability_undeclared": true
+          },
+          {
+            "capability_not_granted": true
+          }
+        ]
+      },
+      "args_check": [],
+      "state_inputs": [
+        "capabilities"
+      ],
+      "test_id": "test_tuca_12_undeclared_capability",
+      "message_zh": "STPA 前置闸拦截（T-UCA-12）：该工具需要未声明或未授予的能力（网络/命令/凭证/动态代码）。最小能力原则下拒绝。宿主工具的能力由宿主授权，不在此列。",
+      "message_en": "STPA pre-flight gate denied (T-UCA-12): tool requires an undeclared or ungranted capability. Least-capability applies. Host-tool capabilities are granted by the host."
+    },
+    {
+      "id": "T-UCA-14",
+      "verdict": "block",
+      "when": {
+        "all": [
+          {
+            "tool_mutating": true
+          },
+          {
+            "state": "frozen_ok",
+            "eq": false
+          }
+        ]
+      },
+      "args_check": [],
+      "state_inputs": [
+        "frozen_ok"
+      ],
+      "test_id": "test_tuca_14_frozen_fail_blocks",
+      "message_zh": "STPA 前置闸拦截（T-UCA-14）：宪法冻结区校验未通过。完整性恢复前，写类调用一律拒绝。",
+      "message_en": "STPA pre-flight gate denied (T-UCA-14): frozen-region integrity check failed. Mutating calls are denied until restored."
+    },
+    {
+      "id": "T-UCA-15",
+      "verdict": "block",
+      "when": {
+        "any": [
+          {
+            "path_escape": true
+          }
+        ]
+      },
+      "args_check": [
+        {
+          "kind": "path_normalize",
+          "unicode": "NFKC",
+          "workspace_root": "state.workspace_root",
+          "reject": [
+            "dotdot_escape",
+            "absolute_outside_workspace",
+            "unc",
+            "null_byte"
+          ]
+        }
+      ],
+      "state_inputs": [
+        "workspace_root"
+      ],
+      "test_id": "test_tuca_15_path_escape",
+      "message_zh": "STPA 前置闸拦截（T-UCA-15）：路径确实逃出工作区（`../` 越界、工作区外的绝对路径/盘符、UNC、空字节）。工作区内的相对路径与工作区内绝对路径都放行。",
+      "message_en": "STPA pre-flight gate denied (T-UCA-15): the path truly escapes the workspace (dot-dot escape, absolute path outside workspace, UNC, NUL). Relative paths and absolute paths inside the workspace pass."
+    },
+    {
+      "id": "T-UCA-10",
+      "verdict": "degrade",
+      "when": {
+        "all": [
+          {
+            "state": "phase",
+            "eq": "critical"
+          },
+          {
+            "tool_mutating": true
+          }
+        ]
+      },
+      "args_check": [],
+      "state_inputs": [
+        "phase"
+      ],
+      "test_id": "test_tuca_10_critical_write_degrade",
+      "message_zh": "STPA 前置闸降级（T-UCA-10）：当前上下文处于临界相位（≥0.85）。写类操作已暂缓，需确认目标与内容后再执行。",
+      "message_en": "STPA pre-flight gate held (T-UCA-10): context is in the critical phase (>=0.85). Mutating calls are paused for confirmation."
+    },
+    {
+      "id": "T-UCA-13",
+      "verdict": "degrade",
+      "when": {
+        "all": [
+          {
+            "any": [
+              {
+                "state": "saturated.valence",
+                "eq": true
+              },
+              {
+                "state": "saturated.arousal",
+                "eq": true
+              },
+              {
+                "state": "saturated.dominance",
+                "eq": true
+              }
+            ]
+          },
+          {
+            "tool_class_any": [
+              "write",
+              "destructive"
+            ]
+          },
+          {
+            "not": {
+              "confirmation_exact": true
+            }
+          }
+        ]
+      },
+      "args_check": [],
+      "state_inputs": [
+        "saturated"
+      ],
+      "test_id": "test_tuca_13_saturated_write_degrade",
+      "message_zh": "STPA 前置闸降级（T-UCA-13）：情感基线处于饱和状态，写/删类操作已暂缓，请确认后执行。",
+      "message_en": "STPA pre-flight gate held (T-UCA-13): affective baseline saturated; irreversible writes/deletes paused for confirmation."
+    },
+    {
+      "id": "T-UCA-16",
+      "verdict": "degrade",
+      "when": {
+        "all": [
+          {
+            "state": "phase",
+            "eq": "shift"
+          },
+          {
+            "tool_class_any": [
+              "destructive"
+            ]
+          }
+        ]
+      },
+      "args_check": [],
+      "state_inputs": [
+        "phase"
+      ],
+      "test_id": "test_tuca_16_shift_destructive_degrade",
+      "message_zh": "STPA 前置闸降级（T-UCA-16）：上下文处于预警相位（≥0.70），删除/覆盖类操作已暂缓，请二次确认目标后再执行。",
+      "message_en": "STPA pre-flight gate held (T-UCA-16): context is in the warning phase (>=0.70). Destructive calls are paused for re-confirmation."
+    },
+    {
+      "id": "T-UCA-11",
+      "verdict": "block",
+      "when": {
+        "any": [
+          {
+            "state": "audit_context_present",
+            "eq": false
+          },
+          {
+            "audit_write_unavailable": true
+          }
+        ]
+      },
+      "args_check": [],
+      "state_inputs": [
+        "audit_context"
+      ],
+      "test_id": "test_tuca_11_missing_audit_context",
+      "message_zh": "STPA 前置闸拦截（T-UCA-11）：本次调用缺少完整审计上下文，无法留痕。请修复会话/轮次标识后重试。",
+      "message_en": "STPA pre-flight gate denied (T-UCA-11): audit context incomplete; the call cannot be traced. Restore session/turn identifiers."
+    }
   ]
 }
 ```
@@ -406,12 +869,17 @@
 
 ## 9. 已知误杀面（必须与规则一起发布）
 
-1. **T-UCA-10（critical 下写）**：长会话几乎总是处于 critical ⇒ 所有写操作都要确认，**确认疲劳**是最现实的误杀/绕过诱因；恢复路径：按目标白名单（如 `notes/` 下的只读日志）自动放行，需 H0 决定。
-2. **T-UCA-04（受保护路径）**：`replay-set/`、`rules/` 的**合法维护**（生成器、冻结脚本）也会被拦；这些操作必须走人工/离线，不走工具网关。
-3. **T-UCA-02（凭证模式）**：讨论"password 字段"的普通文档也可能触发；当前按 fail-closed 拒绝，误杀成本低于漏放。
-4. **T-UCA-07（形状上限）**：合法的批量导入可能超 64 KiB；需按工具声明 `schema.maxBytes` 覆盖默认值（本契约允许 registry 放宽到 256 KiB，但不得放宽深度 8）。
-5. **规则只是静态检查**：不执行 payload ⇒ 无法保证语义安全；误杀率与漏放率都**未标定**（`provenance: guess`），必须在论文 limitations 里写明。
-6. **T-UCA-15（路径逃逸）**：任何绝对路径都会被拦，包括合法的"读取仓库外某个只读文档"；当前 fail-closed，若将来需要跨根目录只读，应由 H0 决定"只读根白名单"，不要改成默认放行。
+> **v1.2 重写**：v1.1 发布后，真实 DSH 会话在 244 次 `tool_gate` 里**判了 241 次 block**（98.8%），其中 **227 次是 T-UCA-08**（宿主工具未登记）、18 次 T-UCA-06（正文里的 `child_process`/`${`）、10 次 T-UCA-02（`usedTokens` 命中 `token`）、6 次 T-UCA-05（正文/命令里的 URL 字面量）、3 次 T-UCA-09（`lingshu_status.verbose` 未声明）。v1.2 逐条修掉，并把这些形态写进测试做回归锁。
+
+1. **T-UCA-02（凭证）**：仍会误伤**凭证赋值形状**的文档，例如 `password: example`；v1.2 已把"裸词 token/password"降为不算凭证，只保留高置信值（私钥块、`sk-`、`ghp_`、`AKIA`、JWT）与 `凭证名[=:]值` 形状，误杀面显著缩小，但不是零。
+2. **T-UCA-04（受保护路径）**：只对 **mutating** 生效（只读访问不再被拦）；`rules/`、`engine/`、`plugin/` 的**合法维护**仍需走人工/离线，占位正确但会拦自动化脚本。
+3. **T-UCA-03（删除/覆盖）**：只对 `destructive` 生效；通配符/根目录/系统目录/递归/强制标志才降级。普通 `rm file.tmp` 放行，但**误删非通配文件**不再由网关兜底（这是 v1.2 有意让出的召回，靠人工审批与备份）。
+4. **T-UCA-05（外发）**：白名单默认只含开发文档站（github/npm/pypi/python/node/mdn 等）；访问**自家内网**或新文档站需人工加白。正文里的 URL 文本不再判外发。
+5. **T-UCA-06（执行）**：形状白名单（curl/wget/iwr/反向 shell/编码执行/管道进 shell/改全局环境变量/subprocess/eval）；**其余命令一律放行**，包括 `rm -rf`（非根路径）、`git push`、`npm publish`。宿主授权边界之外的风险由宿主沙箱与审批承担。
+6. **T-UCA-07（形状上限）**：合法批量导入可能超 64 KiB；单次写 >64 KiB 仍会被拦（保留 v1.1 回归用例，未放宽）。
+7. **T-UCA-15（路径逃逸）**：工作区内相对/绝对路径都放行；**工作区外只读**仍被拦（不提供"只读根白名单"）。
+8. **仍是静态检查**：误杀率/漏放率**未标定**（`provenance: guess`），论文 limitations 必须原样写。
+9. **宿主无 dispatch 钩子**：插件仍只能**事后**判定 + 下一轮强提示；v1.2 修的是"判定本身别乱判"，不是"能提前阻断"。
 
 ---
 
@@ -480,7 +948,26 @@
 
 **遗留（不阻塞）**：T-UCA-10/13/16 的三条 degrade 在没有审批通道的宿主里都会落成 block（本契约 §4 的有意设计），因此"确认路径"尚未在真实宿主跑过；误杀率仍为 `guess`，需在论文 limitations 与 README 原样写。
 
-**冻结声明**：本文件 v1.1 自 2026-10-27 起为**附录与实现的唯一表格源**；本轮落盘后未修改任何 `engine/`、`plugin/`、`rules/` 文件。
+**冻结声明**：本文件自 2026-10-27（v1.1）起为**附录与实现的唯一表格源**；v1.2（2026-10-28）在同一机制下更新 §7，并同步 `engine/tool_gateway.py` 与 `plugin/dsh-lingshu/tool-gateway.js`（`tools/_sync_tool_policy.py --check` 报 `in_sync=True`）。
+
+### 10.5 v1.1 → v1.2（2026-10-28）：误报收敛，越权拦截率不变
+
+**触发**：H0 在真实 DSH 会话里复核 244 条 `tool_gate`：**241 block（98.8%）**，其中 T-UCA-08 **227**、T-UCA-06 **18**、T-UCA-02 **10**、T-UCA-05 **6**、T-UCA-09 **3**，`preflight_block` 1（UCA-01，注入侧另案）。常规 `read/write/edit/pwsh/grep/glob/web_*` 全部被判 block，开发任务无法进行。
+
+| # | 变化 | 理由 / 证据 |
+|---|---|---|
+| 1 | **宿主工具登记表**：`read/write/edit/read_image/glob/grep/pwsh/web_search/web_fetch` + 团队/日程/家居/股票等工作区工具（12 → **62** 条） | T-UCA-08 的 227 次误拦全部来自"宿主工具未登记"；登记后由**形状**规则兜底 |
+| 2 | **语义槽位判定**：路径只扫 path 参数（或裸路径串）、命令只扫 `cmd/command/script/code`、外发只扫 URL 参数；正文关键词/URL/代码文本不参与 | `grep pattern=usedTokens` 命中 `token`、README 里的 URL 命中外发、正文 `child_process` 命中执行 |
+| 3 | **T-UCA-15 工作区感知**：`state.workspace_root` 内的绝对路径 → 转相对路径放行；`..` 越界/工作区外盘符/UNC/NUL 才 block | 真实会话里读 `D:\LSJH\...` 被判逃逸（工作区内！） |
+| 4 | **T-UCA-03 收窄**为 `destructive` + 高风险形状，block→**degrade**；普通删除放行 | 用户要求"普通 `rm file.tmp` 允许，通配/根目录/核心配置才审批" |
+| 5 | **T-UCA-06 只看命令参数的高危形状**；`npm run test` / `python scripts/run.py` 放行 | 用户要求；原先 `tool_class=exec` 即 block |
+| 6 | **T-UCA-05 增 `egress_allowlist`**（github/npm/pypi/python/node/mdn），按 URL 主机判定 | 用户要求；正文 URL 不再算外发 |
+| 7 | **T-UCA-04 只对 mutating 生效** | 只读源码/文档不应被"受保护路径"拦 |
+| 8 | **相位豁免**：`phase=normal` 且无冲突/未饱和 → 写/执行类放行并记 `low_risk=true`；`shift/critical/饱和` 才由 T-UCA-10/13/16 收紧 | 用户要求（正常相位放宽、临界相位收紧） |
+
+**回归锁（未下降）**：`tests/test_tool_gateway.py` **101 checks / 0 failed**：危险用例 **28/28 block**（含 8 条 v1.2 新增真实越权：`.ssh/id_rsa`、工作区外绝对路径、`../` 逃逸、`curl|sh`、`wget|bash`、`setx PATH`、非白名单 `web_fetch`、系统目录通配删除），良性用例 **0/19 误杀**；Python↔JS 判定 23/23 一致。同一批 35 个调用：v1.1 **误杀 19/20 良性**、v1.2 **0/20**；危险拦截两侧均 **15/15**（证据 `acceptance/tool-gateway/v1.1-v1.2-compare.md`）。
+
+**未完成/诚实边界**：真实 **模型驱动**的 headless 复跑被 lab profile 的 API key 失效挡住（`AUTH: api key ****ecff is invalid`），因此 v1.2 的"真实会话不再误拦"目前由**同一批调用的确定性重放 + 单测 + 现场 audit 归因**支撑；插件热加载不生效，需**重启 DSH** 后旧会话的 `tool_gate_hint_injected` 才停止。
 
 ---
 

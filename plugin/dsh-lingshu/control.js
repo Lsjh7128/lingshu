@@ -19,6 +19,10 @@
 //                                        prompt_allowed→promptAllowed，risk_tier→riskTier，
 //                                        trust_exempt→trustExempt；键集与 Python 9 键一一对应）
 //
+// 例外（v5.8 / ADR-017）：§7 的「可解释权限请求」是**插件侧扩展**，engine/control.py 没有对应实现。
+// 它只在宿主插件的表达层用（网关判定为 degrade 时的转述），不参与跨语言 parity；因此本节不写进
+// 上面的映射表，也不要求引擎侧同步。
+//
 // 数值默认值只来自 DEFAULT_PARAMS（与 rules/decay-params.yaml 的 control 段同源）；
 // 调用方既可以传扁平参数（插件 config 的形态），也可以传 { control: {...} }（引擎配置的形态）。
 
@@ -315,13 +319,17 @@ export const RISK_EMOTION_CONFUSED = '困惑';
 // mild 必须"角色线索 + 风险词"同时命中：单独一个"扮演"或单独一个"黑心"都不算。
 // 为什么这么保守：mild 会进入 soft block，误伤普通 roleplay 的代价比漏判高（ADR §8 风险表）。
 // 词表口径（2026-10-27 与 engine-core 对齐）：**两边取并集**，只增识别面、不删旧词。
+// 2026-10-28（ADR-014 显式修正，Lead 授权的最小语义对齐）：补英文角色线索 pretend / act as
+// 与英文风险词 corrupt / shady / scam / fraudster / con artist，修 rc-blind-05 的纯英文漏判。
+// 词表一律小写；classifyUserRisk 内部用小写副本匹配（见该函数注释），与 Python 侧 lower() 对齐。
 const ROLEPLAY_CUES = Object.freeze([
   '扮演', '假装', '模拟', '角色扮演', '假扮', '饰演', '假如你是', '假设你是',
-  '装作', '摆出', 'cosplay', 'roleplay', 'role play',
+  '装作', '摆出', 'cosplay', 'roleplay', 'role play', 'pretend', 'act as',
 ]);
 const MILD_RISK_WORDS = Object.freeze([
   '黑心', '奸商', '骗子', '无良', '反派', '恶人', '不受限制', '不受约束', '没底线',
   '不择手段', '骗人', '欺瞒', '犯罪', '违法', '坏蛋', '腹黑', '坑人', '宰客', '行骗',
+  'corrupt', 'shady', 'scam', 'fraudster', 'con artist',
 ]);
 // severe 的高危红线：用**动作+对象短语**，不单用类别词做子串匹配。
 // 为什么不用裸类别词：真实提问里"这份合同是否违法/犯罪题材小说怎么写"会被误打成 hard
@@ -394,29 +402,34 @@ export function classifyUserRisk(userText, trustOrOpts = 'low', _priorStreak = 0
                 trust_exempt: false, emotion: null };
   const text = userText === null || userText === undefined ? '' : String(userText);
   if (!text.trim()) return out;
+  // 2026-10-28（ADR-014 显式修正，Lead 授权的最小语义对齐）：词表匹配用小写副本。
+  // 为什么：engine/control.py 先 lower() 再匹配，而这里原来按原样匹配——同一句英文
+  // 因大小写会在两侧分到不同 tier（例如 "Ignore Previous Instructions" 只会被 Python 判 severe）。
+  // 只影响匹配，不改输出/审计里的原文；词表本身都是小写。
+  const lowered = text.toLowerCase();
   let trustLevel = 'low';
   if (typeof trustOrOpts === 'string') trustLevel = trustOrOpts;
   else if (isObj(trustOrOpts)) {
     trustLevel = String(trustOrOpts.trustLevel ?? trustOrOpts.trust_level ?? 'low');
   }
-  const joke = hitWord(text, HARMLESS_JOKE_CUES) !== null;
+  const joke = hitWord(lowered, HARMLESS_JOKE_CUES) !== null;
   out.harmless_joke = joke;
 
   // 1) severe 优先：显式覆盖指令 / 绕过安全 / 高危红线。永不信任豁免。
   //    pattern 采用与 engine-core 约定的三段式 "severe:<rule_id>:<命中词>"，便于跨语言比对。
-  const overrideHit = hitWord(text, OVERRIDE_PATTERNS) || hitWord(text, EXTRA_OVERRIDE_PHRASES);
+  const overrideHit = hitWord(lowered, OVERRIDE_PATTERNS) || hitWord(lowered, EXTRA_OVERRIDE_PHRASES);
   if (overrideHit) {
     out.tier = 'severe';
     out.pattern = 'severe:override_constitution:' + overrideHit;
     return out;
   }
-  const bypassHit = hitWord(text, JAILBREAK_PATTERNS) || hitWord(text, EXTRA_BYPASS_PHRASES);
+  const bypassHit = hitWord(lowered, JAILBREAK_PATTERNS) || hitWord(lowered, EXTRA_BYPASS_PHRASES);
   if (bypassHit) {
     out.tier = 'severe';
     out.pattern = 'severe:bypass_safety:' + bypassHit;
     return out;
   }
-  const redlineHit = hitWord(text, SEVERE_REDLINES);
+  const redlineHit = hitWord(lowered, SEVERE_REDLINES);
   if (redlineHit) {
     out.tier = 'severe';
     out.pattern = 'severe:high_risk_redline:' + redlineHit;
@@ -424,13 +437,13 @@ export function classifyUserRisk(userText, trustOrOpts = 'low', _priorStreak = 0
   }
 
   // 2) mild：角色线索 + 风险词同时命中。
-  const cue = hitWord(text, ROLEPLAY_CUES);
-  const riskWord = cue ? hitWord(text, MILD_RISK_WORDS) : null;
+  const cue = hitWord(lowered, ROLEPLAY_CUES);
+  const riskWord = cue ? hitWord(lowered, MILD_RISK_WORDS) : null;
   if (cue && riskWord) {
     out.tier = 'mild';
     out.pattern = 'roleplay:' + cue + '+' + riskWord;
     // 情绪默认"警觉"，带玩笑/疑惑线索时"困惑"（两者都在允许标签集内）。
-    out.emotion = (joke || hitWord(text, CONFUSED_CUES)) ? RISK_EMOTION_CONFUSED : RISK_EMOTION_WARNING;
+    out.emotion = (joke || hitWord(lowered, CONFUSED_CUES)) ? RISK_EMOTION_CONFUSED : RISK_EMOTION_WARNING;
     // 信任豁免的三条件必须同时满足：mild + 无害玩笑 + high（severe 永不豁免）。
     out.trust_exempt = joke && String(trustLevel || '').toLowerCase() === 'high';
   }
@@ -653,4 +666,433 @@ export function preflightAudit(input = {}) {
     trustExempt,
     escalated,
   };
+}
+
+// ── 7. 可解释权限请求（Explainable Permission，ADR-017）───────────
+//
+// 问题（H0 的痛点）：T-UCA 网关在需要人工确认时只输出 `degrade` + 编号 + 系统口吻的强提示。
+// 用户看不懂「T-UCA-10 / critical phase」这类术语，于是最容易发生的事就是**盲批**——
+// 安全防线的最后一次人工检查被"看不懂 + 快点同意"击穿。
+//
+// 本节的定位：**表达层的转述**，不是判定层。网关的 verdict / allowed / degraded_to /
+// requires_confirmation 一个都不改；这里只把「网关已经确定的事实」翻译成
+// ① 事实层（动作 / 对象 / 最坏后果 / 可逆性 / 为什么现在问）——强制、不可省、不可改写；
+// ② 风格层（人设基线 PAD + 关系状态 → 语气 / 称呼距离 / 强度 / 情绪）——可按红区剥离。
+// 合成器（index.js）把两层的指令注入 prompt，由模型用角色口吻生成最终那 1–3 句。
+//
+// 三条不变量（ADR-017）：
+//   · 红区剥离：破坏性删除 / 凭证访问 / 外发 / 执行 / 路径逃逸 → 风格层整个关闭，
+//     退回严肃中立的系统警告。理由：玩笑语气会削弱"这是危险操作"的判断；
+//   · 事实优先：任何风格都不允许省略事实层；事实由网关字段确定性生成，不取自模型措辞；
+//   · fail-closed：未知工具类按 critical 处理（宁可过度警告，不可轻描淡写）。
+// 本节是插件侧扩展（engine/control.py 无对应实现），不参与跨语言 parity。
+//
+// 命名：`Explainable Permission Transfer` 指"把权限决策从系统级提示转述成符合角色设定的、
+// 非专家也能理解的说明"这一动作；机制构件（STPA/UCA、approval seam、PAD）都是既有借用，
+// 我们不声称提出新机制。
+
+export const PERMISSION_REQUEST_SCHEMA = 'lingshu/permission-request/v1';
+export const PERMISSION_REQUEST_HEADER = '〖权限请求 · 可解释转述〗';
+export const PERMISSION_REQUEST_CRITICAL_HEADER = '〖权限请求 · 高危（已剥离角色口吻）〗';
+
+// UCA 红区：这五条一旦命中，风格层**整体**关闭（不是"减弱"）。
+// 选它们的口径：不可逆或不可撤回的副作用——凭证泄露、破坏性变更、外发、执行、越界写。
+export const PERMISSION_RED_ZONE_UCAS = Object.freeze([
+  'T-UCA-02',   // 明文凭证
+  'T-UCA-03',   // 未确认的破坏性删除/覆盖
+  'T-UCA-05',   // 非白名单外发
+  'T-UCA-06',   // 任意代码执行
+  'T-UCA-15',   // 路径逃逸
+]);
+
+// Composer 注入要求（H0 原文）。逐字保留：这是产品约束，不是可改写文案。
+export const PERMISSION_COMPOSER_INSTRUCTION = '本轮你正在请求用户授予工具执行权限。'
+  + '请用符合你当前设定的口吻，向用户解释：你需要用该工具做什么、为什么需要、有什么风险。'
+  + '禁止使用系统术语（如 API、权限、系统调用）。'
+  + '如风险等级为高危（critical），必须剥离所有角色口吻，用最严肃的语言警告。';
+
+// 给模型的"禁止对用户说出这些词"清单。目的是把系统语汇翻译成人话，
+// 而不是让模型把网关编号原样转述给用户。注意：清单本身可以出现在 prompt 的禁令里。
+export const PERMISSION_FORBIDDEN_TERMS = Object.freeze([
+  'API', '接口', '系统调用', '权限', '授权', 'token', 'gateway', '钩子', 'payload', 'schema', '审计',
+]);
+
+// 工具名 → 人话动作。只覆盖网关登记表里的名字；其余按 toolClass 兜底。
+const PERMISSION_ACTION_BY_TOOL = Object.freeze({
+  fs_delete: { action: '把这个文件删掉', code: 'delete' },
+  delete: { action: '把这个文件删掉', code: 'delete' },
+  fs_write: { action: '改写一个文件', code: 'overwrite' },
+  write_file: { action: '改写一个文件', code: 'overwrite' },
+  update_config: { action: '改动一份配置文件', code: 'overwrite' },
+  memory_write: { action: '往长期记忆里写一条记录', code: 'write' },
+  http_post: { action: '把一段数据发送到外部服务', code: 'send_out' },
+  run_shell: { action: '在这台电脑上真的执行一段命令', code: 'execute' },
+  fs_read: { action: '读取一个文件的内容', code: 'read' },
+  list_dir: { action: '看一下一个目录里有什么', code: 'read' },
+  search_memory: { action: '在我记得的事情里查一下', code: 'read' },
+  lingshu_status: { action: '查看一下我自己的运行状态', code: 'read' },
+});
+
+const PERMISSION_ACTION_BY_CLASS = Object.freeze({
+  destructive: { action: '删掉或覆盖一份东西', code: 'delete' },
+  write: { action: '改写一份东西', code: 'overwrite' },
+  exec: { action: '在这台电脑上真的执行一段命令', code: 'execute' },
+  network: { action: '把一段数据发送到外部服务', code: 'send_out' },
+  read: { action: '读取一点内容', code: 'read' },
+  unknown: { action: '做一件我无法完全确认的事', code: 'unknown' },
+});
+
+// 动作 → 最坏后果 / 可逆性（人话；不出现系统术语）。
+const PERMISSION_CONSEQUENCE = Object.freeze({
+  delete: { worstCase: '目标会被永久删除，通常没办法从对话里恢复', reversible: 'no' },
+  overwrite: { worstCase: '原来的内容会被覆盖；如果没有备份，可能就找不回来了', reversible: 'maybe' },
+  write: { worstCase: '会新增或改动一条记录；事后不一定分得清哪些是你本来想要的', reversible: 'maybe' },
+  execute: { worstCase: '命令会在本机真的执行，可能改动系统状态，做完往往撤不回来', reversible: 'no' },
+  send_out: { worstCase: '数据一旦发出去就收不回来，对方也可能把它存下来', reversible: 'no' },
+  read: { worstCase: '只会读取，不会改动任何内容', reversible: 'yes' },
+  unknown: { worstCase: '我们无法确定它到底会改什么，只能按最坏情况当作会破坏数据来对待', reversible: 'unknown' },
+});
+
+// 目标文本的脱敏规则：事实层要进 prompt，绝不能把凭证原文带进去。
+// 口径与 tool-gateway.js 的 preview 脱敏同源（但这里是"值级"最小集，避免重复引入依赖）。
+// 注意顺序：**先脱敏、后截断**（permissionMask）。反过来会把 token 从中间切开，正则匹配不到，
+// 反而把凭证前缀留在对象描述里（v5.8 审计 P2-1 的实测样本：'A'*68 + 'sk-…'）。
+// 令牌形态**不做词界前缀**（不用 \b / lookbehind）：路径或前缀字母会破坏词界，宁可多遮（fail-safe），
+// 也不允许 token 紧贴其他字符时漏网；遮蔽误伤的代价只是对象描述少几个字符。
+const PERMISSION_SECRET_RES = Object.freeze([
+  /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)/g,
+  /sk-[A-Za-z0-9_-]{6,}/g,
+  /ghp_[A-Za-z0-9]{6,}/g,
+  /AKIA[0-9A-Z]{10,}/g,
+  /eyJ[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{2,}/g,
+  /(password|passwd|token|secret|api[_-]?key|credential)\s*[=:]\s*\S+/gi,
+]);
+
+const PERMISSION_TOOL_CLASSES = Object.freeze(['destructive', 'write', 'exec', 'network', 'read', 'unknown']);
+
+function permissionStr(v, limit = 120) {
+  if (v === null || v === undefined) return '';
+  return String(v).replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, limit);
+}
+
+function permissionMask(text) {
+  // 顺序固定：先用较大的上限收敛输入（防止超长文本拖慢正则），**脱敏之后**再截断 80 字符。
+  // 若先截断，token 会被从中间切开，凭证前缀就漏进事实层（审计 P2-1）。
+  let out = permissionStr(text, 400);
+  for (const rx of PERMISSION_SECRET_RES) out = out.replace(rx, '***');
+  return out.slice(0, 80);
+}
+
+function permissionClass(v) {
+  const s = String(v === null || v === undefined ? '' : v).toLowerCase();
+  return PERMISSION_TOOL_CLASSES.includes(s) ? s : 'unknown';
+}
+
+/** 目标对象的人话描述：按工具类换量词，路径/命令只做脱敏与截断，不解释成系统概念。 */
+function permissionObject(tool, toolClass, target) {
+  const t = permissionMask(target);
+  if (!t) return '你没有给出具体目标';
+  if (toolClass === 'network' || tool === 'http_post') return '要发往的外部地址（' + t + '）';
+  if (toolClass === 'exec' || tool === 'run_shell') return '要执行的那段命令（' + t + '）';
+  if (toolClass === 'destructive' || toolClass === 'write') return '你指定的那个位置（' + t + '）';
+  if (toolClass === 'read') return '你要看的那个位置（' + t + '）';
+  return '你指定的目标（' + t + '）';
+}
+
+/** 为什么现在要问：原因来自网关命中的规则，而不是模型自己的解释。 */
+function permissionWhy(ucas, degradedTo) {
+  const has = (id) => ucas.includes(id);
+  const parts = [];
+  if (has('T-UCA-10')) parts.push('当前对话已经很长，早先的设定可能被冲淡，这时写入更容易出错');
+  if (has('T-UCA-13')) parts.push('刚才连续有负面反馈，此时写入长期记录容易留下难恢复的偏差');
+  if (has('T-UCA-16')) parts.push('对话已经接近长度上限，删除或覆盖类操作的目标更容易被长文本带偏');
+  if (degradedTo === 'block') {
+    // 无审批通道时**不要**说"先拦下等你确认"——那会暗示一个并不存在的确认入口。
+    // 这里只说"没有可以马上确认的入口 + 是否继续由你决定"，与事实层 boundary 一致。
+    parts.push('现在没有可以马上确认的入口；我先把它记下来并告诉你代价，是否继续由你决定');
+  }
+  if (!parts.length) parts.push('这一步会产生真实副作用，需要你先点头');
+  return parts.join('；');
+}
+
+function permissionRiskLevel(toolClass, ucas) {
+  // 未知工具类按 critical：我们对它会做什么没有把握，宁可按最坏情况警告。
+  if (toolClass === 'destructive' || toolClass === 'unknown') return 'critical';
+  if (ucas.some((u) => PERMISSION_RED_ZONE_UCAS.includes(u))) return 'critical';
+  if (ucas.some((u) => u === 'T-UCA-10' || u === 'T-UCA-13' || u === 'T-UCA-16')) return 'high';
+  if (toolClass === 'write' || toolClass === 'exec' || toolClass === 'network') return 'high';
+  return 'medium';
+}
+
+function permissionClamp(v, lo, hi) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return 1;
+  return Math.round(Math.max(lo, Math.min(hi, n)) * 1000) / 1000;
+}
+
+/**
+ * 风格层：把 PAD 人设基线与关系状态翻译成**确定性**的表达参数（不调模型）。
+ *
+ * 为什么用规则而不是让模型自己决定风格：风格参数要可审计、可复现，且红区必须能**强制**
+ * 关闭它；让模型"自己理解人设"在红区恰恰是最危险的做法。
+ *
+ * @param {object} persona  {valence, arousal, dominance}（缺省按中性 0,0,0）
+ * @param {object} relation {trustLevel, stage, unresolvedConflict, modifier}
+ * @param {string} riskLevel 'critical' | 'high' | 'medium' | 'low'
+ * @param {string} emotion 可选的允许标签（警觉/困惑）
+ * @returns {{applied:boolean, tone:string, distance:string, intensity:number,
+ *            emotion:string|null, forbiddenTerms:string[], reasons:string[]}}
+ */
+function permissionStyle(persona, relation, riskLevel, emotion) {
+  const forbiddenTerms = PERMISSION_FORBIDDEN_TERMS.slice();
+  if (riskLevel === 'critical') {
+    // 红区：风格层整体关闭。distance 用 neutral（不是 familiar/reserved）——连"怎么称呼"都不留角色痕迹。
+    return {
+      applied: false, tone: 'serious', distance: 'neutral', intensity: 1, emotion: null,
+      forbiddenTerms, reasons: ['red_zone_style_stripped'],
+    };
+  }
+  const p = isObj(persona) ? persona : {};
+  const valence = num(p.valence, 0);
+  const arousal = num(p.arousal, 0);
+  const rel = isObj(relation) ? relation : {};
+  const trust = String(rel.trustLevel || 'low').toLowerCase();
+  const reasons = [];
+  let distance = trust === 'high' ? 'familiar' : (trust === 'mid' ? 'polite' : 'reserved');
+  let tone = 'neutral';
+  if (rel.unresolvedConflict) {
+    // 关系冲突期：不借"亲密"放大说服力，也不假装没事。
+    tone = 'guarded';
+    distance = 'reserved';
+    reasons.push('unresolved_conflict_restraint');
+  } else if (valence <= -0.3) {
+    tone = 'subdued';
+    reasons.push('negative_valence');
+  } else if (arousal >= 0.4) {
+    tone = 'urgent';
+    reasons.push('high_arousal');
+  } else if (trust === 'high' && valence >= 0.2) {
+    tone = 'warm';
+    reasons.push('high_trust_positive');
+  } else {
+    reasons.push('default_neutral');
+  }
+  // dominance 低说明用户的掌控感弱：不允许用"命令式"口吻（tone 已由上面的规则覆盖），
+  // 这里只留痕，便于审计"为什么这轮不显得强势"。
+  if (num(p.dominance, 0) <= -0.3) reasons.push('low_dominance_no_pressure');
+  // 高危但未到红区：只允许严肃侧的语气（guarded / urgent），**不允许** warm——
+  // 否则"需要你确认的危险写入"会被说成亲昵的请求，正是本机制要防的误导。
+  if (riskLevel === 'high' && !rel.unresolvedConflict) {
+    tone = arousal >= 0.4 ? 'urgent' : 'guarded';
+    reasons.push('high_risk_serious_tone');
+  }
+  const explicit = String(emotion || '');
+  const allowedEmotion = (explicit === RISK_EMOTION_WARNING || explicit === RISK_EMOTION_CONFUSED)
+    ? explicit
+    : (riskLevel === 'high' ? RISK_EMOTION_WARNING : null);
+  return {
+    applied: true,
+    tone,
+    distance,
+    intensity: permissionClamp(rel.modifier, 0.8, 1.2),
+    emotion: allowedEmotion,
+    forbiddenTerms,
+    reasons,
+  };
+}
+
+/**
+ * 组装一个 PermissionRequest（纯函数，任何异常都退回"严肃警告"形态，**绝不返回 null**）。
+ *
+ * 为什么异常也要返回对象：宁可在最坏情况下给用户一段过度严肃的事实警告，也不能因为
+ * 组装失败就悄悄少一次风险披露（fail-closed 的表达层版本）。
+ *
+ * @param {object} input 见 ADR-017 §2；所有字段可缺省
+ * @returns {object} PermissionRequest（schema=lingshu/permission-request/v1）
+ */
+export function buildPermissionRequest(input = {}) {
+  try {
+    const a = isObj(input) ? input : {};
+    const tool = permissionStr(a.tool, 64) || 'unknown_tool';
+    const toolClass = permissionClass(a.toolClass ?? a.tool_class);
+    const ucas = Array.isArray(a.ucas)
+      ? a.ucas.filter((u) => typeof u === 'string' && u).slice(0, 16) : [];
+    const degradedTo = permissionStr(a.degradedTo ?? a.degraded_to, 16) || null;
+    const gatewayVerdict = permissionStr(a.verdict, 16) || (degradedTo ? 'block' : 'degrade');
+    const actionSpec = PERMISSION_ACTION_BY_TOOL[tool] || PERMISSION_ACTION_BY_CLASS[toolClass]
+      || PERMISSION_ACTION_BY_CLASS.unknown;
+    const consequence = PERMISSION_CONSEQUENCE[actionSpec.code] || PERMISSION_CONSEQUENCE.unknown;
+    const riskLevel = permissionRiskLevel(toolClass, ucas);
+    const style = permissionStyle(a.persona, a.relation, riskLevel, a.emotion);
+    // executed 缺省 = **true**（保守）：调用方不声明接入点时，默认按"已经派发/事后检测"处理，
+    // 绝不默认声称"已暂缓"——那是 ADR-017 明令禁止的过度声明（审计 P2-2）。
+    const executed = (a.executed === undefined || a.executed === null)
+      ? true : Boolean(a.executed);
+    const facts = {
+      action: actionSpec.action,
+      actionCode: actionSpec.code,
+      object: permissionObject(tool, toolClass, a.target),
+      worstCase: consequence.worstCase,
+      reversible: consequence.reversible,
+      riskLevel,
+      why: permissionWhy(ucas, degradedTo),
+      ucas: ucas.slice(),
+      trigger: degradedTo === 'block' ? 'degrade_no_channel' : 'degrade',
+      // executed 由**调用方**按接入点填：前置接入点（guardTool/引擎循环）为 false（确实暂缓），
+      // 插件默认的事后检测路径为 true（调用已派发/已执行）。这是能力边界，不是实现细节。
+      // 缺省按 true 处理（见上面 const executed 的注释）：不声明就不许声称"已暂停"。
+      executed,
+      boundary: executed
+        ? '这次动作在网关判定之前就已经派发了（当前宿主没有执行前钩子），我们没能拦住它。'
+          + '不要对用户声称"已暂停/等你批准才执行"；把事实作为事后说明，并请用户决定后续是否继续或补救。'
+        : '这次动作已被暂缓，还没有执行；请等用户明确回答后再决定是否继续。',
+    };
+    const request = {
+      schema: PERMISSION_REQUEST_SCHEMA,
+      kind: 'permission_request',
+      at: Number.isFinite(Number(a.at)) ? Number(a.at) : 0,
+      // 注意：request.verdict 表示"这是一次需要确认的降级请求"；网关的实际判定单独放在
+      // gatewayVerdict，避免把"无审批通道回落 block"写成"已经放行"。
+      verdict: 'degrade',
+      gatewayVerdict,
+      tool,
+      toolClass,
+      degradedTo,
+      facts,
+      style,
+      audit: null,
+    };
+    request.composer = {
+      instruction: PERMISSION_COMPOSER_INSTRUCTION,
+      prompt: renderPermissionRequestPrompt(request),
+    };
+    request.audit = permissionRequestAudit(request);
+    return request;
+  } catch (_err) {
+    // fail-closed 的表达层版本：组装失败 → 强制严肃形态 + 不省略风险披露。
+    const fallbackFacts = {
+      action: '做一件我无法完全确认的事',
+      actionCode: 'unknown',
+      object: '无法确定的目标',
+      worstCase: '我们无法确定它到底会改什么，只能按最坏情况当作会破坏数据来对待',
+      reversible: 'unknown',
+      riskLevel: 'critical',
+      // 兜底文案必须与正常路径的口径一致：**不说**"已拦下等你确认"（会暗示确认入口）。
+      why: '现在没有可以马上确认的入口；我先把它记下来并告诉你代价，是否继续由你决定',
+      ucas: [],
+      trigger: 'degrade_no_channel',
+      executed: true,
+      boundary: '这次动作可能已经发生；不要对用户声称"已暂停"，把事实作为事后说明，'
+        + '并请用户决定后续是否继续或补救。',
+    };
+    const request = {
+      schema: PERMISSION_REQUEST_SCHEMA,
+      kind: 'permission_request',
+      at: 0,
+      verdict: 'degrade',
+      gatewayVerdict: 'degrade',
+      tool: 'unknown_tool',
+      toolClass: 'unknown',
+      degradedTo: null,
+      facts: fallbackFacts,
+      style: {
+        applied: false, tone: 'serious', distance: 'neutral', intensity: 1, emotion: null,
+        forbiddenTerms: PERMISSION_FORBIDDEN_TERMS.slice(), reasons: ['build_failed_fail_closed'],
+      },
+      composer: null,
+      audit: null,
+    };
+    request.composer = {
+      instruction: PERMISSION_COMPOSER_INSTRUCTION,
+      prompt: renderPermissionRequestPrompt(request),
+    };
+    request.audit = permissionRequestAudit(request);
+    return request;
+  }
+}
+
+/**
+ * 把 PermissionRequest 渲染成**合成器注入文本**。
+ * 事实层逐条列出（不可省），风格层只给约束；红区用 critical 头 + 强制剥离指令。
+ * 输入不合法时返回空串（调用方回退旧的强提示），绝不抛异常。
+ */
+export function renderPermissionRequestPrompt(request) {
+  try {
+    const r = isObj(request) ? request : null;
+    if (!r) return '';
+    const facts = isObj(r.facts) ? r.facts : {};
+    const style = isObj(r.style) ? r.style : {};
+    const critical = facts.riskLevel === 'critical' || style.applied === false;
+    const lines = [];
+    lines.push(critical ? PERMISSION_REQUEST_CRITICAL_HEADER : PERMISSION_REQUEST_HEADER);
+    lines.push(String(PERMISSION_COMPOSER_INSTRUCTION));
+    if (critical) {
+      lines.push('【强制】风险等级 critical（破坏性删除 / 凭证访问 / 外发 / 执行 / 越界路径之一）。'
+        + '必须剥离所有角色口吻、称呼、玩笑与情绪化表达，用中性、严肃、简短的语言说明风险。');
+    }
+    lines.push('【必须说到的事实（不得省略、不得改写）】');
+    lines.push('· 动作：' + String(facts.action || '未提供'));
+    lines.push('· 对象：' + String(facts.object || '未提供'));
+    lines.push('· 最坏后果：' + String(facts.worstCase || '未提供'));
+    lines.push('· 可逆性：' + String(facts.reversible || 'unknown'));
+    lines.push('· 为什么现在要问：' + String(facts.why || '未提供'));
+    if (facts.boundary) lines.push('【边界】' + String(facts.boundary));
+    // 事实层不许出现系统术语：把禁用词在这里再声明一次，且要求"用手边的说法代替"。
+    lines.push('【表达约束】');
+    if (style.applied === false) {
+      lines.push('· 不要再演角色，不要卖萌，不要用昵称，不要使用感叹号。');
+      lines.push(facts.executed
+        ? '· 只输出 2–3 句：先说明刚才发生了什么，再说明最坏后果，最后请用户决定后续是否继续或补救。'
+        : '· 只输出 2–3 句：先明确"暂不执行"，再说明最坏后果，最后请用户明确回答是否继续。');
+    } else {
+      lines.push('· 语气：' + String(style.tone || 'neutral')
+        + ' ｜ 称呼距离：' + String(style.distance || 'reserved')
+        + ' ｜ 强度上限：' + String(style.intensity ?? 1)
+        + ' ｜ 情绪：' + String(style.emotion || '不渲染'));
+      lines.push(facts.executed
+        ? '· 只输出 1–3 句：先说清刚才发生了什么，再说风险，最后请用户决定后续是否继续；不要执行任何工具调用。'
+        : '· 只输出 1–3 句：先给"做 / 不做"的结论，再说明风险；不要执行任何工具调用，等用户回答。');
+    }
+    const forbidden = Array.isArray(style.forbiddenTerms) && style.forbiddenTerms.length
+      ? style.forbiddenTerms : PERMISSION_FORBIDDEN_TERMS;
+    lines.push('· 不要对用户说出这些词：' + forbidden.join('、') + '。');
+    lines.push('· 不要提及规则编号、网关、宿主或"系统拦截"；不要输出任何标记或元信息。');
+    return lines.join('\n');
+  } catch (_err) {
+    return '';
+  }
+}
+
+/**
+ * 审计投影：只保留可审计字段，**绝不包含参数原文**（args 在网关侧另有摘要脱敏）。
+ * 返回新对象；异常时返回最小可用对象。
+ */
+export function permissionRequestAudit(request) {
+  try {
+    const r = isObj(request) ? request : {};
+    const facts = isObj(r.facts) ? r.facts : {};
+    const style = isObj(r.style) ? r.style : {};
+    return {
+      schema: PERMISSION_REQUEST_SCHEMA,
+      tool: String(r.tool || 'unknown_tool'),
+      tool_class: String(r.toolClass || 'unknown'),
+      gateway_verdict: String(r.gatewayVerdict || 'degrade'),
+      degraded_to: r.degradedTo === null || r.degradedTo === undefined ? null : String(r.degradedTo),
+      risk_level: String(facts.riskLevel || 'critical'),
+      style_stripped: style.applied === false,
+      style_tone: String(style.tone || 'serious'),
+      style_reasons: Array.isArray(style.reasons) ? style.reasons.slice() : [],
+      ucas: Array.isArray(facts.ucas) ? facts.ucas.slice() : [],
+      reversible: String(facts.reversible || 'unknown'),
+      executed: Boolean(facts.executed),
+      args_free: true,   // 恒为 true：本对象不承载参数原文
+    };
+  } catch (_err) {
+    return {
+      schema: PERMISSION_REQUEST_SCHEMA, tool: 'unknown_tool', tool_class: 'unknown',
+      gateway_verdict: 'degrade', degraded_to: null, risk_level: 'critical',
+      style_stripped: true, style_tone: 'serious', style_reasons: ['audit_failed'],
+      ucas: [], reversible: 'unknown', executed: true, args_free: true,
+    };
+  }
 }

@@ -1,0 +1,6 @@
+dsh: reasoning:
+The user has a conversation with U1-U4. They want the answer to the final question. The project codename was changed from Alpha to Beta, so the answer is Beta. Only answer the codename, no explanation.
+
+But wait — do I need to do anything with memory tools? There's no memory tool available. This seems like a simple recall test. The answer is 贝塔 (Beta).
+
+Answer only the codename.

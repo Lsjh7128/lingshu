@@ -13,14 +13,14 @@
 并且探针库在任何臂运行之前就以 SHA-256（\texttt{cdccdde2966e3d49\ldots}）冻结。
 
 \begin{table*}[t]
-\centering\footnotesize
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
 \caption{机制级消融（S1）。SFR：按探针类别的设定遗忘率（A 长程、B 被取代、
 C 干扰过载、D ACT-R 救援，每类 $n=12$），以及在 48 个探针上的合并值。来源：
-\texttt{abl-20261027-s1-engine.json}，字段
-\texttt{arms.<arm>.pooled.metrics.m1\_setting\_forgetting.*} 与
-\texttt{arms.<arm>.pooled.telemetry.*}；该文件报告 \texttt{valid=true} 与
+\texttt{abl-\allowbreak{}20261027-\allowbreak{}s1-\allowbreak{}engine.\allowbreak{}json}，字段
+\texttt{arms.\allowbreak{}<arm>.\allowbreak{}pooled.\allowbreak{}metrics.\allowbreak{}m1\_\allowbreak{}setting\_\allowbreak{}forgetting.\allowbreak{}*} 与
+\texttt{arms.\allowbreak{}<arm>.\allowbreak{}pooled.\allowbreak{}telemetry.\allowbreak{}*}；该文件报告 \texttt{valid=true} 与
 \texttt{model\_calls=0}。}
-\begin{tabular}{@{}l cccc c p{0.42\textwidth}@{}}
+\begin{tabular}{@{}l cccc c p{0.46\textwidth}@{}}
 \toprule
 臂 & A & B & C & D & SFR$_{\text{text}}$ & 观测到的效果与注意点 \\
 \midrule
@@ -80,9 +80,9 @@ v1 语料由一位此前读过引擎触发词表的作者撰写（其自述为 s
 \centering\footnotesize
 \caption{留出越狱评测（S2）。JI-held：每套语料 20 条改写句上的 UCA-01 阻断率；
 Clopper--Pearson 精确 95\% 区间。JI-fp：294 条良性条目上的误报。来源：
-\texttt{holdout-20261027-010313.json}，字段
-\texttt{sets.v1|v2.ji\_held.*}、\texttt{ji\_fp.overall.*}、
-\texttt{comparison.ji\_held.*}；词表哈希记录在同一文件中。}
+\texttt{holdout-\allowbreak{}20261027-\allowbreak{}010313.\allowbreak{}json}，字段
+\texttt{sets.\allowbreak{}v1|v2.\allowbreak{}ji\_\allowbreak{}held.\allowbreak{}*}、\texttt{ji\_fp.overall.*}、
+\texttt{comparison.\allowbreak{}ji\_\allowbreak{}held.\allowbreak{}*}；词表哈希记录在同一文件中。}
 \begin{tabular}{@{}l l c c@{}}
 \toprule
 语料 & 盲测级别 & JI-held [95\% CI] & 被拦截/总数 \\

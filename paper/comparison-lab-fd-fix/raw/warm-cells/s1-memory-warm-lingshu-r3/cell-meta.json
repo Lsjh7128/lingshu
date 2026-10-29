@@ -1,0 +1,15 @@
+{
+  "cell": "s1-memory-warm-lingshu-r3",
+  "scenario": "s1-memory-warm-diag",
+  "subject": "lingshu",
+  "round": 3,
+  "profile": "lingshu-lab-headless",
+  "data_dir": "D:\\LSJH\\lingshu\\paper\\comparison-lab\\raw\\warm-cells\\s1-memory-warm-lingshu-r3",
+  "started_at": "2026-10-27T19:08:25+08:00",
+  "finished_at": "2026-10-27T19:09:18+08:00",
+  "status": "ok",
+  "failed_turn": null,
+  "answer_turn": 5,
+  "diagnostic": true,
+  "not_in_main_table": true
+}

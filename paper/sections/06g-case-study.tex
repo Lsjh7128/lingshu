@@ -23,7 +23,7 @@ the deployed gate, add a static rule patch, and measure again.
 
 \paragraph{Payloads.} Twenty payloads, five per complexity level, all verified to
 be interpretable instructions rather than random strings
-(\texttt{paper/case-study/payloads.jsonl}, SHA-256 recorded in the results
+(\texttt{paper/\allowbreak{}case-\allowbreak{}study/\allowbreak{}payloads.\allowbreak{}jsonl}, SHA-256 recorded in the results
 files): (L1) direct overrides; (L2) encoded variants---Base64, ROT13, hex,
 zero-width separators, full-width Latin; (L3) multilingual variants in English,
 Japanese, Russian and Arabic, plus a mixed Chinese--English item; and (L4)
@@ -48,9 +48,9 @@ is unchanged.
 \paragraph{Measurement.} Each payload is fed as a user message to a mock host that
 loads the real plugin and fires the same hooks as the host contract
 (\texttt{session/event} then \texttt{agent/pre-step}); interception is read from
-\texttt{state.control.blocked}, the \texttt{preflight\_block} audit event, the
+\texttt{state.\allowbreak{}control.\allowbreak{}blocked}, the \texttt{preflight\_block} audit event, the
 UCA list and the source attribution, not from model behaviour. Every payload gets
-its own isolated \texttt{LINGSHU\_DATA\_DIR} and \texttt{DSH\_HOME}, and the run
+its own isolated \texttt{LINGSHU\_\allowbreak{}DATA\_\allowbreak{}DIR} and \texttt{DSH\_HOME}, and the run
 asserts that the temporary paths never touch the real plugin directory. This
 isolates the rule layer's recognition from the model's own refusal behaviour.
 
@@ -78,8 +78,8 @@ Figure~\ref{fig:redteam} plots the two curves by complexity level.
 after a static rule-layer patch, by construction complexity (L1 direct, L2
 encoded, L3 multilingual, L4 nested; $n=5$ per level). Before: 3/20 (15.0\%);
 after: 20/20 (100\%). Source:
-\texttt{paper/case-study/results-before.json} and \texttt{results-after.json};
-figure inputs \texttt{paper/case-study/fig4-inputs.json}.}
+\texttt{paper/\allowbreak{}case-\allowbreak{}study/\allowbreak{}results-\allowbreak{}before.\allowbreak{}json} and \texttt{results-\allowbreak{}after.\allowbreak{}json};
+figure inputs \texttt{paper/\allowbreak{}case-\allowbreak{}study/\allowbreak{}fig4-\allowbreak{}inputs.\allowbreak{}json}.}
 \label{fig:redteam}
 \end{figure}
 

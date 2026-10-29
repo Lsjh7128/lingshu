@@ -10,9 +10,9 @@
 
 \paragraph{结果。} 两臂的规则级评分几乎相同（见表~\ref{tab:host}）；残余差异各只有一条：未知承认关键词规则在关键词表扩充前为 7/9 对 6/9，取代规则则给出 5/9 对 6/9，人工复核认定后者为假阳性（见第~\ref{sec:exp:s5} 节）。随后两名独立评分者对 18 条匿名输出做盲评，覆盖四个维度并以逐字引文为证据（M1 人格、M2 拒绝完整性、M3 记忆越权、M4 未知纪律）。所有条目在四个维度上都拿到满分：M1 与 M2 为 18/18，被判为记忆越权的条目为零，18/18 承认了缺失的事实。观测一致率为 $100\%$；由于两个评分向量都零方差，Cohen's $\kappa$ 在数学上无定义，因此我们只报告原始一致率，不写 $\kappa=1$。
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering\footnotesize
-\caption{宿主消融（S3）。规则计数按臂给出（每臂 $n=9$）；人工标签是臂盲的（$n=18$）。来源：\texttt{calls.json} 的字段 \texttt{aggregate.ON.*}、\texttt{aggregate.OFF.*}、\texttt{aggregate.\_control\_plane\_evidence.*}、\texttt{aggregate.\_manual.*}、\texttt{totals.*}；一致率来自 \texttt{labels/kappa.json}。}
+\caption{宿主消融（S3）。规则计数按臂给出（每臂 $n=9$）；人工标签是臂盲的（$n=18$）。来源：\texttt{calls.json} 的字段 \texttt{aggregate.ON.*}、\texttt{aggregate.OFF.*}、\texttt{aggregate.\allowbreak{}\_\allowbreak{}control\_\allowbreak{}plane\_\allowbreak{}evidence.\allowbreak{}*}、\texttt{aggregate.\allowbreak{}\_\allowbreak{}manual.\allowbreak{}*}、\texttt{totals.*}；一致率来自 \texttt{labels/kappa.json}。}
 \begin{tabular}{@{}l cccc cc@{}}
 \toprule
  & 锚点 & 敬称 & 拒绝 & BETA & 规则：ALPHA & 人工 \\
@@ -27,7 +27,7 @@
 \vspace{2pt}
 \raggedright\scriptsize
 “规则：ALPHA 为现行”计数是人工复核之前的自动启发式；人工行给出的是裁定后的判断。两臂均为零 fallback、零闸门事件，意味着这些机制没有被实际执行到。
-\end{table}
+\end{table*}
 
 \paragraph{预注册结果。} P-S3a 预期 \textsc{On} 在 M1 与 M2 上更好。该预期\emph{不成立}，记为 \texttt{null}：当每个格都处于天花板时，控制面已没有残余失效可修，因此 $n=18$ 没有检出差别的功效。\textbf{这里的 null 不是“无效应”的证据，而是没有功效的天花板效应。} P-S3b（M3/M4 无差异）在方向上一致：两臂在规则层行为相同，人工也未在任何地方看到越权。本实验唯一能支持的主张是“接线可达且没有可测的行为差异”：锚点被插入、该轮仍然通过闸门，但没有任何可观测的变化。我们不主张控制面提升了稳定性。
 

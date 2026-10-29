@@ -1,0 +1,8 @@
+dsh: reasoning:
+The user asks: what is my project codename? Only answer the codename, no explanation.
+
+Memory says project codename is 贝塔 (Beta), source mem_002, confidence high. Memory recall is provided as reference, not current statement. The user asks directly. Answer: 贝塔.
+
+But wait — constitution says memory isn't current statement; if conflict with current user statement, current wins. No conflict here. So answer 贝塔.
+
+Only the codename.

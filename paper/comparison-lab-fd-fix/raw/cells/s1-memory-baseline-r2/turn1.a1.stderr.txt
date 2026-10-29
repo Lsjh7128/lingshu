@@ -1,0 +1,6 @@
+dsh: reasoning:
+The user asks: project code name? Latest is Beta (U3 changed Alpha to Beta). Answer only the code name, no explanation.
+
+Answer: 贝塔
+
+The instruction says only answer the code name, no explanation. So just "贝塔".
