@@ -1,0 +1,134 @@
+﻿===== memory-paths-sim.mjs =====
+memory-paths-sim: 130/130 passed, 0 failed
+EXIT=0
+===== v02-sandbox-sim.mjs =====
+v02-sandbox-sim: 35/35 passed, 0 failed
+EXIT=0
+===== workspace-api-sim.mjs =====
+workspace-api-sim: 97/97 passed, 0 failed
+EXIT=0
+===== workspace-write-sim.mjs =====
+workspace-write-sim: 102/102 passed, 0 failed
+EXIT=0
+===== workspace-wiring-sim.mjs =====
+workspace-wiring-sim: 16/16 passed, 0 failed
+EXIT=0
+===== workspace-sim.mjs =====
+workspace-sim: 61/61 passed, 0 failed
+EXIT=0
+===== workspace-switch-sim.mjs =====
+workspace-switch-sim: 47/47 passed, 0 failed
+EXIT=0
+===== tool-gateway-sim.mjs =====
+EXIT=0
+===== host-sim.mjs =====
+EXIT=0
+===== stress.mjs =====
+EXIT=0
+===== control-sim.mjs =====
+
+248 passed, 0 failed (248 checks)
+EXIT=0
+===== lag-regressions.mjs =====
+[1] 真实宿主时序 claimed → assemble → pre-step
+
+[2] 段落契约（不新增段落）
+
+[3] 下一回合不残留上一回合锚点
+
+[4] 旧路径（只 fire pre-step，不 fire claimed）
+
+24 passed, 0 failed (共 24 条断言)
+EXIT=0
+===== mutation-regressions.mjs =====
+  ok   MW-04 旧值只被记为一次 superseded  — superseded 中 mem_001 出现 1 次
+  ok   MW-04 旧值只落一条墓碑行  — 落盘墓碑 1 行
+  ok   MW-05 批内被取代的新条目 last-wins 后是 superseded  — mem_002 last-wins status=superseded
+  ok   MW-05 最后一条新条目仍是 active  — mem_003 status=active
+  ok   IDX-03 superseded 条目不算冲突（不制造 false unresolved）  — []
+  ok   IDX-03 两条 active 不同 object 仍判冲突（对照）  — [{"subject":"项目","relation":"代号","objects":["阿尔法","贝塔"],"ids":["a","b"]}]
+  ok   IDX-05 quality_label 逐词命中：你说的不对 → wrong  — {"kind":"wrong","quote":"不对"}
+  ok   IDX-05 quality_label 逐词命中：这次错了 → wrong  — {"kind":"wrong","quote":"错了"}
+  ok   IDX-05 quality_label 逐词命中：你漏了上次的约定 → missing  — {"kind":"missing","quote":"漏了"}
+  ok   IDX-05 quality_label 逐词命中：你又忘了 → missing  — {"kind":"missing","quote":"忘了"}
+  ok   IDX-05 quality_label 逐词命中：这个别提了 → should_not_recall  — {"kind":"should_not_recall","quote":"别提"}
+  ok   IDX-05 quality_label 逐词命中：你又来了 → drift  — {"kind":"drift","quote":"你又来了"}
+  ok   IDX-05 quality_label 逐词命中：你凭什么替我做决定 → overreach  — {"kind":"overreach","quote":"你凭什么"}
+  ok   IDX-05 '不对' 单独出现必须判 wrong
+  ok   IDX-05 普通消息不产生标签
+
+PASS: 15 ｜ FAIL: 0 ｜ 断言总数: 15
+EXIT=0
+===== supply-chain-sim.mjs =====
+
+[1] 策略表与规则表
+  ok   policy_version === sc-1.0
+  ok   策略来源为契约文件（非 fallback）
+  ok   扫描规则 10 条
+  ok   能力词表 10 种
+  ok   可授予能力恰 3 种
+  ok   network/shell/credentials/dynamic-code 永不可授予
+  ok   错误码含 SC-E01..SC-E19
+
+[2] 注释剥离与静态扫描
+  ok   注释里的 fs.writeFileSync 不命中
+  ok   块注释里的 child_process 不命中
+  ok   字符串不剥离 → 字符串里的 API 仍命中（保守）
+  ok   fs.writeFileSync → SC-01/fs-write
+  ok   命中行号正确（第 2 行）
+  ok   child_process → SC-03/shell
+  ok   fetch → SC-04/network
+  ok   eval → SC-06/dynamic-code
+  ok   process.env → SC-09/env
+  ok   Buffer.from(base64) → SC-10
+
+[3] Manifest 校验
+  ok   合法 manifest 无错误
+  ok   错误 manifest_version → invalid
+  ok   id 非法 → invalid
+  ok   entry 路径穿越 → invalid
+  ok   缺 integrity → invalid
+  ok   声明 fs-read 但无作用域 → invalid
+  ok   未知能力 → invalid
+
+[4] 裁决（纯函数 decide）
+  ok   合法插件 → allow_sandboxed
+  ok   合法插件 granted=[llm]
+  ok   沙箱计划含 permission 与 fs-read 白名单
+  ok   缺 manifest → deny/SC-E02
+  ok   沙箱不可用 → deny（不降级）
+  ok   sandbox_unavailable 优先级最高
+  ok   完整性漂移 → deny/SC-E07
+  ok   未声明 fs-write → deny/SC-E11
+  ok   声明 network → deny/SC-E10
+  ok   fs 作用域穿越 → deny（manifest_invalid/SC-E04）
+  ok   resolveFsScopes 单独上报越界作用域 2 条
+
+[5] 沙箱运行时（真实子进程 + Node permission model）
+  ok   宿主支持 Node permission model（v24.21.0）
+  ok   良性插件加载成功（allow_sandboxed）
+  ok   子进程 PID 与宿主不同（真隔离）
+  ok   RPC 往返正确
+  ok   声明 fs-read 的插件可读 data/
+  ok   未声明方法 → method_not_allowed
+  ok   close 后子进程已退出
+  ok   越界读 → ERR_ACCESS_DENIED（permission model 兜底）
+  ok   拼接 API 名绕过静态扫描（vectored：scan 应无 SC-01）
+  ok   绕过静态扫描的插件仍被放行到沙箱（不假装扫描器万能）
+  ok   沙箱内越界写被拒（ERR_ACCESS_DENIED）
+  ok   逃逸文件确实不存在（OS 层拒绝副作用）
+  ok   声明 fs-write 的作用域内写成功
+  ok   作用域外的同目录写被拒（ERR_ACCESS_DENIED）
+  ok   导入期越界写 → 加载被拒（fail-closed）
+  ok   导入期越界写 → 错误码 SC-E12
+  ok   导入期逃逸文件不存在
+  ok   导入期失败后加载器挂起
+  ok   慢插件加载成功
+  ok   调用超时 → sandbox_call_timeout
+  ok   超时后及时返回（<2000ms）
+  ok   声明 network → 不 spawn 直接 deny/SC-E10
+  ok   顺序加载：deny 后后续插件被跳过
+  ok   sandbox state 记录 deny 与 suspended
+
+59 ok / 0 fail（共 59 条）
+EXIT=0

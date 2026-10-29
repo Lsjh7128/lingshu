@@ -1,0 +1,114 @@
+{
+  "canonical": [
+    { "input": "D:\\Novel", "realpath": "D:/Novel" },
+    { "input": "d:\\novel", "realpath": "D:/Novel" },
+    { "input": "D:\\Novel\\", "realpath": "D:/Novel" },
+    { "input": "D:\\NOVEL~1", "realpath": "D:/Novel" },
+    { "input": "D:\\Novel\\.\\Novel", "realpath": "D:/Novel" },
+    { "input": "D:\\Novel2", "realpath": "D:/Novel2" },
+    { "input": "D:\\Café", "realpath": "D:/Café" },
+    { "input": "D:\\Cafe\\u0301", "realpath": "D:/Café" }
+  ],
+  "scope": [
+    { "text": "以后都喝红茶" },
+    { "text": "这个项目要保密" },
+    { "text": "以后都在这个项目里用中文" },
+    { "text": "今天天气不错" },
+    { "text": "永远别再提这件事" },
+    { "text": "本仓库禁止提交 node_modules" },
+    { "text": "这次先这样" },
+    { "text": "不管在哪个项目，我都不吃香菜" },
+    { "text": "当前项目用 Python 3.12" },
+    { "text": "永久记住我的名字" }
+  ],
+  "uca": [
+    { "text": "我喜欢喝红茶" },
+    { "text": "sk-abcdefghijklmnopqrstuvwx" },
+    { "text": "password=Hunter2hunter" },
+    { "text": "-----BEGIN RSA PRIVATE KEY-----" },
+    { "text": "110101199003077777" },
+    { "text": "6222021234567890123" },
+    { "text": "13812345678" },
+    { "text": "这份材料是绝密" },
+    { "text": "订单号 123456789012" },
+    { "text": "手机 138 1234 5678" },
+    { "text": "" },
+    { "text": null },
+    { "text": "AKIAIOSFODNN7EXAMPLE" },
+    { "text": "api_key: abcdef123456" }
+  ],
+  "merge": [
+    {
+      "sandbox_id": "a1b2c3d4",
+      "persona_id": "butler",
+      "budget": 900,
+      "top_k": 3,
+      "rows": [
+        { "id": "g1", "scope": "global", "sandbox_id": "deadbeef", "persona_id": "butler", "subject": "喜好", "relation": "喝", "object": "红茶", "display_text": "我喜欢喝红茶", "importance": 0.9, "status": "active" },
+        { "id": "l1", "scope": "local", "sandbox_id": "a1b2c3d4", "persona_id": "butler", "subject": "工程", "relation": "涉密", "object": "是", "display_text": "本项目涉密", "importance": 0.9, "status": "active" }
+      ]
+    },
+    {
+      "sandbox_id": "a1b2c3d4",
+      "persona_id": "butler",
+      "budget": 900,
+      "top_k": 3,
+      "rows": [
+        { "id": "g1", "scope": "global", "sandbox_id": "deadbeef", "persona_id": "butler", "subject": "喜好", "relation": "喝", "object": "红茶", "display_text": "我喜欢喝红茶", "importance": 0.95, "status": "active" },
+        { "id": "l1", "scope": "local", "sandbox_id": "a1b2c3d4", "persona_id": "butler", "subject": "喜好", "relation": "喝", "object": "绿茶", "display_text": "我喜欢喝绿茶", "importance": 0.5, "status": "active" }
+      ]
+    },
+    {
+      "sandbox_id": "a1b2c3d4",
+      "persona_id": "butler",
+      "budget": 300,
+      "top_k": 3,
+      "rows": [
+        { "id": "g1", "scope": "global", "sandbox_id": "deadbeef", "persona_id": "butler", "subject": "事实", "relation": "是", "object": "1", "display_text": "全局记忆一xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "importance": 0.99, "status": "active" },
+        { "id": "g2", "scope": "global", "sandbox_id": "deadbeef", "persona_id": "butler", "subject": "事实", "relation": "是", "object": "2", "display_text": "全局记忆二xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "importance": 0.98, "status": "active" },
+        { "id": "g3", "scope": "global", "sandbox_id": "deadbeef", "persona_id": "butler", "subject": "事实", "relation": "是", "object": "3", "display_text": "全局记忆三xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "importance": 0.97, "status": "active" },
+        { "id": "l1", "scope": "local", "sandbox_id": "a1b2c3d4", "persona_id": "butler", "subject": "工程", "relation": "涉密", "object": "是", "display_text": "本项目涉密", "importance": 0.3, "status": "active" }
+      ]
+    },
+    {
+      "sandbox_id": "a1b2c3d4",
+      "persona_id": "butler",
+      "budget": 900,
+      "top_k": 3,
+      "rows": [
+        { "id": "l_bad", "scope": "local", "sandbox_id": "ffffffff", "persona_id": "butler", "subject": "a", "relation": "b", "object": "c", "display_text": "错沙盒", "importance": 0.9, "status": "active" },
+        { "id": "l_ok", "scope": "local", "sandbox_id": "a1b2c3d4", "persona_id": "butler", "subject": "d", "relation": "e", "object": "f", "display_text": "对沙盒", "importance": 0.8, "status": "active" }
+      ]
+    },
+    {
+      "sandbox_id": "a1b2c3d4",
+      "persona_id": "butler",
+      "budget": 900,
+      "top_k": 3,
+      "rows": [
+        { "id": "g_bad", "scope": "global", "sandbox_id": "deadbeef", "persona_id": "architect", "subject": "a", "relation": "b", "object": "c", "display_text": "错人格", "importance": 0.9, "status": "active" },
+        { "id": "p_pending", "scope": "pending", "sandbox_id": "a1b2c3d4", "persona_id": "butler", "subject": "p", "relation": "q", "object": "r", "display_text": "待定", "importance": 0.99, "status": "active" }
+      ]
+    },
+    {
+      "sandbox_id": "a1b2c3d4",
+      "persona_id": "butler",
+      "budget": 900,
+      "top_k": 3,
+      "rows": [
+        { "id": "l_legacy", "scope": "local", "sandbox_id": "legacy", "persona_id": "butler", "subject": "旧", "relation": "是", "object": "记忆", "display_text": "旧记忆", "importance": 0.7, "status": "active" }
+      ]
+    }
+  ],
+  "lock_keys": [
+    { "kind": "memory", "sandbox_id": "a1b2c3d4" },
+    { "kind": "global", "persona_id": "butler" },
+    { "kind": "audit" },
+    { "kind": "skeleton", "sandbox_id": "a1b2c3d4", "persona_id": "butler" },
+    { "kind": "compaction", "scope": "local" }
+  ],
+  "paths": [
+    { "root": "C:/data/root", "sandbox_id": "a1b2c3d4", "persona_id": "butler" },
+    { "root": "C:/data/root", "sandbox_id": "f04ac905", "persona_id": "architect" }
+  ]
+}

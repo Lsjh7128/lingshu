@@ -25,7 +25,7 @@
     "sandbox-child.mjs",
     "client.js",
     "dashboard.js",
-    "ui/dashboard.html",
+    "ui/",
     "cordis.patch.yml"
   ],
   "scripts": {

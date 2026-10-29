@@ -11,17 +11,25 @@
 //   GET  /dsh-lingshu/api/workspaces/:id             单工作区摘要
 //   PUT  /dsh-lingshu/api/workspaces/:id/persona     写 persona.json（白名单 + 原子写）
 //   POST /dsh-lingshu/api/workspaces/:id/activate    热切换当前工作区（无 body，turn 中 409）
+//   GET  /dsh-lingshu/api/memory                     记忆面板只读视图（人话句子，不含原文 JSON）
+//   POST /dsh-lingshu/api/memory/forget              单条移到回收站（追加墓碑，可恢复）
+//   POST /dsh-lingshu/api/memory/trash/restore       从回收站恢复
+//   POST /dsh-lingshu/api/memory/trash/purge         彻底删除（redact，留骨架）
 //
 // 边界：没有删除/迁移 API；写入口只有上面三个，白名单/原子写/审计/切换保护都在
 // workspace-api.js 与 index.js#switchWorkspace 里做。不要在这里补假写操作，也不要把 Mock 数据混进真实响应。
+// 记忆面板同样只走 provider（index.js#getMemory/memoryOp），不直连文件系统。
 
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const DASHBOARD_FILE = fileURLToPath(new URL('./ui/dashboard.html', import.meta.url));
+const MEMORY_PAGE_FILE = fileURLToPath(new URL('./ui/memory.html', import.meta.url));
 const ROUTE = '/dsh-lingshu/dashboard';
+const MEMORY_PAGE_ROUTE = '/dsh-lingshu/dashboard/memory';
 const STATUS_ROUTE = '/dsh-lingshu/api/status';
 const WORKSPACES_ROUTE = '/dsh-lingshu/api/workspaces';
+const MEMORY_ROUTE = '/dsh-lingshu/api/memory';
 // 与 workspace-api.js 的 persona 上限一致：面板请求体 64KB。
 const JSON_BODY_MAX_BYTES = 64 * 1024;
 
@@ -63,6 +71,27 @@ function sendDashboard(res) {
   res.setHeader('cache-control', 'no-store');
   res.setHeader('x-content-type-options', 'nosniff');
   // 只允许 DSH 自身（web 与 dsh-app: 桌面外壳）嵌入；面板内联脚本/样式是构建产物。
+  res.setHeader(
+    'content-security-policy',
+    "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors 'self' dsh-app:;",
+  );
+  res.end(html);
+}
+
+/** 记忆面板 v1 静态页（同源 iframe 或直接打开；页面只通过 /api/memory 读写）。 */
+function sendMemoryPage(res) {
+  let html;
+  try {
+    html = fs.readFileSync(MEMORY_PAGE_FILE);
+  } catch (error) {
+    sendText(res, 503, `LINGSHU 记忆面板未随插件安装：${String(error?.message || error)}`);
+    return;
+  }
+  res.statusCode = 200;
+  res.setHeader('content-type', 'text/html; charset=utf-8');
+  res.setHeader('content-length', String(html.byteLength));
+  res.setHeader('cache-control', 'no-store');
+  res.setHeader('x-content-type-options', 'nosniff');
   res.setHeader(
     'content-security-policy',
     "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors 'self' dsh-app:;",
@@ -185,6 +214,7 @@ export function registerDashboardRoutes(ctx, options = {}) {
   const pageHandler = (_req, res) => sendDashboard(res);
   registerExact(ROUTE, pageHandler);
   registerExact(`${ROUTE}/`, pageHandler);
+  registerExact(MEMORY_PAGE_ROUTE, (_req, res) => sendMemoryPage(res));
 
   registerExact(STATUS_ROUTE, (_req, res) => {
     try {
@@ -325,6 +355,44 @@ export function registerDashboardRoutes(ctx, options = {}) {
     detailHandler(res, rawId);
     return undefined;
   }, ['GET', 'HEAD', 'PUT', 'POST']);
+
+  // ── 记忆面板 v1（D14/D15/§5）：只读视图 + 单条墓碑删除 + 回收站 ──────────
+  // 所有数据都走 provider（index.js#getMemory/memoryOp），本文件不读记忆文件、不拼假数据。
+  const memoryListHandler = (req, res) => {
+    if (typeof options.getMemory !== 'function') {
+      sendJson(res, 503, { ok: false, error: 'memory_api_unavailable' });
+      return;
+    }
+    let q = '';
+    try {
+      q = new URL(req.url ?? '/', 'http://dsh.local').searchParams.get('q') ?? '';
+    } catch { q = ''; }
+    try {
+      sendProviderResult(res, options.getMemory({ q }), 'memory_api_failed');
+    } catch (error) {
+      sendJson(res, 500, { ok: false, error: String(error?.message || error) });
+    }
+  };
+  const memoryWriteHandler = (provider) => async (req, res) => {
+    if (typeof options[provider] !== 'function') {
+      sendJson(res, 503, { ok: false, error: 'memory_api_unavailable' });
+      return;
+    }
+    const body = await readJsonBody(req, JSON_BODY_MAX_BYTES);
+    if (!body.ok) {
+      sendJson(res, body.status, { ok: false, error: body.error });
+      return;
+    }
+    try {
+      sendProviderResult(res, options[provider](body.value), 'memory_api_failed');
+    } catch (error) {
+      sendJson(res, 500, { ok: false, error: String(error?.message || error) });
+    }
+  };
+  registerExact(MEMORY_ROUTE, memoryListHandler, ['GET', 'HEAD']);
+  registerExact(`${MEMORY_ROUTE}/forget`, memoryWriteHandler('forgetMemory'), ['POST']);
+  registerExact(`${MEMORY_ROUTE}/trash/restore`, memoryWriteHandler('restoreMemory'), ['POST']);
+  registerExact(`${MEMORY_ROUTE}/trash/purge`, memoryWriteHandler('purgeMemory'), ['POST']);
 
   return () => {
     for (const dispose of disposers) {

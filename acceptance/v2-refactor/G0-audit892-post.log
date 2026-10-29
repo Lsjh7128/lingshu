@@ -1,0 +1,16 @@
+﻿[PHASE-A-LOCK] suite=audit892 files=14 root=D:\LSJH\lingshu
+OK   test_agent_state.py                exit=0   45 passed  0 failed    0.1s
+OK   test_astrbot_adapter.py            exit=0   12 passed  0 failed    0.1s
+OK   test_chaos_calibrate.py            exit=0  134 passed  0 failed    1.5s
+OK   test_constitution.py               exit=0   26 passed  0 failed    0.1s
+OK   test_control.py                    exit=0  174 passed  0 failed    0.6s
+OK   test_gray.py                       exit=0   27 passed  0 failed    0.6s
+OK   test_learning.py                   exit=0   23 passed  0 failed    2.4s
+OK   test_mutation_regressions.py       exit=0   22 passed  0 failed    0.1s
+OK   test_onboarding_persona.py         exit=0   50 passed  0 failed    1.0s
+OK   test_pipeline.py                   exit=0   46 passed  0 failed    0.1s
+OK   test_pipeline_integration.py       exit=0   65 passed  0 failed    3.6s
+OK   test_proposal.py                   exit=0   18 passed  0 failed    3.7s
+OK   test_run_chaos.py                  exit=0  117 passed  0 failed    0.2s
+OK   test_shadow_analysis.py            exit=0  156 passed  0 failed    0.3s
+TOTAL suite=audit892 files=14 passed=915 failed=0 failing_files=0 known_env_failing=0

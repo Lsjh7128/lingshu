@@ -52,6 +52,12 @@ import {
   buildEffectivePolicy,
   describeWorkspacePolicy,
 } from './workspace-policy.js';
+// v0.2 沙盒命名空间 + 作用域记忆（施工单 v2 / D4）：Python engine/layout.py 的 JS 镜像。
+// 只有数据根存在 layout.json（layout-0.2）时才启用；缺省 legacy 路径逐字节不变。
+import {
+  LAYOUT_SCHEMA, SKELETON_SECTION, resolveMemoryPaths, readLayout, canonicalizePath,
+  sandboxId as sandboxIdOf, decideScope, MemoryRuntime,
+} from './memory-paths.js';
 
 export const name = 'dsh-lingshu';
 export const inject = ['tools', 'systemPrompt'];
@@ -139,7 +145,9 @@ function toolTargetOf(args) {
 }
 
 // order 90/140 是"首尾人格锚点"，105 是前置审计熔断提示；100/110/120/130 是原有四段。
-const SECTION_ORDER = { anchorHead: 90, constitution: 100, blocked: 105,
+// v0.2（S3/D18）：skeleton 段也是 105（宪法 100 之后、事实 110 之前）；它在 v0.2 布局下
+// 才注册且**恒为空串**，因此与 blocked@105 同 order 不改变任何拼装输出（空段落不产生块）。
+const SECTION_ORDER = { anchorHead: 90, constitution: 100, blocked: 105, skeleton: 105,
                         fact: 110, organization: 120, style: 130, anchorTail: 140 };
 const DEFAULT_CONFIG = {
   coldTurns: 3,
@@ -218,6 +226,46 @@ function stateDir(profileTag = '', workspaceId = '') {
   //   workspaceId='' → 与旧实现逐字节一致（非法 tag 同样被忽略、退回平铺目录，不抛异常）。
   const { base, pathProfileTag } = dataRoots(profileTag);
   return dataDir({ base, workspaceId, profileTag: pathProfileTag });
+}
+
+// ── v0.2：sandbox_mapping.yaml 读取（固定 schema，不引 YAML 依赖）──────────
+// 只认施工单 §3.2 的 bindings 形状；解析失败返回空表（调用方回退 config/默认人格）。
+function readMappingBindings(base) {
+  const file = path.join(path.resolve(base), 'sandbox_mapping.yaml');
+  let raw = '';
+  try { raw = fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''); } catch { return []; }
+  const out = [];
+  let cur = null;
+  for (const line of raw.split(/\r?\n/)) {
+    const item = /^\s*-\s*canonical_path:\s*"?(.+?)"?\s*$/.exec(line);
+    if (item) { cur = { canonical_path: item[1] }; out.push(cur); continue; }
+    if (!cur) continue;
+    const kv = /^\s*(sandbox_id|default_persona|label):\s*"?(.*?)"?\s*$/.exec(line);
+    if (kv) cur[kv[1]] = kv[2];
+  }
+  return out;
+}
+
+// ── v0.2：sandboxes/index.json（缺失时按 sandbox.json 自愈扫描）──────────
+function readSandboxIndex(base) {
+  const root = path.resolve(base);
+  const file = path.join(root, 'sandboxes', 'index.json');
+  try {
+    const doc = JSON.parse(fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
+    if (doc && doc.sandboxes && typeof doc.sandboxes === 'object') return doc.sandboxes;
+  } catch { /* 回退扫描 */ }
+  const out = {};
+  try {
+    for (const sid of fs.readdirSync(path.join(root, 'sandboxes'))) {
+      if (!/^[0-9a-f]{8}$/.test(sid)) continue;
+      try {
+        const rec = JSON.parse(fs.readFileSync(
+          path.join(root, 'sandboxes', sid, 'sandbox.json'), 'utf8').replace(/^\uFEFF/, ''));
+        if (rec && typeof rec === 'object' && rec.canonical_path) out[sid] = rec;
+      } catch { /* 单个坏记录跳过 */ }
+    }
+  } catch { /* 无 sandboxes 目录 */ }
+  return out;
 }
 
 // P2 策略目录：随插件包发布（<pluginRoot>/workspaces/<id>.json）。
@@ -342,6 +390,13 @@ function readJsonl(file) {
       .map((l) => { try { return JSON.parse(l); } catch { return null; } })
       .filter(Boolean);
   } catch { return []; }
+}
+
+function readJsonObject(file) {
+  try {
+    const doc = JSON.parse(fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
+    return doc && typeof doc === 'object' && !Array.isArray(doc) ? doc : null;
+  } catch { return null; }
 }
 
 // 记忆读取：JSONL 只追加，**同 id 后写覆盖**。v4.3 起 memorywriter 清理脏数据时追加
@@ -603,6 +658,55 @@ export function apply(ctx, config = {}) {
   // 当前工作区的人格体快照：只读、只用于风格段；读取时按文件 mtime 重读，
   // 因此面板保存 persona 后，下一条消息即可生效（无需重启；热切换后读新目录）。
   let personaFile = path.join(dir, 'persona.json');
+  // ── v0.2 布局（施工单 v2 §2 / D6）：`layout.json` 是唯一开关 ─────────────────
+  // 为什么用数据根上的文件当开关而不是 config：915/0 基线与全部 JS sim 都跑在 legacy
+  // 布局上，只有显式迁移过的数据根才走新路径；回滚 = 删掉 layout.json（旧文件从未被改写）。
+  const layoutDoc = readLayout(roots.base);
+  const v02 = layoutDoc ? (() => {
+    // 沙盒 ↔ 人格绑定（施工单 §3.2 / G2）：mapping 里 default_persona 优先；
+    // 没有 mapping 时回退 config.personaId 再回退 butler。
+    const workspaceRoot = String(cfg.workspaceRoot || process.cwd());
+    const canonical = canonicalizePath(workspaceRoot);
+    const binding = readMappingBindings(roots.base).find(
+      (b) => canonicalizePath(String(b.canonical_path || '')) === canonical);
+    const personaId = String((binding && binding.default_persona) || cfg.personaId || 'butler');
+    // sandboxId 由"当前项目根"派生（D7）：sha256(canonicalPath)[0:8]；mapping 里写了也以文件为准。
+    const sid = sandboxIdOf(canonical);
+    return {
+      personaId, workspaceRoot, canonical, sandboxId: sid,
+      bindingLabel: binding ? (binding.label || null) : null,
+      personaStateFile: path.join(roots.base, 'personas', personaId, 'persona_state.json'),
+      paths: resolveMemoryPaths(roots.base, sid, personaId),
+    };
+  })() : null;
+  let v02Runtime = null;
+  const getV02Runtime = () => {
+    if (!v02) return null;
+    if (!v02Runtime) {
+      v02Runtime = new MemoryRuntime({
+        dataRoot: roots.base, sandboxId: v02.sandboxId, personaId: v02.personaId,
+      });
+    }
+    return v02Runtime;
+  };
+  if (v02) {
+    dir = path.dirname(v02.paths.localMemory);
+    memFile = v02.paths.localMemory;
+    auditFile = path.join(roots.base, 'audit', 'audit.jsonl');
+    stateFile = v02.paths.state;
+    personaFile = path.join(roots.base, 'personas', v02.personaId, 'persona.json');
+    // 运行时身份统一用 sandboxId（面板/审计/切换都看它），旧 workspaceId 语义在 v0.2 不再使用。
+    ws.id = v02.sandboxId;
+    ws.source = 'v02';
+  }
+  // 读全量：legacy = 单文件 last-wins；v0.2 = local + global 两个文件各自折叠后合并。
+  // pending（待定区）**不参与检索**（§4.2），所以不在这里返回。
+  const readAllEntries = () => {
+    const rt = getV02Runtime();
+    if (!rt) return readMemories(memFile);
+    const all = rt.readAll();
+    return [...all.local, ...all.global];
+  };
   if (ws.rejected) {
     // 静默失效是这里最大的风险：看起来配了工作区、其实还在共用 legacy 目录 → 必须留痕。
     appendJsonl(auditFile, {
@@ -617,6 +721,8 @@ export function apply(ctx, config = {}) {
   }
 
   let st = loadRuntimeState(stateFile);
+  // D2：v0.2 把 persona 层状态（情绪基线/长期积分/关系）单独放在 personas/{pid}/persona_state.json。
+  applyPersonaState();
 
   // 控制论层实例：积分基线从落盘状态续上（跨进程），相变历史只在进程内（上下文本来就会重置）。
   // 热切换时整体重建（见 switchWorkspace），避免旧工作区的积分/相变历史串到新工作区。
@@ -626,12 +732,26 @@ export function apply(ctx, config = {}) {
   let variety = new RequisiteVarietyGuard();
 
   // 记忆存储适配器：读全量 / 追加。只给 memorywriter 用。闭包读可变的 memFile/dir。
+  // v0.2：写入统一走 MemoryRuntime（按 row.scope 路由到 local/global/pending + UCA-01 检查）。
   const memStore = {
-    read: () => readMemories(memFile),
+    read: () => readAllEntries(),
     append: (entries) => {
-      ensureDir(dir);
-      fs.appendFileSync(memFile,
-        entries.map((e) => JSON.stringify(e)).join('\n') + '\n', 'utf8');
+      const rt = getV02Runtime();
+      if (!rt) {
+        ensureDir(dir);
+        fs.appendFileSync(memFile,
+          entries.map((e) => JSON.stringify(e)).join('\n') + '\n', 'utf8');
+        return { written: entries.length, written_ids: entries.map((e) => e.id),
+                 rejected: [], routed: { local: entries.length, global: 0, pending: 0 }, uca01: [] };
+      }
+      const res = rt.append(entries);
+      if (res.rejected.length) {
+        audit('memory_write_rejected', { rejected: res.rejected.map((r) => r.reason) });
+      }
+      if (res.uca01.length) {
+        audit('uca01_warn', { items: res.uca01.map((x) => ({ id: x.id, reasons: x.reasons })) });
+      }
+      return res;
     },
   };
 
@@ -639,10 +759,41 @@ export function apply(ctx, config = {}) {
     try {
       ensureDir(dir);
       fs.writeFileSync(stateFile, JSON.stringify(st, null, 2), 'utf8');
+      // D2：v0.2 同一份运行时状态拆两半——沙盒层进 state.json，人格层进 persona_state.json。
+      if (v02) {
+        ensureDir(path.dirname(v02.personaStateFile));
+        fs.writeFileSync(v02.personaStateFile, JSON.stringify({
+          schema_version: 'persona-state-0.1',
+          integral_baseline: st.control.integral || {},
+          emotion_baseline: st.dev || {},
+          relations: st.relation || {},
+        }, null, 2), 'utf8');
+      }
     } catch { /* 忽略 */ }
   };
 
-  const audit = (kind, data) => appendJsonl(auditFile, { ts: Date.now(), kind, ...data });
+  /** D2：启动/切换时把人格局状态叠回运行时（缺失 = 全新人格基线）。 */
+  function applyPersonaState() {
+    if (!v02) return;
+    const ps = readJsonObject(v02.personaStateFile);
+    if (!ps) return;
+    if (ps.integral_baseline && typeof ps.integral_baseline === 'object') {
+      st.control.integral = { ...(st.control.integral || {}), ...ps.integral_baseline };
+    }
+    if (ps.emotion_baseline && typeof ps.emotion_baseline === 'object') {
+      st.dev = { ...st.dev, ...ps.emotion_baseline };
+    }
+    if (ps.relations && typeof ps.relations === 'object') {
+      st.relation = { ...st.relation, ...ps.relations };
+    }
+  }
+
+  // D3：v0.2 审计是全局单本，每行必须带 sandbox_id + persona_id；legacy 行保持原样。
+  const audit = (kind, data) => appendJsonl(auditFile, {
+    ts: Date.now(), kind,
+    ...(v02 ? { sandbox_id: v02.sandboxId, persona_id: v02.personaId } : {}),
+    ...data,
+  });
 
   // 启动时选择文件有问题（坏 JSON/非法 id/目标目录不存在）：audit 可用后补一条可诊断事件。
   if (startupSelection.notice) {
@@ -719,6 +870,78 @@ export function apply(ctx, config = {}) {
   // 旧工作区在切换完成后不再被本进程写入（审计也写新目录）。
   let onWorkspaceSwitched = null;   // 由 dashboard 块赋值：同步 workspaceOptions.currentId
 
+  /**
+   * v0.2 热切换（G2）：rawId 是 sandboxId（8 位 hex，也接受 index.json 的 key）。
+   * 目标必须已在 sandboxes/index.json（缺失时按 sandbox.json 扫描自愈）里，不隐式创建；
+   * 切换后按目标 canonical_path 重新绑定人格（mapping.default_persona），并整体重载 state。
+   */
+  function switchSandboxV02(id) {
+    const previousId = v02.sandboxId;
+    const previousPersona = v02.personaId;
+    const index = readSandboxIndex(roots.base);
+    let entry = index[id] || null;
+    if (!entry) {
+      for (const rec of Object.values(index)) {
+        if (rec && rec.canonical_path
+            && sandboxIdOf(canonicalizePath(String(rec.canonical_path))) === id) { entry = rec; break; }
+      }
+    }
+    if (!entry || !entry.canonical_path) {
+      return { ok: false, status: 404, error: 'workspace_not_found', workspaceId: id };
+    }
+    const canonical = canonicalizePath(String(entry.canonical_path));
+    const sid = sandboxIdOf(canonical);
+    const binding = readMappingBindings(roots.base).find(
+      (b) => canonicalizePath(String(b.canonical_path || '')) === canonical);
+    const pid = String((binding && binding.default_persona) || v02.personaId || 'butler');
+    const alreadyActive = sid === previousId && pid === previousPersona;
+    saveState();
+    if (!alreadyActive) {
+      v02.sandboxId = sid;
+      v02.personaId = pid;
+      v02.canonical = canonical;
+      v02.workspaceRoot = String(entry.canonical_path);
+      v02.paths = resolveMemoryPaths(roots.base, sid, pid);
+      v02.personaStateFile = path.join(roots.base, 'personas', pid, 'persona_state.json');
+      v02Runtime = null;
+      dir = path.dirname(v02.paths.localMemory);
+      memFile = v02.paths.localMemory;
+      stateFile = v02.paths.state;
+      personaFile = path.join(roots.base, 'personas', pid, 'persona.json');
+      st = loadRuntimeState(stateFile);
+      applyPersonaState();
+      integral = new IntegralBaseline(cfg.control);
+      integral.integral = { ...integral.integral, ...(st.control.integral || {}) };
+      monitor = new PhaseShiftMonitor(cfg.control);
+      variety = new RequisiteVarietyGuard();
+      claimedTurn = null;
+      claimedAgent = null;
+      claimedMessages = [];
+      lastPrecomputedTurn = null;
+      precomputedTurn = null;
+      precomputeAuditPending = false;
+      precomputeCall = false;
+      lastTurnSeen = null;
+      clearTurnActive();
+      ws.id = sid;
+      ws.source = 'switch';
+      ws.rejected = null;
+      ws.rejectedSource = null;
+      saveState();
+    }
+    audit('workspace_switch', {
+      from: previousId, to: sid, previousWorkspaceId: previousId, currentWorkspaceId: sid,
+      previous_persona_id: previousPersona, persona_id: pid, already_active: alreadyActive,
+      turn_active: false, persisted: true, canonical_path: canonical,
+      host_hook: 'v0.2/sandbox_mapping',
+    });
+    try { onWorkspaceSwitched?.(sid); } catch { /* 面板视图同步失败不影响切换 */ }
+    return {
+      ok: true, status: 200, activated: true, alreadyActive,
+      previousWorkspaceId: previousId, currentWorkspaceId: sid, personaId: pid,
+    };
+  }
+
   function switchWorkspace(rawId) {
     const previousId = ws.id || '';
     const id = typeof rawId === 'string' ? rawId.trim() : '';
@@ -731,6 +954,8 @@ export function apply(ctx, config = {}) {
         currentWorkspaceId: previousId || null,
       };
     }
+    // v0.2：切换的是 sandbox（沙盒），不是旧 workspace 目录；走独立分支（§4.2 / G2）。
+    if (v02) return switchSandboxV02(id);
     // 目标目录用启动时捕获的 roots（不重读 env：热切换只换工作区层，数据根/ profile 层不变）。
     const targetDir = dataDir({
       base: roots.base,
@@ -1105,7 +1330,7 @@ export function apply(ctx, config = {}) {
   const renderMemoryBlock = () => {
     const order = st.control.injectionOrder || [];
     if (!order.length) return '';
-    const byId = new Map(readMemories(memFile).map((e) => [e.id, e]));
+    const byId = new Map(readAllEntries().map((e) => [e.id, e]));
     const budgetChars = Math.max(120, Number(cfg.tokenBudgetTokens) * Number(cfg.charsPerToken || 3));
     const parts = [];
     let used = 0;
@@ -1431,6 +1656,9 @@ export function apply(ctx, config = {}) {
     registerSection('organization', SECTION_ORDER.organization, () => gated('organization', renderOrganization()));
     registerSection('style', SECTION_ORDER.style, () => gated('style', renderStyle()));
     registerSection('anchorTail', SECTION_ORDER.anchorTail, () => gated('anchorTail', renderAnchorTail()));
+    // S3（D18）：v0.2 布局下注册空段落 lingshu:skeleton@105。恒返回 ""，不产生任何块；
+    // legacy 布局不注册 → 既有"7 段契约"在旧路径上完全不变（sim 断言仍为 7）。
+    if (v02) registerSection('skeleton', SKELETON_SECTION.order, () => '');
   }
 
   // ── 钩子 ────────────────────────────────────────────
@@ -1570,7 +1798,7 @@ export function apply(ctx, config = {}) {
         });
         if (!st.tools.hintActive) saveState();
       }
-      const entries = readMemories(memFile);
+      const entries = readAllEntries();
       const rec = recall(entries, String(text).slice(0, 500), now, cfg);
       if (st2 === 'cold') { st.coldStartSuppressed += 1; rec.hits = []; rec.matched = 0; }
       if (st2 === 'warm') {
@@ -1976,6 +2204,40 @@ export function apply(ctx, config = {}) {
           ...(r.stateChanged ? r.writeRequests : []).map((q) => ({ ...q, supersede: false })),
           ...fact.requests,
         ].map((req) => ({ ...req, turn: st.turns }));
+        // v0.2（§4.3）：写前做 scope 路由，并把 sandbox/persona/display_text 冗余进行。
+        // · 只有 user_fact 走 decideScope（长期偏好 vs 项目内事实 vs 待定）；
+        // · goal/relation/tool 是"发生了什么"的事件流水，固定落 local（不跨项目污染全局层）；
+        // · legacy 布局下这段完全不执行 → 旧行为逐字节不变。
+        if (v02 && reqs.length) {
+          const route = decideScope(text);
+          for (const req of reqs) {
+            const scope = req.origin === 'user_fact' ? route.scope : 'local';
+            for (const item of req.items || []) {
+              item.scope = scope;
+              item.sandbox_id = v02.sandboxId;
+              item.persona_id = v02.personaId;
+              item.display_text = item.display_text || item.content;
+            }
+          }
+          audit('scope_route', { scope: route.scope, reasons: route.reasons,
+                                 origins: [...new Set(reqs.map((x) => x.origin))], turn: st.turns });
+          // G4「重复说不重复写」：v0.2 下同 (subject, relation, object) 已 active 的不再写第二行。
+          // 只影响 v0.2 布局；legacy 的 memorywriter 批内去重行为不变。
+          const seen = new Set(readAllEntries().map(
+            (e) => [e.subject, e.relation, e.object].join('\u0000')));
+          let deduped = 0;
+          for (const req of reqs) {
+            const kept = [];
+            for (const item of req.items || []) {
+              const key = [item.subject, item.relation, item.object].join('\u0000');
+              if (seen.has(key)) { deduped += 1; continue; }
+              seen.add(key);
+              kept.push(item);
+            }
+            req.items = kept;
+          }
+          if (deduped) audit('memory_dedupe', { dropped: deduped, turn: st.turns });
+        }
         if (reqs.length) {
           const w = applyWriteRequests(reqs, memStore, { now: Date.now() });
           st.stateWrites += w.written;
@@ -2250,10 +2512,16 @@ export function apply(ctx, config = {}) {
     const dashboardStatus = () => {
       let memory = { total: 0, active: 0, suppressed: 0 };
       try {
-        const entries = readMemories(memFile);
+        const entries = readAllEntries();
         memory.total = entries.length;
         memory.active = entries.filter((e) => String(e.status ?? 'active') === 'active').length;
         memory.suppressed = memory.total - memory.active;
+        if (v02) {
+          const all = getV02Runtime().readAll();
+          memory.trash = all.trash.length;
+          memory.pending = all.pending.length;
+          memory.scope = { global: all.global.length, local: all.local.length };
+        }
       } catch {
         // 读取失败保持 0；API 仍可用
       }
@@ -2335,6 +2603,32 @@ export function apply(ctx, config = {}) {
     const writePersona = (id, payload) => writeWorkspacePersona(workspaceOptions, id, payload);
     const createWorkspace = (payload) => createWorkspaceRecord(workspaceOptions, payload);
 
+    // ── v0.2 记忆面板（D14/D15/§5）：只读视图 + 单条墓碑删除 + 回收站 ──────────
+    // 面板不直连文件：所有操作走这里（即 MemoryRuntime），写操作一律 append-only 墓碑。
+    const v02Unavailable = { ok: false, status: 503, error: 'layout_not_v02' };
+    const getMemory = (query = {}) => {
+      const rt = getV02Runtime();
+      if (!rt) return v02Unavailable;
+      const view = rt.list({ query: typeof query.q === 'string' ? query.q : '' });
+      return {
+        ok: true, status: 200,
+        sandbox_id: v02.sandboxId, persona_id: v02.personaId,
+        ...view,
+        retention: { auto_purge: false, note: '回收站不自动清除，由用户手动彻底删除' },
+      };
+    };
+    const memoryOp = (op, kind, body) => {
+      const rt = getV02Runtime();
+      if (!rt) return v02Unavailable;
+      const id = String(body?.id ?? '').trim();
+      if (!id) return { ok: false, status: 400, error: 'invalid_id' };
+      const res = rt[op](id);
+      if (res.ok) audit(kind, { target: id, scope: res.scope ?? null, turn: st.turns });
+      return res.ok
+        ? { ok: true, status: 200, id, scope: res.scope ?? null }
+        : { ok: false, status: 404, error: res.reason || 'not_found' };
+    };
+
     // 热切换后同步面板视图里的"当前工作区"（workspace-api 的 currentId/rejected 是快照）。
     onWorkspaceSwitched = (id) => {
       workspaceOptions.currentId = id;
@@ -2365,6 +2659,10 @@ export function apply(ctx, config = {}) {
         writePersona,
         createWorkspace,
         activateWorkspace,
+        getMemory,
+        forgetMemory: (body) => memoryOp('forget', 'panel_forget', body),
+        restoreMemory: (body) => memoryOp('restore', 'panel_restore', body),
+        purgeMemory: (body) => memoryOp('purge', 'panel_purge', body),
       });
       scope.effect?.(() => () => {
         try { dispose(); } catch { /* noop */ }

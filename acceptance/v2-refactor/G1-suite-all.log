@@ -1,0 +1,36 @@
+﻿[PHASE-A-LOCK] suite=all files=32 root=D:\LSJH\lingshu
+OK   test_agent_state.py                exit=0   45 passed  0 failed    0.1s
+OK   test_astrbot_adapter.py            exit=0   12 passed  0 failed    0.1s
+OK   test_blue_team_patcher.py          exit=0  152 passed  0 failed    0.3s
+OK   test_chaos_calibrate.py            exit=0  134 passed  0 failed    1.6s
+ENV? test_chaos_campaign.py             exit=1  114 passed  8 failed   18.8s
+OK   test_console_server.py             exit=0   72 passed  0 failed    1.4s
+OK   test_constitution.py               exit=0   26 passed  0 failed    0.1s
+OK   test_control.py                    exit=0  174 passed  0 failed    0.6s
+FAIL test_demo_scripts.py               exit=1  302 passed  1 failed   27.2s
+OK   test_fact_extractor.py             exit=0  100 passed  0 failed    0.2s
+OK   test_gray.py                       exit=0   27 passed  0 failed    0.6s
+OK   test_immersive_safety.py           exit=0  107 passed  0 failed    0.7s
+OK   test_layout_v02.py                 exit=0   67 passed  0 failed    0.4s
+OK   test_learning.py                   exit=0   23 passed  0 failed    2.4s
+OK   test_migrate_v02.py                exit=0   52 passed  0 failed    1.0s
+OK   test_mutation_regressions.py       exit=0   22 passed  0 failed    0.1s
+OK   test_onboarding_persona.py         exit=0   50 passed  0 failed    1.0s
+OK   test_phase_c_meta.py               exit=0  123 passed  0 failed    0.6s
+OK   test_pipeline.py                   exit=0   46 passed  0 failed    0.1s
+OK   test_pipeline_integration.py       exit=0   65 passed  0 failed    3.6s
+FAIL test_plot_coevolution_curve.py     exit=1    0 passed  0 failed    0.2s
+OK   test_plot_phase_c.py               exit=0  262 passed  0 failed    3.5s
+OK   test_proposal.py                   exit=0   18 passed  0 failed    3.6s
+OK   test_red_team_evolver.py           exit=0  162 passed  0 failed    0.3s
+OK   test_risk_classifier_eval.py       exit=0   65 passed  0 failed    0.1s
+OK   test_run_chaos.py                  exit=0  117 passed  0 failed    0.2s
+OK   test_run_coevolution.py            exit=0  108 passed  0 failed    0.3s
+OK   test_semantic_guard.py             exit=0  205 passed  0 failed    5.7s
+OK   test_shadow_analysis.py            exit=0  156 passed  0 failed    0.3s
+FAIL test_supply_chain.py               exit=1  153 passed  4 failed    1.3s
+OK   test_tool_gateway.py               exit=0  101 passed  0 failed    0.5s
+OK   test_v02_parity.py                 exit=0    9 passed  0 failed    0.2s
+TOTAL suite=all files=32 passed=3069 failed=13 failing_files=3 known_env_failing=1
+NOTE: 其中 8 项失败属已知环境性（沙箱写权限），不计入红队/蓝队补丁判定：test_chaos_campaign.py
+NOTE: 这些文件的汇总行无法解析（断言数不可知，按不通过处理）：['test_plot_coevolution_curve.py']

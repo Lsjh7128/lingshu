@@ -97,6 +97,12 @@ export function applyWriteRequests(requests, store, { now = Date.now(), supersed
         lastAccess: now,
         tauDays: 30,
       };
+      // v0.2（施工单 §3.8）：作用域/沙盒/人格/展示句是**写入时**就决定的，必须原样落盘；
+      // legacy 布局下这些字段不存在，行为不变。
+      for (const key of ['scope', 'sandbox_id', 'persona_id', 'display_text',
+                          'origin_sandbox_id', 'potency_inputs']) {
+        if (item[key] !== undefined) entry[key] = item[key];
+      }
 
       if (allowSupersede) {
         // 倒序扫描：同键多条 active（历史脏数据/导入）一次全部取代，而不是只取代第一条。

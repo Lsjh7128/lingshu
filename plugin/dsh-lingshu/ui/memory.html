@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LINGSHU 记忆面板 v1</title>
+<style>
+  :root { color-scheme: light dark; --bg:#0f1420; --fg:#e8edf7; --muted:#93a0b8; --card:#171e2c; --line:#26304a; --accent:#6ea8fe; --danger:#e06c75; }
+  body { margin:0; font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--fg); }
+  header { padding:16px 20px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:12px; }
+  header h1 { font-size:16px; margin:0; }
+  header .hint { color:var(--muted); font-size:12px; }
+  main { padding:16px 20px; display:grid; gap:16px; max-width:980px; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  section h2 { font-size:13px; margin:0 0 8px; color:var(--muted); font-weight:600; letter-spacing:.02em; }
+  ul { list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+  li { border:1px solid var(--line); border-radius:8px; padding:8px 10px; display:flex; gap:10px; align-items:flex-start; }
+  li .text { flex:1; }
+  li .meta { color:var(--muted); font-size:12px; margin-top:2px; }
+  button { background:transparent; color:var(--accent); border:1px solid var(--line); border-radius:6px; padding:4px 10px; cursor:pointer; font-size:12px; }
+  button.danger { color:var(--danger); }
+  button:hover { border-color:var(--accent); }
+  .empty { color:var(--muted); font-size:13px; }
+  .status { color:var(--muted); font-size:12px; }
+  .error { color:var(--danger); font-size:13px; }
+  details { margin-top:4px; }
+  details summary { color:var(--muted); font-size:12px; cursor:pointer; }
+  pre { white-space:pre-wrap; word-break:break-all; font-size:11px; color:var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>LINGSHU 记忆面板 v1</h1>
+  <span class="hint">只读视图 + 单条移到回收站；回收站不自动清除。所有操作走插件 API，面板不直连文件。</span>
+</header>
+<main>
+  <section>
+    <h2>全局记忆（跨项目共享）</h2>
+    <ul id="global"></ul>
+  </section>
+  <section>
+    <h2>本项目记忆（局部）</h2>
+    <ul id="local"></ul>
+  </section>
+  <section>
+    <h2>待定区（默认不参与检索）</h2>
+    <div class="status" id="pending">—</div>
+  </section>
+  <section>
+    <h2>回收站</h2>
+    <ul id="trash"></ul>
+  </section>
+  <div class="status" id="status">加载中…</div>
+</main>
+<script>
+(function () {
+  'use strict';
+  var ROUTE = '/dsh-lingshu/api/memory';
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  function itemView(row, trash) {
+    var li = el('li');
+    var body = el('div', 'text');
+    body.appendChild(el('div', null, row.display_text || '（无展示句）'));
+    var meta = el('div', 'meta',
+      '来源: ' + (row.sandbox_id || row.scope || '本沙盒') +
+      ' ｜ 日期: ' + (row.date || '未知') +
+      ' ｜ 使用次数: ' + (row.uses || 0));
+    body.appendChild(meta);
+    var tech = el('details');
+    tech.appendChild(el('summary', null, '技术字段'));
+    tech.appendChild(el('pre', null, JSON.stringify(row, null, 2)));
+    body.appendChild(tech);
+    li.appendChild(body);
+    if (trash) {
+      var r = el('button', null, '恢复');
+      r.addEventListener('click', function () { act('/trash/restore', row.id, '已恢复到记忆库'); });
+      var p = el('button', 'danger', '彻底删除');
+      p.addEventListener('click', function () {
+        if (window.confirm('彻底删除后无法恢复，确定继续？')) act('/trash/purge', row.id, '已彻底删除（内容已抹除）');
+      });
+      li.appendChild(r); li.appendChild(p);
+    } else {
+      var f = el('button', null, '移到回收站');
+      f.addEventListener('click', function () { act('/forget', row.id, '已移到回收站'); });
+      li.appendChild(f);
+    }
+    return li;
+  }
+
+  function fill(id, rows, emptyText, trash) {
+    var ul = document.getElementById(id);
+    ul.textContent = '';
+    if (!rows || !rows.length) { ul.appendChild(el('li', 'empty', emptyText)); return; }
+    rows.forEach(function (r) { ul.appendChild(itemView(r, trash)); });
+  }
+
+  function act(path, id, okText) {
+    fetch(ROUTE + path, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id: id }),
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      if (!res || res.ok !== true) throw new Error((res && res.error) || '操作失败');
+      document.getElementById('status').textContent = okText;
+      refresh();
+    }).catch(function (e) {
+      document.getElementById('status').textContent = '失败：' + e.message;
+    });
+  }
+
+  function refresh() {
+    fetch(ROUTE, { headers: { accept: 'application/json' } })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (!res || res.ok !== true) throw new Error((res && res.error) || '记忆数据不可用');
+        fill('global', res.global, '（暂无）');
+        fill('local', res.local, '（暂无）');
+        document.getElementById('pending').textContent =
+          '待定记忆 ' + (res.pending_count || 0) + ' 条（未晋升前不参与召回）';
+        fill('trash', res.trash, '（回收站为空）', true);
+        document.getElementById('status').textContent =
+          '沙盒 ' + (res.sandbox_id || '—') + ' ｜ 人格 ' + (res.persona_id || '—') +
+          ' ｜ 回收站不自动清除';
+      })
+      .catch(function (e) {
+        var s = document.getElementById('status');
+        s.className = 'error';
+        s.textContent = '加载失败：' + e.message + '（v0.2 布局未启用时面板不可用）';
+      });
+  }
+
+  refresh();
+  window.setInterval(refresh, 30000);
+})();
+</script>
+</body>
+</html>
