@@ -17,6 +17,8 @@
   .persona { border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-bottom:10px; }
   .persona-head { display:flex; align-items:center; gap:8px; }
   .persona-head h3 { margin:0; font-size:14px; flex:1; }
+  .mood { margin-left:6px; font-size:15px; line-height:1; cursor:default; }
+  .mood[data-label="中性"] { opacity:.7; }
   .persona .summary { color:var(--muted); font-size:12px; max-height:54px; overflow:auto; margin:4px 0 6px; }
   .chips { display:flex; flex-wrap:wrap; gap:6px; margin:4px 0 8px; }
   .chip { border:1px solid var(--line); border-radius:999px; padding:2px 9px; font-size:11px; color:var(--muted); }
@@ -71,10 +73,11 @@
   var API = {
     personas: '/dsh-lingshu/api/personas',
     available: '/dsh-lingshu/api/workspaces/available',
+    workspaces: '/dsh-lingshu/api/workspaces',
     bind: '/dsh-lingshu/api/bindings',
     unbind: '/dsh-lingshu/api/bindings/unbind',
   };
-  var state = { personas: [], workspaces: [] };
+  var state = { personas: [], workspaces: [], workspacesFull: [] };
   var drafts = {};                       // pid -> { target, manual }
   var $ = function (id) { return document.getElementById(id); };
 
@@ -137,6 +140,42 @@
     return String(d.manual || '').trim() || String(d.target || '');
   }
 
+  // ── 心情表情（v1：五态）─────────────────────────────────
+  // 数据源：GET /dsh-lingshu/api/workspaces 的 emotion.label（LINGSHU emotionLabel 五态）。
+  // 连接键：persona.bindings[].sandbox_id ≡ workspace.workspaceId。
+  // （workspace.persona 里没有 persona_id，不能按 id 直连。）
+  // v2 若后端补 mood 字段，这里优先用它，其余不动。
+  var MOOD_EMOJI = { '中性': '😐', '愉悦': '🙂', '振奋': '😃', '不满': '😕', '低落': '😔' };
+  var MOOD_UNKNOWN = '😶';
+
+  function workspaceOfPersona(p) {
+    var ids = (p.bindings || []).map(function (b) { return b.sandbox_id; }).filter(Boolean);
+    if (!ids.length) return null;
+    var hits = state.workspacesFull.filter(function (w) {
+      return w && ids.indexOf(w.workspaceId) >= 0;
+    });
+    if (!hits.length) return null;
+    hits.sort(function (a, b) {
+      return (Number(b.isCurrent) - Number(a.isCurrent)) || (Number(b.turns || 0) - Number(a.turns || 0));
+    });
+    return hits[0];
+  }
+
+  function moodOf(p) {
+    if (p.mood && p.mood.label) {
+      return { label: p.mood.label, emoji: MOOD_EMOJI[p.mood.label] || MOOD_UNKNOWN, from: null };
+    }
+    var w = workspaceOfPersona(p);
+    if (!w) return { label: '未知', emoji: MOOD_UNKNOWN, from: null };
+    var label = (w.emotion && w.emotion.label) || '中性';
+    return { label: label, emoji: MOOD_EMOJI[label] || MOOD_UNKNOWN, from: w };
+  }
+
+  function moodTitle(m) {
+    if (!m.from) return '心情：' + m.label + '｜该人格体未绑定人格舱，无心情数据';
+    return '心情：' + m.label + '｜来自 ' + (m.from.canonicalPath || m.from.workspaceId);
+  }
+
   /** 刷新卡片右上角按钮：绑定 / 解绑 / 已被他人绑定。 */
   function syncToggle(persona, d, btn, hint) {
     var target = effectiveTarget(d);
@@ -185,7 +224,13 @@
       var head = el('div', 'persona-head');
       var h = el('h3');
       h.appendChild(document.createTextNode(p.name + ' '));
-      h.appendChild(el('span', 'tag', p.persona_id));
+      var m = moodOf(p);
+      var moodEl = el('span', 'mood', m.emoji);
+      moodEl.setAttribute('data-label', m.label);
+      moodEl.setAttribute('role', 'img');
+      moodEl.setAttribute('aria-label', '心情：' + m.label);
+      moodEl.title = moodTitle(m);
+      h.appendChild(moodEl);
       head.appendChild(h);
       var btn = el('button', 'primary', '绑定');
       head.appendChild(btn);
@@ -265,6 +310,9 @@
     return Promise.all([
       api(API.personas).then(function (j) { state.personas = j.personas || []; }),
       api(API.available).then(function (j) { state.workspaces = j.workspaces || []; }),
+      // 心情数据是装饰性的：拉取失败不影响卡片主体，沿用上一轮结果。
+      api(API.workspaces).then(function (j) { state.workspacesFull = j.workspaces || []; })
+        .catch(function () { /* noop */ }),
     ]).then(function () {
       renderPersonas();
       var bound = state.workspaces.filter(function (w) { return w.bound_persona_id; }).length;
@@ -304,5 +352,190 @@
   window.setInterval(refresh, 20000);
 })();
 </script>
+
+<style id="lh-dsh-theme">
+  /* 跟随 DSH 主题：颜色由下面的脚本从父页面采样后写入 CSS 变量 */
+  html[data-lh-theme] { color-scheme: light; }
+  html[data-lh-theme="dark"] { color-scheme: dark; }
+  html[data-lh-theme] body { background: var(--lh-bg) !important; color: var(--lh-fg); }
+  html[data-lh-theme] .min-h-screen.bg-gradient-to-br {
+    background-image: none !important; background-color: var(--lh-bg) !important;
+  }
+  html[data-lh-theme] [class*="radial-gradient"] { background-image: none !important; }
+  /* 卡片/统计条/搜索框用的都是自定义 .glass（background:#fff9），不是 bg-white */
+  html[data-lh-theme] .glass {
+    background-color: var(--lh-surface) !important;
+    border-color: var(--lh-line) !important;
+  }
+  html[data-lh-theme] .glass-sheen:before {
+    background: linear-gradient(90deg, transparent, var(--lh-line), transparent) !important;
+  }
+  html[data-lh-theme] [class*="bg-white"] { background-color: var(--lh-surface) !important; }
+  html[data-lh-theme] [class*="border-white"] { border-color: var(--lh-line) !important; }
+  html[data-lh-theme] [class*="text-ink-900"] { color: var(--lh-fg) !important; }
+  html[data-lh-theme] [class*="text-ink-700"] { color: var(--lh-fg-2) !important; }
+  html[data-lh-theme] [class*="text-ink-500"] { color: var(--lh-muted) !important; }
+  html[data-lh-theme] [class*="text-ink-400"] { color: var(--lh-muted) !important; }
+  html[data-lh-theme="dark"] [class*="bg-emerald-50"],
+  html[data-lh-theme="dark"] [class*="bg-amber-50"],
+  html[data-lh-theme="dark"] [class*="bg-sky-50"],
+  html[data-lh-theme="dark"] [class*="bg-indigo-50"],
+  html[data-lh-theme="dark"] [class*="bg-violet-50"],
+  html[data-lh-theme="dark"] [class*="bg-rose-50"] {
+    background-color: color-mix(in srgb, currentColor 14%, var(--lh-surface)) !important;
+  }
+  .lh-mood { margin-left: 6px; font-size: 15px; line-height: 1; vertical-align: -1px; cursor: default; }
+</style>
+<script id="lh-dsh-theme-js">
+(function () {
+  'use strict';
+  var root = document.documentElement;
+  var WHITE = { r: 255, g: 255, b: 255 };
+
+  function parseColor(c) {
+    var m = /rgba?\(([^)]+)\)/.exec(String(c || ''));
+    if (!m) return null;
+    var p = m[1].split(',').map(function (x) { return parseFloat(x); });
+    if (p.length < 3 || isNaN(p[0]) || isNaN(p[1]) || isNaN(p[2])) return null;
+    return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 };
+  }
+  function rgb(c) {
+    return 'rgb(' + Math.round(c.r) + ',' + Math.round(c.g) + ',' + Math.round(c.b) + ')';
+  }
+  function mix(a, b, t) {
+    return { r: a.r + (b.r - a.r) * t, g: a.g + (b.g - a.g) * t, b: a.b + (b.b - a.b) * t };
+  }
+  function luminance(c) { return (0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) / 255; }
+
+  // 优先读父页面（同源 iframe）的真实颜色；读不到再退回系统偏好。
+  function sampleParent() {
+    try {
+      var p = window.parent;
+      if (!p || p === window || !p.document || !p.document.body) return null;
+      var cs = window.getComputedStyle(p.document.body);
+      var bg = parseColor(cs.backgroundColor);
+      if (!bg || bg.a < 0.05) bg = parseColor(window.getComputedStyle(p.document.documentElement).backgroundColor);
+      if (!bg || bg.a < 0.05) bg = null;
+      var fg = parseColor(cs.color);
+      if (fg && fg.a < 0.05) fg = null;
+      return { bg: bg, fg: fg };
+    } catch (e) { return null; }
+  }
+
+  function apply() {
+    var s = sampleParent();
+    var dark = s && s.bg
+      ? luminance(s.bg) < 0.45
+      : (window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)').matches : false);
+    var bg = (s && s.bg) || (dark ? { r: 18, g: 19, b: 24 } : { r: 243, g: 244, b: 255 });
+    var fg = (s && s.fg) || (dark ? { r: 232, g: 234, b: 242 } : { r: 30, g: 33, b: 44 });
+    var st = root.style;
+    st.setProperty('--lh-bg', rgb(bg));
+    st.setProperty('--lh-fg', rgb(fg));
+    if (dark) {
+      st.setProperty('--lh-surface', rgb(mix(bg, WHITE, 0.09)));
+      st.setProperty('--lh-line', rgb(mix(bg, WHITE, 0.18)));
+      st.setProperty('--lh-fg-2', rgb(mix(fg, bg, 0.10)));
+      st.setProperty('--lh-muted', rgb(mix(fg, bg, 0.34)));
+      st.setProperty('--lh-muted-2', rgb(mix(fg, bg, 0.46)));
+    } else {
+      st.setProperty('--lh-surface', rgb(mix(bg, WHITE, 0.78)));
+      st.setProperty('--lh-line', rgb(mix(bg, fg, 0.14)));
+      st.setProperty('--lh-fg-2', rgb(mix(fg, bg, 0.18)));
+      st.setProperty('--lh-muted', rgb(mix(fg, bg, 0.50)));
+      st.setProperty('--lh-muted-2', rgb(mix(fg, bg, 0.60)));
+    }
+    if (root.getAttribute('data-lh-theme') !== (dark ? 'dark' : 'light')) {
+      root.setAttribute('data-lh-theme', dark ? 'dark' : 'light');
+    }
+    // personas.html 用的是另一套短变量名，一并写入，两个页面共用这一块。
+    st.setProperty('--bg', st.getPropertyValue('--lh-bg'));
+    st.setProperty('--fg', st.getPropertyValue('--lh-fg'));
+    st.setProperty('--card', st.getPropertyValue('--lh-surface'));
+    st.setProperty('--line', st.getPropertyValue('--lh-line'));
+    st.setProperty('--muted', st.getPropertyValue('--lh-muted'));
+  }
+
+  // ── 心情表情：把 /api/workspaces 的 emotion.label 贴到卡片名字后面 ──
+  var MOOD_EMOJI = { '中性': '😐', '愉悦': '🙂', '振奋': '😃', '不满': '😕', '低落': '😔' };
+  var moodMap = null;
+
+  function personaMoods() {
+    return Promise.all([
+      fetch('/dsh-lingshu/api/personas', { credentials: 'same-origin' }).then(function (r) { return r.json(); }),
+      fetch('/dsh-lingshu/api/workspaces', { credentials: 'same-origin' }).then(function (r) { return r.json(); }),
+    ]).then(function (res) {
+      var personas = (res[0] && res[0].personas) || [];
+      var workspaces = (res[1] && res[1].workspaces) || [];
+      var byId = {};
+      workspaces.forEach(function (w) { byId[w.workspaceId] = w; });
+      var map = {};
+      personas.forEach(function (p) {
+        var hits = (p.bindings || [])
+          .map(function (b) { return byId[b.sandbox_id]; })
+          .filter(Boolean);
+        if (!hits.length) return;
+        hits.sort(function (a, b) {
+          return (Number(b.isCurrent) - Number(a.isCurrent)) || (Number(b.turns || 0) - Number(a.turns || 0));
+        });
+        var label = (hits[0].emotion && hits[0].emotion.label) || '中性';
+        map[p.persona_id] = {
+          label: label,
+          emoji: MOOD_EMOJI[label] || '😶',
+          from: hits[0].canonicalPath || hits[0].workspaceId || '',
+        };
+      });
+      moodMap = map;
+      paintMoods();
+    }).catch(function () { /* 拉不到就维持上一轮 */ });
+  }
+
+  function paintMoods() {
+    if (!moodMap) return;
+    var nodes = document.querySelectorAll('.lh-mood[data-pid]');
+    for (var i = 0; i < nodes.length; i++) {
+      var el = nodes[i];
+      var m = moodMap[el.getAttribute('data-pid')];
+      var text = m ? m.emoji : '😶';
+      if (el.textContent !== text) el.textContent = text;
+      var title = m
+        ? '心情：' + m.label + (m.from ? '｜来自 ' + m.from : '')
+        : '心情：未知｜该人格体未绑定人格舱';
+      if (el.title !== title) el.title = title;
+      var aria = '心情：' + (m ? m.label : '未知');
+      if (el.getAttribute('aria-label') !== aria) el.setAttribute('aria-label', aria);
+    }
+  }
+
+  apply();
+  try {
+    var p = window.parent;
+    if (p && p !== window && p.document && window.MutationObserver) {
+      new MutationObserver(apply).observe(p.document.documentElement, {
+        attributes: true, attributeFilter: ['class', 'style', 'data-theme', 'data-theme-mode'],
+      });
+    }
+  } catch (e) { /* 跨源：只靠轮询 */ }
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', apply);
+    else if (mq.addListener) mq.addListener(apply);
+  }
+  window.setInterval(apply, 3000);
+
+  // 卡片重建时 React 会冲掉表情文本，这里重新贴一遍。
+  try {
+    personaMoods();
+    window.setInterval(personaMoods, 15000);
+    var host = document.getElementById('root');
+    if (host && window.MutationObserver) {
+      new MutationObserver(function () { paintMoods(); }).observe(host, { childList: true, subtree: true });
+    }
+    [200, 600, 1500, 3000].forEach(function (ms) { window.setTimeout(paintMoods, ms); });
+  } catch (e) { /* 面板页面才会有这一步 */ }
+})();
+</script>
+
+
 </body>
 </html>
