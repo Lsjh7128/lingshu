@@ -30,6 +30,7 @@ import { describeWorkspacePolicy, loadWorkspacePolicy } from './workspace-policy
 // v0.2（施工单 v2）：数据根存在 layout.json 时，工作区 = 沙盒（sandboxId），
 // 行内数据在 sandboxes/<sid>/<pid>/ 与 personas/<pid>/，不再用 workspace_<id>/ 目录寻址。
 import { readLayout, foldRows } from './memory-paths.js';
+import { listDiaryIndex, readDiaryText, streakOf, dayKey } from './diary.js';
 import {
   readMappingBindings, writeMappingBindings, canonicalizePath, sandboxId,
 } from './memory-paths.js';
@@ -1078,6 +1079,33 @@ export function listPersonas(options = {}) {
   }
   personas.sort((a, b) => (a.persona_id < b.persona_id ? -1 : a.persona_id > b.persona_id ? 1 : 0));
   return { ok: true, schemaVersion: 'persona-panel-0.1', personas, bindings };
+}
+
+/** 日记索引（面板用）：某人格体的日记列表 + 连续天数。 */
+export function getDiaryIndex(options = {}, query = {}) {
+  const o = normalizeOptions(options);
+  if (!o.base) return { ok: false, status: 503, error: 'data_root_unavailable' };
+  const pid = String((query && query.persona) || '').trim();
+  if (!pid) return { ok: false, status: 400, error: 'persona_required' };
+  if (!V02_PERSONA_RE.test(pid)) return { ok: false, status: 400, error: 'bad_persona_id' };
+  const dir = path.join(personaRoot(o), pid, 'diary');
+  const entries = listDiaryIndex(dir);
+  const today = dayKey();
+  return { ok: true, schemaVersion: 'diary-0.1', persona: pid, today, streak: streakOf(entries, today), entries };
+}
+
+/** 单篇日记正文。 */
+export function getDiaryText(options = {}, query = {}) {
+  const o = normalizeOptions(options);
+  if (!o.base) return { ok: false, status: 503, error: 'data_root_unavailable' };
+  const pid = String((query && query.persona) || '').trim();
+  const date = String((query && query.date) || '').trim();
+  if (!pid) return { ok: false, status: 400, error: 'persona_required' };
+  if (!V02_PERSONA_RE.test(pid)) return { ok: false, status: 400, error: 'bad_persona_id' };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, status: 400, error: 'bad_date' };
+  const text = readDiaryText(path.join(personaRoot(o), pid, 'diary'), date);
+  if (text === null) return { ok: false, status: 404, error: 'diary_not_found' };
+  return { ok: true, schemaVersion: 'diary-0.1', persona: pid, date, text };
 }
 
 /** 创建人格体：persona.json + 全局记忆空文件 + persona_state 默认值。 */

@@ -24,6 +24,35 @@
 > ⚠️ 不要把它装进日常 `desktop` profile。默认 `mode: active` 会注入 7 段 prompt；
 > 只想观测就用 `mode: observe`（零注入、只记录）。
 
+### 给其他用户安装（DSH 图形界面「添加插件」）
+
+DSH 的「添加插件」对话框接受**包名、Git 地址/压缩包、本地绝对路径**三种输入。
+本仓库是 monorepo，**直接输入仓库根地址一定会失败**（根目录没有 `package.json`），
+请按下面三种方式之一填。
+
+| 方式 | 输入 | 适用 |
+|---|---|---|
+| 包名（最省事） | `dsh-lingshu` | 包已发布到 npm 之后；安装源选「中国大陆镜像源」即可走 npmmirror |
+| GitHub 子目录 | `github:Lsjh7128/lingshu#path:/plugin/dsh-lingshu`（取默认分支；改动还在别的分支时写 `#分支名&path:/plugin/dsh-lingshu`） | 未发布 npm、但能访问 GitHub 时 |
+| 本地目录 / 压缩包 | `D:\path\to\plugin\dsh-lingshu` 或 `dsh-lingshu-0.2.0.tgz` | 离线、内网、不想联网时 |
+
+三种方式安装后都要再做两步，否则插件不生效：
+
+1. 在侧边栏「插件」页打开 `dsh-lingshu` 的开关（图形界面安装默认**不启用**）；
+2. **重启 DSH**（不是刷新页面）：`dsh.client` 的扫描与宿主路由只在启动时生效。
+
+补充说明：
+
+- 图形界面安装依赖 `package.json` 的 `dsh.bundle.patch` 声明；缺了它安装器会
+  把它当普通依赖装进去但不启用（本包已声明，见 `cordis.patch.yml`）。
+- 目录方式装的是 `link:`（源码改动即时生效）；压缩包与 Git 方式装的是复制，
+  升级要重新装。
+- 发布前在仓库根跑 `node scripts/check_plugin_package.mjs` 自检，确认运行时文件
+  都在 `files` 清单里、`supply-chain-policy.json` 与 `contracts/` 一致；否则装完
+  才会以「缺文件 / 供应链闸门降级」的形式暴露。
+- 维护者发布：`cd plugin/dsh-lingshu && npm publish --dry-run` 先核对内容，
+  再去掉 `--dry-run`；发布后 npmmirror 自动同步（通常几分钟）。
+
 ## 配置（`cordis.patch.yml` → `config`）
 
 | 键 | 默认 | 说明 |

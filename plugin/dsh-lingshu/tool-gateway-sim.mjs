@@ -60,7 +60,7 @@ const wantVerdict = (name, c, state, verdict, uca) => {
 };
 
 // 合同基础
-check(`policy_version === t-uca-1.2（实际 ${POLICY_VERSION}）`, POLICY_VERSION === 't-uca-1.2');
+check(`policy_version === t-uca-1.3（实际 ${POLICY_VERSION}）`, POLICY_VERSION === 't-uca-1.3');
 check('规则数 16', POLICY.rules.length === 16, String(POLICY.rules.length));
 check('degrade 恰 4 条（03/10/13/16）',
   POLICY.rules.filter((r) => r.verdict === 'degrade').map((r) => r.id).join(',') ===
@@ -192,7 +192,7 @@ const ra = evaluate(call('fs_read', { path: 'notes/a.md' }), st());
 const ev = ra.audit;
 check('审计 schema=lingshu/tool-gate/v1', ev.schema === 'lingshu/tool-gate/v1');
 check('审计 type=tool_gate', ev.type === 'tool_gate');
-check('审计 policy_version=t-uca-1.2', ev.policy_version === 't-uca-1.2');
+check('审计 policy_version=t-uca-1.3', ev.policy_version === 't-uca-1.3');
 check('审计 allowed=true（allow）', ev.allowed === true && ra.allowed === true);
 check('审计 ucas 为空（allow）', Array.isArray(ev.ucas) && ev.ucas.length === 0);
 check('审计 必填字段齐全', ['schema', 'type', 'policy_version', 'at', 'session_id',

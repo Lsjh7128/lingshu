@@ -26,7 +26,7 @@
 - **真实运行态**：`/dsh-lingshu/api/status` 返回 `mode / profileTag / stage / turns / frozen / memory 计数 / goal / relation / control / emotion / counters`；不返回记忆原文、prompt、绝对路径。
 - **真实工作区**：`workspace-api.js` 提供 `GET /api/workspaces`、`GET /api/workspaces/:id`、`PUT /api/workspaces/:id/persona`、`POST /api/workspaces`、`POST /api/workspaces/:id/activate`；`workspace-policy.js` 负责 `workspaces/<id>.json` 的 deny-only 策略；`workspace-admin.mjs` 提供 legacy 迁移 CLI。
 - **写入边界**：persona 只写 `schema_version/persona_id/name/summary/traits/confirmed_by_user/confirmed_at`，原子写 + 审计；create 只创建未激活目录，不伪造 `state.json`；activate 在无 turn 时即时重载 state/memory/persona/policy，turn 中 409；删除/改名未实现。
-- **persona → prompt**：当前工作区的 `persona.json` 由 `index.js#renderPersonaStyle` 每回合读取（按 mtime 重读），映射成 `〖人格体 · 仅影响表达〗` 并入 style 段；非当前工作区不注入；摘要只作风格参考，不改变事实/安全/权限/拒绝边界。面板保存后下一条消息生效；热切换后新工作区 persona 下一条消息生效。
+- **persona → prompt**：当前工作区的 `persona.json` 由 `index.js#renderPersonaStyle` 每回合读取（按 mtime 重读），映射成 `〖人格体 · 影响表达与思考链〗` 并入 style 段；绑定后**表达域与思考链一起对齐**（称呼/自称、语气、详略、推理用词与节奏），但事实/安全判断/权限/拒绝边界不跟随；非当前工作区不注入；摘要只作风格参考。面板保存后下一条消息生效；热切换后新工作区 persona 下一条消息生效。口径见 `decisions/005` 的 v3.1 追加：这是 prompt 层偏置，是"默认跟随"而非"保证跟随"。
 - **策略边界**：只读 `plugin/workspaces/<id>.json`，只追加 deny、不放宽；缺失=无追加；非法/未知规则 fail-closed；`policy.enforced` 仅当前工作区 loaded 时为 true；非当前工作区只展示。
 - **边界**：目录隔离 ≠ 权限隔离；legacy 平铺目录显示「未隔离」，迁移需显式 CLI；多租户未定义。
 

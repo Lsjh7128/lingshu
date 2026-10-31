@@ -473,6 +473,24 @@ export function registerDashboardRoutes(ctx, options = {}) {
       sendJson(res, 500, { ok: false, error: String(error?.message || error) });
     }
   }, ['GET', 'HEAD']);
+  // ── 日记本（只读）─────────────────────────────────────
+  const DIARY_ROUTE = '/dsh-lingshu/api/diary';
+  const diaryGet = (provider, fallback) => (req, res) => {
+    let query = { persona: '', date: '' };
+    try {
+      const q = new URL(req.url ?? '/', 'http://dsh.local').searchParams;
+      query = { persona: q.get('persona') || '', date: q.get('date') || '' };
+    } catch { /* 用空 query */ }
+    try {
+      const out = typeof options[provider] === 'function'
+        ? options[provider](query) : { ok: false, status: 503, error: fallback };
+      sendProviderResult(res, out, fallback);
+    } catch (error) {
+      sendJson(res, 500, { ok: false, error: String(error?.message || error) });
+    }
+  };
+  registerExact(DIARY_ROUTE, diaryGet('getDiaryIndex', 'diary_api_unavailable'), ['GET', 'HEAD']);
+  registerExact(`${DIARY_ROUTE}/text`, diaryGet('getDiaryText', 'diary_api_unavailable'), ['GET', 'HEAD']);
   registerExact(PERSONAS_PAGE_ROUTE, (_req, res) => {
     let html;
     try {

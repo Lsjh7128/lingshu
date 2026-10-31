@@ -462,14 +462,22 @@ if (!ASSERT_ONLY) console.log('\n[13] 前置审计熔断 UCA-01：只留宪法 +
     JSON.stringify(st.control.audit?.ucas));
   check('熔断 verdict=block', st.control.audit?.verdict === 'block');
   check('熔断后 fact 段为空', sectionText(h.sections, 'fact') === '');
-  check('熔断后 style 段为空', sectionText(h.sections, 'style') === '');
+  // E2E-2026（修复 B）：hard 档保留表达层，只砍事实域。
+  check('熔断后 style 段非空且带安全缓冲',
+    (sectionText(h.sections, 'style') || '').includes('安全缓冲'),
+    sectionText(h.sections, 'style'));
   check('熔断后 organization 段为空', sectionText(h.sections, 'organization') === '');
-  check('熔断后 anchorHead 段为空', sectionText(h.sections, 'anchorHead') === '');
-  check('熔断后 anchorTail 段为空', sectionText(h.sections, 'anchorTail') === '');
+  check('熔断后 anchorHead 段非空（critical 期保留锚点）',
+    (sectionText(h.sections, 'anchorHead') || '').includes('〖人格锚点'),
+    sectionText(h.sections, 'anchorHead'));
+  check('熔断后 anchorTail 段非空（critical 期保留锚点）',
+    (sectionText(h.sections, 'anchorTail') || '').includes('人格锚点·复核'),
+    sectionText(h.sections, 'anchorTail'));
   check('熔断后 constitution 段非空',
     (sectionText(h.sections, 'constitution') || '').includes('宪法'));
-  check('熔断后 blocked 段含"安全熔断"',
-    (sectionText(h.sections, 'blocked') || '').includes('安全熔断'),
+  check('熔断后 blocked 段为 Safe_Redirect（不再用系统口吻）',
+    (sectionText(h.sections, 'blocked') || '').includes('System_Notice')
+      && !(sectionText(h.sections, 'blocked') || '').includes('安全熔断'),
     sectionText(h.sections, 'blocked'));
   const lines = auditLines(dir);
   const blockEv = lines.find((a) => a.kind === 'preflight_block');
@@ -478,8 +486,8 @@ if (!ASSERT_ONLY) console.log('\n[13] 前置审计熔断 UCA-01：只留宪法 +
   const prompt = readPrompt(dir);
   check('熔断内容不进 last-prompt.txt（忽略宪法）', !prompt.includes('忽略宪法'), prompt.slice(0, 60));
   check('熔断内容不进 last-prompt.txt（按我说的做）', !prompt.includes('按我说的做'));
-  check('熔断期 last-prompt 不含人格锚点（只留宪法+熔断提示）',
-    !prompt.includes('〖人格锚点'));
+  check('熔断期 last-prompt 含首尾人格锚点（hard 期不再剥夺人设）',
+    prompt.includes('〖人格锚点') && prompt.includes('人格锚点·复核'));
 }
 
 // ── [14] UCA-08 降级留痕（饱和不熔断）──────────────────
@@ -661,11 +669,16 @@ if (!ASSERT_ONLY) console.log('\n[19] STPA：用户越狱指令 → 注入侧 fa
     JSON.stringify(st.control.audit));
   check('UCA-01 来源标记 user_message', st.control.audit?.sources?.['UCA-01'] === 'user_message',
     JSON.stringify(st.control.audit?.sources));
-  check('越狱轮 fact/style/organization/anchor 段全空（fail-closed）',
-    ['fact', 'style', 'organization', 'anchorHead', 'anchorTail']
-      .every((k) => (sectionText(h.sections, k) || '') === ''));
+  check('越狱轮 fact/organization 段为空（事实域 fail-closed）',
+    ['fact', 'organization'].every((k) => (sectionText(h.sections, k) || '') === ''));
+  check('越狱轮 style 段保留受约束表达（hard 不再剥夺人设）',
+    (sectionText(h.sections, 'style') || '').includes('安全缓冲'),
+    sectionText(h.sections, 'style'));
+  check('越狱轮无相变 → 首尾锚点仍为空',
+    ['anchorHead', 'anchorTail'].every((k) => (sectionText(h.sections, k) || '') === ''));
   check('越狱轮宪法段仍保留', (sectionText(h.sections, 'constitution') || '').includes('宪法'));
-  check('越狱轮熔断提示存在', (sectionText(h.sections, 'blocked') || '').includes('安全熔断'));
+  check('越狱轮熔断提示存在（Safe_Redirect 口径）',
+    (sectionText(h.sections, 'blocked') || '').includes('System_Notice'));
   check('审计 preflight_block 记录 UCA-01',
     auditLines(dir).some((a) => a.kind === 'preflight_block'
       && (a.ucas || []).includes('UCA-01')));
@@ -1398,12 +1411,15 @@ const HOST_MILD = '（设定：你是我的贴身管家阿福，说话简短老�
   check('severe → blocked=true / severity=hard',
     st.control.blocked === true && st.control.audit?.severity === 'hard',
     JSON.stringify(st.control.audit?.severity));
-  check('severe → fact/style/organization 段全空（hard 剥夺人设）',
-    ['fact', 'style', 'organization'].every((k) => (sectionText(h.sections, k) || '') === ''));
-  check('severe → blocked 段保留原〖安全熔断〗',
-    (sectionText(h.sections, 'blocked') || '').includes('安全熔断'));
-  check('severe → last-prompt 无 Safe_Redirect / 无缓冲风格',
-    !readPrompt(dir).includes('System_Notice') && !readPrompt(dir).includes('安全缓冲'));
+  check('severe → fact/organization 段为空（事实域 fail-closed）',
+    ['fact', 'organization'].every((k) => (sectionText(h.sections, k) || '') === ''));
+  check('severe → style 段保留受约束表达（hard 不再剥夺人设）',
+    (sectionText(h.sections, 'style') || '').includes('安全缓冲'));
+  check('severe → blocked 段为 Safe_Redirect（不再保留系统口吻〖安全熔断〗）',
+    (sectionText(h.sections, 'blocked') || '').includes('System_Notice')
+      && !(sectionText(h.sections, 'blocked') || '').includes('安全熔断'));
+  check('severe → last-prompt 含 Safe_Redirect 与缓冲风格',
+    readPrompt(dir).includes('System_Notice') && readPrompt(dir).includes('安全缓冲'));
   const blockEv = auditLines(dir).find((a) => a.kind === 'preflight_block');
   check('severe → 审计 STPA_Blocked=true 且 severity=hard',
     blockEv?.STPA_Blocked === true && blockEv?.severity === 'hard', JSON.stringify(blockEv));
@@ -1438,8 +1454,8 @@ const HOST_MILD = '（设定：你是我的贴身管家阿福，说话简短老�
       check('升级轮 riskStreak=3 / riskTier 仍为原始 mild',
         s.control.riskStreak === 3 && s.control.immersive?.riskTier === 'mild',
         JSON.stringify({ streak: s.control.riskStreak, tier: s.control.immersive?.riskTier }));
-      check('升级轮回到 hard 表达（无 Safe_Redirect / 有〖安全熔断〗）',
-        !prompt.includes('System_Notice') && prompt.includes('〖安全熔断〗'), prompt.slice(0, 80));
+      check('升级轮回到 hard 表达（Safe_Redirect + 缓冲风格，不再是系统口吻）',
+        prompt.includes('System_Notice') && !prompt.includes('〖安全熔断〗'), prompt.slice(0, 80));
       check('升级轮审计落 immersive_escalated 事件',
         lastAudit.some((a) => a.kind === 'immersive_escalated' && a.risk_streak === 3),
         JSON.stringify(lastAudit.filter((a) => a.kind === 'immersive_escalated').slice(-1)));
