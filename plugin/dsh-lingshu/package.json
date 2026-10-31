@@ -1,6 +1,6 @@
 {
   "name": "dsh-lingshu",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "LINGSHU 认知插件：记忆/元认知/情感/合成/目标/关系 + 控制论层（相变/积分/UCA 前置闸）",
   "keywords": [
     "dsh",
