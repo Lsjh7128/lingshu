@@ -138,3 +138,12 @@ Thumbs.db
 .lingshu-demo-data/
 # npx 冷启动缓存（demo 只用本机已装 DSH，不会生成；防御性排除）
 demo/.runtime/
+
+# 本地快照与改名前备份（2026-10-30 起；只在本机，不入库）
+.snapshots/
+*.bak-*
+
+# 实验镜像副本与 UI 验收截图（2026-10-31 起；本机保留，不入库）
+plugin/dsh-lingshu-lab/
+acceptance/v2-refactor/*.png
+
