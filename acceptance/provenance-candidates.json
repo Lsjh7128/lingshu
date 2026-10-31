@@ -1,15 +1,15 @@
 {
   "schema": "lingshu/provenance-candidates/v1",
   "generated_by": "tools/analyze_shadow.py",
-  "data_dir": "C:\\Users\\陈岩\\.dsh\\plugins\\dsh-lingshu",
-  "data_asof": "2026-10-27 23:31:59",
-  "data_asof_ms": 1793115119192.0,
-  "analysis_at": "2026-10-27 23:31:59",
+  "data_dir": "<DSH_HOME>\\plugins\\dsh-lingshu\\workspace_qq",
+  "data_asof": "2026-10-29 20:17:13",
+  "data_asof_ms": 1793276233745.0,
+  "analysis_at": "2026-10-29 20:17:13",
   "sample": {
-    "audit_events": 435,
-    "turns": 10,
-    "phase_observed": 7,
-    "memory_entries": 2
+    "audit_events": 1568,
+    "turns": 50,
+    "phase_observed": 93,
+    "memory_entries": 20
   },
   "control_params_source": "engine/config.py DEFAULTS.control（与 rules/decay-params.yaml#control 由 tools/check_config_sync.py 校验一致）",
   "note": "本文件是候选建议，不修改 rules/decay-params.yaml。任何 guess→measured 变更都必须按 docs/20-真实标定协议.md 的流程人工执行，并同步更新 assumptions/已验证.md；样本不足时本文件会给出 proposed_provenance=guess。",
@@ -22,7 +22,7 @@
       "distribution_ready": false,
       "upgrade_eligible": false,
       "evidence": {
-        "observed_turns": 7,
+        "observed_turns": 93,
         "crossings_shift": 0,
         "crossings_hard": 0,
         "boundary_shift": 0,
@@ -32,7 +32,7 @@
         "prefeed_allowed_nouca07": 0,
         "shift_observations": 0,
         "critical_observations": 0,
-        "trend_samples": 5,
+        "trend_samples": 40,
         "trend_near": 0,
         "trend_triggers": 0,
         "trend_trigger_source": "日志 anchor 字段",
@@ -45,8 +45,8 @@
           "label": "有 ratio 观测的 turn 数",
           "kind": "distribution",
           "need": 30,
-          "have": 7,
-          "met": false
+          "have": 93,
+          "met": true
         },
         {
           "gate": "boundary_shift",
@@ -83,14 +83,6 @@
       ],
       "blocking": [
         {
-          "gate": "observed_turns",
-          "label": "有 ratio 观测的 turn 数",
-          "kind": "distribution",
-          "need": 30,
-          "have": 7,
-          "met": false
-        },
-        {
           "gate": "boundary_shift",
           "label": "阈值边界样本（0.60≤ratio<0.80）",
           "kind": "distribution",
@@ -115,7 +107,7 @@
           "met": false
         }
       ],
-      "verdict": "保持 guess：样本不足（有 ratio 观测的 turn 数 7/30；阈值边界样本（0.60≤ratio<0.80） 0/10；ratio≥0.70 的越界次数 0/20；结果标签（是否漂移/质量下降） 0/20）"
+      "verdict": "保持 guess：样本不足（阈值边界样本（0.60≤ratio<0.80） 0/10；ratio≥0.70 的越界次数 0/20；结果标签（是否漂移/质量下降） 0/20）"
     },
     {
       "param": "control.phaseShiftHardRatio",
@@ -125,7 +117,7 @@
       "distribution_ready": false,
       "upgrade_eligible": false,
       "evidence": {
-        "observed_turns": 7,
+        "observed_turns": 93,
         "crossings_shift": 0,
         "crossings_hard": 0,
         "boundary_shift": 0,
@@ -135,7 +127,7 @@
         "prefeed_allowed_nouca07": 0,
         "shift_observations": 0,
         "critical_observations": 0,
-        "trend_samples": 5,
+        "trend_samples": 40,
         "trend_near": 0,
         "trend_triggers": 0,
         "trend_trigger_source": "日志 anchor 字段",
@@ -148,8 +140,8 @@
           "label": "有 ratio 观测的 turn 数",
           "kind": "distribution",
           "need": 30,
-          "have": 7,
-          "met": false
+          "have": 93,
+          "met": true
         },
         {
           "gate": "crossings_hard",
@@ -186,14 +178,6 @@
       ],
       "blocking": [
         {
-          "gate": "observed_turns",
-          "label": "有 ratio 观测的 turn 数",
-          "kind": "distribution",
-          "need": 30,
-          "have": 7,
-          "met": false
-        },
-        {
           "gate": "crossings_hard",
           "label": "ratio≥0.85 的越界次数",
           "kind": "distribution",
@@ -226,7 +210,7 @@
           "met": false
         }
       ],
-      "verdict": "保持 guess：样本不足（有 ratio 观测的 turn 数 7/30；ratio≥0.85 的越界次数 0/10；阈值边界样本（0.80≤ratio<0.90） 0/10；相变期放行且未命中 UCA-07 的轮数 0/10）"
+      "verdict": "保持 guess：样本不足（ratio≥0.85 的越界次数 0/10；阈值边界样本（0.80≤ratio<0.90） 0/10；相变期放行且未命中 UCA-07 的轮数 0/10；结果标签（critical 前后是否避免漂移） 0/10）"
     },
     {
       "param": "control.trendThreshold",
@@ -236,7 +220,7 @@
       "distribution_ready": false,
       "upgrade_eligible": false,
       "evidence": {
-        "observed_turns": 7,
+        "observed_turns": 93,
         "crossings_shift": 0,
         "crossings_hard": 0,
         "boundary_shift": 0,
@@ -246,7 +230,7 @@
         "prefeed_allowed_nouca07": 0,
         "shift_observations": 0,
         "critical_observations": 0,
-        "trend_samples": 5,
+        "trend_samples": 40,
         "trend_near": 0,
         "trend_triggers": 0,
         "trend_trigger_source": "日志 anchor 字段",
@@ -259,16 +243,16 @@
           "label": "有 ratio 观测的 turn 数",
           "kind": "distribution",
           "need": 30,
-          "have": 7,
-          "met": false
+          "have": 93,
+          "met": true
         },
         {
           "gate": "trend_samples",
           "label": "可算 trend 的连续观测样本（每 3 个连续观测 1 个）",
           "kind": "distribution",
           "need": 28,
-          "have": 5,
-          "met": false
+          "have": 40,
+          "met": true
         },
         {
           "gate": "trend_near",
@@ -305,22 +289,6 @@
       ],
       "blocking": [
         {
-          "gate": "observed_turns",
-          "label": "有 ratio 观测的 turn 数",
-          "kind": "distribution",
-          "need": 30,
-          "have": 7,
-          "met": false
-        },
-        {
-          "gate": "trend_samples",
-          "label": "可算 trend 的连续观测样本（每 3 个连续观测 1 个）",
-          "kind": "distribution",
-          "need": 28,
-          "have": 5,
-          "met": false
-        },
-        {
           "gate": "trend_near",
           "label": "靠近门槛的 trend 样本（0.01≤trend≤0.03）",
           "kind": "distribution",
@@ -353,21 +321,21 @@
           "met": false
         }
       ],
-      "verdict": "保持 guess：样本不足（有 ratio 观测的 turn 数 7/30；可算 trend 的连续观测样本（每 3 个连续观测 1 个） 5/28；靠近门槛的 trend 样本（0.01≤trend≤0.03） 0/5；trend 触发提前锚点次数 0/10）"
+      "verdict": "保持 guess：样本不足（靠近门槛的 trend 样本（0.01≤trend≤0.03） 0/5；trend 触发提前锚点次数 0/10；shift 阶段观测数（trend 只在 shift 内提前补锚） 0/10；结果标签（提前锚是否真的减少漂移） 0/10）"
     }
   ],
   "monitoring_claims": [
     {
       "claim": "STPA 熔断 100% 有效（UCA-01 越狱尝试全部被 block）",
       "need": "越狱尝试(UCA-01) ≥20 次 + 熔断率=100% + 0 漏放",
-      "have": "UCA-01 命中 0 次；pre_step 观测 7 轮",
+      "have": "UCA-01 命中 0 次；pre_step 观测 93 轮",
       "met": false
     },
     {
       "claim": "UCA-08（积分饱和）降级可观测",
       "need": "≥10 次饱和降级事件",
-      "have": "0 次",
-      "met": false
+      "have": "100 次",
+      "met": true
     },
     {
       "claim": "supersede 误判率 ≤5%（G1）",
@@ -378,36 +346,38 @@
     {
       "claim": "potency 归档门 0.15 可标定",
       "need": "≥1000 个真实 turn（docs/17 §5 W4.5）",
-      "have": "10 个 turn",
+      "have": "50 个 turn",
       "met": false
     },
     {
       "claim": "影子 goal/relation 误报率可评估",
       "need": "≥200 条 agent_state 记录 + ≥50 条人工标注",
-      "have": "2 条记录",
+      "have": "12 条记录",
       "met": false
     }
   ],
   "quality_labels": {
     "auxiliary_only": true,
     "note": "规则自动标签（插件按用户消息子串规则产出）仅作辅助统计；不进入 OUTCOME_KINDS / REQUIREMENTS 的 outcome_labels 门槛，不改变 upgrade_eligible——规则自动标签 ≠ 人工结果标签。",
-    "total": 0,
-    "recognized": 0,
+    "total": 1,
+    "recognized": 1,
     "unknown_kind": 0,
     "invalid": 0,
     "by_kind": {
-      "wrong": 0,
+      "wrong": 1,
       "missing": 0,
       "should_not_recall": 0,
       "drift": 0,
       "overreach": 0
     },
-    "by_source": {},
+    "by_source": {
+      "user_message_rule": 1
+    },
     "ratio_buckets": {
       "<0.70": {
-        "labels": 0,
-        "observed_turns": 7,
-        "per_100_observed_turns": 0.0
+        "labels": 1,
+        "observed_turns": 93,
+        "per_100_observed_turns": 1.08
       },
       "0.70-0.85": {
         "labels": 0,
@@ -425,8 +395,8 @@
         "per_100_observed_turns": null
       }
     },
-    "observed_turns": 7,
-    "per_100_observed_turns": 0.0
+    "observed_turns": 93,
+    "per_100_observed_turns": 1.08
   },
   "summary": {
     "upgrade_eligible": [],
