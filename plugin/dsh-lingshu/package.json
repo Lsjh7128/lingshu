@@ -36,6 +36,7 @@
     "sandbox-child.mjs",
     "client.js",
     "dashboard.js",
+    "diary.js",
     "ui/",
     "cordis.patch.yml",
     "README.md",
