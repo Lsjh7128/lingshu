@@ -17,7 +17,8 @@ identifier, verdict and hint text agrees row by row. The namespace is disjoint
 from the injection-side UCA-01--08; the two are related only by ordering:
 injection pre-flight runs before the model call, the tool gate runs after a call
 is emitted and before execution. The contract's policy version is
-\texttt{t-uca-1.1}, and the field carrying tool-side identifiers in the audit
+\texttt{t-uca-1.1} (the \texttt{v1.0.0-paper-baseline} snapshot, commit
+\texttt{d551079}, 2026-10-27), and the field carrying tool-side identifiers in the audit
 event is named \texttt{ucas} (same spelling as the injection-side field, but a
 different event type: \texttt{tool\_gate.ucas} may contain only
 \texttt{T-UCA-xx}, \texttt{audit.ucas} only \texttt{UCA-0x}).
@@ -25,7 +26,7 @@ different event type: \texttt{tool\_gate.ucas} may contain only
 \begin{table*}[t]
 \centering
 \caption{Tool-side unsafe control actions (\texttt{docs/24} v1.1, policy
-\texttt{t-uca-1.1}). Sixteen rules: thirteen block, three degrade (a degrade
+\texttt{t-uca-1.1}, paper baseline). Sixteen rules: thirteen block, three degrade (a degrade
 falls back to block when no approval channel exists). No rule returns
 \emph{allow}; allow is the default policy for read-only calls that match no rule.
 The \emph{group} column follows the contract's grouping and is not a runtime

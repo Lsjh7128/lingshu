@@ -22,7 +22,8 @@ transactional rollback or compensation, and writing tool outcomes into long-term
 memory.
 
 \paragraph{The T-UCA matrix.} Sixteen rules---contract version
-\texttt{t-uca-1.1}---in six groups. \emph{State coupling} (four): a mutating call
+\texttt{t-uca-1.1}, the paper-baseline snapshot (commit \texttt{d551079})---in six
+groups. \emph{State coupling} (four): a mutating call
 under variety fallback or unresolved conflict, in the critical phase, an
 irreversible write with a saturated affective baseline, and a destructive call in
 the shift phase. \emph{Data protection} (one): credentials in clear text.

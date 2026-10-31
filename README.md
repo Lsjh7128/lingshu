@@ -1,6 +1,6 @@
 # LINGSHU · Agent Cognition Plugin System
 
-> Version: **v1.1.0** (tag `v1.1.0`) ｜ Status: contracts and prompt set finalized; `engine/` is a runnable reference implementation (control-theoretic layer wired in, separately verified) ｜ Host: DSH
+> Version: **v1.2.0** (tag `v1.2.0`) ｜ Status: contracts and prompt set finalized; `engine/` is a runnable reference implementation (control-theoretic layer wired in, separately verified) ｜ Host: DSH
 > This document set is the result of several consolidation passes. Version history and corrections: [CHANGELOG](CHANGELOG.md). ｜ [简体中文](README.zh-CN.md)
 
 > **Tagline: 灵为行为，枢为边界 — behavior is the spirit; boundaries are the pivot.**
@@ -237,7 +237,7 @@ node plugin/dsh-lingshu/host-sim.mjs --assert    # plugin acceptance (needs Node
 
 ## 0. Read this first
 
-- **If you are taking over**: read [`交接总览.md`](交接总览.md) first. It gives you the whole picture, progress, boundaries and next steps in 30 minutes. This file covers "positioning and invariants"; the handover overview covers "judgement and indexing".
+- **If you are taking over**: read [`HANDOFF.md`](HANDOFF.md) first (English) or [`交接总览.md`](交接总览.md) (简体中文). Either gives you the whole picture, progress, boundaries and next steps in 30 minutes. This file covers "positioning and invariants"; the handover overview covers "judgement and indexing".
 - **If you only want a quick status**: read [`项目简介.md`](项目简介.md) — the 5-minute version (what it is / how far it got / evidence / boundaries).
 
 ## 1. What this is

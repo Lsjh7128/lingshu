@@ -2,6 +2,40 @@
 
 ---
 
+## v1.2.0 · 工具网关误报根治 + 作者侧 diary + 反馈层（2026-10-31）
+
+> **版本轴说明**：`v1.x` 与 git tag 对齐；`v5.x / v3.0` 为内部开发版本历史，两者不同轴、不可换算。
+
+**新增**
+
+- **作者侧 diary（`diary.js`）**：`composeDiary / collectMaterials / writeDiary / listDiaryIndex / readDiaryText / yesterdaySummary / streakOf` 等接口，按天落盘并维护连续天数；无 diary 数据时注入行为不变。
+- **反馈层**：读取 `feedback.jsonl` 做 tier 降级、确认建边与 EIA 来源护栏；缺失该文件时所有权重为 1，召回排序与注入字节逐一致（零行为变更）。
+- **`mergeLayers` 接回**：给足 topK/budget，只取 local 胜 global 的冲突裁决语义，不改 recall 打分。
+- **`check:package` / `prepublishOnly`**：新增 `scripts/check_plugin_package.mjs`；`dsh-lingshu` 移除 `private`，`supply-chain-policy.json` 纳入包清单。
+- **skeleton 配置项**：`skeleton: { enabled: true, bytes: 600, progressItems: 2 }` 进入默认配置。
+
+**修复**
+
+- **工具网关误报根治（`t-uca-1.3`）**：宿主把 `arguments` 序列化成 JSON 字符串时，旧逻辑每轮 read/grep/write/edit 都误报 T-UCA-09。现改为“解析不出就标记 `argsUnparsed`，交给真实注入特征判定”，并新增 `reason_detail` 逐条回放 T-UCA-09 的谓词，不再一律写 `schema_invalid`。
+- **`persona-prompt-sim` / `host-sim` / `tool-gateway-sim`**：断言按新契约同步。
+
+**文档与验收**
+
+- 新增英文交接 `HANDOFF.md`；README 双语版顶部互链。
+- 新增 `docs/29-工具网关误报治理方案.md`；`交接总览.md` 大改。
+- 新增验收产物：`acceptance/chaos/2026-10-31.md`、`calibration-2026-10-31.md`、`v2/2026-10-30-report.md`、`phase-b/周报-2026-10-30.md`、影子基线 `shadow-20261030*.md`、`paper/supplement/CODE-VERSION.md`。
+- `acceptance/` 下本机数据目录统一脱敏为 `<DSH_HOME>`。
+
+**Known limitations（不得当作已解决）**
+
+1. 多租户与权限隔离未定义（同 v1.1.0）。
+2. `skeleton` 仍只有占位段，生成器未实现。
+3. 混沌 v2 自检未达 20/20（见 `acceptance/chaos/v2/2026-10-30-report.md`）。
+4. Docker 仍未在本机验证。
+5. `acceptance/v2-refactor/*.png` 截图仍不入库（含真实路径与人格体正文）。
+
+---
+
 ## v1.1.0 · 开源发布：沙盒命名空间 + 人格体路由 + 双语 README（2026-10-29）
 
 > **版本轴说明**：`v1.x` 是与 git tag 对齐的**开源发布版本**；其下的 `v5.x / v3.0` 是**内部开发版本历史**。两者不同轴、不可换算；历史条目保持原样，不再新增内部版本号。
